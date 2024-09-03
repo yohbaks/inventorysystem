@@ -1,3 +1,3 @@
-# my first  demo publish
+# Inventory system using django python
 
-github project
+1st upload in github
