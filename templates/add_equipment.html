@@ -78,10 +78,35 @@
                 <div class="col-md-4">
                   <div class="form-group">
                     <label for="desktopModel">Model</label>
-                    <input type="text" class="form-control" id="desktopModel" name="desktop_model" placeholder="Enter Desktop Model">
+                    <input type="text" class="form-control" id="desktopModel" name="desktop_model_input" value="{{ modelany }}" placeholder="Enter Desktop Model">
                   </div>
                 </div>
               </div>
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopProcessor">Processor</label>
+                    <input type="text" class="form-control" id="desktopProcessor" name="desktop_processor_input" value="{{ processorany }}" placeholder="Enter Desktop Processor">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopMemory">Memory</label>
+                    <input type="text" class="form-control" id="desktopMemory" name="desktop_memory_input" value="{{ memoryany }}" placeholder="Enter Memory Size">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopDrive">Computer Drive</label>
+                    <input type="text" class="form-control" id="desktopDrive" name="desktop_drive_input" value="{{ driveany }}" placeholder="Enter Desktop Drive Size">
+                  </div>
+                </div>
+              </div>
+
+
+
+
             </div>
 
             <!-- Similar blocks for Laptop, UPS, etc. -->

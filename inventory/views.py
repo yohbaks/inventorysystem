@@ -88,9 +88,13 @@ def add_equipment_func(request):
         nameany = request.POST.get('name_input', '')
         serialany = request.POST.get('desktop_serial_input', '')
         brandnameany = request.POST.get('desktop_brand_input', '')
+        modelany = request.POST.get('desktop_model_input', '')
+        processorany = request.POST.get('desktop_processor_input', '')
+        memoryany = request.POST.get('desktop_memory_input', '')
+        driveany = request.POST.get('desktop_drive_input', '')
 
         if equipment_type == 'Desktop':
-            if len(nameany) < 2 or len(serialany) < 1 or len(brandnameany) < 2:
+            if len(nameany) < 2 or len(serialany) < 1 or len(brandnameany) < 2 or len(modelany) < 2 or len(processorany) < 2 or len(memoryany)<2:
                 messages.error(request, "Please fill out all required fields.")
                 # Render the form again with error messages and existing data
                 return render(request, 'add_equipment.html', {
@@ -98,9 +102,15 @@ def add_equipment_func(request):
                     'nameany': nameany,
                     'serialany': serialany,
                     'brandnameany': brandnameany,
+                    'modelany': modelany,
+                    'processorany' : processorany,
+                    'memoryany' : memoryany,
+                    'driveany' : driveany,
                 })
             else:
-                additemany = DESKTOPPACKAGE(name=nameany, desktop_SerialNo=serialany, desktop_BrandName=brandnameany)
+                additemany = DESKTOPPACKAGE(name=nameany, desktop_SerialNo=serialany, desktop_BrandName=brandnameany, 
+                                            desktop_Model=modelany, desktop_Processor=processorany, desktop_Memory=memoryany, 
+                                            desktop_Drive=driveany)
                 additemany.save()
                 messages.success(request, 'Your Desktop Package was successfully added')
                 return redirect('success_add_page')  # Redirect to success page
