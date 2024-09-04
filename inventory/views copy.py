@@ -48,75 +48,35 @@ def equipment_full_list(request):
 
 ##############################################################################
 
-
-
-
-
-
-
-
-
-# def add_equipment_func(request):
-#     if request.method == 'POST':
-#         nameany = request.POST['name_input']
-#         serialany = request.POST['desktop_serial_input']
-#         brandnameany = request.POST['desktop_brand_input']
-        
-#         if len(nameany) < 2 or len(serialany)< 1 or len(brandnameany)< 2:
-#             messages.error(request, "Please fill the following forms")
-
-#         else:   
-#             additemany = DESKTOPPACKAGE(name=nameany, desktop_SerialNo=serialany, desktop_BrandName=brandnameany)
-#             additemany.save()
-#             messages.success(request, 'Your Desktop Package was succesfully add')
-#             print(nameany, serialany, brandnameany)
-
-#             # Redirect to another page to prevent form resubmission on refresh
-#             return redirect('success_add_page')  # Replace 'success_page' with the name of the page you want to redirect to
-
-#     #render the request
-#     return render(request, 'add_equipment.html')
-
-# def success_page(request):
-#     return render(request, 'success_add.html')  # Render the success page template
-
-
-
 def add_equipment_func(request):
     if request.method == 'POST':
-        equipment_type = request.POST.get('name_input', '')
-        nameany = request.POST.get('name_input', '')
-        serialany = request.POST.get('desktop_serial_input', '')
-        brandnameany = request.POST.get('desktop_brand_input', '')
+        nameany = request.POST['name_input']
+        serialany = request.POST['desktop_serial_input']
+        brandnameany = request.POST['desktop_brand_input']
+        
+        if len(nameany) < 2 or len(serialany)< 1 or len(brandnameany)< 2:
+            messages.error(request, "Please fill the following forms")
 
-        if equipment_type == 'Desktop':
-            if len(nameany) < 2 or len(serialany) < 1 or len(brandnameany) < 2:
-                messages.error(request, "Please fill out all required fields.")
-                # Render the form again with error messages and existing data
-                return render(request, 'add_equipment.html', {
-                    'equipment_type': equipment_type,
-                    'nameany': nameany,
-                    'serialany': serialany,
-                    'brandnameany': brandnameany,
-                })
-            else:
-                additemany = DESKTOPPACKAGE(name=nameany, desktop_SerialNo=serialany, desktop_BrandName=brandnameany)
-                additemany.save()
-                messages.success(request, 'Your Desktop Package was successfully added')
-                return redirect('success_add_page')  # Redirect to success page
+        else:   
+            additemany = DESKTOPPACKAGE(name=nameany, desktop_SerialNo=serialany, desktop_BrandName=brandnameany)
+            additemany.save()
+            messages.success(request, 'Your Desktop Package was succesfully add')
+            print(nameany, serialany, brandnameany)
 
-        # Add similar conditions for other equipment types as needed
+            # Redirect to another page to prevent form resubmission on refresh
+            return redirect('success_add_page')  # Replace 'success_page' with the name of the page you want to redirect to
 
-    # Render the form with default values if not a POST request
-    return render(request, 'add_equipment.html', {
-        'equipment_type': '',
-        'nameany': '',
-        'serialany': '',
-        'brandnameany': '',
-    })
-    
+    #render the request
+    return render(request, 'add_equipment.html')
+
 def success_page(request):
     return render(request, 'success_add.html')  # Render the success page template
+
+
+
+
+
+
 
 
 ##################################################################################

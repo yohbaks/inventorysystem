@@ -650,11 +650,11 @@
                           <tr>
                             <th>IT Equipment</th>
                             <th>Serial No.</th>
-                            <th>Serial No</th>
-                            <th>Quantity</th>
-                            <th>Purchase Date</th>
-                            <th>Discription</th>
-                            <th>Detailed List</th>
+                            <th>Brand Name</th>
+                            <th>Model Name</th>
+                            <th>End User</th>
+                            <th>Computer Name</th>
+                            <th>Detailed List </th>
                           </tr>
                         </thead>
                         <tfoot>
@@ -672,11 +672,12 @@
                           {% for equipment in equipments %}
                           <tr>
                             <td>{{ equipment.name }}</td>
-                            <td>{{ equipment.serialE }}</td>
-                            <td>{{ equipment.brandname }}</td>
-                            <td>{{ equipment.quantity }}</td>
-                            <td>{{ equipment.purchase_date }}</td>
-                            <td>{{ equipment.description }}</td>
+                            <td>{{ equipment.desktop_SerialNo }}</td>
+                            <td>{{ equipment.desktop_BrandName }}</td>
+                            <td>{{ equipment.desktop_Model }}</td>
+                            <td>test</td>
+                            <td>test2</td>
+                            <td>test3</td>
                             <td>clickable link</td>
                           </tr>
                           {% endfor %}
@@ -776,14 +777,5 @@
   </body>
 </html>
 
-
-<h2></h2>
-<p>Category: </p>
-<p>Quantity: {{ equipment.quantity }}</p>
-<p>Purchase Date: {{ equipment.purchase_date }}</p>
-<p>Description: {{ equipment.description }}</p>
-
-<h2>Equipment List</h2>
-<ul>
 
 
