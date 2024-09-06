@@ -6,7 +6,7 @@ from django.utils.text import slugify
 
 class DESKTOPPACKAGE(models.Model):
 
-    id_number = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
 
     EQUIPMENT_CHOICES = [
         ('Desktop', 'Desktop'),
@@ -32,6 +32,7 @@ class DESKTOPPACKAGE(models.Model):
     desktop_Office = models.CharField(max_length=100)
     desktop_OS_keys = models.CharField(max_length=100)
     desktop_Office_keys = models.CharField(max_length=100)
+
     
     def __str__(self):
         return 'IT EQUPMENT: ' + self.name 

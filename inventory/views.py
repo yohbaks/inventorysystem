@@ -74,13 +74,12 @@ def success_page(request):
 
 ##################################################################################
 
-# detailed list
-
-def detailed_list_func(request):
-    return render(request, 'detailed_list.html') # Render the detailed page
-
-
 
 ##################################################################################
 
+# detailed view
 
+def desktop_detailed_view(request, id):
+    desktop = get_object_or_404(DESKTOPPACKAGE, id=id)
+    return render(request, 'desktop_detailed_view.html', {'desktop': desktop})
+#########################################################################

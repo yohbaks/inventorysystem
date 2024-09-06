@@ -642,42 +642,34 @@
                   </div>
                   <div class="card-body">
                     <div class="table-responsive">
-                      <table
-                        id="basic-datatables"
-                        class="display table table-striped table-hover"
-                      >
+                      <table id="basic-datatables" class="display table table-striped table-hover">
                         <thead>
                           <tr>
                             <th>IT Equipment</th>
                             <th>Serial No.</th>
                             <th>Brand Name</th>
                             <th>Model Name</th>
-                            <th>End User</th>
-                            <th>End User</th>
+                            <th>Processor</th>
+                            <th>Memory</th>
                             <th>Hard Drive</th>
                             <th>Link</th>
-
                           </tr>
                         </thead>
-                        
                         <tbody>
-                          {% for desktop_list in desktop_List %}
+                          {% for desktop in desktop_List %}
                           <tr>
-                            <td>{{ desktop_list.name }}</td>
-                            <td>{{ desktop_list.desktop_SerialNo }}</td>
-                            <td>{{ desktop_list.desktop_BrandName }}</td>
-                            <td>{{ desktop_list.desktop_Processor }}</td>
-                            <td>{{ desktop_list.desktop_Model }}</td>
-                            <td>{{ desktop_list.desktop_Memory }}</td>
-                            <td>{{ desktop_list.desktop_Drive }}</td>
-                            <td><a href="#">
-                              <span class="sub-item">IT Equipments</span>
+                            <td>{{ desktop.name }}</td>
+                            <td>{{ desktop.desktop_SerialNo }}</td>
+                            <td>{{ desktop.desktop_BrandName }}</td>
+                            <td>{{ desktop.desktop_Model }}</td>
+                            <td>{{ desktop.desktop_Processor }}</td>
+                            <td>{{ desktop.desktop_Memory }}</td>
+                            <td>{{ desktop.desktop_Drive }}</td>
+                            <td><a href="{% url 'desktop_detailed_view' desktop.id %}">
+                              <span class="sub-item">View Details</span>
                             </a></td>
-
-                            
                           </tr>
                           {% endfor %}
- 
                         </tbody>
                       </table>
                     </div>
@@ -685,7 +677,7 @@
                 </div>
               </div>
             </div>
-          </div>
+            
         </div>
 
            
