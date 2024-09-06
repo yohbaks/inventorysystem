@@ -59,7 +59,7 @@
         <div class="sidebar-logo">
           <!-- Logo Header -->
           <div class="logo-header" data-background-color="dark">
-            <a href="{% url 'equipmentList' %}" class="logo">
+            <a href="{% url 'desktop_list_page' %}" class="logo">
               <img 
                 src="{% static 'img/kaiadmin/logo_light.svg' %}"
                 alt="navbar brand"
@@ -120,7 +120,7 @@
                 <div class="collapse" id="base">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="{% url 'equipment_full_list' %}">
+                      <a href="#">
                         <span class="sub-item">IT Equipments</span>
                       </a>
                     </li>
@@ -562,7 +562,7 @@
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                           <p class="card-category">Total Equipment:</p>
-                          <h4 class="card-title">{{ equipment_count }}</h4>
+                          <h4 class="card-title">{{ desktop_count }}</h4>
                         </div>
                       </div>
                     </div>
@@ -653,32 +653,28 @@
                             <th>Brand Name</th>
                             <th>Model Name</th>
                             <th>End User</th>
-                            <th>Computer Name</th>
-                            <th>Detailed List </th>
+                            <th>End User</th>
+                            <th>Hard Drive</th>
+                            <th>Link</th>
+
                           </tr>
                         </thead>
-                        <tfoot>
-                          <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Age</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
-                            <th>Detailed List</th>
-                          </tr>
-                        </tfoot>
+                        
                         <tbody>
-                          {% for equipment in equipments %}
+                          {% for desktop_list in desktop_List %}
                           <tr>
-                            <td>{{ equipment.name }}</td>
-                            <td>{{ equipment.desktop_SerialNo }}</td>
-                            <td>{{ equipment.desktop_BrandName }}</td>
-                            <td>{{ equipment.desktop_Model }}</td>
-                            <td>test</td>
-                            <td>test2</td>
-                            <td>test3</td>
-                            <td>clickable link</td>
+                            <td>{{ desktop_list.name }}</td>
+                            <td>{{ desktop_list.desktop_SerialNo }}</td>
+                            <td>{{ desktop_list.desktop_BrandName }}</td>
+                            <td>{{ desktop_list.desktop_Processor }}</td>
+                            <td>{{ desktop_list.desktop_Model }}</td>
+                            <td>{{ desktop_list.desktop_Memory }}</td>
+                            <td>{{ desktop_list.desktop_Drive }}</td>
+                            <td><a href="#">
+                              <span class="sub-item">IT Equipments</span>
+                            </a></td>
+
+                            
                           </tr>
                           {% endfor %}
  
