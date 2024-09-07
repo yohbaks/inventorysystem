@@ -81,5 +81,5 @@ def success_page(request):
 
 def desktop_detailed_view(request, id):
     desktop = get_object_or_404(DESKTOPPACKAGE, id=id)
-    return render(request, 'desktop_detailed_view.html', {'desktop': desktop})
+    return render(request, 'desktop_detailed_view.html', {'desktops': desktop})
 #########################################################################

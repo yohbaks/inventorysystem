@@ -2,37 +2,135 @@
 
 {% block content %}
 <div class="container">
-  <h2>Desktop Package Details</h2>
-  <table class="table table-bordered">
-    <tr>
-      <th>Name</th>
-      <td>{{ desktop.name }}</td>
-    </tr>
-    <tr>
-      <th>Serial No.</th>
-      <td>{{ desktop.desktop_SerialNo }}</td>
-    </tr>
-    <tr>
-      <th>Brand Name</th>
-      <td>{{ desktop.desktop_BrandName }}</td>
-    </tr>
-    <tr>
-      <th>Model Name</th>
-      <td>{{ desktop.desktop_Model }}</td>
-    </tr>
-    <tr>
-      <th>Processor</th>
-      <td>{{ desktop.desktop_Processor }}</td>
-    </tr>
-    <tr>
-      <th>Memory</th>
-      <td>{{ desktop.desktop_Memory }}</td>
-    </tr>
-    <tr>
-      <th>Hard Drive</th>
-      <td>{{ desktop.desktop_Drive }}</td>
-    </tr>
-    <!-- Add more fields as needed -->
-  </table>
+  
+
+<div class="page-inner">
+<div class="row">
+  <div class="col-md-8">
+    <div class="card card-round">
+      <div class="card-header">
+        <div class="card-head-row">
+          <div class="card-title">Desktop Package Details</div>
+          <div class="card-tools">
+            <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+              <span class="btn-label">
+                <i class="fa fa-pencil"></i>
+              </span>
+              Export
+            </a>
+            <a href="#" class="btn btn-label-info btn-round btn-sm">
+              <span class="btn-label">
+                <i class="fa fa-print"></i>
+              </span>
+              Print
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="container">
+          <h2>R08-LEY4-156</h2>
+          <table class="table table-bordered table-head-bg-info table-bordered-bd-info mt-4">       
+
+            <thead>
+              <tr>
+                <th class="col-sm-6 col-md-3">Details</th>
+                <th colspan="8">Data Entries</th>
+                <th class="col-sm-1">Last</th>
+              </tr>
+            
+
+            <tr>
+                <td>Equipment</td>
+                <td>{{ desktops.name }}</td>
+                <td colspan="8">
+                  <center><button class="btn-link btn-primary">
+                    <i class="fa fa-edit"></i>
+                  </button></center>
+              </td>
+            </tr>
+            <tr>
+
+                <td>Serial Number</td>
+                <td colspan="8">{{ desktops.desktop_SerialNo }}</td>
+                
+            </tr>
+            <tr>
+                <td>Brand Name</td>
+                <td colspan="4">{{ desktops.desktop_BrandName }}</td>
+            </tr>
+            <tr>
+                <td>Model</td>
+                <td colspan="4">{{ desktops.desktop_Model }}</td>
+            </tr>
+            <tr>
+                <td>Processor</td>
+                <td colspan="4">{{ desktops.desktop_Processor }}</td>
+            </tr> 
+          </thead>
+            <!-- Add more fields as needed -->
+        </table>
+
+        </div>
+
+{% comment %} end content here {% endcomment %}
+
+
+        <div id="myChartLegend"><ul class="0-legend html-legend"><li><span style="background-color:#f3545d"></span>Subscribers</li><li><span style="background-color:#fdaf4b"></span>New Visitors</li><li><span style="background-color:#177dff"></span>Active Users</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-primary card-round">
+      <div class="card-header">
+        <div class="card-head-row">
+          <div class="card-title">Daily Sales</div>
+          <div class="card-tools">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-label-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Export
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-category">March 25 - April 02</div>
+      </div>
+      <div class="card-body pb-0">
+        <div class="mb-4 mt-2">
+          <h1>$4,578.58</h1>
+        </div>
+        <div class="pull-in"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
+          <canvas id="dailySalesChart" width="506" height="150" style="display: block; width: 506px; height: 150px;" class="chartjs-render-monitor"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="card card-round">
+      <div class="card-body pb-0">
+        <div class="h1 fw-bold float-end text-primary">+5%</div>
+        <h2 class="mb-2">17</h2>
+        <p class="text-muted">Users online</p>
+        <div class="pull-in sparkline-fix">
+          <div id="lineChart"><canvas width="508" height="70" style="display: inline-block; width: 508.766px; height: 70px; vertical-align: top;"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+</div>
+</div>
+
+
+
+
+
+
+{% endblock %}
+{% block scripts %}
+
 {% endblock %}
