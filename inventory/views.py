@@ -21,7 +21,6 @@ def desktop_list_func(request):
     return render(request, 'base.html', {'desktop_List': desktop_list, 'desktop_count': desktop_count})
 
 
-
 ##############################################################################
 #add equipment function
 
@@ -79,7 +78,40 @@ def success_page(request):
 
 # detailed view
 
+# def desktop_detailed_view(request, id):
+#     desktop = get_object_or_404(DESKTOPPACKAGE, id=id)
+#     return render(request, 'desktop_detailed_view.html', {'desktops': desktop})
+# #########################################################################
+
+
+###########################################################################
+
+# edit
+
+############################
+
+
+# Edit function
 def desktop_detailed_view(request, id):
+    # Get the specific desktop package by its ID
     desktop = get_object_or_404(DESKTOPPACKAGE, id=id)
+
+    if request.method == 'POST':
+        # Update the data if the form is submitted (editing functionality)
+        desktop.desktop_SerialNo = request.POST.get('serial_input', desktop.desktop_SerialNo)
+        desktop.desktop_BrandName = request.POST.get('brand_input', desktop.desktop_BrandName)
+        desktop.desktop_Model = request.POST.get('model_input', desktop.desktop_Model)
+        desktop.desktop_Processor = request.POST.get('processor_input', desktop.desktop_Processor)
+        desktop.desktop_Memory = request.POST.get('memory_input', desktop.desktop_Memory)
+        desktop.desktop_Drive = request.POST.get('drive_input', desktop.desktop_Drive)
+
+        # Validate and save changes
+        if desktop.desktop_SerialNo and desktop.desktop_BrandName and desktop.desktop_Model:
+            desktop.save()
+            messages.success(request, 'Desktop details updated successfully!')
+            return redirect('desktop_detailed_view', id=desktop.id)
+        else:
+            messages.error(request, 'Please fill in all required fields.')
+
+    # Render the template with the current desktop details for editing
     return render(request, 'desktop_detailed_view.html', {'desktops': desktop})
-#########################################################################

@@ -27,12 +27,21 @@
           </div>
         </div>
       </div>
+
       <div class="card-body">
 
         <div class="container">
           <h2>R08-LEY4-156</h2>
+          {% comment %} this is the message if successfull updsated {% endcomment %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }}">
+                  {{ message }}
+              </div>
+           {% endfor %}
+          {% endif %}
           <table class="table table-bordered table-head-bg-info table-bordered-bd-info mt-4">       
-
+            <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
             <thead>
               <tr>
                 <th class="col-sm-6 col-md-3">Details</th>
@@ -40,12 +49,13 @@
                 <th class="col-sm-1">Last</th>
               </tr>
             
-
+     
             <tr>
                 <td>Equipment</td>
-                <td>{{ desktops.name }}</td>
+                <td><span id="equipment-view">{{ desktops.name }}</span>
+                  <input class="form-control input-full" id="equipment-edit" type="text" name="name_input" value="{{ desktops.name }}" style="display:none;"></td>
                 <td colspan="8">
-                  <center><button class="btn-link btn-primary">
+                  <center><button class="btn-link btn-primary" onclick="editRow('equipment')">
                     <i class="fa fa-edit"></i>
                   </button></center>
               </td>
@@ -53,27 +63,66 @@
             <tr>
 
                 <td>Serial Number</td>
-                <td colspan="8">{{ desktops.desktop_SerialNo }}</td>
-                
+                <td>
+                  <span id="serial-view">{{ desktops.desktop_SerialNo }}</span>
+                  <input class="form-control input-full" id="serial-edit" type="text" name="serial_input" value="{{ desktops.desktop_SerialNo }}" style="display:none;">
+                </td>
+                <td colspan="8">
+                  <center><button class="btn-link btn-primary" onclick="editRow('serial')">
+                    <i class="fa fa-edit"></i>
+                  </button></center>
+                </td>
             </tr>
             <tr>
                 <td>Brand Name</td>
-                <td colspan="4">{{ desktops.desktop_BrandName }}</td>
+                <td>
+                  <span id="brand-view">{{ desktops.desktop_BrandName }}</span>
+                  <input class="form-control input-full" id="brand-edit" type="text" name="brand_input" value="{{ desktops.desktop_BrandName }}" style="display:none;">
+                </td>
+                <td colspan="8">
+                  <center><button class="btn-link btn-primary" onclick="editRow('brand')">
+                    <i class="fa fa-edit"></i>
+                  </button></center>
+                </td>
+          
             </tr>
             <tr>
-                <td>Model</td>
-                <td colspan="4">{{ desktops.desktop_Model }}</td>
+              <td>Model</td>
+              <td>
+                  <span id="model-view">{{ desktops.desktop_Model }}</span>
+                  <input class="form-control input-full" id="model-edit" type="text" name="model_input" value="{{ desktops.desktop_Model }}" style="display:none;">
+              </td>
+              <td colspan="8">
+                <center><button class="btn-link btn-primary" onclick="editRow('model')">
+                  <i class="fa fa-edit"></i>
+                </button></center>
+              </td>
             </tr>
             <tr>
-                <td>Processor</td>
-                <td colspan="4">{{ desktops.desktop_Processor }}</td>
+              <td>Processor</td>
+              <td>
+                  <span id="processor-view">{{ desktops.desktop_Processor }}</span>
+                  <input class="form-control input-full" id="processor-edit" type="text" name="processor_input" value="{{ desktops.desktop_Processor }}" style="display:none;">
+              </td>
+                <td colspan="8">
+                  <center><button class="btn-link btn-primary" onclick="editRow('processor')">
+                    <i class="fa fa-edit"></i>
+                  </button></center>
+                </td>
             </tr> 
           </thead>
             <!-- Add more fields as needed -->
         </table>
+        
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit" id="save-btn" style="display:none;">Save Changes</button>
+      
+        
 
-        </div>
 
+</form>
+
+</div>
 {% comment %} end content here {% endcomment %}
 
 
@@ -126,6 +175,44 @@
 </div>
 
 
+<script>
+  function editRow(rowId) {
+    event.preventDefault();  // Prevent form submission on button click
+    // Hide the view element
+    document.getElementById(rowId + '-view').style.display = 'none';
+    // Show the input field for editing
+    document.getElementById(rowId + '-edit').style.display = 'block';
+
+    // Show the Save Changes button
+    document.getElementById('save-btn').style.display = 'block';
+  }
+</script>
+
+<!-- Save Changes button initially hidden -->
+
+{% comment %} <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+  {% csrf_token %}
+  
+  <label for="serial_input">Serial Number:</label>
+  <input type="text" id="serial_input" name="serial_input" value="{{ desktops.desktop_SerialNo }}">
+  
+  <label for="brand_input">Brand Name:</label>
+  <input type="text" id="brand_input" name="brand_input" value="{{ desktops.desktop_BrandName }}">
+  
+  <label for="model_input">Model:</label>
+  <input type="text" id="model_input" name="model_input" value="{{ desktops.desktop_Model }}">
+  
+  <label for="processor_input">Processor:</label>
+  <input type="text" id="processor_input" name="processor_input" value="{{ desktops.desktop_Processor }}">
+  
+  <label for="memory_input">Memory:</label>
+  <input type="text" id="memory_input" name="memory_input" value="{{ desktops.desktop_Memory }}">
+  
+  <label for="drive_input">Drive:</label>
+  <input type="text" id="drive_input" name="drive_input" value="{{ desktops.desktop_Drive }}">
+  
+  <button type="submit">Save Changes</button>
+</form> {% endcomment %}
 
 
 
