@@ -32,6 +32,7 @@ class DESKTOPPACKAGE(models.Model):
     desktop_Office = models.CharField(max_length=100)
     desktop_OS_keys = models.CharField(max_length=100)
     desktop_Office_keys = models.CharField(max_length=100)
+    desktop_Image = models.ImageField(upload_to='equipment_images/', blank=True, null=True)  # Add this line
 
     
     def __str__(self):
