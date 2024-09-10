@@ -34,6 +34,8 @@ class DESKTOPPACKAGE(models.Model):
     desktop_Office_keys = models.CharField(max_length=100)
     desktop_Image = models.ImageField(upload_to='equipment_images/', blank=True, null=True)  # Add this line
 
+     # New field to track disposed status
+    is_disposed = models.BooleanField(default=False)  # Default is False (not disposed)
     
     def __str__(self):
         return 'IT EQUPMENT: ' + self.name 

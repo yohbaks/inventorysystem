@@ -12,10 +12,17 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from django.contrib.messages import constants as messages
+import os
 
+######## FILE UPLOAD ##############
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Database configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+############ FILE UPLOAD END########
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -131,6 +138,7 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 
 MESSAGE_TAGS = {

@@ -45,7 +45,7 @@
           <div class="card-title">ADD ICT EQUIPMENT</div>
         </div>
 
-        <form action="{% url 'add_equipment_func_input' %}" method="post">
+        <form action="{% url 'add_equipment_func_input' %}" method="post" enctype="multipart/form-data">
           {% csrf_token %}
           <div class="card-body">
 
@@ -106,10 +106,10 @@
                 </div>
               </div>
 
-              
+              {% comment %} upload file form {% endcomment %}
               <div class="mb-3">
                 <label for="image" class="form-label">Default file input example</label>
-                <input class="form-control" type="file" id="image" name="image">
+                <input class="form-control" type="file" id="desktopImage" name="desktop_image_input" value="{{ image }}">
               </div>
 
             </div>

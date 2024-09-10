@@ -48,7 +48,7 @@
     <link rel="stylesheet" href="{% static 'css/kaiadmin.min.css' %}">
     
 
-    <!-- CSS Just for demo purpose, don't include it in your project -->
+  
     {% endblock %}
   </head>
   <body>
@@ -120,7 +120,7 @@
                 <div class="collapse" id="base">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="#">
+                      <a href="{% url 'desktop_all_detailed_view' %}">
                         <span class="sub-item">IT Equipments</span>
                       </a>
                     </li>
@@ -144,6 +144,7 @@
       </div>
       <!-- End Sidebar --> {% endblock %}
 
+      {% block navbar %}
       <div class="main-panel">
         <div class="main-header">
           <div class="main-header-logo">
@@ -173,7 +174,7 @@
             <!-- End Logo Header -->
           </div>
 
-          {% block navbar %}
+          
           <!-- Navbar Header -->
           <nav
             class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
@@ -643,6 +644,10 @@
                   <div class="card-body">
                     <div class="table-responsive">
                       <table id="basic-datatables" class="display table table-striped table-hover">
+                        {% comment %} <table
+                        id="multi-filter-select"
+                        class="display table table-striped table-hover" para ni sa select table
+                      > {% endcomment %}
                         <thead>
                           <tr>
                             <th>IT Equipment</th>
@@ -655,6 +660,18 @@
                             <th>Link</th>
                           </tr>
                         </thead>
+                        <tfoot>
+                          <tr>
+                            <th>IT Equipment</th>
+                            <th>Serial No.</th>
+                            <th>Brand Name</th>
+                            <th>Model Name</th>
+                            <th>Processor</th>
+                            <th>Memory</th>
+                            <th>Hard Drive</th>
+                            <th>Link</th>
+                          </tr>
+                        </tfoot>
                         <tbody>
                           {% for desktop in desktop_List %}
                           <tr>
@@ -730,6 +747,7 @@
     <!-- Kaiadmin DEMO methods, don't include it in your project! -->
 
     <script src="{% static 'assets/js/demo.js' %}"></script>
+    <script src="{% static 'assets/js/setting-demo2.js' %}" ></script>
     <script>
       $("#lineChart").sparkline([102, 109, 120, 99, 110, 105, 115], {
         type: "line",
@@ -759,6 +777,66 @@
       });
     </script>
     
+
+
+
+    <script>
+      $(document).ready(function () {
+        $("#basic-datatables").DataTable({});
+
+        $("#multi-filter-select").DataTable({
+          pageLength: 5,
+          initComplete: function () {
+            this.api()
+              .columns()
+              .every(function () {
+                var column = this;
+                var select = $(
+                  '<select class="form-select"><option value=""></option></select>'
+                )
+                  .appendTo($(column.footer()).empty())
+                  .on("change", function () {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                    column
+                      .search(val ? "^" + val + "$" : "", true, false)
+                      .draw();
+                  });
+
+                column
+                  .data()
+                  .unique()
+                  .sort()
+                  .each(function (d, j) {
+                    select.append(
+                      '<option value="' + d + '">' + d + "</option>"
+                    );
+                  });
+              });
+          },
+        });
+
+        // Add Row
+        $("#add-row").DataTable({
+          pageLength: 5,
+        });
+
+        var action =
+          '<td> <div class="form-button-action"> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
+
+        $("#addRowButton").click(function () {
+          $("#add-row")
+            .dataTable()
+            .fnAddData([
+              $("#addName").val(),
+              $("#addPosition").val(),
+              $("#addOffice").val(),
+              action,
+            ]);
+          $("#addRowModal").modal("hide");
+        });
+      });
+    </script>
  
     {% endblock %}
 

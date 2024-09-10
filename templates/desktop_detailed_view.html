@@ -12,6 +12,15 @@
         <div class="card-head-row">
           <div class="card-title">Desktop Package Details</div>
           <div class="card-tools">
+
+
+            <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <span class="btn-label">
+                <i class="fa fa-location-arrow"></i>
+              </span>
+              Return to Supply
+            </button>
+
             <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
               <span class="btn-label">
                 <i class="fa fa-pencil"></i>
@@ -46,7 +55,7 @@
               <tr>
                 <th class="col-sm-6 col-md-3">Details</th>
                 <th colspan="8">Data Entries</th>
-                <th class="col-sm-1">Last</th>
+                <th class="col-sm-1">Edit</th>
               </tr>
             
      
@@ -117,8 +126,6 @@
           {% csrf_token %}
           <button class="btn btn-primary" type="submit" id="save-btn" style="display:none;">Save Changes</button>
       
-        
-
 
 </form>
 
@@ -132,47 +139,24 @@
   </div>
   <div class="col-md-4">
     <div class="card card-primary card-round">
-      <div class="card-header">
-        <div class="card-head-row">
-          <div class="card-title">Daily Sales</div>
-          <div class="card-tools">
-            <div class="dropdown">
-              <button class="btn btn-sm btn-label-light dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Export
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Action</a>
-                <a class="dropdown-item" href="#">Another action</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-              </div>
+  
+        <div class="card card-primary card-round">
+          <div class="card-body pb-0">
+            <div class="mb-4 mt-2 image-wrapper">
+              <h1>Desktop Image</h1>
+              {% if desktops.desktop_Image %}
+              <img src="{{ desktops.desktop_Image.url }}" alt="Desktop Image" class="img-fluid">    
+          {% else %}
+              <p>No image available.</p>
+          {% endif %}
             </div>
-          </div>
-        </div>
-        <div class="card-category">March 25 - April 02</div>
-      </div>
-      <div class="card-body pb-0">
-        <div class="mb-4 mt-2">
-          <h1>$4,578.58</h1>
-        </div>
-        <div class="pull-in"><div class="chartjs-size-monitor" style="position: absolute; inset: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;"><div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div></div><div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;"><div style="position:absolute;width:200%;height:200%;left:0; top:0"></div></div></div>
-          <canvas id="dailySalesChart" width="506" height="150" style="display: block; width: 506px; height: 150px;" class="chartjs-render-monitor"></canvas>
-        </div>
-      </div>
-    </div>
-    <div class="card card-round">
-      <div class="card-body pb-0">
-        <div class="h1 fw-bold float-end text-primary">+5%</div>
-        <h2 class="mb-2">17</h2>
-        <p class="text-muted">Users online</p>
-        <div class="pull-in sparkline-fix">
-          <div id="lineChart"><canvas width="508" height="70" style="display: inline-block; width: 508.766px; height: 70px; vertical-align: top;"></canvas></div>
-        </div>
-      </div>
+            </div>
+          </div>  
     </div>
   </div>
-</div>
-</div>
-</div>
+
+
+
 
 
 <script>
@@ -188,36 +172,29 @@
   }
 </script>
 
-<!-- Save Changes button initially hidden -->
 
-{% comment %} <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
-  {% csrf_token %}
-  
-  <label for="serial_input">Serial Number:</label>
-  <input type="text" id="serial_input" name="serial_input" value="{{ desktops.desktop_SerialNo }}">
-  
-  <label for="brand_input">Brand Name:</label>
-  <input type="text" id="brand_input" name="brand_input" value="{{ desktops.desktop_BrandName }}">
-  
-  <label for="model_input">Model:</label>
-  <input type="text" id="model_input" name="model_input" value="{{ desktops.desktop_Model }}">
-  
-  <label for="processor_input">Processor:</label>
-  <input type="text" id="processor_input" name="processor_input" value="{{ desktops.desktop_Processor }}">
-  
-  <label for="memory_input">Memory:</label>
-  <input type="text" id="memory_input" name="memory_input" value="{{ desktops.desktop_Memory }}">
-  
-  <label for="drive_input">Drive:</label>
-  <input type="text" id="drive_input" name="drive_input" value="{{ desktops.desktop_Drive }}">
-  
-  <button type="submit">Save Changes</button>
-</form> {% endcomment %}
+<!-- Modal -->
 
 
 
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Pop-Up Modal Title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to dispose the Desktop Package?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-{% endblock %}
-{% block scripts %}
+
 
 {% endblock %}

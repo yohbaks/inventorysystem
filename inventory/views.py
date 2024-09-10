@@ -6,6 +6,7 @@ from django.shortcuts import render, get_object_or_404
 
 
 
+
 # Create your views here.
 ##############################################################################
 # code for the list in the homepage
@@ -34,6 +35,7 @@ def add_equipment_func(request):
         processorany = request.POST.get('desktop_processor_input', '')
         memoryany = request.POST.get('desktop_memory_input', '')
         driveany = request.POST.get('desktop_drive_input', '')
+        image = request.FILES.get('desktop_image_input')
 
         if equipment_type == 'Desktop':
             if len(nameany) < 2 or len(serialany) < 1 or len(brandnameany) < 2 or len(modelany) < 2 or len(processorany) < 2 or len(memoryany)<2:
@@ -48,11 +50,12 @@ def add_equipment_func(request):
                     'processorany' : processorany,
                     'memoryany' : memoryany,
                     'driveany' : driveany,
+                    'image' : image
                 })
             else:
                 additemany = DESKTOPPACKAGE(name=nameany, desktop_SerialNo=serialany, desktop_BrandName=brandnameany, 
                                             desktop_Model=modelany, desktop_Processor=processorany, desktop_Memory=memoryany, 
-                                            desktop_Drive=driveany)
+                                            desktop_Drive=driveany, desktop_Image=image)
                 additemany.save()
                 messages.success(request, 'Your Desktop Package was successfully added')
                 return redirect('success_add_page')  # Redirect to success page
@@ -71,20 +74,13 @@ def success_page(request):
     return render(request, 'success_add.html')  # Render the success page template
 
 
-##################################################################################
+# all detailed view
 
-
-##################################################################################
-
-# detailed view
-
-# def desktop_detailed_view(request, id):
-#     desktop = get_object_or_404(DESKTOPPACKAGE, id=id)
-#     return render(request, 'desktop_detailed_view.html', {'desktops': desktop})
-# #########################################################################
-
-
-###########################################################################
+def all_detailed_view(request):
+   # Get all equipment
+    desktop_list = DESKTOPPACKAGE.objects.all()
+    # Render the list of equipment and the count to the template
+    return render(request, 'desktop_all_detailed_view.html', {'desktop_List': desktop_list})
 
 # edit
 
@@ -104,6 +100,10 @@ def desktop_detailed_view(request, id):
         desktop.desktop_Processor = request.POST.get('processor_input', desktop.desktop_Processor)
         desktop.desktop_Memory = request.POST.get('memory_input', desktop.desktop_Memory)
         desktop.desktop_Drive = request.POST.get('drive_input', desktop.desktop_Drive)
+        
+        # Handle image file if uploaded
+        if 'desktop_image_input' in request.FILES:
+            desktop.desktop_Image = request.FILES['desktop_image_input']
 
         # Validate and save changes
         if desktop.desktop_SerialNo and desktop.desktop_BrandName and desktop.desktop_Model:
@@ -115,3 +115,5 @@ def desktop_detailed_view(request, id):
 
     # Render the template with the current desktop details for editing
     return render(request, 'desktop_detailed_view.html', {'desktops': desktop})
+
+############################
