@@ -81,22 +81,6 @@
   
       </div>
 
-      
-      <!-- Right Column for Image -->
-      {% comment %} <div class="col-md-4">
-        <div class="card card-primary card-round">
-          <div class="card-body pb-0">
-            <h1>Desktop Image</h1>
-            <div class="image-wrapper">
-              {% if desktops.desktop_Image %}
-              <img src="{{ desktops.desktop_Image.url }}" alt="Desktop Image" class="img-fluid">
-              {% else %}
-              <p>No image available.</p>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </div> {% endcomment %}
     </div>
 
     
@@ -105,7 +89,7 @@
       <div class="tab-pane fade show active" id="pills-desktop" role="tabpanel" aria-labelledby="pills-desktop-tab">
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Desktop Package Details</div>
+        <div class="card-title">Desktop Details</div>
       </div>
       <div class="card-body">
         <table class="table table-head-bg-success">
@@ -151,173 +135,306 @@
         </table>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
       </div>
+
     </div>
+  </div>
+
+      <!-- Monitor Details Tab -->
+      <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+          <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Monitor Details</div>
+        </div>
+        <div class="card-body">
+          <table class="table table-head-bg-success">
+            <thead>
+              <tr>
+                <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                <th scope="col">DETAILS</th>
+  
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+               <td><h6> {{ desktops.desktop_Monitor_SN }}</h6></td>
+  
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+                <td>{{ desktops.desktop_Monitor_Brand }}</td>
+  
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+                <td>{{ desktops.desktop_Monitor_Model }}</td>
+  
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Monitor Size:</h5></td>
+                <td>{{ desktops.desktop_Monitor_Size}}</td>
+  
+              </tr>
+    
+            </tbody>
+          </table>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMonitorModal">Edit</button>
+        </div>
+  
+      </div>
+    </div>
+
+     <!-- keyboard Details Tab -->
+    <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+      <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Keyboard Details</div>
+    </div>
+    <div class="card-body">
+      <table class="table table-head-bg-success">
+        <thead>
+          <tr>
+            <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+            <th scope="col">DETAILS</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+           <td><h6> {{ desktops.desktop_Keyboard_SN }}</h6></td>
+
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+            <td>{{ desktops.desktop_keyboard_Brand }}</td>
+
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+            <td>{{ desktops.desktop_keyboard_Model }}</td>
+
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+    </div>
+
   </div>
 </div>
 
 
-
-      <!-- Monitor Details Tab -->
-      <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
-        <h4>Monitor Details</h4>
-        <table class="table table-bordered">
-          <tr>
-            <td>Monitor Serial Number</td>
-            <td>{{ desktops.desktop_Monitor_SN }}</td>
-          </tr>
-          <tr>
-            <td>Monitor Brand</td>
-            <td>{{ desktops.desktop_Monitor_Brand }}</td>
-          </tr>
-          <tr>
-            <td>Monitor Model</td>
-            <td>{{ desktops.desktop_Monitor_Model }}</td>
-          </tr>
-          <tr>
-            <td>Monitor Size</td>
-            <td>{{ desktops.desktop_Monitor_Size }}</td>
-          </tr>
-        </table>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMonitorModal">Edit</button>
-      </div>
-
-       <!-- Keyboard Details Tab -->
-       <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
-        <h4>Keyboard Details</h4>
-        <table class="table table-bordered">
-          <tr>
-            <td>Keyboard Serial Number</td>
-            <td>{{ desktops.desktop_Keyboard_SN }}</td>
-          </tr>
-          <tr>
-            <td>Keyboard Brand</td>
-            <td>{{ desktops.desktop_keyboard_Brand }}</td>
-          </tr>
-          <tr>
-            <td>Keyboard Model</td>
-            <td>{{ desktops.desktop_keyboard_Model }}</td>
-          </tr>
-        </table>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
-      </div>
-
         <!-- Mouse Details Tab -->
-<div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
-  <h4>Mouse Details</h4>
-  <table class="table table-bordered">
-    <tr>
-      <td>Mouse Serial Number</td>
-      <td>{{ desktops.desktop_Mouse_SN }}</td>
-    </tr>
-    <tr>
-      <td>Mouse Brand</td>
-      <td>{{ desktops.desktop_Mouse_Brand }}</td>
-    </tr>
-    <tr>
-      <td>Mouse Model</td>
-      <td>{{ desktops.desktop_Mouse_Model }}</td>
-    </tr>
-  </table>
-  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMouseModal">Edit</button>
-</div>   
+
+        <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+          <div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Mouse Details</div>
+        </div>
+        <div class="card-body">
+          <table class="table table-head-bg-success">
+            <thead>
+              <tr>
+                <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                <th scope="col">DETAILS</th>
+    
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+               <td><h6> {{ desktops.desktop_Mouse_SN }}</h6></td>
+    
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+                <td>{{ desktops.desktop_Mouse_Brand }}</td>
+    
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+                <td>{{ desktops.desktop_Mouse_Model }}</td>
+    
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMouseModal">Edit</button>
+        </div>
+    
+      </div>
+    </div>
 
 <!-- UPS Details Tab -->
-<div class="tab-pane fade" id="pills-ups" role="tabpanel" aria-labelledby="pills-ups-tab">
-  <h4>UPS Details</h4>
-  <table class="table table-bordered">
-    <tr>
-      <td>UPS Serial Number</td>
-      <td>{{ desktops.desktop_UPS_SN }}</td>
-    </tr>
-    <tr>
-      <td>UPS Brand</td>
-      <td>{{ desktops.desktop_UPS_Brand }}</td>
-    </tr>
-    <tr>
-      <td>UPS Model</td>
-      <td>{{ desktops.desktop_UPS_Model }}</td>
-    </tr>
+
+
+<div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+  <div class="tab-pane fade" id="pills-ups" role="tabpanel" aria-labelledby="pills-ups-tab">
+<div class="card">
+<div class="card-header">
+  <div class="card-title">UPS Details</div>
+</div>
+<div class="card-body">
+  <table class="table table-head-bg-success">
+    <thead>
+      <tr>
+        <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+        <th scope="col">DETAILS</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+       <td><h6> {{ desktops.desktop_UPS_SN }}</h6></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+        <td>{{ desktops.desktop_UPS_Brand }}</td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+        <td>{{ desktops.desktop_UPS_Model }}</td>
+
+      </tr>
+    </tbody>
   </table>
   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUPSModal">Edit</button>
 </div>
 
+</div>
+</div>
+
 <!-- User Details Tab -->
-<div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
-  <h4>User Details</h4>
-  <table class="table table-bordered">
-    <tr>
-      <td>Asset Owner</td>
-      <td>{{ desktops.desktop_Asset_owner }}</td>
-    </tr>
-    <tr>
-      <td>Asset Designation</td>
-      <td>{{ desktops.desktop_Asset_designation }}</td>
-    </tr>
-    <tr>
-      <td>Asset Section</td>
-      <td>{{ desktops.desktop_Asset_section }}</td>
-    </tr>
-    <tr>
-      <td>End User</td>
-      <td>{{ desktops.desktop_Enduser }}</td>
-    </tr>
-    <tr>
-      <td>End User Designation</td>
-      <td>{{ desktops.desktop_Enduser_designation }}</td>
-    </tr>
-    <tr>
-      <td>End User Section</td>
-      <td>{{ desktops.desktop_Enduser_section }}</td>
-    </tr>
+<div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+  <div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
+<div class="card">
+<div class="card-header">
+  <div class="card-title">User Details</div>
+</div>
+<div class="card-body">
+  <table class="table table-head-bg-success">
+    <thead>
+      <tr>
+        <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+        <th scope="col">DETAILS</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Asset Onwer:</h5></td>
+       <td><h5><strong> {{ desktops.desktop_Asset_owner }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Asset Designation:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Asset_designation }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Asset Section:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Asset_section }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>End User:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Enduser }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>End User Designation:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Enduser_designation }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>End User Section:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Enduser_section }}</strong></h5></td>
+      </tr>
+    </tbody>
   </table>
   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button>
 </div>
 
+</div>
+</div>
+
 <!-- Documents Details Tab -->
-<div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
-  <h4>Documents</h4>
-  <table class="table table-bordered">
-    <tr>
-      <td>PAR</td>
-      <td>{{ desktops.desktop_PAR }}</td>
-    </tr>
-    <tr>
-      <td>Property Number</td>
-      <td>{{ desktops.desktop_Propertyno }}</td>
-    </tr>
-    <tr>
-      <td>Acquisition Type</td>
-      <td>{{ desktops.desktop_Acquisition_Type }}</td>
-    </tr>
-    <tr>
-      <td>Value</td>
-      <td>{{ desktops.desktop_Value }}</td>
-    </tr>
-    <tr>
-      <td>Date Received</td>
-      <td>{{ desktops.desktop_Datereceived }}</td>
-    </tr>
-    <tr>
-      <td>Date Inspected</td>
-      <td>{{ desktops.desktop_Dateinspected }}</td>
-    </tr>
-    <tr>
-      <td>Supplier</td>
-      <td>{{ desktops.desktop_Supplier }}</td>
-    </tr>
-    <tr>
-      <td>Status</td>
-      <td>{{ desktops.desktop_Status }}</td>
-    </tr>
-    <tr>
-      <td>Computer Name</td>
-      <td>{{ desktops.desktop_Computer_name }}</td>
-    </tr>
+
+<div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+  <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
+<div class="card">
+<div class="card-header">
+  <div class="card-title">Documents Details</div>
+</div>
+<div class="card-body">
+  <table class="table table-head-bg-success">
+    <thead>
+      <tr>
+        <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+        <th scope="col">DETAILS</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>PAR:</h5></td>
+       <td><h5><strong> {{ desktops.desktop_PAR }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Property Number:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Propertyno }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Acquisition Type:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Acquisition_Type }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Value:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Value }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Date Received:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Datereceived }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Date Inspected:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Dateinspected }}</strong></h5></td>
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Supplier:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Supplier }}</strong></h5></td>
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Status:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Status }}</strong></h5></td>
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Computer Name:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Computer_name }}</strong></h5></td>
+      </tr>
+    </tbody>
   </table>
   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">Edit</button>
 </div>
 
-      <!-- Repeat for other tabs like  Mouse, UPS, User, and Documents -->
+</div>
+</div>
 
       <!-- Desktop Edit Modal -->
       <div class="modal fade" id="editDesktopModal" tabindex="-1" aria-labelledby="editDesktopModalLabel" aria-hidden="true">
@@ -636,6 +753,41 @@
   </div>
 </div>
 
+   <!-- Display Notify Message -->
+   {% if notify_message %}
+   <div class="modal fade" id="notifyModal" tabindex="-1" aria-labelledby="notifyModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header {% if notify_type == 'success' %}bg-success{% else %}bg-danger{% endif %}">
+                   <h5 class="modal-title" id="notifyModalLabel">
+                       {% if notify_type == 'success' %}
+                       Success
+                       {% else %}
+                       Error
+                       {% endif %}
+                   </h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                   {{ notify_message }}
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               </div>
+           </div>
+       </div>
+   </div>
+   {% endif %}
+</div>
+
+<script>
+   // Automatically show the notify modal if there's a message
+   {% if notify_message %}
+   var notifyModal = new bootstrap.Modal(document.getElementById('notifyModal'), {});
+   notifyModal.show();
+   {% endif %}
+</script>
+
 <script>
   // Script for handling disposal
   document.getElementById('saveDisposeBtn').addEventListener('click', function () {
@@ -676,5 +828,9 @@
     }
     return cookieValue;
   }
+  
 </script>
+
+
+
 {% endblock %}
