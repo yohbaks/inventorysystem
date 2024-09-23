@@ -106,12 +106,323 @@
                 </div>
               </div>
 
+
+              {% comment %} another row for the graphhics {% endcomment %}
+              {% comment %} #Graphics
+                      desktop_gpu_input_any = request.FILES.get('desktop_gpu_input') #desktop_gpu_input
+        desktop_gpusize_input_any = request.FILES.get('desktop_gpusize_input') #desktop_gpusize_input
+        
+        desktop_os_input_any = request.FILES.get('desktop_os_input') #desktop_os_input
+        desktop_office_input_any = request.FILES.get('desktop_office_input') #desktop_office_input
+        desktop_OSkeys_input_any = request.FILES.get('desktop_OSkeys_input') #desktop_OSkeys_input
+        desktop_Officekeys_input_any = request.FILES.get('desktop_Officekeys_input') #desktop_Officekeys_input
+        monitor_serial_input_any = request.FILES.get('monitor_serial_input') #monitor_serial_input
+        monitor_brand_input_any = request.FILES.get('monitor_brand_input') #monitor_brand_input
+        monitor_model_input_any = request.FILES.get('monitor_model_input') #monitor_model_input
+        monitor_size_input_any = request.FILES.get('monitor_size_input') #monitor_size_input
+        keyboard_serial_input_any = request.FILES.get('keyboard_serial_input') #keyboard_serial_input
+        keyboard_brand_input_any = request.FILES.get('keyboard_brand_input') #keyboard_brand_input
+        keyboard_model_input_any = request.FILES.get('keyboard_model_input') #keyboard_model_input
+        mouse_serial_input_any = request.FILES.get('mouse_serial_input') #mouse_serial_input
+        mouse_brand_input_any = request.FILES.get('mouse_brand_input') #mouse_brand_input
+        mouse_model_input_any = request.FILES.get('mouse_model_input') #mouse_model_input
+        ups_serial_input_any = request.FILES.get('ups_serial_input') #ups_serial_input
+        ups_brand_input_any = request.FILES.get('ups_brand_input') #ups_brand_input
+        ups_model_input_any = request.FILES.get('ups_model_input') #ups_model_input
+        asset_owner_input_any = request.FILES.get('asset_owner_input') #asset_owner_input
+        designation_Asset_input_any = request.FILES.get('designation_Asset_input') #designation_Asset_input
+        asset_section_input_any = request.FILES.get('asset_section_input') #asset_section_input
+        end_user_input_any = request.FILES.get('end_user_input') #end_user_input
+        enduser_designation_input_any = request.FILES.get('enduser_designation_input') #enduser_designation_input
+        enduser_section_input_any = request.FILES.get('enduser_section_input') #aenduser_section_input
+        par_number_input_any = request.FILES.get('par_number_input') #par_number_input
+        property_number_input_any = request.FILES.get('property_number_input') #property_number_input
+        acquisition_type_input_any = request.FILES.get('acquisition_type_input') #acquisition_type_input
+        value_desktop_input_any = request.FILES.get('value_desktop_input') #value_desktop_input
+        date_received_input_any = request.FILES.get('date_received_input') #date_received_input
+        date_inspected_input_any = request.FILES.get('date_inspected_input') #date_inspected_input
+        supplier_name_input_any = request.FILES.get('supplier_name_input') #supplier_name_input
+        status_desktop_input_any = request.FILES.get('status_desktop_input') #status_desktop_input
+        computer_name_input_any = request.FILES.get('computer_name_input') #computer_name_input {% endcomment %}
+          
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopGPU">Graphics Name</label>
+                    <input type="text" class="form-control" id="desktopGPU" name="desktop_gpu_input" value="{{ desktop_gpusize_input_any }}" placeholder="Enter GPU Name">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopGPUSIZE">Graphics Size</label>
+                    <input type="text" class="form-control" id="desktopGPUSIZE" name="desktop_gpusize_input" value="{{ desktop_gpusize_input_any }}" placeholder="Enter GPU Size">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopOS">Operating System</label>
+                    <input type="text" class="form-control" id="desktopOS" name="desktop_os_input" value="{{ desktop_os_input_any }}" placeholder="Enter Operating System">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopOffice">Office Version</label>
+                    <input type="text" class="form-control" id="desktopOffice" name="desktop_office_input" value="{{ desktop_office_input_any }}" placeholder="Enter Office Version">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopOSkeys">OS License Keys</label>
+                    <input type="text" class="form-control" id="desktopOSkeys" name="desktop_OSkeys_input" value="{{ desktop_OSkeys_input_any }}" placeholder="Enter OS Keys">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="desktopOfficekeys">Office License Keys</label>
+                    <input type="text" class="form-control" id="desktopOfficekeys" name="desktop_Officekeys_input" value="{{ desktop_Officekeys_input_any }}" placeholder="Enter Office Keys">
+                  </div>
+                </div>
+
+
+{% comment %} start here {% endcomment %}
+
+
+              <!-- Add here for the Details of the Monitor -->
+              <h5><i class="fas fa-desktop"> &nbsp;</i> Monitor Details</h5>
+                
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="monitorSerial">Serial Number</label>
+                      <input type="text" class="form-control" id="monitorSerial" name="monitor_serial_input" value="{{ monitor_serial_input_any }}" placeholder="Enter Monitor Serial Number">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="monitorBrand">Brand Name</label>
+                      <input type="text" class="form-control" id="monitorBrand" name="monitor_brand_input" value="{{ monitor_brand_input_any }}" placeholder="Enter Monitor Brand">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="monitorModel">Model</label>
+                      <input type="text" class="form-control" id="monitorModel" name="monitor_model_input" value="{{ monitor_model_input_any }}" placeholder="Enter Monitor Model">
+                    </div>
+                  </div>
+                </div>    
+
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="monitorSize">Screen Size</label>
+                      <input type="text" class="form-control" id="monitorSize" name="monitor_size_input" value="{{ monitor_size_input_any }}" placeholder="Enter Monitor Size">
+                    </div>
+                  </div>
+                </div>    
+            
+
+
+                &nbsp;
+                   <!-- Add here for the Details of the Keyboard  -->
+              <h5><i class="fas fa-keyboard"> &nbsp;</i>Keyboard Details</h5>
+                
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="keyboardSerial">Serial Number</label>
+                    <input type="text" class="form-control" id="keyboardSerial" name="keyboard_serial_input" value="{{ keyboard_serial_input_any }}" placeholder="Enter Keyboard Serial Number">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="keyboardBrand">Brand Name</label>
+                    <input type="text" class="form-control" id="keyboardBrand" name="keyboard_brand_input" value="{{ keyboard_brand_input_any }}" placeholder="Enter keyboard Brand">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="keyboardModel">Model</label>
+                    <input type="text" class="form-control" id="keyboardModel" name="keyboard_model_input" value="{{ keyboard_model_input_any }}" placeholder="Enter keyboard Model">
+                  </div>
+                </div>
+              </div>    
+              &nbsp;
+                 <!-- Add here for the Details of the Mouse  -->
+              <h5><i class="fas fa-mouse-pointer"> &nbsp;</i>Mouse Details</h5>
+                
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="mouseSerial">Serial Number</label>
+                    <input type="text" class="form-control" id="monitorSerial" name="mouse_serial_input" value="{{ mouse_serial_input_any }}" placeholder="Enter Mouse Serial Number">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="mouseBrand">Brand Name</label>
+                    <input type="text" class="form-control" id="mouseBrand" name="mouse_brand_input" value="{{ mouse_brand_input_any }}" placeholder="Enter Mouse Brand">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="mouseModel">Model</label>
+                    <input type="text" class="form-control" id="mouseModel" name="mouse_model_input" value="{{ mouse_model_input_any }}" placeholder="Enter Mouse Model">
+                  </div>
+                </div>
+              </div>    
+
+              &nbsp;
+              <!-- Add here for the Details of the UPS  -->
+
+              <h5><i class="fas fa-plug"> &nbsp;</i>UPS Details</h5>
+                
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="upsSerial">Serial Number</label>
+                    <input type="text" class="form-control" id="upsSerial" name="ups_serial_input" value="{{ ups_serial_input_any }}" placeholder="Enter UPS Serial Number">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="upsBrand">Brand Name</label>
+                    <input type="text" class="form-control" id="upsBrand" name="ups_brand_input" value="{{ ups_brand_input_any }}" placeholder="Enter UPS Brand">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="upsModel">Model</label>
+                    <input type="text" class="form-control" id="upsModel" name="ups_model_input" value="{{ ups_model_input_any }}" placeholder="Enter UPS Model">
+                  </div>
+                </div>
+              </div>    
+
+             &nbsp;
+              <!-- Add here for the Details of the enduser  -->
+
+              <h5><i class="fas fa-user-friends"> &nbsp;</i>User Details</h5>
+                
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="assetOwner">Asset Owner</label>
+                    <input type="text" class="form-control" id="assetOwner" name="asset_owner_input" value="{{ asset_owner_input_any }}" placeholder="User Owner">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="designationAsset">Designation</label>
+                    <input type="text" class="form-control" id="designationAsset" name="designation_Asset_input" value="{{ designation_Asset_input_any }}" placeholder="Enter Designation">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="section">Section</label>
+                    <input type="text" class="form-control" id="section" name="asset_section_input" value="{{ asset_section_input_any }}" placeholder="Enter Section">
+                  </div>
+                </div>
+              </div>    
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="endUser">End User</label>
+                    <input type="text" class="form-control" id="endUser" name="end_user_input" value="{{ end_user_input_any }}" placeholder="Enter End User">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="designationAsset">Designation</label>
+                    <input type="text" class="form-control" id="designationenduser" name="enduser_designation_input" value="{{ enduser_designation_input_any }}" placeholder="Enter Designation">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="section">Section</label>
+                    <input type="text" class="form-control" id="endusersection" name="enduser_section_input" value="{{ enduser_section_input_any }}" placeholder="Enter Section">
+                  </div>
+                </div>
+              </div>     
+
+
+              &nbsp;
+              <!-- Add here for the Details of the documents such us PAR and property number  -->
+
+              <h5><i class="fas fa-money-check"> &nbsp;</i>Documents</h5>
+                
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="parnumber">PAR Number</label>
+                    <input type="text" class="form-control" id="parnumber" name="par_number_input" value="{{ par_number_input_any }}" placeholder="Enter PAR Number">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="propertynumber">Property Number</label>
+                    <input type="text" class="form-control" id="propertynumber" name="property_number_input" value="{{ property_number_input_any }}" placeholder="Enter Property Number">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="Acquisition">Acquisition Type</label>
+                    <input type="text" class="form-control" id="acquisition" name="acquisition_type_input" value="{{ acquisition_type_input_any }}" placeholder="Enter Acquisition Type">
+                  </div>
+                </div>
+              </div>    
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="value">Package Value</label>
+                    <input type="text" class="form-control" id="value" name="value_desktop_input" value="{{ value_desktop_input_any }}" placeholder="Enter Package Value">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="dateReceived">Date Received</label>
+                    <input type="text" class="form-control" id="dateReceived" name="date_received_input" value="{{ date_received_input_any }}" placeholder="Date Received of the Unit">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="dateInspected">Date Inspected</label>
+                    <input type="text" class="form-control" id="dateInspected" name="date_inspected_input" value="{{ date_inspected_input_any }}" placeholder="Date Inspected of the Unit">
+                  </div>
+                </div>
+              </div>    
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="supplier">Supplier</label>
+                    <input type="text" class="form-control" id="supplier" name="supplier_name_input" value="{{ supplier_name_input_any }}" placeholder="Enter Supplier Name">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="status">Status</label>
+                    <input type="text" class="form-control" id="status" name="status_desktop_input" value="{{ status_desktop_input_any }}" placeholder="Status">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="computername">Computer Name</label>
+                    <input type="text" class="form-control" id="computername" name="computer_name_input" value="{{ computer_name_input_any }}" placeholder="Enter Computer Name">
+                  </div>
+                </div>
+              </div>  
+
+
               {% comment %} upload file form {% endcomment %}
               <div class="mb-3">
                 <label for="image" class="form-label">Default file input example</label>
                 <input class="form-control" type="file" id="desktopImage" name="desktop_image_input" value="{{ image }}">
               </div>
-
             </div>
 
             <!-- Similar blocks for Laptop, UPS, etc. -->

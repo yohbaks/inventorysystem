@@ -6911,3 +6911,8 @@ body {
     font-size: 18px !important; } }
 
 /*# sourceMappingURL=kaiadmin.css.map */
+
+.table-header-blue th {
+  background-color: #007bff; /* Bootstrap blue color */
+  color: white; /* Set text color to white for better visibility */
+}
