@@ -92,7 +92,7 @@
         <div class="card-title">Desktop Details</div>
       </div>
       <div class="card-body">
-        <table class="table table-head-bg-success">
+        <table class="table table-head-bg-success table-bordered table-hover">
           <thead>
             <tr>
               <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
@@ -102,32 +102,32 @@
           </thead>
           <tbody>
             <tr>
-              <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
-             <td><h6> {{ desktops.desktop_SerialNo }}</h6></td>
+              <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+             <td> {{ desktops.desktop_SerialNo }}</td>
 
             </tr>
             <tr>
-              <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+              <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
               <td>{{ desktops.desktop_BrandName }}</td>
 
             </tr>
             <tr>
-              <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+              <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
               <td>{{ desktops.desktop_Model }}</td>
 
             </tr>
             <tr>
-              <td class="col-sm-6 col-md-3"><h5>Processor:</h5></td>
+              <td class="col-sm-6 col-md-3"><strong>Processor:</strong></td>
               <td>{{ desktops.desktop_Processor}}</td>
 
             </tr>
             <tr>
-              <td class="col-sm-6 col-md-3"><h5>Memory:</h5></td>
+              <td class="col-sm-6 col-md-3"><strong>Memory:</strong></td>
               <td>{{ desktops.desktop_Memory }}</td>
 
             </tr>
             <tr>
-              <td class="col-sm-6 col-md-3"><h5>Drive:</h5></td>
+              <td class="col-sm-6 col-md-3"><strong>Drive:</strong></td>
               <td>{{ desktops.desktop_Drive }}</td>
 
             </tr>
@@ -830,7 +830,6 @@
   }
   
 </script>
-
 
 
 {% endblock %}
