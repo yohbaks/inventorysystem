@@ -222,6 +222,9 @@
         </tbody>
       </table>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+      <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#disposeModal_keyboard">
+        <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Disposed Keyboard
+      </button>
     </div>
 
   </div>
@@ -732,7 +735,7 @@
 
     </div>
 
-    <!-- Modal for Disposal Confirmation -->
+    <!-- Modal for Disposal Confirmation ALL DESKTOP-->
     <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -746,10 +749,32 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-primary" id="saveDisposeBtn" data-desktop-id="{{ desktops.id }}">Yes, Dispose</button>
+            
+
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Modal for Disposal Confirmation KEYBOARD-->
+    <div class="modal fade" id="disposeModal_keyboard" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="disposeModalLabel">Confirm Disposal</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to dispose of this keyboard?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveDisposeKeyboardBtn" data-desktop-id="{{ desktop_Keyboard_SN }}">Yes, Dispose</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -831,5 +856,31 @@
   
 </script>
 
+<script>
+// Script for handling keyboard disposal
+document.getElementById('saveDisposeKeyboardBtn').addEventListener('click', function () {
+  const keyboardId = this.getAttribute('data-keyboard-id');
+  fetch(`/dispose_keyboard/${keyboardId}/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken') // Make sure CSRF token is passed correctly
+      }
+  }).then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          alert('Keyboard has been marked as disposed.');
+          window.location.href = "/disposed_keyboard_list/";  // Redirect to the disposed keyboard list
+      } else {
+          alert('Error disposing keyboard.');
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert('Error disposing keyboard.');
+  });
+});
 
+
+</script>
 {% endblock %}

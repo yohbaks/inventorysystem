@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
+from inventory.models import Desktop_Package, KeyboardDetails, DisposedKeyboard, MouseDetails
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -240,91 +241,6 @@ def desktop_detailed_view(request, id):
 
 
 
-
-
-
-# def desktop_detailed_view(request, id):
-#     # Get the specific desktop package by its ID
-#     desktop = get_object_or_404(DESKTOPPACKAGE, id=id)
-
-#     if request.method == 'POST':
-#         # Update the data if the form is submitted (editing functionality)
-#         desktop.desktop_SerialNo = request.POST.get('serial_input', desktop.desktop_SerialNo)
-#         desktop.desktop_BrandName = request.POST.get('brand_input', desktop.desktop_BrandName)
-#         desktop.desktop_Model = request.POST.get('model_input', desktop.desktop_Model)
-#         desktop.desktop_Processor = request.POST.get('processor_input', desktop.desktop_Processor)
-#         desktop.desktop_Memory = request.POST.get('memory_input', desktop.desktop_Memory)
-#         desktop.desktop_Drive = request.POST.get('drive_input', desktop.desktop_Drive)
-#         desktop.desktop_Graphics = request.POST.get('graphics_input', desktop.desktop_Graphics)
-#         desktop.desktop_Graphics_Size = request.POST.get('graphics_size_input', desktop.desktop_Graphics_Size)
-#         desktop.desktop_OS = request.POST.get('os_input', desktop.desktop_OS)
-#         desktop.desktop_Office = request.POST.get('office_input', desktop.desktop_Office)
-#         desktop.desktop_OS_keys = request.POST.get('os_keys_input', desktop.desktop_OS_keys)
-#         desktop.desktop_Office_keys = request.POST.get('office_keys_input', desktop.desktop_Office_keys)
-
-#         # Monitor fields
-#         desktop.desktop_Monitor_SN = request.POST.get('monitor_sn_input', desktop.desktop_Monitor_SN)
-#         desktop.desktop_Monitor_Brand = request.POST.get('monitor_brand_input', desktop.desktop_Monitor_Brand)
-#         desktop.desktop_Monitor_Model = request.POST.get('monitor_model_input', desktop.desktop_Monitor_Model)
-#         desktop.desktop_Monitor_Size = request.POST.get('monitor_size_input', desktop.desktop_Monitor_Size)
-
-#         # Keyboard fields
-#         desktop.desktop_Keyboard_SN = request.POST.get('keyboard_sn_input', desktop.desktop_Keyboard_SN)
-#         desktop.desktop_keyboard_Brand = request.POST.get('keyboard_brand_input', desktop.desktop_keyboard_Brand)
-#         desktop.desktop_keyboard_Model = request.POST.get('keyboard_model_input', desktop.desktop_keyboard_Model)
-
-#         # Mouse fields
-#         desktop.desktop_Mouse_SN = request.POST.get('mouse_sn_input', desktop.desktop_Mouse_SN)
-#         desktop.desktop_Mouse_Brand = request.POST.get('mouse_brand_input', desktop.desktop_Mouse_Brand)
-#         desktop.desktop_Mouse_Model = request.POST.get('mouse_model_input', desktop.desktop_Mouse_Model)
-
-#         # UPS fields
-#         desktop.desktop_UPS_SN = request.POST.get('ups_sn_input', desktop.desktop_UPS_SN)
-#         desktop.desktop_UPS_Brand = request.POST.get('ups_brand_input', desktop.desktop_UPS_Brand)
-#         desktop.desktop_UPS_Model = request.POST.get('ups_model_input', desktop.desktop_UPS_Model)
-
-#         # User details
-#         desktop.desktop_Asset_owner = request.POST.get('asset_owner_input', desktop.desktop_Asset_owner)
-#         desktop.desktop_Asset_designation = request.POST.get('asset_designation_input', desktop.desktop_Asset_designation)
-#         desktop.desktop_Asset_section = request.POST.get('asset_section_input', desktop.desktop_Asset_section)
-#         desktop.desktop_Enduser = request.POST.get('enduser_input', desktop.desktop_Enduser)
-#         desktop.desktop_Enduser_designation = request.POST.get('enduser_designation_input', desktop.desktop_Enduser_designation)
-#         desktop.desktop_Enduser_section = request.POST.get('enduser_section_input', desktop.desktop_Enduser_section)
-
-#         # Documents
-
-#         desktop.desktop_PAR = request.POST.get('par_number_input', '') #par_number_input
-#         desktop.desktop_Propertyno = request.POST.get('property_number_input', '') #property_number_input
-#         desktop.desktop_Acquisition_Type = request.POST.get('acquisition_type_input', '') #acquisition_type_input
-#         desktop.desktop_Value = request.POST.get('value_desktop_input', '') #value_desktop_input
-#         desktop.desktop_Datereceived = request.POST.get('date_received_input', '') #date_received_input
-#         desktop.desktop_Dateinspected= request.POST.get('date_inspected_input', '') #date_inspected_input
-#         desktop.desktop_Supplier = request.POST.get('supplier_name_input', '') #supplier_name_input
-#         desktop.desktop_Status = request.POST.get('status_desktop_input', '') #status_desktop_input
-#         desktop.desktop_Computer_name = request.POST.get('computer_name_input', '')
-
-#         # Disposal status
-#         desktop.is_disposed = request.POST.get('is_disposed_input', desktop.is_disposed)
-#         desktop.disposal_date = request.POST.get('disposal_date_input', desktop.disposal_date)
-
-#         # Handle image file if uploaded
-#         if 'desktop_image_input' in request.FILES:
-#             desktop.desktop_Image = request.FILES['desktop_image_input']
-
-#         # Validate and save changes
-#         if desktop.desktop_SerialNo and desktop.desktop_BrandName and desktop.desktop_Model:
-#             desktop.save()
-#             messages.success(request, 'Desktop details updated successfully!')
-#             return redirect('desktop_detailed_view', id=desktop.id)
-#         else:
-#             messages.error(request, 'Please fill in all required fields.')
-
-#     # Render the template with the current desktop details for editing
-#     return render(request, 'desktop_detailed_view.html', {'desktops': desktop})
-
-
-############################
-
 #dispose function
 
 def dispose_desktop(request, desktop_id):
@@ -341,4 +257,42 @@ def disposed_desktop_list(request):
     # Assuming there's an `is_disposed` field to filter disposed desktops
     disposed_desktops = DESKTOPPACKAGE.objects.filter(is_disposed=True)
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
+
+
+################# (KEYBOARD)
+
+def keyboard_details(request):
+   # Get all equipment
+    keyboard_details = KeyboardDetails.objects.all()
+    mouse_details = MouseDetails.objects.all()
+    # Render the list of equipment and the count to the template
+    return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details, 
+                                                     'mouse_details': mouse_details})
+    
+
+
+
+def dispose_keyboard(request, keyboard_id):
+    if request.method == 'POST':
+        # Get the keyboard object using its ID
+        keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+        
+        # Create a new DisposedKeyboard entry
+        disposed_keyboard = DisposedKeyboard(
+            keyboard=keyboard,  # Link the disposed keyboard to the active keyboard
+            disposal_date=timezone.now()  # Set the disposal date to now
+        )
+        disposed_keyboard.save()  # Save the disposed keyboard record
+        
+        # Optionally, remove the active keyboard entry
+        keyboard.delete()  # Delete the active keyboard from the KeyboardDetails table
+        
+        return JsonResponse({'success': True, 'message': 'Keyboard disposed successfully.'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+# END ################ (KEYBOARD END)
+
+################# (MOUSE)
+
 
