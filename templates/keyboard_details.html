@@ -41,9 +41,7 @@
                     <th>Serial No.</th>
                     <th>Brand Name</th>
                     <th>Model Name</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Hard Drive</th>
+                    <th>Dispose</th>
                     <th>Link</th>
                   </tr>
                 </thead>
@@ -53,38 +51,31 @@
                     <th>Serial Number</th>
                     <th>Brand Name</th>
                     <th>Model Name</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Delete Here</th>
+                    <th>Dispose</th>
                     <th>Link</th>
                   </tr>
                 </tfoot>
                 <tbody>
                   {% for keyboard in keyboard_details %}
+                  {% if not keyboard.is_disposed %}
                   <tr>
                     <td>{{ keyboard.desktop_package }}</td>
                     <td>{{ keyboard.keyboard_sn }}</td>
                     <td>{{ keyboard.brand }}</td>
                     <td>{{ keyboard.model }}</td>
-                    <td>{{ keyboard.processor }}</td>
-                    
                     <td>
-                      <form method="POST" action="{% url 'keyboard_disposed' keyboard.id %}" class="dispose-keyboard-form">
+                      <form method="POST" action="{% url 'keyboard_disposed' keyboard.id %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger btn-sm">Dispose</button>
                       </form>
-                    </td>
-                    
                     </td>
                     <td>
                       <a href="{% url 'desktop_detailed_view' keyboard.desktop_package.id %}">
                         <span class="sub-item">View Details</span>
                       </a>
                     </td>
-                    <td>
-
-                    </td>
                   </tr>
+                  {% endif %}
                   {% endfor %}
                 </tbody>
               </table>
@@ -94,7 +85,7 @@
       </div>
     </div>
 
-    <!-- Second Container (Identical to the First) -->
+    <!-- Second Container (Identical to the First for Mouse Details) -->
     <div class="row">
       <div class="col-md-12">
         <div class="card">
@@ -132,9 +123,6 @@
                     <th>Serial No.</th>
                     <th>Brand Name</th>
                     <th>Model Name</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Hard Drive</th>
                     <th>Link</th>
                   </tr>
                 </thead>
@@ -144,9 +132,6 @@
                     <th>Serial Number</th>
                     <th>Brand Name</th>
                     <th>Model Name</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Hard Drive</th>
                     <th>Link</th>
                   </tr>
                 </tfoot>
@@ -157,9 +142,6 @@
                     <td>{{ mouse.mouse_sn }}</td>
                     <td>{{ mouse.brand }}</td>
                     <td>{{ mouse.model }}</td>
-                    <td>{{ keyboard.processor }}</td>
-                    <td>{{ keyboard.memory }}</td>
-                    <td>{{ keyboard.hard_drive }}</td>
                     <td>
                       <a href="#">
                         <span class="sub-item">View Details</span>
@@ -174,38 +156,6 @@
         </div>
       </div>
     </div>
-  </div> 
+  </div>
 </div>
-
-
-<script>
-
-  document.querySelectorAll('.dispose-keyboard-btn').forEach(button => {
-    button.addEventListener('click', function(event) {
-        event.preventDefault();
-        const keyboardId = this.dataset.keyboardId;
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-        fetch(`/keyboard_disposed/${keyboardId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // CSRF token is required for POST requests
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload(); // Reload the page to update the list
-            } else {
-                alert(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    });
-});
-</script>
 {% endblock %}

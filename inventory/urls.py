@@ -21,7 +21,11 @@ urlpatterns = [
     
     #keyboard
     path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
-    path('keyboard_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),
+    path('keyboard_details/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Add keyboard ID for disposal
+
+    # Keyboard disposal paths
+    path('disposed_keyboards/', views.disposed_keyboards, name='disposed_keyboards'),
+
     
 
     # #mouse

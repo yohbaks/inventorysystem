@@ -273,30 +273,29 @@ def keyboard_details(request):
 
 def keyboard_disposed(request, keyboard_id):
     if request.method == 'POST':
-        try:
-            # Get the keyboard object using its ID
-            keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+        keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+        
+        # Set the keyboard as disposed and save
+        keyboard.is_disposed = True
+        keyboard.save()
+        
+        # Create a new DisposedKeyboard entry
+        disposed_keyboard = DisposedKeyboard(
+            keyboard=keyboard,
+            disposal_date=timezone.now()
+        )
+        disposed_keyboard.save()
 
-            # Mark the keyboard as disposed
-            keyboard.is_disposed = True
-            keyboard.save()  # Save the changes
-
-            # Create a new DisposedKeyboard entry for record-keeping purposes
-            disposed_keyboard = DisposedKeyboard(
-                keyboard=keyboard,
-                disposal_date=timezone.now()
-            )
-            disposed_keyboard.save()
-
-            return JsonResponse({'success': True, 'message': 'Keyboard marked as disposed successfully.'})
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        return JsonResponse({'success': True, 'message': 'Keyboard disposed successfully.'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 
-
+def disposed_keyboards(request):
+    # Get all disposed keyboards
+    disposed_keyboards = DisposedKeyboard.objects.all()
+    # Render the list of disposed keyboards to the template
+    return render(request, 'disposed_keyboards.html', {'disposed_keyboards': disposed_keyboards})
 
 
 # END ################ (KEYBOARD END)

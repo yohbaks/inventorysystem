@@ -3,23 +3,16 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
-    <!-- First Container -->
     <div class="row">
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
             <div class="card-head-row">
-              <h4 class="card-title">Keyboard</h4>
+              <h4 class="card-title">Disposed Keyboards</h4>
               <div class="card-tools">
-                <a href="#" class="btn btn-label-danger btn-round btn-sm me-2">
-                  <span class="btn-label">
-                    <i class="fa fa-pencil"></i>
-                  </span>
-                  Return to Supply
-                </a>
                 <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
                   <span class="btn-label">
-                    <i class="fa fa-pencil"></i>
+                    <i class="fa fa-download"></i>
                   </span>
                   Export
                 </a>
@@ -34,47 +27,37 @@
           </div>
           <div class="card-body">
             <div class="table-responsive">
-              <table id="multi-filter-select" class="display table table-striped table-hover">
+              <table id="disposed-keyboards-table" class="display table table-striped table-hover">
                 <thead>
                   <tr>
                     <th>IT Equipment</th>
                     <th>Serial No.</th>
                     <th>Brand Name</th>
                     <th>Model Name</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Hard Drive</th>
+                    <th>Disposal Date</th>
                     <th>Link</th>
                   </tr>
                 </thead>
                 <tfoot>
                   <tr>
-                    <th>Package Number</th>
+                    <th>IT Equipment</th>
                     <th>Serial Number</th>
                     <th>Brand Name</th>
                     <th>Model Name</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Delete Here</th>
+                    <th>Disposal Date</th>
                     <th>Link</th>
                   </tr>
                 </tfoot>
                 <tbody>
-                  {% for keyboard in keyboard_disposed %}
+                  {% for disposed_keyboard in disposed_keyboards %}
                   <tr>
-                    <td>{{ keyboard.desktop_package }}</td>
-                    <td>{{ keyboard.keyboard_sn }}</td>
-                    <td>{{ keyboard.brand }}</td>
-                    <td>{{ keyboard.model }}</td>
-                    <td>{{ keyboard.processor }}</td>
-                    <td>{{ keyboard.memory }}</td>
+                    <td>{{ disposed_keyboard.keyboard.desktop_package }}</td>
+                    <td>{{ disposed_keyboard.keyboard.keyboard_sn }}</td>
+                    <td>{{ disposed_keyboard.keyboard.brand }}</td>
+                    <td>{{ disposed_keyboard.keyboard.model }}</td>
+                    <td>{{ disposed_keyboard.disposal_date }}</td>
                     <td>
-                      <a href="{% url 'keyboard_disposed' keyboard.id %}" class="btn btn-warning">
-                        <span class="sub-item">Dispose</span>
-                      </a>
-                    </td>
-                    <td>
-                      <a href="{% url 'desktop_detailed_view' keyboard.desktop_package.id %}">
+                      <a href="{% url 'desktop_detailed_view' disposed_keyboard.keyboard.desktop_package.id %}">
                         <span class="sub-item">View Details</span>
                       </a>
                     </td>
@@ -87,9 +70,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Second Container (Identical to the First) -->
-    
   </div> 
 </div>
 {% endblock %}
