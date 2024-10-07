@@ -259,7 +259,7 @@ def disposed_desktop_list(request):
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
 
 
-################# (KEYBOARD)
+################# (KEYBOAR AND MOUSE)
 
 def keyboard_details(request):
    # Get all equipment
@@ -271,28 +271,37 @@ def keyboard_details(request):
     
 
 
-
-def dispose_keyboard(request, keyboard_id):
+def keyboard_disposed(request, keyboard_id):
     if request.method == 'POST':
-        # Get the keyboard object using its ID
-        keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
-        
-        # Create a new DisposedKeyboard entry
-        disposed_keyboard = DisposedKeyboard(
-            keyboard=keyboard,  # Link the disposed keyboard to the active keyboard
-            disposal_date=timezone.now()  # Set the disposal date to now
-        )
-        disposed_keyboard.save()  # Save the disposed keyboard record
-        
-        # Optionally, remove the active keyboard entry
-        keyboard.delete()  # Delete the active keyboard from the KeyboardDetails table
-        
-        return JsonResponse({'success': True, 'message': 'Keyboard disposed successfully.'})
-    
+        try:
+            # Get the keyboard object using its ID
+            keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+
+            # Mark the keyboard as disposed
+            keyboard.is_disposed = True
+            keyboard.save()  # Save the changes
+
+            # Create a new DisposedKeyboard entry for record-keeping purposes
+            disposed_keyboard = DisposedKeyboard(
+                keyboard=keyboard,
+                disposal_date=timezone.now()
+            )
+            disposed_keyboard.save()
+
+            return JsonResponse({'success': True, 'message': 'Keyboard marked as disposed successfully.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
+
+
+
 
 # END ################ (KEYBOARD END)
 
-################# (MOUSE)
 
+
+############### (KEYBOARD AND MOUSE)
 

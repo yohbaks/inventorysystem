@@ -21,7 +21,8 @@ urlpatterns = [
     
     #keyboard
     path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
-    path('dispose_keyboard/<int:keyboard_id>/', views.dispose_keyboard, name='dispose_keyboard'),
+    path('keyboard_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),
+    
 
     # #mouse
     # path('keyboard_details/', views.mouse_details, name='mouse_details'),

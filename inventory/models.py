@@ -127,6 +127,7 @@ class KeyboardDetails(models.Model):
     keyboard_sn = models.CharField(max_length=255)
     brand = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
+    is_disposed = models.BooleanField(default=False)  # To indicate if the keyboard is disposed
 
     def __str__(self):
         return f"{self.brand} {self.model} ({self.keyboard_sn})"
