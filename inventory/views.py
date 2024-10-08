@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, KeyboardDetails, DisposedKeyboard, MouseDetails
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -259,6 +259,17 @@ def disposed_desktop_list(request):
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
 
 
+
+def desktop_details(request):
+    # Get all equipment
+    desktop_details = DesktopDetails.objects.all()
+    return render(request, 'desktop_details.html', {'desktop_details': desktop_details})
+
+
+
+
+
+
 ################# (KEYBOAR AND MOUSE)
 
 def keyboard_details(request):
@@ -268,6 +279,12 @@ def keyboard_details(request):
     # Render the list of equipment and the count to the template
     return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details, 
                                                      'mouse_details': mouse_details})
+
+def keyboard_detailed_view(request, keyboard_id):
+    # Get the specific keyboard using its ID
+    keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+    # Render the detailed view of the keyboard
+    return render(request, 'keyboard_detailed_view.html', {'keyboard': keyboard})
     
 
 

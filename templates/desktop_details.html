@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-head-row">
+              <h4 class="card-title">Desktop Details</h4>
+              <div class="card-tools">
+                <a href="#" class="btn btn-label-danger btn-round btn-sm me-2">
+                  <span class="btn-label">
+                    <i class="fa fa-pencil"></i>
+                  </span>
+                  Return to Supply
+                </a>
+                <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+                  <span class="btn-label">
+                    <i class="fa fa-pencil"></i>
+                  </span>
+                  Export
+                </a>
+                <a href="#" class="btn btn-label-info btn-round btn-sm">
+                  <span class="btn-label">
+                    <i class="fa fa-print"></i>
+                  </span>
+                  Print
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="multi-filter-select" class="display table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Desktop Package</th>
+                    <th>Serial No.</th>
+                    <th>Brand Name</th>
+                    <th>Model</th>
+                    <th>Processor</th>
+                    <th>Memory</th>
+                    <th>Drive</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Desktop Package</th>
+                    <th>Serial No.</th>
+                    <th>Brand Name</th>
+                    <th>Model</th>
+                    <th>Processor</th>
+                    <th>Memory</th>
+                    <th>Drive</th>
+                    <th>Actions</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  {% for desktopx in desktop_details %}
+                  <tr>
+                    <td>{{ desktopx.desktop_package }}</td>
+                    <td>{{ desktopx.serial_no }}</td>
+                    <td>{{ desktopx.brand_name }}</td>
+                    <td>{{ desktopx.model }}</td>
+                    <td>{{ desktopx.processor }}</td>
+                    <td>{{ desktopx.memory }}</td>
+                    <td>{{ desktopx.drive }}</td>
+                    <td>
+                      <a href="{% url 'desktop_detailed_view' desktopx.id %}" class="btn btn-primary btn-sm">
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

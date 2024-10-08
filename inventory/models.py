@@ -88,20 +88,24 @@ class DESKTOPPACKAGE(models.Model):
     def __str__(self):
         return 'IT EQUPMENT: ' + self.name 
 
-
+#################
 class Desktop_Package(models.Model):
     computer_name = models.CharField(max_length=255, unique=True)
+    asset_owner = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)
     disposal_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
 
 class DesktopDetails(models.Model):
     desktop_package = models.ForeignKey(Desktop_Package, related_name='desktop_details', on_delete=models.CASCADE)
     serial_no = models.CharField(max_length=255)
     brand_name = models.CharField(max_length=255)
-    model = models.CharField(max_length=255)
-    computer_name = models.CharField(max_length=255)
+    model = models.CharField(max_length=255, null=True)
+    processor = models.CharField(max_length=33, null=True)
+    memory = models.CharField(max_length=100, null=True)
+    drive = models.CharField(max_length=332, null=True)
 
     def __str__(self):
         return f"{self.brand_name} {self.model} ({self.serial_no})"

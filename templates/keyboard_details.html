@@ -33,7 +33,7 @@
             </div>
           </div>
           <div class="card-body">
-            <div class="table-responsive">
+            <div class="table">
               <table id="multi-filter-select" class="display table table-striped table-hover">
                 <thead>
                   <tr>
@@ -70,7 +70,7 @@
                       </form>
                     </td>
                     <td>
-                      <a href="{% url 'desktop_detailed_view' keyboard.desktop_package.id %}">
+                      <a href="{% url 'keyboard_detailed_view' keyboard.id %}">
                         <span class="sub-item">View Details</span>
                       </a>
                     </td>
