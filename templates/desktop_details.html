@@ -37,6 +37,7 @@
                 <thead>
                   <tr>
                     <th>Desktop Package</th>
+                    <th>Computer Name</th>
                     <th>Serial No.</th>
                     <th>Brand Name</th>
                     <th>Model</th>
@@ -49,6 +50,7 @@
                 <tfoot>
                   <tr>
                     <th>Desktop Package</th>
+                    <th>Computer Name</th>
                     <th>Serial No.</th>
                     <th>Brand Name</th>
                     <th>Model</th>
@@ -59,8 +61,9 @@
                   </tr>
                 </tfoot>
                 <tbody>
-                  {% for desktopx in desktop_details %}
-                  <tr>
+                  
+                  <tr>{% for desktopx in desktop_details %}
+                    <td>{{ desktopx.computer_name }}</td>
                     <td>{{ desktopx.desktop_package }}</td>
                     <td>{{ desktopx.serial_no }}</td>
                     <td>{{ desktopx.brand_name }}</td>
@@ -69,7 +72,7 @@
                     <td>{{ desktopx.memory }}</td>
                     <td>{{ desktopx.drive }}</td>
                     <td>
-                      <a href="{% url 'desktop_detailed_view' desktopx.id %}" class="btn btn-primary btn-sm">
+                      <a href="{% url 'desktop_details_view' desktopx.id %}" class="btn btn-primary btn-sm">
                         View Details
                       </a>
                     </td>

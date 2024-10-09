@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Add Desktop Package with Details</div>
+          </div>
+          <div class="card-body">
+
+            <!-- Display Django messages -->
+            {% if messages %}
+              <div>
+                {% for message in messages %}
+                  <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <form method="post" action="">
+              {% csrf_token %}
+
+              <!-- Desktop Package Fields -->
+              <h4>Desktop Package Information</h4>
+              <div class="form-group">
+                <label for="computer_name">Computer Name:</label>
+                <input type="text" name="computer_name" id="computer_name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="asset_owner">Asset Owner:</label>
+                <input type="text" name="asset_owner" id="asset_owner" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="is_disposed">Is Disposed:</label>
+                <select name="is_disposed" id="is_disposed" class="form-control">
+                  <option value="False">No</option>
+                  <option value="True">Yes</option>
+                </select>
+              </div>
+
+              <!-- Desktop Details Fields -->
+              <h4>Desktop Details Information</h4>
+              <div class="form-group">
+                <label for="desktop_serial_no">Desktop Serial Number:</label>
+                <input type="text" name="desktop_serial_no" id="desktop_serial_no" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="desktop_brand_name">Desktop Brand Name:</label>
+                <input type="text" name="desktop_brand_name" id="desktop_brand_name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="desktop_model">Desktop Model:</label>
+                <input type="text" name="desktop_model" id="desktop_model" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="desktop_processor">Processor:</label>
+                <input type="text" name="desktop_processor" id="desktop_processor" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="desktop_memory">Memory:</label>
+                <input type="text" name="desktop_memory" id="desktop_memory" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="desktop_drive">Drive:</label>
+                <input type="text" name="desktop_drive" id="desktop_drive" class="form-control">
+              </div>
+
+              <!-- Keyboard Details Fields -->
+              <h4>Keyboard Details Information</h4>
+              <div class="form-group">
+                <label for="keyboard_sn">Keyboard Serial Number:</label>
+                <input type="text" name="keyboard_sn" id="keyboard_sn" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="keyboard_brand">Keyboard Brand Name:</label>
+                <input type="text" name="keyboard_brand" id="keyboard_brand" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="keyboard_model">Keyboard Model:</label>
+                <input type="text" name="keyboard_model" id="keyboard_model" class="form-control">
+              </div>
+
+              <button type="submit" class="btn btn-primary mt-3">Add Desktop Package with Details</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

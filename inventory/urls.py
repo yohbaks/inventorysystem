@@ -20,13 +20,19 @@ urlpatterns = [
     path('desktop_all_detailed_view/', views.all_detailed_view, name='desktop_all_detailed_view'),
 
     #desktop_details
-    path('desktop_details/', views.desktop_details, name='desktop_details'),  # URL pattern for desktop details
+    path('desktop_details/', views.desktop_package, name='desktop_details'),  # URL pattern for desktop details
+    path('desktop_details_view/<int:desktop_id>/', views.desktop_details_view, name='desktop_details_view'),  # URL pattern for desktop details view
     
     #keyboard
     path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
     path('keyboard_details/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Add keyboard ID for disposal
     # Keyboard detailed view
     path('keyboard_detailed_view/<int:keyboard_id>/', views.keyboard_detailed_view, name='keyboard_detailed_view'),
+
+    # Add this to your urlpatterns
+    
+    path('add_desktop_package_with_details/', views.add_desktop_package_with_details, name='add_desktop_package_with_details'),
+
 
 
     # Keyboard disposal paths

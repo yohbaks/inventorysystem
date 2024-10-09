@@ -258,14 +258,26 @@ def disposed_desktop_list(request):
     disposed_desktops = DESKTOPPACKAGE.objects.filter(is_disposed=True)
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
 
+############################
 
-
-def desktop_details(request):
+def desktop_package(request):
     # Get all equipment
+    desktop_package = Desktop_Package.objects.all()
     desktop_details = DesktopDetails.objects.all()
-    return render(request, 'desktop_details.html', {'desktop_details': desktop_details})
+    return render(request, 'desktop_details.html', {'desktop_package': desktop_package, 'desktop_details': desktop_details})
 
 
+def desktop_details_view(request, desktop_id):
+    # Get the specific desktop by ID
+    desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
+    
+    # Get all keyboards related to the desktop package
+    keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_details.desktop_package)
+
+    return render(request, 'desktop_details_view.html', {
+        'desktop_detailsx': desktop_details,
+        'keyboard_detailse': keyboard_detailsx.first()  # Assuming you only need one related keyboard detail
+    })
 
 
 
@@ -318,6 +330,63 @@ def disposed_keyboards(request):
 # END ################ (KEYBOARD END)
 
 
+# adding Desktop packages
+def add_desktop_package_with_details(request):
+    if request.method == 'POST':
+        # Gather Desktop Package Information
+        computer_name = request.POST.get('computer_name')
+        asset_owner = request.POST.get('asset_owner')
+        is_disposed = request.POST.get('is_disposed', 'False') == 'True'
+
+        # Prevent data duplication - check if a package with the same computer_name exists
+        if DesktopDetails.objects.filter(computer_name=computer_name).exists():
+            return JsonResponse({'success': False, 'error': 'Desktop Package with this computer name already exists.'}, status=400)
+
+        # Create Desktop Package
+        desktop_package = Desktop_Package(
+            is_disposed=is_disposed,
+        )
+        desktop_package.save() #savefirst the the package as a memory to have some id or pk, before adding the whole
+
+        # Create Desktop Details associated with this Desktop Package
+        desktop_serial_no = request.POST.get('desktop_serial_no')
+        desktop_brand_name = request.POST.get('desktop_brand_name')
+        desktop_model = request.POST.get('desktop_model')
+        desktop_processor = request.POST.get('desktop_processor')
+        desktop_memory = request.POST.get('desktop_memory')
+        desktop_drive = request.POST.get('desktop_drive')
+
+        desktop_details = DesktopDetails(
+            desktop_package=desktop_package,
+            serial_no=desktop_serial_no,
+            computer_name=computer_name,
+            brand_name=desktop_brand_name,
+            model=desktop_model,
+            processor=desktop_processor,
+            memory=desktop_memory,
+            drive=desktop_drive,
+            asset_owner=asset_owner,
+        )
+        desktop_details.save()
+
+        # Create Keyboard Details associated with this Desktop Package
+        keyboard_sn = request.POST.get('keyboard_sn')
+        keyboard_brand = request.POST.get('keyboard_brand')
+        keyboard_model = request.POST.get('keyboard_model')
+
+        if keyboard_sn and keyboard_brand and keyboard_model:
+            keyboard_details = KeyboardDetails(
+                desktop_package=desktop_package,
+                keyboard_sn=keyboard_sn,
+                brand=keyboard_brand,
+                model=keyboard_model,
+            )
+            keyboard_details.save()
+
+        # Redirect to prevent form resubmission
+        return redirect('success_add_page')
+
+    return render(request, 'add_desktop_package_with_details.html')
 
 ############### (KEYBOARD AND MOUSE)
 
