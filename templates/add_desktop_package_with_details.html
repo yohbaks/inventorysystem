@@ -1,96 +1,193 @@
+<!-- templates/add_equipment.html -->
 {% extends 'base.html' %}
+<style>
 
+</style>
 {% block content %}
+
+<!-- Forms begins here -->
 <div class="container">
   <div class="page-inner">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Add Desktop Package with Details</div>
-          </div>
-          <div class="card-body">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Forms</h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Forms</a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Basic Form</a></li>
+      </ul>
+    </div>
 
-            <!-- Display Django messages -->
-            {% if messages %}
-              <div>
-                {% for message in messages %}
-                  <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                    {{ message }}
-                  </div>
-                {% endfor %}
-              </div>
-            {% endif %}
+    <!-- Success and Error Messages -->
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      <strong>{{ message.tags|title }}:</strong> {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
 
-            <form method="post" action="">
-              {% csrf_token %}
-
-              <!-- Desktop Package Fields -->
-              <h4>Desktop Package Information</h4>
-              <div class="form-group">
-                <label for="computer_name">Computer Name:</label>
-                <input type="text" name="computer_name" id="computer_name" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="asset_owner">Asset Owner:</label>
-                <input type="text" name="asset_owner" id="asset_owner" class="form-control">
-              </div>
-              <div class="form-group">
-                <label for="is_disposed">Is Disposed:</label>
-                <select name="is_disposed" id="is_disposed" class="form-control">
-                  <option value="False">No</option>
-                  <option value="True">Yes</option>
-                </select>
-              </div>
-
-              <!-- Desktop Details Fields -->
-              <h4>Desktop Details Information</h4>
-              <div class="form-group">
-                <label for="desktop_serial_no">Desktop Serial Number:</label>
-                <input type="text" name="desktop_serial_no" id="desktop_serial_no" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="desktop_brand_name">Desktop Brand Name:</label>
-                <input type="text" name="desktop_brand_name" id="desktop_brand_name" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="desktop_model">Desktop Model:</label>
-                <input type="text" name="desktop_model" id="desktop_model" class="form-control">
-              </div>
-              <div class="form-group">
-                <label for="desktop_processor">Processor:</label>
-                <input type="text" name="desktop_processor" id="desktop_processor" class="form-control">
-              </div>
-              <div class="form-group">
-                <label for="desktop_memory">Memory:</label>
-                <input type="text" name="desktop_memory" id="desktop_memory" class="form-control">
-              </div>
-              <div class="form-group">
-                <label for="desktop_drive">Drive:</label>
-                <input type="text" name="desktop_drive" id="desktop_drive" class="form-control">
-              </div>
-
-              <!-- Keyboard Details Fields -->
-              <h4>Keyboard Details Information</h4>
-              <div class="form-group">
-                <label for="keyboard_sn">Keyboard Serial Number:</label>
-                <input type="text" name="keyboard_sn" id="keyboard_sn" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="keyboard_brand">Keyboard Brand Name:</label>
-                <input type="text" name="keyboard_brand" id="keyboard_brand" class="form-control" required>
-              </div>
-              <div class="form-group">
-                <label for="keyboard_model">Keyboard Model:</label>
-                <input type="text" name="keyboard_model" id="keyboard_model" class="form-control">
-              </div>
-
-              <button type="submit" class="btn btn-primary mt-3">Add Desktop Package with Details</button>
-            </form>
-          </div>
+    <!-- Main Form Container -->
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">ADD ICT EQUIPMENT</div>
         </div>
+        
+        <form action="{% url 'add_equipment_func_input' %}" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Equipment Selection Dropdown -->
+          <div class="card-body">
+            <div class="form-group">
+              <label for="equipmentSelect">Equipment Type</label>
+              <select class="form-select form-control" id="equipmentSelect" name="name_input">
+                <option value="" {% if equipment_type == '' %}selected{% endif %} disabled>Select Equipment Type</option>
+                <option value="Desktop" {% if equipment_type == 'Desktop' %}selected{% endif %}>Desktop</option>
+                <option value="Laptop" {% if equipment_type == 'Laptop' %}selected{% endif %}>Laptop</option>
+                <option value="UPS" {% if equipment_type == 'UPS' %}selected{% endif %}>UPS</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Desktop Details Card -->
+          <div id="desktopForm" class="equipment-form card-body" style="display: {% if equipment_type == 'Desktop' %}block{% else %}none{% endif %};">
+            <h3><i class="fas fa-desktop"> &nbsp;</i>Desktop Details</h3>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopSerial">Serial Number</label>
+                  <input type="text" class="form-control" id="desktopSerial" name="desktop_serial_input" value="{{ serialany }}" placeholder="Enter Desktop Serial Number">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopBrand">Brand Name</label>
+                  <input type="text" class="form-control" id="desktopBrand" name="desktop_brand_input" value="{{ brandnameany }}" placeholder="Enter Desktop Brand">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopModel">Model</label>
+                  <input type="text" class="form-control" id="desktopModel" name="desktop_model_input" value="{{ modelany }}" placeholder="Enter Desktop Model">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopProcessor">Processor</label>
+                  <input type="text" class="form-control" id="desktopProcessor" name="desktop_processor_input" value="{{ processorany }}" placeholder="Enter Desktop Processor">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopMemory">Memory</label>
+                  <input type="text" class="form-control" id="desktopMemory" name="desktop_memory_input" value="{{ memoryany }}" placeholder="Enter Memory Size">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopDrive">Computer Drive</label>
+                  <input type="text" class="form-control" id="desktopDrive" name="desktop_drive_input" value="{{ driveany }}" placeholder="Enter Desktop Drive Size">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopGPU">Graphics Name</label>
+                  <input type="text" class="form-control" id="desktopGPU" name="desktop_gpu_input" value="{{ desktop_gpusize_input_any }}" placeholder="Enter GPU Name">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopGPUSIZE">Graphics Size</label>
+                  <input type="text" class="form-control" id="desktopGPUSIZE" name="desktop_gpusize_input" value="{{ desktop_gpusize_input_any }}" placeholder="Enter GPU Size">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopOS">Operating System</label>
+                  <input type="text" class="form-control" id="desktopOS" name="desktop_os_input" value="{{ desktop_os_input_any }}" placeholder="Enter Operating System">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopOffice">Office Version</label>
+                  <input type="text" class="form-control" id="desktopOffice" name="desktop_office_input" value="{{ desktop_office_input_any }}" placeholder="Enter Office Version">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopOSkeys">OS License Keys</label>
+                  <input type="text" class="form-control" id="desktopOSkeys" name="desktop_OSkeys_input" value="{{ desktop_OSkeys_input_any }}" placeholder="Enter OS Keys">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="desktopOfficekeys">Office License Keys</label>
+                  <input type="text" class="form-control" id="desktopOfficekeys" name="desktop_Officekeys_input" value="{{ desktop_Officekeys_input_any }}" placeholder="Enter Office Keys">
+                </div>
+              </div>
+
+          <!-- Submit and Reset Buttons -->
+          <div class="card-action">
+            <button class="btn btn-success">Submit</button>
+            <button class="btn btn-danger" type="reset">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Separate Container for Additional Details -->
+<div id="additionalDetailsContainer" class="container mt-4" style="display: none;">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title">Additional Desktop Details</h5>
+    </div>
+    <div class="card-body">
+      <p>Here you can add extra details specifically related to the selected Desktop.</p>
+      <!-- Add extra fields as needed -->
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Dynamic Form Display -->
+<script>
+  document.getElementById('equipmentSelect').addEventListener('change', function() {
+    // Hide all form containers initially
+    document.querySelectorAll('.equipment-form').forEach(function(form) {
+      form.style.display = 'none';
+    });
+    
+    // Hide additional details container
+    document.getElementById('additionalDetailsContainer').style.display = 'none';
+
+    // Show the selected form and additional details if Desktop is selected
+    const selectedValue = this.value;
+    if (selectedValue === 'Desktop') {
+      document.getElementById('desktopForm').style.display = 'block';
+      document.getElementById('additionalDetailsContainer').style.display = 'block';
+    } else if (selectedValue === 'Laptop') {
+      document.getElementById('laptopForm').style.display = 'block';
+    } else if (selectedValue === 'UPS') {
+      document.getElementById('upsForm').style.display = 'block';
+    }
+  });
+</script>
+
+
+
+
+
+
+
+
 {% endblock %}
