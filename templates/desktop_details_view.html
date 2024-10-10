@@ -25,7 +25,7 @@
             <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-pills-icons justify-content-center" id="pills-tab-with-icon" role="tablist">
               <li class="nav-item submenu" role="presentation">
                 <a class="nav-link active" id="pills-desktop-tab" data-bs-toggle="pill" href="#pills-desktop" role="tab" aria-controls="pills-desktop" aria-selected="true">
-                  <i class="fas fa-desktop"></i> Desktop Details
+                  <i class="fas fa-power-off"></i> Desktop Details
                 </a>
               </li>
               <li class="nav-item submenu" role="presentation">
@@ -133,7 +133,29 @@
       <!-- Monitor Details Tab -->
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
         <h4>Monitor Details</h4>
-        <p>Details for the monitor will go here.</p>
+        <table class="table table-bordered">
+          
+            <tr>
+              <td>Keyboard Serial Number</td>
+              <td>{{ monitor_detailse.monitor_sn_db }}</td>
+            </tr>
+            <tr>
+              <td>Keyboard Brand</td>
+              <td>{{ monitor_detailse.monitor_brand_db }}</td>
+            </tr>
+            <tr>
+              <td>Keyboard Model</td>
+              <td>{{ monitor_detailse.monitor_model_db }}</td>
+            </tr>
+            <tr>
+              <td>Keyboard Size</td>
+              <td>{{ monitor_detailse.monitor_size_db }}</td>
+            </tr>
+            <tr>
+              <td colspan="2">No available keyboards or the keyboard is disposed.</td>
+            </tr>
+          
+        </table>
       </div>
 
       <!-- Keyboard Details Tab -->
