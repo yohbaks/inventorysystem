@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -356,6 +356,13 @@ def add_desktop_package_with_details(request):
         desktop_memory = request.POST.get('desktop_memory')
         desktop_drive = request.POST.get('desktop_drive')
 
+        desktop_Graphics = request.POST.get('desktop_Graphics')
+        desktop_Graphics_Size = request.POST.get('desktop_Graphics_Size')
+        desktop_OS = request.POST.get('desktop_OS')
+        desktop_Office = request.POST.get('desktop_Office')
+        desktop_OS_keys = request.POST.get('desktop_OS_keys')
+        desktop_Office_keys = request.POST.get('desktop_Office_keys')
+
         desktop_details = DesktopDetails(
             desktop_package=desktop_package,
             serial_no=desktop_serial_no,
@@ -366,6 +373,12 @@ def add_desktop_package_with_details(request):
             memory=desktop_memory,
             drive=desktop_drive,
             asset_owner=asset_owner,
+            desktop_Graphics=desktop_Graphics,
+            desktop_Graphics_Size=desktop_Graphics_Size,
+            desktop_OS=desktop_OS,
+            desktop_Office=desktop_Office,
+            desktop_OS_keys=desktop_OS_keys,
+            desktop_Office_keys=desktop_Office_keys,
         )
         desktop_details.save()
 
@@ -374,14 +387,55 @@ def add_desktop_package_with_details(request):
         keyboard_brand = request.POST.get('keyboard_brand')
         keyboard_model = request.POST.get('keyboard_model')
 
-        if keyboard_sn and keyboard_brand and keyboard_model:
-            keyboard_details = KeyboardDetails(
-                desktop_package=desktop_package,
-                keyboard_sn=keyboard_sn,
-                brand=keyboard_brand,
-                model=keyboard_model,
-            )
-            keyboard_details.save()
+        keyboard_details = KeyboardDetails(
+            desktop_package=desktop_package,
+            keyboard_sn=keyboard_sn,
+            brand=keyboard_brand,
+            model=keyboard_model,
+        )
+        keyboard_details.save()
+
+        # Create Monitor Details Associated with  this Desktop Package
+
+        monitor_sn = request.POST.get('monitor_sn')
+        monitor_brand = request.POST.get('monitor_brand')
+        monitor_model = request.POST.get('monitor_model')
+        monitor_size = request.POST.get('monitor_size')
+
+        monitor_details = MonitorDetails(
+            desktop_package_db=desktop_package,
+            monitor_sn_db=monitor_sn,
+            monitor_brand_db=monitor_brand,
+            monitor_model_db=monitor_model,
+            monitor_size_db=monitor_size,
+        )
+        monitor_details.save()    
+
+        # Create Mouse Details Associated with  this Desktop Package
+        mouse_sn = request.POST.get('mouse_sn')
+        mouse_brand = request.POST.get('mouse_brand')
+        mouse_model = request.POST.get('mouse_model')
+
+        mouse_details = MouseDetails(
+            desktop_package=desktop_package,
+            mouse_sn_db=mouse_sn,
+            mouse_brand_db=mouse_brand,
+            mouse_model_db=mouse_model,
+        )
+        mouse_details.save()        
+
+        # Create UPS Details Associated with  this Desktop Package
+        ups_sn = request.POST.get('ups_sn')
+        ups_brand = request.POST.get('ups_brand')
+        ups_model = request.POST.get('ups_model')
+
+        mouse_details = UPSDetails(
+            desktop_package=desktop_package,
+            ups_sn_db=ups_sn,
+            brand_db=ups_brand,
+            model_db=ups_model,
+        )
+        mouse_details.save()        
 
         # Redirect to prevent form resubmission
         return redirect('success_add_page')

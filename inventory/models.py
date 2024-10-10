@@ -111,17 +111,27 @@ class DesktopDetails(models.Model):
     drive = models.CharField(max_length=332, null=True)
     asset_owner = models.CharField(max_length=255, null=True)
 
+    desktop_Graphics = models.CharField(max_length=100, blank=True, null=True)
+    desktop_Graphics_Size = models.CharField(max_length=100, blank=True, null=True)
+    
+    desktop_OS = models.CharField(max_length=100, blank=True, null=True)
+    desktop_Office = models.CharField(max_length=100, blank=True, null=True)
+    desktop_OS_keys = models.CharField(max_length=100, blank=True, null=True)
+    desktop_Office_keys = models.CharField(max_length=100, blank=True, null=True)
+    
+
     def __str__(self):
         return f"{self.brand_name} {self.model} ({self.serial_no})"
 
 class MonitorDetails(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
-    monitor_sn = models.CharField(max_length=255)
-    brand = models.CharField(max_length=255)
-    model = models.CharField(max_length=255)
+    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
+    monitor_sn_db = models.CharField(max_length=255)
+    monitor_brand_db = models.CharField(max_length=255)
+    monitor_model_db = models.CharField(max_length=255)
+    monitor_size_db = models.CharField(max_length=255, null=True)
 
     def __str__(self):
-        return f"{self.brand} {self.model} ({self.monitor_sn})"
+        return f"{self.monitor_brand_db} {self.monitor_model_db} ({self.monitor_sn_db})"
 
 class DisposedMonitor(models.Model):
     monitor = models.ForeignKey(MonitorDetails, on_delete=models.CASCADE)
@@ -149,15 +159,16 @@ class DisposedKeyboard(models.Model):
 
 class MouseDetails(models.Model):
     desktop_package = models.ForeignKey(Desktop_Package, related_name='mice', on_delete=models.CASCADE)
-    mouse_sn = models.CharField(max_length=255)
-    brand = models.CharField(max_length=255)
-    model = models.CharField(max_length=255)
+    mouse_sn_db = models.CharField(max_length=255, null=True)
+    mouse_brand_db = models.CharField(max_length=255, null=True)
+    mouse_model_db = models.CharField(max_length=255, null=True)
+    
 
     def __str__(self):
-        return f"{self.brand} {self.model} ({self.mouse_sn})"
+        return f"{self.mouse_brand_db} {self.mouse_model_db} ({self.mouse_sn_db})"
 
 class DisposedMouse(models.Model):
-    mouse = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
+    mouse_db = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
@@ -165,12 +176,12 @@ class DisposedMouse(models.Model):
 
 class UPSDetails(models.Model):
     desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
-    ups_sn = models.CharField(max_length=255)
-    brand = models.CharField(max_length=255)
-    model = models.CharField(max_length=255)
+    ups_sn_db = models.CharField(max_length=255)
+    brand_db = models.CharField(max_length=255)
+    model_db = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.brand} {self.model} ({self.ups_sn})"
+        return f"{self.brand_db} {self.model_db} ({self.ups_sn_db})"
 
 class DisposedUPS(models.Model):
     ups = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
