@@ -132,8 +132,55 @@
 
       <!-- Monitor Details Tab -->
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
-        <h4>Monitor Details</h4>
-        <p>Details for the monitor will go here.</p>
+       
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Desktop Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ desktop_detailsx.desktop_package }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ desktop_detailsx.serial_no }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ desktop_detailsx.brand_name }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ desktop_detailsx.model }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Processor:</strong></td>
+                  <td>{{ desktop_detailsx.processor }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Memory:</strong></td>
+                  <td>{{ desktop_detailsx.memory }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Drive:</strong></td>
+                  <td>{{ desktop_detailsx.drive }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
+          </div>
+        </div>
+
+
       </div>
 
       <!-- Keyboard Details Tab -->

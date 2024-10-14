@@ -27,9 +27,9 @@
     </div>
     {% endfor %}
 
-    <!-- Main Form Container -->
-    <div class="col-md-12">
-      <div class="card">
+    <!-- Main Form Container -->  
+    <div class="container">
+      <div class="card col">
         <div class="card-header">
           <div class="card-title">ADD ICT EQUIPMENT</div>
         </div>
@@ -40,7 +40,7 @@
           <!-- Equipment Selection Dropdown -->
           <div class="card-body">
             <div class="form-group">
-              <label for="equipmentSelect">Equipment Type</label>
+              <label for="equipmentSelect"><h5>Equipment Type</h5></label>
               <select class="form-select form-control" id="equipmentSelect" name="name_input">
                 <option value="" selected disabled>Select Equipment Type</option>
                 <option value="Desktop" {% if equipment_type == 'Desktop' %}selected{% endif %}>Desktop</option>
@@ -49,10 +49,11 @@
               </select>
             </div>
           </div>
-
+        
           <!-- Desktop Details Card -->
           <div id="desktopForm" class="equipment-form card-body" style="display: {% if equipment_type == 'Desktop' %}block{% else %}none{% endif %};">
-            <h3><i class="fas fa-desktop"> &nbsp;</i>Desktop Details</h3>
+            <hr>
+            <h3><i class="fas fa-window-maximize"> &nbsp;</i>Desktop Details</h3>
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
@@ -150,11 +151,12 @@
 
 
 
-<!-- 2 Separate Container for Additional Details Monitor -->
-<div id="2additionalDetailsContainer" class="col-md-12" style="display: none;">
-  <div class="card">
+<!-- 2 Separate Container for Additional Details Monitor --> 
+      
+<div id="2additionalDetailsContainer" class="container" style="display: none;">
+  <div class="card col">
     <div class="card-header">
-      <h5 class="card-title">Monitor Details</h5>
+      <h3><i class="fas fa-desktop"> &nbsp;</i>Monitor Details</h3>
     </div>
     <div class="card-body">
       <p>Here you can add extra details specifically related to the selected Desktop.</p>
@@ -198,10 +200,10 @@
 </div>
 
 <!-- Separate Container for Additional Details -->
-<div id="additionalDetailsContainer" class="col-md-12" style="display: none;">
-  <div class="card">
-    <div class="card-header">
-      <h5 class="card-title">Keyboard Details</h5>
+<div id="additionalDetailsContainer" class="container" style="display: none;">
+  <div class="card col">
+    <div class="card-header card-title">
+      <h3><i class="fas fa-keyboard"> &nbsp;</i>Keyboard Details</h3>
     </div>
     <div class="card-body">
       <p>Here you can add extra details specifically related to the selected Desktop.</p>
@@ -242,10 +244,10 @@
 
 
 <!-- Separate Container for Additional Details -->
-<div id="3additionalDetailsContainer" class="col-md-12" style="display: none;">
-  <div class="card">
+<div id="3additionalDetailsContainer" class="container" style="display: none;">
+  <div class="card col">
     <div class="card-header">
-      <h5 class="card-title">Mouse Details</h5>
+      <h3><i class="fas fa-mouse-pointer"> &nbsp;</i>Mouse Details</h3>
     </div>
     <div class="card-body">
       <p>Here you can add extra details specifically related to the selected Desktop.</p>
@@ -281,10 +283,10 @@
 </div>
 
 <!-- Separate Container for Additional Details -->
-<div id="4additionalDetailsContainer" class="col-md-12" style="display: none;">
-  <div class="card">
+<div id="4additionalDetailsContainer" class="container" style="display: none;">
+  <div class="card col">
     <div class="card-header">
-      <h5 class="card-title">UPS Details</h5>
+      <h3><i class="fas fa-power-off"> &nbsp;</i>UPS Details</h3>
     </div>
     <div class="card-body">
       <p>Here you can add extra details specifically related to the selected Desktop.</p>
