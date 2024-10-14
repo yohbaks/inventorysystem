@@ -274,9 +274,13 @@ def desktop_details_view(request, desktop_id):
     # Get all keyboards related to the desktop package
     keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_details.desktop_package)
 
+    # Get all monitors related to the desktop package
+    monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_details.desktop_package)
+
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
-        'keyboard_detailse': keyboard_detailsx.first()  # Assuming you only need one related keyboard detail
+        'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
+        'monitor_detailse': monitor_detailsx.first()
     })
 
 

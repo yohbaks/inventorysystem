@@ -52,8 +52,12 @@
         
           <!-- Desktop Details Card -->
           <div id="desktopForm" class="equipment-form card-body" style="display: {% if equipment_type == 'Desktop' %}block{% else %}none{% endif %};">
+<<<<<<< HEAD
             <hr>
             <h3><i class="fas fa-window-maximize"> &nbsp;</i>Desktop Details</h3>
+=======
+            <h3><i class="fas fa-door-closed"> &nbsp;</i>Desktop Details</h3>
+>>>>>>> 00e7f30fd5f3fa2b3f7e84b6e13bde4cd8d1d9f5
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
@@ -200,9 +204,15 @@
 </div>
 
 <!-- Separate Container for Additional Details -->
+<<<<<<< HEAD
 <div id="additionalDetailsContainer" class="container" style="display: none;">
   <div class="card col">
     <div class="card-header card-title">
+=======
+<div id="additionalDetailsContainer" class="col-md-12" style="display: none;">
+  <div class="card">
+    <div class="card-header">
+>>>>>>> 00e7f30fd5f3fa2b3f7e84b6e13bde4cd8d1d9f5
       <h3><i class="fas fa-keyboard"> &nbsp;</i>Keyboard Details</h3>
     </div>
     <div class="card-body">
@@ -286,7 +296,52 @@
 <div id="4additionalDetailsContainer" class="container" style="display: none;">
   <div class="card col">
     <div class="card-header">
+<<<<<<< HEAD
       <h3><i class="fas fa-power-off"> &nbsp;</i>UPS Details</h3>
+=======
+      <h3><i class="fas fa-plug"> &nbsp;</i>Mouse Details</h3>
+    </div>
+    <div class="card-body">
+      <p>Here you can add extra details specifically related to the selected Desktop.</p>
+
+      <!-- UPS Details -->
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardBrand">Serial Number</label>
+            <input type="text" name="ups_sn" id="ups_sn" class="form-control" required>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardModel">UPS Brand</label>
+            <input type="text" name="ups_brand" id="ups_brand" class="form-control">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardSerial">UPS Model</label>
+            <input type="text" name="ups_model" id="ups_model" class="form-control" required>
+          </div>
+        </div>
+        
+
+      </div>
+      
+    </div>
+    <div class="card-action">
+      
+    </div>
+     </div>
+</div>
+
+
+<!-- Separate Container for Additional Details -->
+<div id="5additionalDetailsContainer" class="col-md-12" style="display: none;">
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-money-check"> &nbsp;</i>Document Details</h3>
+>>>>>>> 00e7f30fd5f3fa2b3f7e84b6e13bde4cd8d1d9f5
     </div>
     <div class="card-body">
       <p>Here you can add extra details specifically related to the selected Desktop.</p>
@@ -337,6 +392,7 @@
     document.getElementById('2additionalDetailsContainer').style.display = 'none';
     document.getElementById('3additionalDetailsContainer').style.display = 'none';
     document.getElementById('4additionalDetailsContainer').style.display = 'none';
+    document.getElementById('5additionalDetailsContainer').style.display = 'none';
 
     // Show the selected form and additional details if Desktop is selected
     const selectedValue = this.value;
@@ -346,6 +402,7 @@
       document.getElementById('2additionalDetailsContainer').style.display = 'block';
       document.getElementById('3additionalDetailsContainer').style.display = 'block';
       document.getElementById('4additionalDetailsContainer').style.display = 'block';
+      document.getElementById('5additionalDetailsContainer').style.display = 'block';
     } else if (selectedValue === 'Laptop') {
       document.getElementById('laptopForm').style.display = 'block';
     } else if (selectedValue === 'UPS') {
