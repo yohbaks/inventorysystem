@@ -277,10 +277,18 @@ def desktop_details_view(request, desktop_id):
     # Get all monitors related to the desktop package
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_details.desktop_package)
 
+    # Get all mouse related to the desktop package
+    mouse_details = MouseDetails.objects.filter(desktop_package=desktop_details.desktop_package)
+
+    # Get all ups related to the desktop package
+    ups_details = UPSDetails.objects.filter(desktop_package=desktop_details.desktop_package)
+
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
-        'monitor_detailse': monitor_detailsx.first()
+        'monitor_detailse': monitor_detailsx.first(),
+        'mouse_detailse': mouse_details.first(),
+        'ups_detailse': ups_details.first(),
     })
 
 

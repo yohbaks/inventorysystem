@@ -132,53 +132,255 @@
 
       <!-- Monitor Details Tab -->
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
-        <h4>Monitor Details</h4>
-        <p>Details for the monitor will go here.</p>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Monitor Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ monitor_detailse.desktop_package_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ monitor_detailse.monitor_sn_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ monitor_detailse.monitor_brand_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ monitor_detailse.monitor_model_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Monitor Size:</strong></td>
+                  <td>{{ monitor_detailse.monitor_size_db }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
+          </div>
+        </div>
       </div>
 
       <!-- Keyboard Details Tab -->
       <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
-        <h4>Keyboard Details</h4>
-        <table class="table table-bordered">
-          {% if keyboard_detailse and not keyboard_detailse.is_disposed %}
-            <tr>
-              <td>Keyboard Serial Number</td>
-              <td>{{ keyboard_detailse.keyboard_sn }}</td>
-            </tr>
-            <tr>
-              <td>Keyboard Brand</td>
-              <td>{{ keyboard_detailse.brand }}</td>
-            </tr>
-            <tr>
-              <td>Keyboard Model</td>
-              <td>{{ keyboard_detailse.model }}</td>
-            </tr>
-          {% else %}
-            <tr>
-              <td colspan="2">No available keyboards or the keyboard is disposed.</td>
-            </tr>
-          {% endif %}
-        </table>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Keyboard Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ keyboard_detailse.desktop_package }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ keyboard_detailse.keyboard_sn }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ keyboard_detailse.brand }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ keyboard_detailse.model }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+          </div>
+        </div>
       </div>
 
+      <!-- Mouse Details Tab -->
+      <div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Mouse Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ mouse_detailse.desktop_package }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ mouse_detailse.mouse_sn_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ mouse_detailse.mouse_brand_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ mouse_detailse.mouse_model_db }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+          </div>
+        </div>
+      </div>
+
+
       <!-- UPS Details Tab -->
+      
       <div class="tab-pane fade" id="pills-ups" role="tabpanel" aria-labelledby="pills-ups-tab">
-        <h4>UPS Details</h4>
-        <p>Details for the UPS will go here.</p>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">UPS Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ ups_detailse.desktop_package }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ ups_detailse.ups_sn_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ ups_detailse.brand_db }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ ups_detailse.model_db }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+          </div>
+        </div>
       </div>
 
       <!-- User Details Tab -->
+     
       <div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
-        <h4>User Details</h4>
-        <p>Details for the user will go here.</p>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Keyboard Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ keyboard_detailsx.package_no }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ keyboard_detailsx.serial_no }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ keyboard_detailsx.brand_name }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ keyboard_detailsx.model }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+          </div>
+        </div>
       </div>
 
       <!-- Documents Tab -->
+     
       <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
-        <h4>Documents</h4>
-        <p>Documents and attachments will go here.</p>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Documents Details</div>
+          </div>
+          <div class="card-body">
+            <table class="table table-head-bg-success table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                  <th scope="col">DETAILS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                  <td>{{ keyboard_detailsx.package_no }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                  <td>{{ keyboard_detailsx.serial_no }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                  <td>{{ keyboard_detailsx.brand_name }}</td>
+                </tr>
+                <tr>
+                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                  <td>{{ keyboard_detailsx.model }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+          </div>
+        </div>
       </div>
+
+
     </div>
   </div>
 </div>
+
+<!-- Optional JavaScript -->
+<script>
+  // Initialize the Bootstrap pill tabs
+  var triggerTabList = [].slice.call(document.querySelectorAll('#pills-tab-with-icon a'))
+  triggerTabList.forEach(function (triggerEl) {
+    var tabTrigger = new bootstrap.Tab(triggerEl)
+    triggerEl.addEventListener('click', function (event) {
+      event.preventDefault()
+      tabTrigger.show()
+    })
+  })
+</script>
 {% endblock %}
