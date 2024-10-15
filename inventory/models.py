@@ -90,6 +90,7 @@ class DESKTOPPACKAGE(models.Model):
 
 #################
 class Desktop_Package(models.Model):
+    
     is_disposed = models.BooleanField(default=False)
     disposal_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

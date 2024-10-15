@@ -272,7 +272,10 @@ def desktop_details_view(request, desktop_id):
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
     
     # Get all keyboards related to the desktop package
-    keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_details.desktop_package)
+    keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_details.desktop_package, is_disposed=False)
+
+    # Get disposed keyboards
+    disposed_keyboards = DisposedKeyboard.objects.filter(keyboard__desktop_package=desktop_details.desktop_package)
 
     # Get all monitors related to the desktop package
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_details.desktop_package)
@@ -286,6 +289,7 @@ def desktop_details_view(request, desktop_id):
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
+        'disposed_keyboards': disposed_keyboards,
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
@@ -303,6 +307,7 @@ def keyboard_details(request):
     # Render the list of equipment and the count to the template
     return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details, 
                                                      'mouse_details': mouse_details})
+
 
 def keyboard_detailed_view(request, keyboard_id):
     # Get the specific keyboard using its ID
@@ -327,16 +332,18 @@ def keyboard_disposed(request, keyboard_id):
         )
         disposed_keyboard.save()
 
-        return JsonResponse({'success': True, 'message': 'Keyboard disposed successfully.'})
 
-    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+        desktop_package_id = keyboard.desktop_package.id
+        return render(request, 'success_dispose.html', {'desktop_package_id': desktop_package_id})
 
 
+#viewing of all keyboard disposed
 def disposed_keyboards(request):
     # Get all disposed keyboards
     disposed_keyboards = DisposedKeyboard.objects.all()
     # Render the list of disposed keyboards to the template
     return render(request, 'disposed_keyboards.html', {'disposed_keyboards': disposed_keyboards})
+
 
 
 # END ################ (KEYBOARD END)
