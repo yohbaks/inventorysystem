@@ -271,29 +271,37 @@ def desktop_package(request):
 def desktop_details_view(request, desktop_id):
     # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
+    desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
     
     # Get all keyboards related to the desktop package
-    keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_details.desktop_package, is_disposed=False)
+    keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
 
     # Get disposed keyboards
-    disposed_keyboards = DisposedKeyboard.objects.filter(keyboard__desktop_package=desktop_details.desktop_package)
+    disposed_keyboards = DisposedKeyboard.objects.filter(keyboard__desktop_package=desktop_package)
+
+    # active keyboards
+    has_active_keyboards = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
+    has_active_mouse = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
 
     # Get all monitors related to the desktop package
-    monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_details.desktop_package)
+    monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package)
 
     # Get all mouse related to the desktop package
-    mouse_details = MouseDetails.objects.filter(desktop_package=desktop_details.desktop_package)
+    mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package)
 
     # Get all ups related to the desktop package
-    ups_details = UPSDetails.objects.filter(desktop_package=desktop_details.desktop_package)
+    ups_details = UPSDetails.objects.filter(desktop_package=desktop_package)
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
         'disposed_keyboards': disposed_keyboards,
+        'has_active_keyboards': has_active_keyboards,
+        'has_active_mouse': has_active_mouse,
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
+        'desktop_package': desktop_package  # Pass desktop_package to the template for URL resolution
     })
 
 
@@ -320,6 +328,7 @@ def keyboard_detailed_view(request, keyboard_id):
 
 def keyboard_disposed(request, keyboard_id):
     if request.method == 'POST':
+        # Retrieve the keyboard by its ID
         keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
         
         # Set the keyboard as disposed and save
@@ -333,9 +342,38 @@ def keyboard_disposed(request, keyboard_id):
         )
         disposed_keyboard.save()
 
-
+        # Get the package ID to redirect to the same page
         desktop_package_id = keyboard.desktop_package.id
-        return render(request, 'success_dispose.html', {'desktop_package_id': desktop_package_id})
+        
+        # Redirect back to the desktop details view with the Keyboard tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-keyboard')
+
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=keyboard.desktop_package.id)
+
+
+def add_keyboard_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        keyboard_sn = request.POST.get('keyboard_sn')
+        keyboard_brand = request.POST.get('keyboard_brand')
+        keyboard_model = request.POST.get('keyboard_model')
+        
+        # Create a new keyboard associated with the desktop package
+        KeyboardDetails.objects.create(
+            desktop_package=desktop_package,
+            keyboard_sn=keyboard_sn,
+            brand=keyboard_brand,
+            model=keyboard_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Keyboard tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-keyboard')
+    
+    return redirect('desktop_details_view', package_id=package_id)
 
 
 #viewing of all keyboard disposed
@@ -350,9 +388,86 @@ def disposed_keyboards(request):
 # END ################ (KEYBOARD END)
 
 
+# BEGIN ################ (MOUSE)
+
+#This function retrieves all mouse records and renders them in a similar way as keyboard_details.
+def mouse_details(request):
+    # Get all mouse equipment
+    mouse_details = MouseDetails.objects.all()
+    # Render the list of mice and the count to the template
+    return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
+
+
+#This function retrieves the details of a specific mouse by its ID.
+def mouse_detailed_view(request, mouse_id):
+    # Get the specific mouse using its ID
+    mouse = get_object_or_404(MouseDetails, id=mouse_id)
+    # Render the detailed view of the mouse
+    return render(request, 'mouse_detailed_view.html', {'mouse': mouse})
+
+#This function marks a specific mouse as disposed, saves it, and then redirects back to the desktop details view with the "Mouse" tab active.
+def mouse_disposed(request, mouse_id):
+    if request.method == 'POST':
+        # Retrieve the mouse by its ID
+        mouse = get_object_or_404(MouseDetails, id=mouse_id)
+        
+        # Set the mouse as disposed and save
+        mouse.is_disposed = True
+        mouse.save()
+        
+        # Create a new DisposedMouse entry (assuming you have a DisposedMouse model)
+        disposed_mouse = DisposedMouse(
+            mouse=mouse,
+            disposal_date=timezone.now()
+        )
+        disposed_mouse.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = mouse.desktop_package.id
+        
+        # Redirect back to the desktop details view with the Mouse tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-mouse')
+
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=mouse.desktop_package.id)
+
+#This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.
+def add_mouse_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        mouse_sn = request.POST.get('mouse_sn')
+        mouse_brand = request.POST.get('mouse_brand')
+        mouse_model = request.POST.get('mouse_model')
+        
+        # Create a new mouse associated with the desktop package
+        MouseDetails.objects.create(
+            desktop_package=desktop_package,
+            mouse_sn_db=mouse_sn,
+            mouse_brand_db=mouse_brand,
+            mouse_model_db=mouse_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Mouse tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-mouse')
+    
+    return redirect('desktop_details_view', package_id=package_id)
+
+#This function lists all disposed mice, assuming you have a DisposedMouse model similar to DisposedKeyboard.
+def disposed_mice(request):
+    # Get all disposed mice
+    disposed_mice = DisposedMouse.objects.all()
+    # Render the list of disposed mice to the template
+    return render(request, 'disposed_mice.html', {'disposed_mice': disposed_mice})
+
+
+# END ################ (MOUSE END)
+
+
+
 # adding Desktop packages
-
-
 def add_desktop_package_with_details(request):
     if request.method == 'POST':
         with transaction.atomic():  # Ensure all or nothing for database changes
@@ -360,9 +475,8 @@ def add_desktop_package_with_details(request):
             desktop_package = Desktop_Package.objects.create(is_disposed=False)
             package_id = desktop_package.id  # Retrieve the auto-generated ID
 
-            # Manually assign the package ID to related models
+            # Create Desktop Details without manually setting id
             DesktopDetails.objects.create(
-                id=package_id,  # Set the same primary key as the package ID
                 desktop_package=desktop_package,
                 serial_no=request.POST.get('desktop_serial_no'),
                 computer_name=request.POST.get('computer_name'),
@@ -371,19 +485,25 @@ def add_desktop_package_with_details(request):
                 processor=request.POST.get('desktop_processor'),
                 memory=request.POST.get('desktop_memory'),
                 drive=request.POST.get('desktop_drive'),
-                asset_owner=request.POST.get('asset_owner')
+                asset_owner=request.POST.get('asset_owner'),
+                desktop_Graphics=request.POST.get('desktop_Graphics'),
+                desktop_Graphics_Size=request.POST.get('desktop_Graphics_Size'),
+                desktop_OS=request.POST.get('desktop_OS'),
+                desktop_Office=request.POST.get('desktop_Office'),
+                desktop_OS_keys=request.POST.get('desktop_OS_keys'),
+                desktop_Office_keys=request.POST.get('desktop_Office_keys')
             )
 
+            # Create Keyboard Details without manually setting id
             KeyboardDetails.objects.create(
-                id=package_id,  # Set the same primary key as the package ID
                 desktop_package=desktop_package,
                 keyboard_sn=request.POST.get('keyboard_sn'),
                 brand=request.POST.get('keyboard_brand'),
                 model=request.POST.get('keyboard_model')
             )
 
+            # Create Monitor Details without manually setting id
             MonitorDetails.objects.create(
-                id=package_id,  # Set the same primary key as the package ID
                 desktop_package_db=desktop_package,
                 monitor_sn_db=request.POST.get('monitor_sn'),
                 monitor_brand_db=request.POST.get('monitor_brand'),
@@ -391,16 +511,16 @@ def add_desktop_package_with_details(request):
                 monitor_size_db=request.POST.get('monitor_size')
             )
 
+            # Create Mouse Details without manually setting id
             MouseDetails.objects.create(
-                id=package_id,  # Set the same primary key as the package ID
                 desktop_package=desktop_package,
                 mouse_sn_db=request.POST.get('mouse_sn'),
                 mouse_brand_db=request.POST.get('mouse_brand'),
                 mouse_model_db=request.POST.get('mouse_model')
             )
 
+            # Create UPS Details without manually setting id
             UPSDetails.objects.create(
-                id=package_id,  # Set the same primary key as the package ID
                 desktop_package=desktop_package,
                 ups_sn_db=request.POST.get('ups_sn'),
                 brand_db=request.POST.get('ups_brand'),
@@ -411,116 +531,6 @@ def add_desktop_package_with_details(request):
 
     return render(request, 'add_desktop_package_with_details.html')
 
-# def add_desktop_package_with_details(request):
-#     if request.method == 'POST':
-#         # Gather Desktop Package Information
-#         computer_name = request.POST.get('computer_name')
-#         asset_owner = request.POST.get('asset_owner')
-#         is_disposed = request.POST.get('is_disposed', 'False') == 'True'
-
-#         # Prevent data duplication - check if a package with the same computer_name exists
-#         if DesktopDetails.objects.filter(computer_name=computer_name).exists():
-#             return JsonResponse({'success': False, 'error': 'Desktop Package with this computer name already exists.'}, status=400)
-
-#         # Create Desktop Package
-#         desktop_package = Desktop_Package(
-#             is_disposed=is_disposed,
-#         )
-#         desktop_package.save() #savefirst the the package as a memory to have some id or pk, before adding the whole
-
-#         # Create Desktop Details associated with this Desktop Package
-#         desktop_serial_no = request.POST.get('desktop_serial_no')
-#         desktop_brand_name = request.POST.get('desktop_brand_name')
-#         desktop_model = request.POST.get('desktop_model')
-#         desktop_processor = request.POST.get('desktop_processor')
-#         desktop_memory = request.POST.get('desktop_memory')
-#         desktop_drive = request.POST.get('desktop_drive')
-
-#         desktop_Graphics = request.POST.get('desktop_Graphics')
-#         desktop_Graphics_Size = request.POST.get('desktop_Graphics_Size')
-#         desktop_OS = request.POST.get('desktop_OS')
-#         desktop_Office = request.POST.get('desktop_Office')
-#         desktop_OS_keys = request.POST.get('desktop_OS_keys')
-#         desktop_Office_keys = request.POST.get('desktop_Office_keys')
-
-#         desktop_details = DesktopDetails(
-#             desktop_package=desktop_package,
-#             serial_no=desktop_serial_no,
-#             computer_name=computer_name,
-#             brand_name=desktop_brand_name,
-#             model=desktop_model,
-#             processor=desktop_processor,
-#             memory=desktop_memory,
-#             drive=desktop_drive,
-#             asset_owner=asset_owner,
-#             desktop_Graphics=desktop_Graphics,
-#             desktop_Graphics_Size=desktop_Graphics_Size,
-#             desktop_OS=desktop_OS,
-#             desktop_Office=desktop_Office,
-#             desktop_OS_keys=desktop_OS_keys,
-#             desktop_Office_keys=desktop_Office_keys,
-#         )
-#         desktop_details.save()
-
-#         # Create Keyboard Details associated with this Desktop Package
-#         keyboard_sn = request.POST.get('keyboard_sn')
-#         keyboard_brand = request.POST.get('keyboard_brand')
-#         keyboard_model = request.POST.get('keyboard_model')
-
-#         keyboard_details = KeyboardDetails(
-#             desktop_package=desktop_package,
-#             keyboard_sn=keyboard_sn,
-#             brand=keyboard_brand,
-#             model=keyboard_model,
-#         )
-#         keyboard_details.save()
-
-#         # Create Monitor Details Associated with  this Desktop Package
-
-#         monitor_sn = request.POST.get('monitor_sn')
-#         monitor_brand = request.POST.get('monitor_brand')
-#         monitor_model = request.POST.get('monitor_model')
-#         monitor_size = request.POST.get('monitor_size')
-
-#         monitor_details = MonitorDetails(
-#             desktop_package_db=desktop_package,
-#             monitor_sn_db=monitor_sn,
-#             monitor_brand_db=monitor_brand,
-#             monitor_model_db=monitor_model,
-#             monitor_size_db=monitor_size,
-#         )
-#         monitor_details.save()    
-
-#         # Create Mouse Details Associated with  this Desktop Package
-#         mouse_sn = request.POST.get('mouse_sn')
-#         mouse_brand = request.POST.get('mouse_brand')
-#         mouse_model = request.POST.get('mouse_model')
-
-#         mouse_details = MouseDetails(
-#             desktop_package=desktop_package,
-#             mouse_sn_db=mouse_sn,
-#             mouse_brand_db=mouse_brand,
-#             mouse_model_db=mouse_model,
-#         )
-#         mouse_details.save()        
-
-#         # Create UPS Details Associated with  this Desktop Package
-#         ups_sn = request.POST.get('ups_sn')
-#         ups_brand = request.POST.get('ups_brand')
-#         ups_model = request.POST.get('ups_model')
-
-#         mouse_details = UPSDetails(
-#             desktop_package=desktop_package,
-#             ups_sn_db=ups_sn,
-#             brand_db=ups_brand,
-#             model_db=ups_model,
-#         )
-#         mouse_details.save()        
-
-#         # Redirect to prevent form resubmission
-#         return redirect('success_add_page')
-
-#     return render(request, 'add_desktop_package_with_details.html')
 
 ############### (KEYBOARD AND MOUSE)
 

@@ -174,14 +174,24 @@
 
       
 
+
+<!-- Keyboard Details Tab -->
 <!-- Keyboard Details Tab -->
 <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
   <div class="card">
-    <div class="card-header">
+    <!-- Card Header with Flexbox to Align Title and Button -->
+    <div class="card-header d-flex justify-content-between align-items-center">
       <div class="card-title">Keyboard Details</div>
+      
+      <!-- Conditionally show Add Keyboard Button only if no active keyboards are present -->
+      {% if not has_active_keyboards %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyboardModal">Add Keyboard</button>
+      {% endif %}
     </div>
+    
     <div class="card-body">
       {% if keyboard_detailse %}
+        <!-- Keyboard Details Table -->
         <table class="table table-head-bg-success table-bordered table-hover">
           <thead>
             <tr>
@@ -208,11 +218,11 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Edit and Dispose Buttons for active keyboard -->
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
-        
-        <!-- Button to trigger disposal modal -->
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal">Dispose Keyboard</button>
-        
+
         <!-- Disposal Confirmation Modal -->
         <div class="modal fade" id="confirmDisposeModal" tabindex="-1" aria-labelledby="confirmDisposeModalLabel" aria-hidden="true">
           <div class="modal-dialog">
@@ -236,7 +246,7 @@
           </div>
         </div>
       {% else %}
-        <p>No available keyboards for this desktop package.</p>
+        <p class="text-danger">No available keyboards for this desktop package.</p>
       {% endif %}
 
       <!-- Disposed Keyboards Table -->
@@ -264,54 +274,190 @@
         </tbody>
       </table>
       {% else %}
-        <p></p>
+        <p>No disposed keyboards for this desktop package.</p>
       {% endif %}
+    </div>
+  </div>
 
-
-      
-
+  <!-- Add Keyboard Modal -->
+  <div class="modal fade" id="addKeyboardModal" tabindex="-1" aria-labelledby="addKeyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addKeyboardModalLabel">Add New Keyboard</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="keyboard_sn" class="form-label">Serial Number</label>
+              <input type="text" class="form-control" id="keyboard_sn" name="keyboard_sn" required>
+            </div>
+            <div class="mb-3">
+              <label for="keyboard_brand" class="form-label">Brand</label>
+              <input type="text" class="form-control" id="keyboard_brand" name="keyboard_brand" required>
+            </div>
+            <div class="mb-3">
+              <label for="keyboard_model" class="form-label">Model</label>
+              <input type="text" class="form-control" id="keyboard_model" name="keyboard_model" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Add Keyboard</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
 
+<!-- Keyboard Details Tab END -->
+
       <!-- Mouse Details Tab -->
-      <div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Mouse Details</div>
-          </div>
-          <div class="card-body">
-            <table class="table table-head-bg-success table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
-                  <th scope="col">DETAILS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ mouse_detailse.desktop_package }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
-                  <td>{{ mouse_detailse.mouse_sn_db }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
-                  <td>{{ mouse_detailse.mouse_brand_db }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
-                  <td>{{ mouse_detailse.mouse_model_db }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+      <!-- Mouse Details Tab -->
+<div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
+  <div class="card">
+    <!-- Card Header with Flexbox to Align Title and Button -->
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div class="card-title">Mouse Details</div>
+      
+      <!-- Conditionally show Add Mouse Button only if no active mice are present -->
+      {% if not has_active_mice %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMouseModal">Add Mouse</button>
+      {% endif %}
+    </div>
+    
+    <div class="card-body">
+      {% if mouse_detailse %}
+        <!-- Mouse Details Table -->
+        <table class="table table-head-bg-success table-bordered table-hover">
+          <thead>
+            <tr>
+              <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+              <th scope="col">DETAILS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+              <td>{{ mouse_detailse.desktop_package }}</td>
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+              <td>{{ mouse_detailse.mouse_sn_db }}</td>
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+              <td>{{ mouse_detailse.mouse_brand_db }}</td>
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+              <td>{{ mouse_detailse.mouse_model_db }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Edit and Dispose Buttons for active mouse -->
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMouseModal">Edit</button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeMouseModal">Dispose Mouse</button>
+
+        <!-- Disposal Confirmation Modal -->
+        <div class="modal fade" id="confirmDisposeMouseModal" tabindex="-1" aria-labelledby="confirmDisposeMouseModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="confirmDisposeMouseModalLabel">Confirm Disposal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to dispose of this mouse?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <!-- Disposal form inside modal -->
+                <form method="POST" action="{% url 'mouse_disposed' mouse_detailse.id %}" class="dispose-mouse-form d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm Dispose</button>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
+      {% else %}
+        <p class="text-danger">No available mice for this desktop package.</p>
+      {% endif %}
+
+      <!-- Disposed Mice Table -->
+      {% if disposed_mice.exists %}
+      <hr>
+      <h5>Disposed Mice</h5>
+      <table class="table table-head-bg-danger table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Serial Number</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Disposal Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for disposed_mouse in disposed_mice %}
+          <tr>
+            <td>{{ disposed_mouse.mouse.mouse_sn_db }}</td>
+            <td>{{ disposed_mouse.mouse.mouse_brand_db }}</td>
+            <td>{{ disposed_mouse.mouse.mouse_model_db }}</td>
+            <td>{{ disposed_mouse.disposal_date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      
+      <h5 class="text-success">
+        <br>
+        No disposed mice for this desktop package.
+      </h5>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Add Mouse Modal -->
+  <div class="modal fade" id="addMouseModal" tabindex="-1" aria-labelledby="addMouseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addMouseModalLabel">Add New Mouse</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="{% url 'add_mouse_to_package' desktop_package.id %}">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="mouse_sn" class="form-label">Serial Number</label>
+              <input type="text" class="form-control" id="mouse_sn" name="mouse_sn" required>
+            </div>
+            <div class="mb-3">
+              <label for="mouse_brand" class="form-label">Brand</label>
+              <input type="text" class="form-control" id="mouse_brand" name="mouse_brand" required>
+            </div>
+            <div class="mb-3">
+              <label for="mouse_model" class="form-label">Model</label>
+              <input type="text" class="form-control" id="mouse_model" name="mouse_model" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Add Mouse</button>
+          </div>
+        </form>
       </div>
+    </div>
+  </div>
+</div>
+
 
 
       <!-- UPS Details Tab -->

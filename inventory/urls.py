@@ -27,6 +27,10 @@ urlpatterns = [
     path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
     path('success_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Add keyboard ID for disposal
 
+    #add keyboard
+    path('add_keyboard/<int:package_id>/', views.add_keyboard_to_package, name='add_keyboard_to_package'),
+    
+
     
     # Keyboard detailed view
     path('keyboard_detailed_view/<int:keyboard_id>/', views.keyboard_detailed_view, name='keyboard_detailed_view'),
@@ -34,6 +38,20 @@ urlpatterns = [
     
     # Keyboard disposal paths
     path('disposed_keyboards/', views.disposed_keyboards, name='disposed_keyboards'),
+
+
+    # Mouse URLs
+    path('mouse_details/', views.mouse_details, name='mouse_details'),  # View all mice
+    path('success_disposed_mouse/<int:mouse_id>/', views.mouse_disposed, name='mouse_disposed'),  # Dispose of a specific mouse
+
+    # Add Mouse
+    path('add_mouse/<int:package_id>/', views.add_mouse_to_package, name='add_mouse_to_package'),
+
+    # Mouse detailed view
+    path('mouse_detailed_view/<int:mouse_id>/', views.mouse_detailed_view, name='mouse_detailed_view'),
+
+    # Mouse disposal paths
+    path('disposed_mice/', views.disposed_mice, name='disposed_mice'),
     
 
     # Add this to your urlpatterns

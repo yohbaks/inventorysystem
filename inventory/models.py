@@ -167,6 +167,7 @@ class MouseDetails(models.Model):
     mouse_sn_db = models.CharField(max_length=255, null=True)
     mouse_brand_db = models.CharField(max_length=255, null=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
+    is_disposed = models.BooleanField(default=False)  # To indicate if the mouse is disposed
     
 
     def __str__(self):
