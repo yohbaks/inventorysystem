@@ -266,6 +266,10 @@
       {% else %}
         <p></p>
       {% endif %}
+
+
+      
+
     </div>
   </div>
 </div>
@@ -443,5 +447,20 @@
       tabTrigger.show()
     })
   })
+</script>
+<!-- JavaScript for pill hash -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Check if there is a hash in the URL
+    const hash = window.location.hash;
+    if (hash) {
+      // Find the tab link with matching href and activate it
+      const targetTabLink = document.querySelector(`a[href="${hash}"]`);
+      if (targetTabLink) {
+        const tab = new bootstrap.Tab(targetTabLink);
+        tab.show();
+      }
+    }
+  });
 </script>
 {% endblock %}

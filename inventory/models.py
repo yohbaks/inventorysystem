@@ -102,6 +102,7 @@ class Desktop_Package(models.Model):
     
 
 class DesktopDetails(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='desktop_details', on_delete=models.CASCADE)
     serial_no = models.CharField(max_length=255)
     computer_name = models.CharField(max_length=255, unique=True, null=True)
@@ -125,6 +126,7 @@ class DesktopDetails(models.Model):
         return f"{self.brand_name} {self.model} ({self.serial_no})"
 
 class MonitorDetails(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
     monitor_sn_db = models.CharField(max_length=255)
     monitor_brand_db = models.CharField(max_length=255)
@@ -142,6 +144,7 @@ class DisposedMonitor(models.Model):
         return f"Disposed: {self.monitor}"
 
 class KeyboardDetails(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
     keyboard_sn = models.CharField(max_length=255)
     brand = models.CharField(max_length=255)
@@ -159,6 +162,7 @@ class DisposedKeyboard(models.Model):
         return f"Disposed: {self.keyboard}"
 
 class MouseDetails(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='mice', on_delete=models.CASCADE)
     mouse_sn_db = models.CharField(max_length=255, null=True)
     mouse_brand_db = models.CharField(max_length=255, null=True)
@@ -176,6 +180,7 @@ class DisposedMouse(models.Model):
         return f"Disposed: {self.mouse}"
 
 class UPSDetails(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
     ups_sn_db = models.CharField(max_length=255)
     brand_db = models.CharField(max_length=255)
