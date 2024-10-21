@@ -206,15 +206,15 @@
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
-              <td>{{ keyboard_detailse.keyboard_sn }}</td>
+              <td>{{ keyboard_detailse.keyboard_sn_db }}</td>
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
-              <td>{{ keyboard_detailse.brand }}</td>
+              <td>{{ keyboard_detailse.keyboard_brand_db }}</td>
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
-              <td>{{ keyboard_detailse.model }}</td>
+              <td>{{ keyboard_detailse.keyboard_model_db }}</td>
             </tr>
           </tbody>
         </table>
@@ -265,9 +265,9 @@
         <tbody>
           {% for disposed_keyboard in disposed_keyboards %}
           <tr>
-            <td>{{ disposed_keyboard.keyboard.keyboard_sn }}</td>
-            <td>{{ disposed_keyboard.keyboard.brand }}</td>
-            <td>{{ disposed_keyboard.keyboard.model }}</td>
+            <td>{{ disposed_keyboard.keyboard_dispose_db.keyboard_sn_db}}</td>
+            <td>{{ disposed_keyboard.keyboard_dispose_db.keyboard_brand_db }}</td>
+            <td>{{ disposed_keyboard.keyboard_dispose_db.keyboard_model_db }}</td>
             <td>{{ disposed_keyboard.disposal_date }}</td>
           </tr>
           {% endfor %}
@@ -325,7 +325,7 @@
       <div class="card-title">Mouse Details</div>
       
       <!-- Conditionally show Add Mouse Button only if no active mice are present -->
-      {% if not has_active_mice %}
+      {% if not has_active_mouse %}
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMouseModal">Add Mouse</button>
       {% endif %}
     </div>
@@ -343,11 +343,11 @@
           <tbody>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-              <td>{{ mouse_detailse.desktop_package }}</td>
+              <td>{{ mouse_detailse.desktop_package}}</td>
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
-              <td>{{ mouse_detailse.mouse_sn_db }}</td>
+              <td>{{ mouse_detailse.mouse_sn_db  }}</td>
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
@@ -391,7 +391,7 @@
       {% endif %}
 
       <!-- Disposed Mice Table -->
-      {% if disposed_mice.exists %}
+      {% if disposed_mouse.exists %}
       <hr>
       <h5>Disposed Mice</h5>
       <table class="table table-head-bg-danger table-bordered table-hover">
@@ -404,12 +404,12 @@
           </tr>
         </thead>
         <tbody>
-          {% for disposed_mouse in disposed_mice %}
+          {% for disposed_mousx in disposed_mouse %}
           <tr>
-            <td>{{ disposed_mouse.mouse.mouse_sn_db }}</td>
-            <td>{{ disposed_mouse.mouse.mouse_brand_db }}</td>
-            <td>{{ disposed_mouse.mouse.mouse_model_db }}</td>
-            <td>{{ disposed_mouse.disposal_date }}</td>
+            <td>{{ disposed_mousx.mouse_db.mouse_sn_db }}</td>
+            <td>{{ disposed_mousx.mouse_db.mouse_brand_db }}</td>
+            <td>{{ disposed_mousx.mouse_db.mouse_model_db }}</td>
+            <td>{{ disposed_mousx.disposal_date }}</td>
           </tr>
           {% endfor %}
         </tbody>

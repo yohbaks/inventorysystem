@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -275,9 +275,11 @@ def desktop_details_view(request, desktop_id):
     
     # Get all keyboards related to the desktop package
     keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+    mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
 
     # Get disposed keyboards
-    disposed_keyboards = DisposedKeyboard.objects.filter(keyboard__desktop_package=desktop_package)
+    disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package=desktop_package)
+    disposed_mouse = DisposedMouse.objects.filter(mouse_db__desktop_package=desktop_package)
 
     # active keyboards
     has_active_keyboards = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
@@ -287,7 +289,7 @@ def desktop_details_view(request, desktop_id):
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package)
 
     # Get all mouse related to the desktop package
-    mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package)
+    
 
     # Get all ups related to the desktop package
     ups_details = UPSDetails.objects.filter(desktop_package=desktop_package)
@@ -296,6 +298,7 @@ def desktop_details_view(request, desktop_id):
         'desktop_detailsx': desktop_details,
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
         'disposed_keyboards': disposed_keyboards,
+        'disposed_mouse' : disposed_mouse,
         'has_active_keyboards': has_active_keyboards,
         'has_active_mouse': has_active_mouse,
         'monitor_detailse': monitor_detailsx.first(),
@@ -337,7 +340,7 @@ def keyboard_disposed(request, keyboard_id):
         
         # Create a new DisposedKeyboard entry
         disposed_keyboard = DisposedKeyboard(
-            keyboard=keyboard,
+            keyboard_dispose_db=keyboard,
             disposal_date=timezone.now()
         )
         disposed_keyboard.save()
@@ -365,9 +368,9 @@ def add_keyboard_to_package(request, package_id):
         # Create a new keyboard associated with the desktop package
         KeyboardDetails.objects.create(
             desktop_package=desktop_package,
-            keyboard_sn=keyboard_sn,
-            brand=keyboard_brand,
-            model=keyboard_model
+            keyboard_sn_db=keyboard_sn,
+            keyboard_brand_db=keyboard_brand,
+            keyboard_model_db=keyboard_model
         )
         
         # Redirect back to the desktop details view, focusing on the Keyboard tab
@@ -407,6 +410,7 @@ def mouse_detailed_view(request, mouse_id):
 
 #This function marks a specific mouse as disposed, saves it, and then redirects back to the desktop details view with the "Mouse" tab active.
 def mouse_disposed(request, mouse_id):
+    # Only proceed if the request is POST
     if request.method == 'POST':
         # Retrieve the mouse by its ID
         mouse = get_object_or_404(MouseDetails, id=mouse_id)
@@ -415,21 +419,22 @@ def mouse_disposed(request, mouse_id):
         mouse.is_disposed = True
         mouse.save()
         
-        # Create a new DisposedMouse entry (assuming you have a DisposedMouse model)
+        # Create a new DisposedMouse entry
         disposed_mouse = DisposedMouse(
-            mouse=mouse,
+            mouse_db=mouse,
             disposal_date=timezone.now()
         )
         disposed_mouse.save()
 
         # Get the package ID to redirect to the same page
         desktop_package_id = mouse.desktop_package.id
-        
+
         # Redirect back to the desktop details view with the Mouse tab active
         return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-mouse')
 
-    # Fallback in case the request method is not POST
-    return redirect('desktop_details_view', package_id=mouse.desktop_package.id)
+    # Fallback for non-POST requests: redirect to an appropriate page or show an error
+    return redirect('desktop_details_view', package_id=mouse_id)
+
 
 #This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.
 def add_mouse_to_package(request, package_id):

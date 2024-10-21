@@ -146,16 +146,16 @@ class DisposedMonitor(models.Model):
 class KeyboardDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
-    keyboard_sn = models.CharField(max_length=255)
-    brand = models.CharField(max_length=255)
-    model = models.CharField(max_length=255)
+    keyboard_sn_db = models.CharField(max_length=255)
+    keyboard_brand_db = models.CharField(max_length=255)
+    keyboard_model_db = models.CharField(max_length=255)
     is_disposed = models.BooleanField(default=False)  # To indicate if the keyboard is disposed
 
     def __str__(self):
-        return f"{self.brand} {self.model} ({self.keyboard_sn})"
+        return f"{self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
 
 class DisposedKeyboard(models.Model):
-    keyboard = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
+    keyboard_dispose_db = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
@@ -163,7 +163,7 @@ class DisposedKeyboard(models.Model):
 
 class MouseDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='mice', on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_db', on_delete=models.CASCADE)
     mouse_sn_db = models.CharField(max_length=255, null=True)
     mouse_brand_db = models.CharField(max_length=255, null=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
@@ -178,7 +178,7 @@ class DisposedMouse(models.Model):
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"Disposed: {self.mouse}"
+        return f"Disposed: {self.mouse_db}"
 
 class UPSDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
