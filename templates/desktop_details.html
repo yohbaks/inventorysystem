@@ -44,6 +44,7 @@
                     <th>Processor</th>
                     <th>Memory</th>
                     <th>Drive</th>
+                    <th>Kebyaord SN</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -57,13 +58,14 @@
                     <th>Processor</th>
                     <th>Memory</th>
                     <th>Drive</th>
+                    <th>Kebyaord SN</th>
                     <th>Actions</th>
                   </tr>
                 </tfoot>
                 <tbody>
                   
-                  <tr>{% for desktopx in desktop_details %}
-                    <td>{{ desktopx.computer_name }}</td>
+                  <tr>{% for item in desktops_with_keyboards %}
+                    <td>{{ item.desktop.computer_name }}</td>
                     <td>{{ desktopx.desktop_package }}</td>
                     <td>{{ desktopx.serial_no }}</td>
                     <td>{{ desktopx.brand_name }}</td>
@@ -72,7 +74,12 @@
                     <td>{{ desktopx.memory }}</td>
                     <td>{{ desktopx.drive }}</td>
                     <td>
-                      <a href="{% url 'desktop_details_view' desktopx.id %}" class="btn btn-primary btn-sm">
+                      {% for keyboard in item.keyboards %}
+                          {{ keyboard.keyboard_sn_db }}<br> <!-- Show each keyboard's serial number -->
+                      {% endfor %}
+                  </td>
+                    <td>
+                      <a href="#" class="btn btn-primary btn-sm">
                         View Details
                       </a>
                     </td>

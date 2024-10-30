@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -260,12 +260,29 @@ def disposed_desktop_list(request):
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
 
 ############################
-
 def desktop_package(request):
-    # Get all equipment
-    desktop_package = Desktop_Package.objects.all()
+    # Fetch all desktop details
     desktop_details = DesktopDetails.objects.all()
-    return render(request, 'desktop_details.html', {'desktop_package': desktop_package, 'desktop_details': desktop_details})
+    
+    # Create a combined list where each desktop is paired with its keyboards
+    desktops_with_keyboards = []
+    for desktop in desktop_details:
+        keyboards = KeyboardDetails.objects.filter(desktop_package=desktop.desktop_package)
+        desktops_with_keyboards.append({
+            'desktop': desktop,
+            'keyboards': keyboards  # This can have multiple entries per desktop
+        })
+
+    return render(request, 'desktop_details.html', {
+        'desktops_with_keyboards': desktops_with_keyboards,
+    })      
+
+
+# def desktop_package(request):
+#     # Get all equipment
+#     desktop_package = Desktop_Package.objects.all()
+#     desktop_details = DesktopDetails.objects.all()
+#     return render(request, 'desktop_details.html', {'desktop_package': desktop_package, 'desktop_details': desktop_details,})
 
 
 def desktop_details_view(request, desktop_id):
