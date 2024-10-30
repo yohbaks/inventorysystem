@@ -260,21 +260,23 @@ def disposed_desktop_list(request):
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
 
 ############################
-def desktop_package(request):
+def desktop_package_base(request):
     # Fetch all desktop details
     desktop_details = DesktopDetails.objects.all()
     
     # Create a combined list where each desktop is paired with its keyboards
-    desktops_with_keyboards = []
+    desktops_with_items = []
     for desktop in desktop_details:
-        keyboards = KeyboardDetails.objects.filter(desktop_package=desktop.desktop_package)
-        desktops_with_keyboards.append({
+        keyboards = KeyboardDetails.objects.filter(desktop_package=desktop.desktop_package, is_disposed=False)
+        user = UserDetails.objects.filter(desktop_package_db=desktop.desktop_package)
+        desktops_with_items.append({
             'desktop': desktop,
-            'keyboards': keyboards  # This can have multiple entries per desktop
+            'keyboards': keyboards,  # This can have multiple entries per desktop
+            'user': user
         })
 
     return render(request, 'desktop_details.html', {
-        'desktops_with_keyboards': desktops_with_keyboards,
+        'desktops_with_items': desktops_with_items,
     })      
 
 

@@ -40,11 +40,11 @@
                     <th>Computer Name</th>
                     <th>Serial No.</th>
                     <th>Brand Name</th>
-                    <th>Model</th>
+
                     <th>Processor</th>
                     <th>Memory</th>
-                    <th>Drive</th>
-                    <th>Kebyaord SN</th>
+                    <th>Enduser</th>
+                    <th>Asset Owner</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -53,33 +53,34 @@
                     <th>Desktop Package</th>
                     <th>Computer Name</th>
                     <th>Serial No.</th>
-                    <th>Brand Name</th>
+
                     <th>Model</th>
                     <th>Processor</th>
                     <th>Memory</th>
-                    <th>Drive</th>
-                    <th>Kebyaord SN</th>
+                    <th>Enduser</th>
+                    <th>Asset Owner</th>
                     <th>Actions</th>
                   </tr>
                 </tfoot>
                 <tbody>
                   
-                  <tr>{% for item in desktops_with_keyboards %}
+                  <tr>{% for item in desktops_with_items %}
                     <td>{{ item.desktop.computer_name }}</td>
                     <td>{{ desktopx.desktop_package }}</td>
                     <td>{{ desktopx.serial_no }}</td>
                     <td>{{ desktopx.brand_name }}</td>
-                    <td>{{ desktopx.model }}</td>
+
                     <td>{{ desktopx.processor }}</td>
                     <td>{{ desktopx.memory }}</td>
-                    <td>{{ desktopx.drive }}</td>
+                    <td>{{ desktopx.memory }}</td>
+                    
                     <td>
-                      {% for keyboard in item.keyboards %}
-                          {{ keyboard.keyboard_sn_db }}<br> <!-- Show each keyboard's serial number -->
+                      {% for userx in item.user %}
+                          {{ userx.user_Asset_owner }}<br> <!-- Show each keyboard's serial number -->
                       {% endfor %}
                   </td>
                     <td>
-                      <a href="#" class="btn btn-primary btn-sm">
+                      <a href="{% url 'desktop_detailed_view' item.desktop.id %}" class="btn btn-primary btn-sm">
                         View Details
                       </a>
                     </td>

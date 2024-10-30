@@ -20,7 +20,7 @@ urlpatterns = [
     path('desktop_all_detailed_view/', views.all_detailed_view, name='desktop_all_detailed_view'),
 
     #desktop_details
-    path('desktop_details/', views.desktop_package, name='desktop_details'),  # URL pattern for desktop details
+    path('desktop_details/', views.desktop_package_base, name='desktop_details'),  # URL pattern for desktop details
     path('desktop_details_view/<int:desktop_id>/', views.desktop_details_view, name='desktop_details_view'),  # URL pattern for desktop details view
     
     #keyboard
