@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -273,24 +273,21 @@ def desktop_details_view(request, desktop_id):
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
     desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
     
-    # Get all keyboards related to the desktop package
+    # Get all keyboards,mouse, monitor in desktop_details_view related to the desktop package
     keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+    monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False)
 
-    # Get disposed keyboards
+    # Get disposed keyboards,mouse, monitor in desktop_details_view
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package=desktop_package)
     disposed_mouse = DisposedMouse.objects.filter(mouse_db__desktop_package=desktop_package)
+    disposed_monitor = DisposedMonitor.objects.filter(monitor_disposed_db__desktop_package_db=desktop_package)
 
-    # active keyboards
+    # active keyboards,mouse, monitor in desktop_details_view
     has_active_keyboards = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
     has_active_mouse = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
-
-    # Get all monitors related to the desktop package
-    monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package)
-
-    # Get all mouse related to the desktop package
-    
-
+    has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
+   
     # Get all ups related to the desktop package
     ups_details = UPSDetails.objects.filter(desktop_package=desktop_package)
 
@@ -299,8 +296,10 @@ def desktop_details_view(request, desktop_id):
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
         'disposed_keyboards': disposed_keyboards,
         'disposed_mouse' : disposed_mouse,
+        'disposed_monitor' : disposed_monitor,
         'has_active_keyboards': has_active_keyboards,
         'has_active_mouse': has_active_mouse,
+        'has_active_monitor': has_active_monitor,
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
@@ -354,61 +353,31 @@ def keyboard_disposed(request, keyboard_id):
     # Fallback in case the request method is not POST
     return redirect('desktop_details_view', package_id=keyboard.desktop_package.id)
 
-
-def add_keyboard_to_package(request, package_id):
+def monitor_disposed(request, monitor_id):
     if request.method == 'POST':
-        # Retrieve the desktop package by its ID
-        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        # Retrieve the keyboard by its ID
+        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
         
-        # Get form data
-        keyboard_sn = request.POST.get('keyboard_sn')
-        keyboard_brand = request.POST.get('keyboard_brand')
-        keyboard_model = request.POST.get('keyboard_model')
+        # Set the keyboard as disposed and save
+        monitor.is_disposed = True
+        monitor.save()
         
-        # Create a new keyboard associated with the desktop package
-        KeyboardDetails.objects.create(
-            desktop_package=desktop_package,
-            keyboard_sn_db=keyboard_sn,
-            keyboard_brand_db=keyboard_brand,
-            keyboard_model_db=keyboard_model
+        # Create a new DisposedKeyboard entry
+        disposed_monitor = DisposedMonitor(
+            monitor_disposed_db=monitor,
+            disposal_date=timezone.now()
         )
+        disposed_monitor.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = monitor.desktop_package_db.id
         
-        # Redirect back to the desktop details view, focusing on the Keyboard tab
-        return redirect(f'/desktop_details_view/{package_id}/#pills-keyboard')
-    
-    return redirect('desktop_details_view', package_id=package_id)
+        # Redirect back to the desktop details view with the Keyboard tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
 
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=monitor_id)
 
-#viewing of all keyboard disposed
-def disposed_keyboards(request):
-    # Get all disposed keyboards
-    disposed_keyboards = DisposedKeyboard.objects.all()
-    # Render the list of disposed keyboards to the template
-    return render(request, 'disposed_keyboards.html', {'disposed_keyboards': disposed_keyboards})
-
-
-
-# END ################ (KEYBOARD END)
-
-
-# BEGIN ################ (MOUSE)
-
-#This function retrieves all mouse records and renders them in a similar way as keyboard_details.
-def mouse_details(request):
-    # Get all mouse equipment
-    mouse_details = MouseDetails.objects.all()
-    # Render the list of mice and the count to the template
-    return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
-
-
-#This function retrieves the details of a specific mouse by its ID.
-def mouse_detailed_view(request, mouse_id):
-    # Get the specific mouse using its ID
-    mouse = get_object_or_404(MouseDetails, id=mouse_id)
-    # Render the detailed view of the mouse
-    return render(request, 'mouse_detailed_view.html', {'mouse': mouse})
-
-#This function marks a specific mouse as disposed, saves it, and then redirects back to the desktop details view with the "Mouse" tab active.
 def mouse_disposed(request, mouse_id):
     # Only proceed if the request is POST
     if request.method == 'POST':
@@ -434,6 +403,87 @@ def mouse_disposed(request, mouse_id):
 
     # Fallback for non-POST requests: redirect to an appropriate page or show an error
     return redirect('desktop_details_view', package_id=mouse_id)
+
+
+
+def add_keyboard_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        keyboard_sn = request.POST.get('keyboard_sn')
+        keyboard_brand = request.POST.get('keyboard_brand')
+        keyboard_model = request.POST.get('keyboard_model')
+        
+        # Create a new keyboard associated with the desktop package
+        KeyboardDetails.objects.create(
+            desktop_package=desktop_package,
+            keyboard_sn_db=keyboard_sn,
+            keyboard_brand_db=keyboard_brand,
+            keyboard_model_db=keyboard_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Keyboard tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-keyboard')
+    
+    return redirect('desktop_details_view', package_id=package_id)
+
+def add_monitor_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        monitor_sn = request.POST.get('monitor_sn')
+        monitor_brand = request.POST.get('monitor_brand')
+        monitor_model = request.POST.get('monitor_model')
+        
+        # Create a new keyboard associated with the desktop package
+        MonitorDetails.objects.create(
+            desktop_package_db=desktop_package,
+            monitor_sn_db=monitor_sn,
+            monitor_brand_db=monitor_brand,
+            monitor_model_db=monitor_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Keyboard tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-monitor')
+    
+    return redirect('desktop_details_view', package_id=package_id)
+
+
+#viewing of all keyboard disposed
+def disposed_keyboards(request):
+    # Get all disposed keyboards
+    disposed_keyboards = DisposedKeyboard.objects.all()
+    # Render the list of disposed keyboards to the template
+    return render(request, 'disposed_keyboards.html', {'disposed_keyboards': disposed_keyboards})
+
+
+
+# END ################ (KEYBOARD END)
+
+
+# BEGIN ################ (MOUSE)
+
+#This function retrieves all mouse records and renders them in a similar way as mouse_details.
+def mouse_details(request):
+    # Get all mouse equipment
+    mouse_details = MouseDetails.objects.all()
+    # Render the list of mice and the count to the template
+    return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
+
+
+#This function retrieves the details of a specific mouse by its ID.
+def mouse_detailed_view(request, mouse_id):
+    # Get the specific mouse using its ID
+    mouse = get_object_or_404(MouseDetails, id=mouse_id)
+    # Render the detailed view of the mouse
+    return render(request, 'mouse_detailed_view.html', {'mouse': mouse})
+
+#This function marks a specific mouse as disposed, saves it, and then redirects back to the desktop details view with the "Mouse" tab active.
+
 
 
 #This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.

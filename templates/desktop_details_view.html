@@ -133,10 +133,14 @@
       <!-- Monitor Details Tab -->
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
         <div class="card">
-          <div class="card-header">
+          <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title">Monitor Details</div>
+            {% if not has_active_monitor %}
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMonitorModal">Add Monitor</button>
+            {% endif %}
           </div>
           <div class="card-body">
+            {% if monitor_detailse %}
             <table class="table table-head-bg-success table-bordered table-hover">
               <thead>
                 <tr>
@@ -167,16 +171,104 @@
                 </tr>
               </tbody>
             </table>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
+
+        
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMonitorModal">Edit</button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal_Monitor">Dispose Monitor</button>
+
+                <!-- Disposal Confirmation Modal -->
+                <div class="modal fade" id="confirmDisposeModal_Monitor" tabindex="-1" aria-labelledby="confirmDisposeModal_Monitor" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDisposeModal_Monitor">Confirm Disposal</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to dispose of this Monitor?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <!-- Disposal form inside modal -->
+                        <form method="POST" action="{% url 'monitor_disposed' monitor_detailse.id %}" class="dispose-monitor-form d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Confirm Dispose</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% else %}
+                <p class="text-danger">No available Monitors for this desktop package.</p>
+                 {% endif %}
+
+                 <!-- Disposed Monitor Table -->
+      {% if disposed_monitor.exists %}
+      <hr>
+      <h5>Disposed Monitors</h5>
+      <table class="table table-head-bg-danger table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Serial Number</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Disposal Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for disposed_monitor in disposed_monitor %}
+          <tr>
+            <td>{{ disposed_monitor.monitor_disposed_db.monitor_sn_db }}</td>
+            <td>{{ disposed_monitor.monitor_disposed_db.monitor_brand_db }}</td>
+            <td>{{ disposed_monitor.monitor_disposed_db.monitor_model_db }}</td>
+            <td>{{ disposed_monitor.disposal_date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p>No disposed Monitor for this desktop package.</p>
+      {% endif %}
+
           </div>
         </div>
+
+         <!-- Add Monitor Modal -->
+  <div class="modal fade" id="addMonitorModal" tabindex="-1" aria-labelledby="addMonitorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addMonitorModalLabel">Add New Monitor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="{% url 'add_monitor_to_package' desktop_package.id %}">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="monitor_sn" class="form-label">Serial Number</label>
+              <input type="text" class="form-control" id="monitor_sn" name="monitor_sn" required>
+            </div>
+            <div class="mb-3">
+              <label for="monitor_brand" class="form-label">Brand</label>
+              <input type="text" class="form-control" id="monitor_brand" name="monitor_brand" required>
+            </div>
+            <div class="mb-3">
+              <label for="monitor_model" class="form-label">Model</label>
+              <input type="text" class="form-control" id="monitor_model" name="monitor_model" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Add Monitor</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
       </div>
 
       
-
-
-<!-- Keyboard Details Tab -->
-<!-- Keyboard Details Tab -->
+<!-- Keyboard Details Tab ORGIGNAL -->
 <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
   <div class="card">
     <!-- Card Header with Flexbox to Align Title and Button -->
