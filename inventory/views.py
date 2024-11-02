@@ -29,7 +29,7 @@ def desktop_list_func(request):
     
 
 ##############################################################################
-#add equipment function
+#add equipment functions
 
 def add_equipment_func(request):
     if request.method == 'POST':
@@ -259,7 +259,8 @@ def disposed_desktop_list(request):
     disposed_desktops = DESKTOPPACKAGE.objects.filter(is_disposed=True)
     return render(request, 'disposed_desktop_list.html', {'disposed_desktops': disposed_desktops})
 
-############################
+###########################################################################################
+#Template: Desktop_details_view
 def desktop_package_base(request):
     # Fetch all desktop details
     desktop_details = DesktopDetails.objects.all()
@@ -278,13 +279,6 @@ def desktop_package_base(request):
     return render(request, 'desktop_details.html', {
         'desktops_with_items': desktops_with_items,
     })      
-
-
-# def desktop_package(request):
-#     # Get all equipment
-#     desktop_package = Desktop_Package.objects.all()
-#     desktop_details = DesktopDetails.objects.all()
-#     return render(request, 'desktop_details.html', {'desktop_package': desktop_package, 'desktop_details': desktop_details,})
 
 
 def desktop_details_view(request, desktop_id):
@@ -607,4 +601,16 @@ def add_desktop_package_with_details(request):
 
 
 ############### (KEYBOARD AND MOUSE)
+
+
+############### (RECENT at BASE)
+
+def recent_it_equipment_base(request):
+    recent_desktops = DesktopDetails.objects.filter(is_disposed=False).order_by('-created_at')[:10]
+    # recent_keyboards = KeyboardDetails.objects.filter(is_disposed=False).order_by('-created_at')[:10]
+
+    return render(request, 'base.html', {
+        'recent_desktops': recent_desktops,
+        # 'recent_keyboards': recent_keyboards,
+    })
 

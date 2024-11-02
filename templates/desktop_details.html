@@ -36,7 +36,7 @@
               <table id="multi-filter-select" class="display table table-striped table-hover">
                 <thead>
                   <tr>
-                    <th>Desktop Package</th>
+                    
                     <th>Computer Name</th>
                     <th>Serial No.</th>
                     <th>Brand Name</th>
@@ -50,7 +50,7 @@
                 </thead>
                 <tfoot>
                   <tr>
-                    <th>Desktop Package</th>
+                    
                     <th>Computer Name</th>
                     <th>Serial No.</th>
 
@@ -66,13 +66,18 @@
                   
                   <tr>{% for item in desktops_with_items %}
                     <td>{{ item.desktop.computer_name }}</td>
-                    <td>{{ desktopx.desktop_package }}</td>
-                    <td>{{ desktopx.serial_no }}</td>
-                    <td>{{ desktopx.brand_name }}</td>
+                    <td>{{ item.desktop.serial_no }}</td>
+                    <td>{{ item.desktop.brand_name }}</td>
+                    <td>{{ item.desktop.processor }}</td>
 
-                    <td>{{ desktopx.processor }}</td>
-                    <td>{{ desktopx.memory }}</td>
-                    <td>{{ desktopx.memory }}</td>
+                    <td>{{ item.desktop.memory }}</td>
+
+                    <td>
+                      {% for userx in item.user %}
+                          {{ userx.user_Enduser }}<br> <!-- Show each keyboard's serial number -->
+                      {% endfor %}
+                  </td>
+                    
                     
                     <td>
                       {% for userx in item.user %}
@@ -80,7 +85,7 @@
                       {% endfor %}
                   </td>
                     <td>
-                      <a href="{% url 'desktop_detailed_view' item.desktop.id %}" class="btn btn-primary btn-sm">
+                      <a href="{% url 'desktop_details_view' item.desktop.id %}" class="btn btn-primary btn-sm">
                         View Details
                       </a>
                     </td>

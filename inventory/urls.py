@@ -11,7 +11,8 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('', views.desktop_list_func, name='desktop_list_page'),
+    # path('', views.desktop_list_func, name='desktop_list_page'),
+    path('', views.recent_it_equipment_base, name='recent_it_equipment'),
     path('add_equipment/', views.add_equipment_func, name='add_equipment_func_input'),
     path('success_add/', views.success_page, name='success_add_page'),
     path('<int:id>/', views.desktop_detailed_view, name='desktop_detailed_view'),  # Correct pattern for detailed view
@@ -63,10 +64,7 @@ urlpatterns = [
 
 
 
-    
 
-    # #mouse
-    # path('keyboard_details/', views.mouse_details, name='mouse_details'),
 
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

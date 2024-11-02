@@ -116,6 +116,8 @@ class DesktopDetails(models.Model):
     desktop_Office = models.CharField(max_length=100, blank=True, null=True)
     desktop_OS_keys = models.CharField(max_length=100, blank=True, null=True)
     desktop_Office_keys = models.CharField(max_length=100, blank=True, null=True)
+    is_disposed = models.BooleanField(default=False)  # To indicate if the Desktop is disposed
+    created_at = models.DateTimeField(default=timezone.now)  # Date when the desktop was added
     
 
     def __str__(self):
