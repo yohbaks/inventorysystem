@@ -3,7 +3,7 @@ from .models import DESKTOPPACKAGE
 from .models import (
     Desktop_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor, 
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
-    UPSDetails, DisposedUPS
+    UPSDetails, DisposedUPS, DocumentsDetails
 )
 
 # Register your models here.
@@ -19,3 +19,4 @@ admin.site.register(MouseDetails)
 admin.site.register(DisposedMouse)
 admin.site.register(UPSDetails)
 admin.site.register(DisposedUPS)
+admin.site.register(DocumentsDetails)

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -295,14 +295,18 @@ def desktop_details_view(request, desktop_id):
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package=desktop_package)
     disposed_mouse = DisposedMouse.objects.filter(mouse_db__desktop_package=desktop_package)
     disposed_monitor = DisposedMonitor.objects.filter(monitor_disposed_db__desktop_package_db=desktop_package)
+    disposed_ups = DisposedUPS.objects.filter(ups_db__desktop_package=desktop_package)
+
 
     # active keyboards,mouse, monitor in desktop_details_view
     has_active_keyboards = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
     has_active_mouse = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
     has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
+    has_active_ups = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
+
    
     # Get all ups related to the desktop package
-    ups_details = UPSDetails.objects.filter(desktop_package=desktop_package)
+    ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
@@ -310,9 +314,11 @@ def desktop_details_view(request, desktop_id):
         'disposed_keyboards': disposed_keyboards,
         'disposed_mouse' : disposed_mouse,
         'disposed_monitor' : disposed_monitor,
+        'disposed_ups' : disposed_ups,
         'has_active_keyboards': has_active_keyboards,
         'has_active_mouse': has_active_mouse,
         'has_active_monitor': has_active_monitor,
+        'has_active_ups' : has_active_ups, 
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
@@ -418,6 +424,33 @@ def mouse_disposed(request, mouse_id):
     return redirect('desktop_details_view', package_id=mouse_id)
 
 
+#disposed UPS
+def ups_disposed(request, ups_id):
+    # Only proceed if the request is POST
+    if request.method == 'POST':
+        # Retrieve the UPS by its ID
+        ups = get_object_or_404(UPSDetails, id=ups_id)
+        
+        # Set the ups as disposed and save
+        ups.is_disposed = True
+        ups.save()
+        
+        # Create a new DisposedUps entry
+        disposed_mups = DisposedUPS(
+            ups_db=ups,
+            disposal_date=timezone.now()
+        )
+        disposed_mups.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = ups.desktop_package.id
+
+        # Redirect back to the desktop details view with the UPS tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-ups')
+
+    # Fallback for non-POST requests: redirect to an appropriate page or show an error
+    return redirect('desktop_details_view', package_id=ups_id)
+
 
 def add_keyboard_to_package(request, package_id):
     if request.method == 'POST':
@@ -520,6 +553,30 @@ def add_mouse_to_package(request, package_id):
         
         # Redirect back to the desktop details view, focusing on the Mouse tab
         return redirect(f'/desktop_details_view/{package_id}/#pills-mouse')
+    
+    return redirect('desktop_details_view', package_id=package_id)
+
+
+def add_ups_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        ups_sn = request.POST.get('ups_sn')
+        ups_brand = request.POST.get('ups_brand')
+        ups_model = request.POST.get('ups_model')
+        
+        # Create a new mouse associated with the desktop package
+        UPSDetails.objects.create(
+            desktop_package=desktop_package,
+            ups_sn_db=ups_sn,
+            brand_db=ups_brand,
+            model_db=ups_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Mouse tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-ups')
     
     return redirect('desktop_details_view', package_id=package_id)
 

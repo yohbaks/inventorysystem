@@ -545,7 +545,7 @@
             <button type="submit" class="btn btn-primary">Add Mouse</button>
           </div>
         </form>
-      </div>
+      </div>  
     </div>
   </div>
 </div>
@@ -555,37 +555,140 @@
       
       <div class="tab-pane fade" id="pills-ups" role="tabpanel" aria-labelledby="pills-ups-tab">
         <div class="card">
-          <div class="card-header">
+          <!-- Card Header with Flexbox to Align Title and Button -->
+          <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title">UPS Details</div>
+            
+            <!-- Conditionally show Add UPS Button only if no active mice are present -->
+            {% if not has_active_ups %}
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUpsModal">Add UPS</button>
+            {% endif %}
           </div>
+          
           <div class="card-body">
-            <table class="table table-head-bg-success table-bordered table-hover">
+            {% if ups_detailse %}
+              <!-- UPS Details Table -->
+              <table class="table table-head-bg-success table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                    <th scope="col">DETAILS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+                    <td>{{ ups_detailse.desktop_package}}</td>
+                  </tr>
+                  <tr>
+                    <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+                    <td>{{ ups_detailse.ups_sn_db  }}</td>
+                  </tr>
+                  <tr>
+                    <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+                    <td>{{ ups_detailse.brand_db }}</td>
+                  </tr>
+                  <tr>
+                    <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+                    <td>{{ ups_detailse.model_db }}</td>
+                  </tr>
+                </tbody>
+              </table>
+      
+              <!-- Edit and Dispose Buttons for active ups -->
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUpsModal">Edit</button>
+              <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">Dispose UPS</button>
+      
+              <!-- Disposal Confirmation Modal -->
+              <div class="modal fade" id="confirmDisposeUpsModal" tabindex="-1" aria-labelledby="confirmDisposeUpsModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="confirmDisposeUpsModalLabel">Confirm Disposal</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      Are you sure you want to dispose of this UPS?
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <!-- Disposal form inside modal -->
+                      <form method="POST" action="{% url 'ups_disposed' ups_detailse.id %}" class="dispose-ups-form d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-danger">Confirm Dispose</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              <p class="text-danger">No available mice for this desktop package.</p>
+            {% endif %}
+      
+            <!-- Disposed Mice Table -->
+            {% if disposed_ups.exists %}
+            <hr>
+            <h5>Disposed Mice</h5>
+            <table class="table table-head-bg-danger table-bordered table-hover">
               <thead>
                 <tr>
-                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
-                  <th scope="col">DETAILS</th>
+                  <th>Serial Number</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Disposal Date</th>
                 </tr>
               </thead>
               <tbody>
+                {% for disposed_upsx in disposed_ups %}
                 <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ ups_detailse.desktop_package }}</td>
+                  <td>{{ disposed_upsx.ups_db.ups_sn_db }}</td>
+                  <td>{{ disposed_upsx.ups_db.brand_db }}</td>
+                  <td>{{ disposed_upsx.ups_db.model_db }}</td>
+                  <td>{{ disposed_upsx.disposal_date }}</td>
                 </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
-                  <td>{{ ups_detailse.ups_sn_db }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
-                  <td>{{ ups_detailse.brand_db }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
-                  <td>{{ ups_detailse.model_db }}</td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+            {% else %}
+            
+            <h5 class="text-success">
+              <br>
+              No disposed mice for this desktop package.
+            </h5>
+            {% endif %}
+          </div>
+        </div>
+      
+        <!-- Add UPS Modal -->
+        <div class="modal fade" id="addUpsModal" tabindex="-1" aria-labelledby="addUpsModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addUpsModalLabel">Add New UPS</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form method="POST" action="{% url 'add_ups_to_package' desktop_package.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="mouse_sn" class="form-label">Serial Number</label>
+                    <input type="text" class="form-control" id="ups_sn" name="ups_sn" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="mouse_brand" class="form-label">Brand</label>
+                    <input type="text" class="form-control" id="ups_brand" name="ups_brand" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="mouse_model" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="ups_model" name="ups_model" required>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Add UPS</button>
+                </div>
+              </form>
+            </div>  
           </div>
         </div>
       </div>

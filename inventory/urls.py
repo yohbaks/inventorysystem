@@ -29,10 +29,13 @@ urlpatterns = [
     path('success_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Add keyboard ID for disposal
     path('success_disposed_monitor/<int:monitor_id>/', views.monitor_disposed, name='monitor_disposed'),  # Add keyboard ID for disposal change this to mouse
     path('success_disposed_mouse/<int:mouse_id>/', views.mouse_disposed, name='mouse_disposed'),  # Dispose of a specific mouse
+    path('success_disposed_ups/<int:ups_id>/', views.ups_disposed, name='ups_disposed'),  # Dispose of a specific ups
 
     #add keyboard
     path('add_keyboard/<int:package_id>/', views.add_keyboard_to_package, name='add_keyboard_to_package'),
     path('add_monitor/<int:package_id>/', views.add_monitor_to_package, name='add_monitor_to_package'),
+    path('add_mouse/<int:package_id>/', views.add_mouse_to_package, name='add_mouse_to_package'),
+    path('add_ups/<int:package_id>/', views.add_ups_to_package, name='add_ups_to_package'),
     
 
     
@@ -47,9 +50,6 @@ urlpatterns = [
     # Mouse URLs
     path('mouse_details/', views.mouse_details, name='mouse_details'),  # View all mice
    
-
-    # Add Mouse
-    path('add_mouse/<int:package_id>/', views.add_mouse_to_package, name='add_mouse_to_package'),
 
     # Mouse detailed view
     path('mouse_detailed_view/<int:mouse_id>/', views.mouse_detailed_view, name='mouse_detailed_view'),

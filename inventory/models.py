@@ -131,6 +131,7 @@ class MonitorDetails(models.Model):
     monitor_model_db = models.CharField(max_length=255)
     monitor_size_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the monitor is dispose
+    created_at = models.DateTimeField(default=timezone.now)  # Date when the monitor was added
 
     def __str__(self):
         return f"{self.monitor_brand_db} {self.monitor_model_db} ({self.monitor_sn_db})"
@@ -145,6 +146,7 @@ class UserDetails(models.Model):
     user_Enduser = models.CharField(max_length=100, blank=True, null=True)
     user_Enduser_designation = models.CharField(max_length=100, blank=True, null=True)
     user_Enduser_section = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)  # Date when the user was added
 
     def __str__(self):
         return f"{self.user_Asset_owner} {self.user_Asset_designation} ({self.user_Asset_section})" 
@@ -163,6 +165,7 @@ class KeyboardDetails(models.Model):
     keyboard_brand_db = models.CharField(max_length=255)
     keyboard_model_db = models.CharField(max_length=255)
     is_disposed = models.BooleanField(default=False)  # To indicate if the keyboard is disposed
+    created_at = models.DateTimeField(default=timezone.now)  # Date when the keyboard was added
 
     def __str__(self):
         return f"{self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
@@ -198,6 +201,7 @@ class MouseDetails(models.Model):
     mouse_brand_db = models.CharField(max_length=255, null=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the mouse is disposed
+    created_at = models.DateTimeField(default=timezone.now)  # Date when the mouse was added
     
 
     def __str__(self):
@@ -216,15 +220,33 @@ class UPSDetails(models.Model):
     ups_sn_db = models.CharField(max_length=255)
     brand_db = models.CharField(max_length=255)
     model_db = models.CharField(max_length=255)
+    is_disposed = models.BooleanField(default=False)  # To indicate if the mouse is disposed
+    created_at = models.DateTimeField(default=timezone.now)  # Date when the UPS was added
 
     def __str__(self):
         return f"{self.brand_db} {self.model_db} ({self.ups_sn_db})"
 
 class DisposedUPS(models.Model):
-    ups = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
+    ups_db = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
         return f"Disposed: {self.ups}"
+    
+
+class DocumentsDetails(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='docs', on_delete=models.CASCADE)
+    docs_PAR = models.CharField(max_length=100, blank=True, null=True)
+    docs_Propertyno = models.CharField(max_length=100, blank=True, null=True)
+    docs_Acquisition_Type = models.CharField(max_length=100, blank=True, null=True)
+    docs_Value = models.CharField(max_length=100, blank=True, null=True)
+    docs_Datereceived= models.CharField(max_length=100, blank=True, null=True)
+    docs_Dateinspected = models.CharField(max_length=100, blank=True, null=True)
+    docs_Supplier = models.CharField(max_length=100, blank=True, null=True)
+    docs_Status = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"
     
 
