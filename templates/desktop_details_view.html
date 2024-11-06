@@ -19,7 +19,7 @@
                 <span class="btn-label"><i class="fa fa-print"></i></span> Print
               </a>
             </div>
-          </div>
+          </div> 
           <div class="card-body">
             <!-- Pills Navigation -->
             <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-pills-icons justify-content-center" id="pills-tab-with-icon" role="tablist">
@@ -625,7 +625,7 @@
               <p class="text-danger">No available mice for this desktop package.</p>
             {% endif %}
       
-            <!-- Disposed Mice Table -->
+            <!-- Disposed UPS Table -->
             {% if disposed_ups.exists %}
             <hr>
             <h5>Disposed Mice</h5>
@@ -693,44 +693,141 @@
         </div>
       </div>
 
+
       <!-- User Details Tab -->
-     
-      <div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Keyboard Details</div>
-          </div>
-          <div class="card-body">
-            <table class="table table-head-bg-success table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
-                  <th scope="col">DETAILS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ keyboard_detailsx.package_no }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
-                  <td>{{ keyboard_detailsx.serial_no }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
-                  <td>{{ keyboard_detailsx.brand_name }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
-                  <td>{{ keyboard_detailsx.model }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
-          </div>
-        </div>
+<div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <div class="card-title">User Details</div>
+    </div>
+    
+    <div class="card-body">
+      {% if user_details %}
+        <!-- User Details Table -->
+        <table class="table table-head-bg-success table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>ATTRIBUTES</th>
+              <th>DETAILS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Package Number:</strong></td>
+              <td>{{ user_details.desktop_package_db }}</td>
+            </tr>
+            <tr>
+              <td><strong>Asset Owner:</strong></td>
+              <td>{{ user_details.user_Asset_owner }}</td>
+            </tr>
+            <tr>
+              <td><strong>Asset Owner Designation</strong></td>
+              <td>{{ user_details.user_Asset_designation }}</td>
+            </tr>
+            <tr>
+              <td><strong>Asset Owner Section:</strong></td>
+              <td>{{ user_details.user_Asset_section }}</td>
+            </tr>
+            <tr>
+              <td><strong>End User:</strong></td>
+              <td>{{ user_details.user_Enduser }}</td>
+            </tr>
+            <tr>
+              <td><strong>End User Designation:</strong></td>
+              <td>{{ user_details.user_Enduser_designation }}</td>
+            </tr>
+            <tr>
+              <td><strong>End User Section:</strong></td>
+              <td>{{ user_details.user_Enduser_section }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editEndUserModal">Edit EndUser</a>
+        <a href="{% url 'transfer_ownership' desktop_package.id %}" class="btn btn-warning">Transfer Ownership</a>
+      {% else %}
+        <p class="text-danger">No available user for this desktop package.</p>
+      {% endif %}
+    </div>
+
+<!-- Edit EndUser Modal -->
+<div class="modal fade" id="editEndUserModal" tabindex="-1" aria-labelledby="editEndUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editEndUserModalLabel">Edit End User Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        <form id="editEndUserForm" method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="enduser" class="form-label">End User</label>
+            <input type="text" name="enduser" id="enduser" class="form-control" value="{{ user_details.user_Enduser }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="enduser_designation" class="form-label">End User Designation</label>
+            <input type="text" name="enduser_designation" id="enduser_designation" class="form-control" value="{{ user_details.user_Enduser_designation }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="enduser_section" class="form-label">End User Section</label>
+            <input type="text" name="enduser_section" id="enduser_section" class="form-control" value="{{ user_details.user_Enduser_section }}" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    
+  </div>
+
+  
+<!-- Ownership Transfer History Tab -->
+
+<div class="card">
+  <div class="card-header">
+    <h4 class="card-title">Ownership Transfer History</h4>
+  </div>
+  <div class="card-body">
+    {% if transfer_history %}
+      <table class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>Transferred From</th>
+            <th>Transferred To</th>
+            <th>Designation</th>
+            <th>Section</th>
+            <th>Transfer Date</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transfer in transfer_history %}
+            <tr>
+              <td>{{ transfer.transferred_from }}</td>
+              <td>{{ transfer.transferred_to }}</td>
+              <td>{{ transfer.owner_designation }}</td>
+              <td>{{ transfer.owner_section }}</td>
+              <td>{{ transfer.transfer_date|date:"Y-m-d H:i" }}</td>
+              <td>{{ transfer.notes }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>No transfer history available.</p>
+    {% endif %}
+  </div>
+</div>
+</div>
+<!-- End User Details Tab -->
+
+
+<!-- End Ownership Transfer History Tab -->
+
 
       <!-- Documents Tab -->
      

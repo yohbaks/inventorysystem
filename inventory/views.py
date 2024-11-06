@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from inventory.models import DESKTOPPACKAGE
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, OwnershipTransfer, OwnershipHistory
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.db import transaction
 
 
-
+ 
 
 
 # Create your views here.
@@ -290,6 +290,8 @@ def desktop_details_view(request, desktop_id):
     keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False)
+    ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+    user_details = UserDetails.objects.filter(desktop_package_db=desktop_package).first()
 
     # Get disposed keyboards,mouse, monitor in desktop_details_view
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package=desktop_package)
@@ -304,9 +306,8 @@ def desktop_details_view(request, desktop_id):
     has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
     has_active_ups = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
 
-   
-    # Get all ups related to the desktop package
-    ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+    #ownership
+    transfer_history = OwnershipTransfer.objects.filter(desktop_package=desktop_package).order_by('-transfer_date')
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
@@ -322,7 +323,9 @@ def desktop_details_view(request, desktop_id):
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
-        'desktop_package': desktop_package  # Pass desktop_package to the template for URL resolution
+        'user_details' : user_details,
+        'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
+        'transfer_history' : transfer_history,
     })
 
 
@@ -671,3 +674,63 @@ def recent_it_equipment_base(request):
         # 'recent_keyboards': recent_keyboards,
     })
 
+
+
+###### OWNERSHIP
+
+
+def transfer_ownership(request, package_id):
+    # Get the specific desktop package by ID
+    desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+    
+    # Fetch the current owner details from UserDetails associated with the desktop package
+    user_details = UserDetails.objects.filter(desktop_package_db=desktop_package).first()
+    current_owner = user_details.user_Asset_owner if user_details else "Unknown"
+    current_designation = user_details.user_Asset_designation if user_details else "Unknown"
+    current_section = user_details.user_Asset_section if user_details else "Unknown"
+    
+    if request.method == 'POST':
+        # Retrieve new owner details from the form
+        new_owner = request.POST.get('new_owner')
+        new_designation = request.POST.get('new_designation')
+        new_section = request.POST.get('new_section')
+        transfer_notes = request.POST.get('notes')
+
+        # Save the transfer record in OwnershipTransfer
+        OwnershipTransfer.objects.create(
+            desktop_package=desktop_package,
+            transferred_from=current_owner,
+            transferred_to=new_owner,
+            owner_designation=new_designation,
+            owner_section=new_section,
+            transfer_date=timezone.now(),
+            notes=transfer_notes
+        )
+
+        # Update or create UserDetails with the new owner information
+        if user_details:
+            # Update existing user details
+            user_details.user_Asset_owner = new_owner
+            user_details.user_Asset_designation = new_designation
+            user_details.user_Asset_section = new_section
+            user_details.save()
+        else:
+            # Create a new UserDetails record if it doesn't exist
+            UserDetails.objects.create(
+                desktop_package_db=desktop_package,
+                user_Asset_owner=new_owner,
+                user_Asset_designation=new_designation,
+                user_Asset_section=new_section,
+                created_at=timezone.now()
+            )
+
+        # Redirect back to the desktop details view
+        return redirect('desktop_details_view', desktop_id=package_id)
+
+    # Render the transfer ownership page with current owner's information
+    return render(request, 'transfer_ownership.html', {
+        'desktop_package': desktop_package,
+        'current_owner': current_owner,
+        'current_designation': current_designation,
+        'current_section': current_section,
+    })

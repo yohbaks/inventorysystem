@@ -150,6 +150,8 @@ class UserDetails(models.Model):
 
     def __str__(self):
         return f"{self.user_Asset_owner} {self.user_Asset_designation} ({self.user_Asset_section})" 
+    
+ 
 
 class DisposedMonitor(models.Model):
     monitor_disposed_db = models.ForeignKey(MonitorDetails, on_delete=models.CASCADE)
@@ -171,7 +173,7 @@ class KeyboardDetails(models.Model):
         return f"{self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
     
 
-    @property
+    @property 
     def asset_owner_details(self):
         """Return a formatted string of asset owner details (owner, designation, section)."""
         user_details = self.desktop_package.user.first()  # Assuming 'user' is the related_name in UserDetails
@@ -250,3 +252,24 @@ class DocumentsDetails(models.Model):
         return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"
     
 
+class OwnershipTransfer(models.Model):
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    transferred_from = models.CharField(max_length=100, blank=True, null=True)
+    transferred_to = models.CharField(max_length=100)
+    owner_designation = models.CharField(max_length=100, null=True, blank=True)  # Add this field
+    owner_section = models.CharField(max_length=100, null=True, blank=True)      # Add this field
+    transfer_date = models.DateTimeField(default=timezone.now)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Transfer from {self.transferred_from} to {self.transferred_to} on {self.transfer_date}"
+    
+class OwnershipHistory(models.Model):
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    previous_owner = models.CharField(max_length=100)
+    previous_designation = models.CharField(max_length=100)
+    previous_section = models.CharField(max_length=100)
+    transfer_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Transfer of {self.desktop_package} on {self.transfer_date}"

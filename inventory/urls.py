@@ -5,7 +5,7 @@ from inventory import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-
+ 
 
 
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('add_equipment/', views.add_equipment_func, name='add_equipment_func_input'),
     path('success_add/', views.success_page, name='success_add_page'),
     path('<int:id>/', views.desktop_detailed_view, name='desktop_detailed_view'),  # Correct pattern for detailed view
+
     path('disposed_desktop_list/', views.disposed_desktop_list, name='disposed_desktop_list'),  # List disposed desktops
     path('dispose_desktop/<int:desktop_id>/', views.dispose_desktop, name='dispose_desktop'),  # Dispose a desktop
     path('desktop_all_detailed_view/', views.all_detailed_view, name='desktop_all_detailed_view'),
@@ -36,6 +37,9 @@ urlpatterns = [
     path('add_monitor/<int:package_id>/', views.add_monitor_to_package, name='add_monitor_to_package'),
     path('add_mouse/<int:package_id>/', views.add_mouse_to_package, name='add_mouse_to_package'),
     path('add_ups/<int:package_id>/', views.add_ups_to_package, name='add_ups_to_package'),
+
+    #Transfer Area
+    path('transfer_ownership/<int:package_id>/', views.transfer_ownership, name='transfer_ownership'),
     
 
     
