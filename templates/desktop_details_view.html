@@ -743,7 +743,7 @@
           </tbody>
         </table>
         <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editEndUserModal">Edit EndUser</a>
-        <a href="{% url 'transfer_ownership' desktop_package.id %}" class="btn btn-warning">Transfer Ownership</a>
+        <a href="" class="btn btn-warning">Transfer Ownership</a>
       {% else %}
         <p class="text-danger">No available user for this desktop package.</p>
       {% endif %}
@@ -792,7 +792,7 @@
     <h4 class="card-title">Ownership Transfer History</h4>
   </div>
   <div class="card-body">
-    {% if transfer_history %}
+    <!-- {% if transfer_history %} -->
       <table class="table table-bordered table-hover">
         <thead>
           <tr>
@@ -805,21 +805,21 @@
           </tr>
         </thead>
         <tbody>
-          {% for transfer in transfer_history %}
+          <!-- {% for transfer in transfer_history %} -->
             <tr>
-              <td>{{ transfer.transferred_from }}</td>
-              <td>{{ transfer.transferred_to }}</td>
-              <td>{{ transfer.owner_designation }}</td>
-              <td>{{ transfer.owner_section }}</td>
-              <td>{{ transfer.transfer_date|date:"Y-m-d H:i" }}</td>
-              <td>{{ transfer.notes }}</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
             </tr>
-          {% endfor %}
+          <!-- {% endfor %} -->
         </tbody>
       </table>
-    {% else %}
+    <!-- {% else %} -->
       <p>No transfer history available.</p>
-    {% endif %}
+    <!-- {% endif %} -->
   </div>
 </div>
 </div>

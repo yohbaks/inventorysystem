@@ -1,13 +1,12 @@
 from django.contrib import admin
-from .models import DESKTOPPACKAGE
 from .models import (
     Desktop_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor, 
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
-    UPSDetails, DisposedUPS, DocumentsDetails, OwnershipTransfer, OwnershipHistory
+    UPSDetails, DisposedUPS, DocumentsDetails
 )
 
 # Register your models here.
-admin.site.register(DESKTOPPACKAGE)
+# admin.site.register(DESKTOPPACKAGE)
 admin.site.register(Desktop_Package)
 admin.site.register(DesktopDetails)
 admin.site.register(MonitorDetails)
@@ -20,5 +19,5 @@ admin.site.register(DisposedMouse)
 admin.site.register(UPSDetails)
 admin.site.register(DisposedUPS)
 admin.site.register(DocumentsDetails)
-admin.site.register(OwnershipTransfer)
-admin.site.register(OwnershipHistory)
+
+

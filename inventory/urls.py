@@ -7,19 +7,10 @@ from django.conf.urls.static import static
 
  
 
-
-
-
 urlpatterns = [
-    # path('', views.desktop_list_func, name='desktop_list_page'),
-    path('', views.recent_it_equipment_base, name='recent_it_equipment'),
-    path('add_equipment/', views.add_equipment_func, name='add_equipment_func_input'),
-    path('success_add/', views.success_page, name='success_add_page'),
-    path('<int:id>/', views.desktop_detailed_view, name='desktop_detailed_view'),  # Correct pattern for detailed view
 
-    path('disposed_desktop_list/', views.disposed_desktop_list, name='disposed_desktop_list'),  # List disposed desktops
-    path('dispose_desktop/<int:desktop_id>/', views.dispose_desktop, name='dispose_desktop'),  # Dispose a desktop
-    path('desktop_all_detailed_view/', views.all_detailed_view, name='desktop_all_detailed_view'),
+    path('', views.recent_it_equipment_base, name='recent_it_equipment'),
+    path('success_add/', views.success_page, name='success_add_page'),
 
     #desktop_details
     path('desktop_details/', views.desktop_package_base, name='desktop_details'),  # URL pattern for desktop details
@@ -38,11 +29,6 @@ urlpatterns = [
     path('add_mouse/<int:package_id>/', views.add_mouse_to_package, name='add_mouse_to_package'),
     path('add_ups/<int:package_id>/', views.add_ups_to_package, name='add_ups_to_package'),
 
-    #Transfer Area
-    path('transfer_ownership/<int:package_id>/', views.transfer_ownership, name='transfer_ownership'),
-    
-
-    
     # Keyboard detailed view
     path('keyboard_detailed_view/<int:keyboard_id>/', views.keyboard_detailed_view, name='keyboard_detailed_view'),
 
