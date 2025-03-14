@@ -175,3 +175,18 @@ class DocumentsDetails(models.Model):
     def __str__(self):
         return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"
     
+ class AssetOwnerDetails_new(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='docs', on_delete=models.CASCADE)
+    docs_PAR = models.CharField(max_length=100, blank=True, null=True)
+    docs_Propertyno = models.CharField(max_length=100, blank=True, null=True)
+    docs_Acquisition_Type = models.CharField(max_length=100, blank=True, null=True)
+    docs_Value = models.CharField(max_length=100, blank=True, null=True)
+    docs_Datereceived= models.CharField(max_length=100, blank=True, null=True)
+    docs_Dateinspected = models.CharField(max_length=100, blank=True, null=True)
+    docs_Supplier = models.CharField(max_length=100, blank=True, null=True)
+    docs_Status = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"   
+    
