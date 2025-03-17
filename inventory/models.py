@@ -175,18 +175,32 @@ class DocumentsDetails(models.Model):
     def __str__(self):
         return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"
     
- class AssetOwnerDetails_new(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='docs', on_delete=models.CASCADE)
-    docs_PAR = models.CharField(max_length=100, blank=True, null=True)
-    docs_Propertyno = models.CharField(max_length=100, blank=True, null=True)
-    docs_Acquisition_Type = models.CharField(max_length=100, blank=True, null=True)
-    docs_Value = models.CharField(max_length=100, blank=True, null=True)
-    docs_Datereceived= models.CharField(max_length=100, blank=True, null=True)
-    docs_Dateinspected = models.CharField(max_length=100, blank=True, null=True)
-    docs_Supplier = models.CharField(max_length=100, blank=True, null=True)
-    docs_Status = models.CharField(max_length=100, blank=True, null=True)
+    
+
+class OwnershipTransfer(models.Model):
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    transferred_from = models.CharField(max_length=100, blank=True, null=True)
+    transferred_to = models.CharField(max_length=100)
+    owner_designation = models.CharField(max_length=100, null=True, blank=True)  # Add this field
+    owner_section = models.CharField(max_length=100, null=True, blank=True)      # Add this field
+    transfer_date = models.DateTimeField(default=timezone.now)
+    notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"   
+        return f"Transfer from {self.transferred_from} to {self.transferred_to} on {self.transfer_date}"
     
+class OwnershipHistory(models.Model):
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    previous_owner = models.CharField(max_length=100)
+    previous_designation = models.CharField(max_length=100)
+    previous_section = models.CharField(max_length=100)
+    transfer_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Transfer of {self.desktop_package} on {self.transfer_date}"
+    
+class Employee(models.Model):
+    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    employee_fname = models.CharField(max_length=100, blank=True, null=True)
+    employee_mname = models.CharField(max_length=100, blank=True, null=True)
+    employee_lname = models.CharField(max_length=100, blank=True, null=True)

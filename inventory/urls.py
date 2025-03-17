@@ -49,8 +49,10 @@ urlpatterns = [
     
 
     # Add this to your urlpatterns
-    
     path('add_desktop_package_with_details/', views.add_desktop_package_with_details, name='add_desktop_package_with_details'),
+
+    #employees
+    path('employees/', views.employees, name='employees'),  # URL pattern for desktop details
 
 
 
