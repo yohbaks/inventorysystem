@@ -144,7 +144,7 @@
 
 
 
-<!-- 2 Separate Container for Additional Details Monitor --> 
+<!-- Monitor Separate Container for Additional Details Monitor --> 
       
 <div id="MonitorContainer" class="container" style="display: none;">
   <div class="card col">
@@ -152,31 +152,74 @@
       <h3><i class="fas fa-desktop"> &nbsp;</i>Monitor Details</h3>
     </div>
     <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Desktop.</p>
+      <p>Here you can add extra details specifically related to the selected Monitor.</p>
 
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
-            <label for="keyboardBrand">Monitor Serial Number</label>
+            <label for="MonitorSerial">Monitor Serial Number</label>
             <input type="text" name="monitor_sn" id="monitor_sn" class="form-control" required>
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
-            <label for="keyboardModel">Monitor Brand</label>
+            <label for="MonitorBrand">Monitor Brand</label>
             <input type="text" name="monitor_brand" id="monitor_brand" class="form-control">
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
-            <label for="keyboardSerial">Monitor Model</label>
+            <label for="MonitorModel">Monitor Model</label>
             <input type="text" name="monitor_model" id="monitor_model" class="form-control" required>
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
-            <label for="keyboardSerial">Monitor Size</label>
+            <label for="MonitorSize">Monitor Size</label>
             <input type="text" name="monitor_size" id="monitor_size" class="form-control" required>
+          </div>
+        </div>
+
+      </div>
+      
+    </div>
+
+    
+  </div>
+</div>
+
+<!-- Keyboard Separate Container for Additional Details -->
+<div id="KeyboardContainer" class="container" style="display: none;">
+  <div class="card col">
+    <div class="card-header">
+      <h3><i class="fas fa-desktop"> &nbsp;</i>Keyboard Details</h3>
+    </div>
+    <div class="card-body">
+      <p>Here you can add extra details specifically related to the selected Keyboard.</p>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardSerial">Keyboard Serial Number</label>
+            <input type="text" name="keyboard_sn" id="keyboard_sn" class="form-control">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardBrand">Keyboard Brand</label>
+            <input type="text" name="keyboard_brand" id="keyboard_brand" class="form-control">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardModel">Monitor Model</label>
+            <input type="text" name="monitor_model" id="monitor_model" class="form-control">
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="keyboardSize">Monitor Size</label>
+            <input type="text" name="monitor_size" id="monitor_size" class="form-control">
           </div>
         </div>
 
@@ -190,9 +233,6 @@
     </div>
   </div>
 </div>
-
-<!-- Separate Container for Additional Details -->
-
 
 </div>
 
@@ -209,6 +249,7 @@
     // Hide additional details container
     
     document.getElementById('MonitorContainer').style.display = 'none';
+    document.getElementById('KeyboardContainer').style.display = 'none';
 
 
 
@@ -216,8 +257,8 @@
     const selectedValue = this.value;
     if (selectedValue === 'Desktop') {
       document.getElementById('desktopForm').style.display = 'block';
-
       document.getElementById('MonitorContainer').style.display = 'block';
+      document.getElementById('KeyboardContainer').style.display = 'block';
 
 
     } else if (selectedValue === 'Laptop') {

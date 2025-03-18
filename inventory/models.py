@@ -90,6 +90,7 @@ class KeyboardDetails(models.Model):
     keyboard_sn_db = models.CharField(max_length=255)
     keyboard_brand_db = models.CharField(max_length=255)
     keyboard_model_db = models.CharField(max_length=255)
+    keyboard_size_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the keyboard is disposed
     created_at = models.DateTimeField(default=timezone.now)  # Date when the keyboard was added
 

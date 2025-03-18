@@ -408,6 +408,14 @@ def add_desktop_package_with_details(request):
                 monitor_size_db=request.POST.get('monitor_size')    
             )
 
+            KeyboardDetails.objects.create(
+                desktop_package=desktop_package,
+                keyboard_sn_db=request.POST.get('keyboard_sn'),
+                keyboard_brand_db=request.POST.get('keyboard_brand'),
+                keyboard_model_db=request.POST.get('monitor_model'),
+                keyboard_size_db=request.POST.get('monitor_size')
+            )
+
         return redirect('success_add_page')
 
     return render(request, 'add_desktop_package_with_details.html')
