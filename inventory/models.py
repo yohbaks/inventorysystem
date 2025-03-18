@@ -97,20 +97,6 @@ class KeyboardDetails(models.Model):
         return f"{self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
     
 
-    @property 
-    def asset_owner_details(self):
-        """Return a formatted string of asset owner details (owner, designation, section)."""
-        user_details = self.desktop_package.user.first()  # Assuming 'user' is the related_name in UserDetails
-        if user_details:
-            return f"{user_details.user_Asset_owner} ({user_details.user_Asset_designation}, {user_details.user_Asset_section})"
-        return "No Owner Details"
-
-    
-    @property
-    def computer_name(self):
-        # Access the DesktopDetails related to this keyboard's desktop_package
-        desktop_details = DesktopDetails.objects.filter(desktop_package=self.desktop_package).first()
-        return desktop_details.computer_name if desktop_details else "N/A" 
     
 
 class DisposedKeyboard(models.Model):
@@ -204,3 +190,9 @@ class Employee(models.Model):
     employee_fname = models.CharField(max_length=100, blank=True, null=True)
     employee_mname = models.CharField(max_length=100, blank=True, null=True)
     employee_lname = models.CharField(max_length=100, blank=True, null=True)
+    employee_position = models.CharField(max_length=100, blank=True, null=True)   
+    employee_office = models.CharField(max_length=100, blank=True, null=True)
+    employee_status = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.employee_fname} {self.employee_office}"

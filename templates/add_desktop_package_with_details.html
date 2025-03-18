@@ -20,12 +20,7 @@
     </div>
 
     <!-- Success and Error Messages -->
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-      <strong>{{ message.tags|title }}:</strong> {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
+   
 
     <!-- Main Form Container -->  
     <div class="container">
@@ -142,9 +137,7 @@
         
       </div>
     </div>
-    <div class="card-action">
-      <!-- Add card action buttons or other elements if needed -->
-    </div>
+    
   </div>
 </div>
 
@@ -153,7 +146,7 @@
 
 <!-- 2 Separate Container for Additional Details Monitor --> 
       
-<div id="2additionalDetailsContainer" class="container" style="display: none;">
+<div id="MonitorContainer" class="container" style="display: none;">
   <div class="card col">
     <div class="card-header">
       <h3><i class="fas fa-desktop"> &nbsp;</i>Monitor Details</h3>
@@ -161,7 +154,6 @@
     <div class="card-body">
       <p>Here you can add extra details specifically related to the selected Desktop.</p>
 
-      <!-- Keyboard Details -->
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
@@ -193,215 +185,15 @@
     </div>
 
     <div class="card-action">
-      <!-- Add card action buttons or other elements if needed -->
-    </div>
-    
-  </div>
-</div>
-
-<!-- Separate Container for Additional Details -->
-
-<div id="additionalDetailsContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header card-title">
-
-      <h3><i class="fas fa-keyboard"> &nbsp;</i>Keyboard Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Desktop.</p>
-
-      <!-- Keyboard Details -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardBrand">Keyboard Brand</label>
-            <input type="text" name="keyboard_brand" id="keyboard_brand" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">Keyboard Model</label>
-            <input type="text" name="keyboard_model" id="keyboard_model" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardSerial">Keyboard Serial Number</label>
-            <input type="text" name="keyboard_sn" id="keyboard_sn" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="computerNameTemp">Computer Name Temp</label>
-            <input type="text" name="computer_name" id="computer_name" class="form-control" required>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="card-action">
-      <!-- Add card action buttons or other elements if needed -->
-    </div>
-  </div>
-</div>
-
-
-<!-- Separate Container for Additional Details -->
-<div id="3additionalDetailsContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-mouse-pointer"> &nbsp;</i>Mouse Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Desktop.</p>
-
-      <!-- Mouse Details -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardBrand">Serial Number</label>
-            <input type="text" name="mouse_sn" id="mouse_sn" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">Mouse Brand</label>
-            <input type="text" name="mouse_brand" id="mouse_brand" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardSerial">Mouse Model</label>
-            <input type="text" name="mouse_model" id="mouse_model" class="form-control" required>
-          </div>
-        </div>
-        
-
-      </div>
-      
-    </div>
-    <div class="card-action">
-    </div>
-     </div>
-</div>
-
-<!-- Separate Container for Additional Details -->
-<div id="4additionalDetailsContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-plug"> &nbsp;</i>UPS Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Desktop.</p>
-
-      <!-- UPS Details -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardBrand">Serial Number</label>
-            <input type="text" name="ups_sn" id="ups_sn" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">UPS Brand</label>
-            <input type="text" name="ups_brand" id="ups_brand" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardSerial">UPS Model</label>
-            <input type="text" name="ups_model" id="ups_model" class="form-control" required>
-          </div>
-        </div>
-        
-
-      </div>
-      
-    </div>
-    <div class="card-action">
-      
-    </div>
-     </div>
-</div>
-
-
-<!-- Separate Container for Additional Details -->
-<div id="5additionalDetailsContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-money-check"> &nbsp;</i>Document Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Desktop.</p>
-
-      <!-- UPS Details -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardBrand">Serial Number</label>
-            <input type="text" name="ups_sn" id="ups_sn" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">UPS Brand</label>
-            <input type="text" name="ups_brand" id="ups_brand" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardSerial">UPS Model</label>
-            <input type="text" name="ups_model" id="ups_model" class="form-control" required>
-          </div>
-        </div>
-        
-
-      </div>
-      
-    </div>
-   
-     </div>
-</div>
-
-
-<div id="6additionalDetailsContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-user-edit"> &nbsp;</i>User Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Desktop.</p>
-
-      <!-- UPS Details -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardBrand">Serial Number</label>
-            <input type="text" name="ups_sn" id="ups_sn" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">UPS Brand</label>
-            <input type="text" name="ups_brand" id="ups_brand" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardSerial">UPS Model</label>
-            <input type="text" name="ups_model" id="ups_model" class="form-control" required>
-          </div>
-        </div>
-        
-
-      </div>
-      
-    </div>
-    <div class="card-action">
       <button class="btn btn-success mt-3">Submit</button>
       <button class="btn btn-danger mt-3" type="reset">Cancel</button>
     </div>
-     </div>
+  </div>
+</div>
+
+<!-- Separate Container for Additional Details -->
+
+
 </div>
 
 
@@ -415,23 +207,19 @@
     });
     
     // Hide additional details container
-    document.getElementById('additionalDetailsContainer').style.display = 'none';
-    document.getElementById('2additionalDetailsContainer').style.display = 'none';
-    document.getElementById('3additionalDetailsContainer').style.display = 'none';
-    document.getElementById('4additionalDetailsContainer').style.display = 'none';
-    document.getElementById('5additionalDetailsContainer').style.display = 'none';
-    document.getElementById('6additionalDetailsContainer').style.display = 'none';
+    
+    document.getElementById('MonitorContainer').style.display = 'none';
+
+
 
     // Show the selected form and additional details if Desktop is selected
     const selectedValue = this.value;
     if (selectedValue === 'Desktop') {
       document.getElementById('desktopForm').style.display = 'block';
-      document.getElementById('additionalDetailsContainer').style.display = 'block';
-      document.getElementById('2additionalDetailsContainer').style.display = 'block';
-      document.getElementById('3additionalDetailsContainer').style.display = 'block';
-      document.getElementById('4additionalDetailsContainer').style.display = 'block';
-      document.getElementById('5additionalDetailsContainer').style.display = 'block';
-      document.getElementById('6additionalDetailsContainer').style.display = 'block';
+
+      document.getElementById('MonitorContainer').style.display = 'block';
+
+
     } else if (selectedValue === 'Laptop') {
       document.getElementById('laptopForm').style.display = 'block';
     } else if (selectedValue === 'UPS') {

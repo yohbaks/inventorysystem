@@ -11,92 +11,94 @@
             <i class="icon-home"></i>
           </a>
         </li>
-        <li class="separator">
-          <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-          <a href="#">Tables</a>
-        </li>
-        <li class="separator">
-          <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-          <a href="#">Datatables</a>
-        </li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Tables</a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Datatables</a></li>
       </ul>
     </div>
-
-    <!-- Table -->
+    
+    <!-- Add Employee Button -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Add Employee</button>
+    
+    <!-- Add Employee Modal -->
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEmployeeModalLabel">Add Employee</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addEmployeeForm" method="POST" action="{% url 'employee_list' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" name="firstName" required>
+              </div>
+              <div class="mb-3">
+                <label for="middleInitial" class="form-label">Middle Initial</label>
+                <input type="text" class="form-control" name="middleInitial" maxlength="1">
+              </div>
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="lastName" required>
+              </div>
+              <div class="mb-3">
+                <label for="position" class="form-label">Position</label>
+                <input type="text" class="form-control" name="position" required>
+              </div>
+              <div class="mb-3">
+                <label for="office" class="form-label">Office</label>
+                <input type="text" class="form-control" name="office" required>
+              </div>
+              <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-control" name="status" required>
+                  <option value="Regular">Regular</option>
+                  <option value="Job Order">Job Order</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-success">Add Employee</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Employee Table -->
     <div class="row">
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
-            <h4 class="card-title">Multi Filter Select</h4>
+            <h4 class="card-title">Employees</h4>
           </div>
           <div class="card-body">
             <div class="table-responsive">
               <table id="multi-filter-select" class="display table table-striped table-hover dataTable">
                 <thead>
-                  <tr role="row">
-                    <th class="sorting_asc" aria-sort="ascending">Name</th>
-                    <th class="sorting">Position</th>
-                    <th class="sorting">Office</th>
-                    <th class="sorting">Age</th>
-                    <th class="sorting">Start date</th>
-                    <th class="sorting">Salary</th>
+                  <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    <th><select class="form-select"><option value=""></option></select></th>
-                    <th><select class="form-select"><option value=""></option></select></th>
-                    <th><select class="form-select"><option value=""></option></select></th>
-                    <th><select class="form-select"><option value=""></option></select></th>
-                    <th><select class="form-select"><option value=""></option></select></th>
-                    <th><select class="form-select"><option value=""></option></select></th>
-                  </tr>
-                </tfoot>
                 <tbody>
-                  <tr role="row" class="odd">
-                    <td class="sorting_1">Airi Satou</td>
-                    <td>Accountant</td>
-                    <td>Tokyo</td>
-                    <td>33</td>
-                    <td>2008/11/28</td>
-                    <td>$162,700</td>
+                  {% for employee in employees %}
+                  <tr>
+                    <td>
+                      {{ employee.employee_fname }}
+                      {% if employee.employee_mname %} {{ employee.employee_mname }}.{% endif %}
+                      {{ employee.employee_lname }}
+                    </td>
+                    <td>{{ employee.employee_position }}</td>
+                    <td>{{ employee.employee_office }}</td>
+                    <td>{{ employee.employee_status }}</td>
+                    <td><button class='btn btn-danger btn-sm'>Delete</button></td>
                   </tr>
-                  <tr role="row" class="even">
-                    <td class="sorting_1">Angelica Ramos</td>
-                    <td>Chief Executive Officer (CEO)</td>
-                    <td>London</td>
-                    <td>47</td>
-                    <td>2009/10/09</td>
-                    <td>$1,200,000</td>
-                  </tr>
-                  <tr role="row" class="odd">
-                    <td class="sorting_1">Ashton Cox</td>
-                    <td>Junior Technical Author</td>
-                    <td>San Francisco</td>
-                    <td>66</td>
-                    <td>2009/01/12</td>
-                    <td>$86,000</td>
-                  </tr>
-                  <tr role="row" class="even">
-                    <td class="sorting_1">Bradley Greer</td>
-                    <td>Software Engineer</td>
-                    <td>London</td>
-                    <td>41</td>
-                    <td>2012/10/13</td>
-                    <td>$132,000</td>
-                  </tr>
-                  <tr role="row" class="odd">
-                    <td class="sorting_1">Brenden Wagner</td>
-                    <td>Software Engineer</td>
-                    <td>San Francisco</td>
-                    <td>28</td>
-                    <td>2011/06/07</td>
-                    <td>$206,850</td>
-                  </tr>
+                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -109,48 +111,9 @@
 
 <script>
 $(document).ready(function () {
-  // Initialize DataTable with multi-filter select
   $("#multi-filter-select").DataTable({
     pageLength: 5,
-    initComplete: function () {
-      this.api()
-        .columns()
-        .every(function () {
-          var column = this;
-          var select = $('<select class="form-select"><option value=""></option></select>')
-            .appendTo($(column.footer()).empty())
-            .on("change", function () {
-              var val = $.fn.dataTable.util.escapeRegex($(this).val());
-              column.search(val ? "^" + val + "$" : "", true, false).draw();
-            });
-
-          column
-            .data()
-            .unique()
-            .sort()
-            .each(function (d, j) {
-              select.append('<option value="' + d + '">' + d + "</option>");
-            });
-        });
-    },
-  });
-
-  // Add Row Functionality (if needed)
-  var action =
-    '<td> <div class="form-button-action"> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
-
-  $("#addRowButton").click(function () {
-    $("#add-row")
-      .dataTable()
-      .fnAddData([
-        $("#addName").val(),
-        $("#addPosition").val(),
-        $("#addOffice").val(),
-        action,
-      ]);
-    $("#addRowModal").modal("hide");
   });
 });
 </script>
-
 {% endblock %}

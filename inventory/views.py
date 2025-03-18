@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -400,37 +400,12 @@ def add_desktop_package_with_details(request):
                 desktop_Office_keys=request.POST.get('desktop_Office_keys')
             )
 
-            # Create Keyboard Details without manually setting id
-            KeyboardDetails.objects.create(
-                desktop_package=desktop_package,
-                keyboard_sn=request.POST.get('keyboard_sn'),
-                brand=request.POST.get('keyboard_brand'),
-                model=request.POST.get('keyboard_model')
-            )
-
-            # Create Monitor Details without manually setting id
             MonitorDetails.objects.create(
                 desktop_package_db=desktop_package,
                 monitor_sn_db=request.POST.get('monitor_sn'),
                 monitor_brand_db=request.POST.get('monitor_brand'),
                 monitor_model_db=request.POST.get('monitor_model'),
-                monitor_size_db=request.POST.get('monitor_size')
-            )
-
-            # Create Mouse Details without manually setting id
-            MouseDetails.objects.create(
-                desktop_package=desktop_package,
-                mouse_sn_db=request.POST.get('mouse_sn'),
-                mouse_brand_db=request.POST.get('mouse_brand'),
-                mouse_model_db=request.POST.get('mouse_model')
-            )
-
-            # Create UPS Details without manually setting id
-            UPSDetails.objects.create(
-                desktop_package=desktop_package,
-                ups_sn_db=request.POST.get('ups_sn'),
-                brand_db=request.POST.get('ups_brand'),
-                model_db=request.POST.get('ups_model')
+                monitor_size_db=request.POST.get('monitor_size')    
             )
 
         return redirect('success_add_page')
@@ -453,7 +428,28 @@ def recent_it_equipment_base(request):
     })
 
 ########## this data will render test only for template
-def employees(request):
-    return render(request, 'employees.html', {
-        'desktops_with_items': [],  # Empty list to avoid errors in the template
-    })
+
+
+def employee_list(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('firstName')
+        middle_initial = request.POST.get('middleInitial')
+        last_name = request.POST.get('lastName')
+        position = request.POST.get('position', 'Unknown')  # Default if missing
+        office = request.POST.get('office', 'Unknown')  # Default if missing
+        status = request.POST.get('status')
+
+        # Create new employee
+        Employee.objects.create(
+            employee_fname=first_name,
+            employee_mname=middle_initial,
+            employee_lname=last_name,
+            employee_position=position,
+            employee_office=office,
+            employee_status=status
+        )
+
+        return redirect('employee_list')  # Reload the page with new employee added
+
+    employees = Employee.objects.all()
+    return render(request, 'employees.html', {'employees': employees})
