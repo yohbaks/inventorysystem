@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -416,12 +416,39 @@ def add_desktop_package_with_details(request):
                 keyboard_size_db=request.POST.get('monitor_size')
             )
 
+            MouseDetails.objects.create(
+                desktop_package=desktop_package,
+                mouse_sn_db=request.POST.get('mouse_sn'),
+                mouse_brand_db=request.POST.get('mouse_brand'),
+                mouse_model_db=request.POST.get('mouse_model')
+            )
+
+            UPSDetails.objects.create(
+                desktop_package=desktop_package,
+                ups_sn_db=request.POST.get('ups_sn'),
+                ups_brand_db=request.POST.get('ups_brand'),
+                ups_model_db=request.POST.get('ups_model'),
+                ups_capacity_db=request.POST.get('ups_capacity')
+            )
+
+            DocumentsDetails.objects.create(
+                desktop_package=desktop_package,
+                docs_PAR=request.POST.get('par_number_input'),
+                docs_Propertyno=request.POST.get('property_number_input'),
+                docs_Acquisition_Type=request.POST.get('acquisition_type_input'),    
+                docs_Value=request.POST.get('value_desktop_input'),
+                docs_Datereceived=request.POST.get('date_received_input'),
+                docs_Dateinspected=request.POST.get('date_inspected_input'),
+                docs_Supplier=request.POST.get('supplier_name_input'),
+                docs_Status=request.POST.get('status_desktop_input')
+            )
+
         return redirect('success_add_page')
 
     return render(request, 'add_desktop_package_with_details.html')
 
 
-############### (KEYBOARD AND MOUSE)
+
 
 
 ############### (RECENT at BASE)
