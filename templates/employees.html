@@ -109,11 +109,41 @@
   </div>
 </div>
 
-<script>
-$(document).ready(function () {
-  $("#multi-filter-select").DataTable({
-    pageLength: 5,
-  });
-});
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    $(document).ready(function () {
+      $("#editEndUserForm").submit(function (event) { 
+        event.preventDefault();  // Prevent default form submission
+  
+        let desktopId = "{{ desktop_package.id }}";  // Get desktop package ID
+        let formData = $(this).serialize();  // Serialize form data
+  
+        $.ajax({
+          type: "POST",
+          url: "/updateeee_end_user/" + desktopId + "/",
+          data: formData,
+          success: function (response) {
+            if (response.success) {
+              Swal.fire({
+                title: "Success!",
+                text: "End User updated successfully!",
+                icon: "success",
+                showConfirmButton: false,
+                timer: 2000
+              }).then(() => {
+                location.reload();  // Reload page to reflect changes
+              });
+            } else {
+              Swal.fire("Error!", "Failed to update End User.", "error");
+            }
+          },
+          error: function () {
+            Swal.fire("Error!", "Something went wrong!", "error");
+          },
+        });
+      });
+    });
 </script>
 {% endblock %}

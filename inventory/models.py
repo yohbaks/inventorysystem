@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
-from django.utils import timezone
+from django.utils import timezone 
+from django.contrib.auth.models import User     # Import the User model if you have a custom user model, otherwise use the default Django User model  
+from django.utils.timezone import now
 
 
 # Create your models here.
@@ -163,28 +165,6 @@ class DocumentsDetails(models.Model):
     
     
 
-class OwnershipTransfer(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
-    transferred_from = models.CharField(max_length=100, blank=True, null=True)
-    transferred_to = models.CharField(max_length=100)
-    owner_designation = models.CharField(max_length=100, null=True, blank=True)  # Add this field
-    owner_section = models.CharField(max_length=100, null=True, blank=True)      # Add this field
-    transfer_date = models.DateTimeField(default=timezone.now)
-    notes = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"Transfer from {self.transferred_from} to {self.transferred_to} on {self.transfer_date}"
-    
-class OwnershipHistory(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
-    previous_owner = models.CharField(max_length=100)
-    previous_designation = models.CharField(max_length=100)
-    previous_section = models.CharField(max_length=100)
-    transfer_date = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Transfer of {self.desktop_package} on {self.transfer_date}"
-    
 class Employee(models.Model):
     desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE, null=True)
     employee_fname = models.CharField(max_length=100, blank=True, null=True)
@@ -196,3 +176,13 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.employee_fname} {self.employee_lname} - {self.employee_office}"
+    
+
+#This tracks which user changed the End User and when.
+   
+class EndUserChangeHistory(models.Model):
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    old_enduser = models.ForeignKey(Employee, related_name="old_enduser", on_delete=models.SET_NULL, null=True, blank=True)
+    new_enduser = models.ForeignKey(Employee, related_name="new_enduser", on_delete=models.CASCADE, null=True)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically

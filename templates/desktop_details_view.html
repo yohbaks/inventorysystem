@@ -749,6 +749,11 @@
       {% endif %}
     </div>
 
+
+    
+
+
+
 <!-- Edit EndUser Modal -->
 <div class="modal fade" id="editEndUserModal" tabindex="-1" aria-labelledby="editEndUserModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -766,18 +771,60 @@
               <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
             {% endfor %}
           </select>
+          <br>
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
       </div>
     </div>
   </div>
+  
 </div>
+<hr>
+<div class="card-body">
+  <div class="table-responsive">
+  {% comment %} the end user change history view {% endcomment %}
+  <h3>End User Change History</h3>
+  <p>Below is the history of changes made to the End User for this desktop package.</p>
 
-    
+  <table class="table table-head-bg-danger table-bordered table-hover">
+      <thead>
+          <tr>
+              <th>Old End User</th>
+              <th>New End User</th>
+              <th>Changed By</th>
+              <th>Changed At</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for record in enduser_history %}
+          <tr>
+              <td>{{ record.old_enduser.employee_fname }} {{ record.old_enduser.employee_lname }}</td>
+              <td>{{ record.new_enduser.employee_fname }} {{ record.new_enduser.employee_lname }}</td>
+              <td>{{ record.changed_by.username }}</td>
+              <td>{{ record.changed_at }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="4">No history available.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>  
+</div>
+</div>
   </div>
 
-  
+  {% comment %} the end user change history view {% endcomment %}
 
+  
+ 
+  
+      </div>
+
+      
+    </div>
+  
+    
       <!-- Documents Tab -->
      
       <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
@@ -849,6 +896,17 @@
     }
   });
 </script>
+<!-- Bootstrap Toast for success message -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <div id="updateSuccessToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        ✅ End User updated successfully!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
 <script>
   $(document).ready(function () {
     $("#editEndUserForm").submit(function (event) {
@@ -863,17 +921,34 @@
         data: formData,
         success: function (response) {
           if (response.success) {
-            alert("End User updated successfully!");
-            location.reload();  // Reload page to reflect changes
+            // Show Bootstrap Toast on success
+            let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast'));
+            toast.show();
+
+            // Close modal after a short delay
+            setTimeout(function () {
+              $("#editEndUserModal").modal("hide");
+              location.reload(); // Reload to reflect changes
+            }, 1500);
           } else {
-            alert("Failed to update End User.");
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Failed to update End User!",
+            });
           }
         },
         error: function () {
-          alert("Error updating End User.");
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Something went wrong while updating the End User.",
+          });
         },
       });
     });
   });
 </script>
 {% endblock %}
+
+

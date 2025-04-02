@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     Desktop_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor, 
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
-    UPSDetails, DisposedUPS, DocumentsDetails, Employee
+    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory   
 )
 
 # Register your models here.
@@ -20,6 +20,7 @@ admin.site.register(UPSDetails)
 admin.site.register(DisposedUPS)
 admin.site.register(DocumentsDetails)
 admin.site.register(Employee)
+admin.site.register(EndUserChangeHistory)
 
 
 

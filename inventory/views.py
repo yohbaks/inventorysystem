@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, EndUserChangeHistory
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import now
 from django.utils import timezone
 from django.db import transaction
 
@@ -64,6 +65,7 @@ def desktop_details_view(request, desktop_id):
     # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
     desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
+    enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
     employees = Employee.objects.all()
     
     # Get all keyboards,mouse, monitor in desktop_details_view related to the desktop package
@@ -106,6 +108,7 @@ def desktop_details_view(request, desktop_id):
         'ups_detailse': ups_details.first(),
         'user_details' : user_details,
         'employees': employees,  # Pass the list of employees to the template
+        'enduser_history': enduser_history,
         'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
        })
 
@@ -584,23 +587,36 @@ def employee_list(request):
 ######update enduser at my viewpage
 def update_end_user(request, desktop_id):
     if request.method == 'POST':
-        # Get the selected End User from the form
-        enduser_id = request.POST.get('enduser_input')
+        try:
+            new_enduser_id = request.POST.get('enduser_input')
+            new_enduser = get_object_or_404(Employee, id=new_enduser_id)
 
-        if enduser_id:
-            # Get the Employee object based on the selected id
-            enduser = get_object_or_404(Employee, id=enduser_id)
-
-            # Get the UserDetails object related to the given desktop_id
+            # Get UserDetails instead of DesktopDetails
             user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
+            old_enduser = user_details.user_Enduser  # Store old end user
 
-            # Update the enduser in UserDetails
-            user_details.user_Enduser = enduser
+            # Debugging prints
+            print(f"Old End User: {old_enduser}")  
+            print(f"New End User: {new_enduser}")  
+            print(f"User Making Change: {request.user}")  
+
+            # Update end user
+            user_details.user_Enduser = new_enduser
             user_details.save()
 
-            # Send a success response
+            # Save history record
+            history_entry = EndUserChangeHistory(
+                desktop_package=user_details.desktop_package_db,
+                old_enduser=old_enduser if old_enduser else None,  # Prevent NoneType errors
+                new_enduser=new_enduser,
+                changed_by=request.user,
+                changed_at=timezone.now()
+            )
+            history_entry.save()
+            print("History entry saved successfully!")  # Debugging
+
             return JsonResponse({'success': True})
-        else:
-            # If no End User is selected, send an error response
-            return JsonResponse({'success': False, 'error': 'No End User selected.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f"Error updating End User: {e}"})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
