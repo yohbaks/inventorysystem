@@ -307,19 +307,19 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="parnumber">PAR Number</label>
-            <input type="text" class="form-control" id="parnumber" name="par_number_input" value="{{ par_number_input_any }}" placeholder="Enter PAR Number">
+            <input type="text" class="form-control" id="parnumber" name="par_number_input" value="{{ par_number_input_any }}">
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="propertynumber">Property Number</label>
-            <input type="text" class="form-control" id="propertynumber" name="property_number_input" value="{{ property_number_input_any }}" placeholder="Enter Property Number">
+            <input type="text" class="form-control" id="propertynumber" name="property_number_input" value="{{ property_number_input_any }}" >
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="Acquisition">Acquisition Type</label>
-            <input type="text" class="form-control" id="acquisition" name="acquisition_type_input" value="{{ acquisition_type_input_any }}" placeholder="Enter Acquisition Type">
+            <input type="text" class="form-control" id="acquisition" name="acquisition_type_input" value="{{ acquisition_type_input_any }}" >
           </div>
         </div>
       </div>    
@@ -328,19 +328,19 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="value">Package Value</label>
-            <input type="text" class="form-control" id="value" name="value_desktop_input" value="{{ value_desktop_input_any }}" placeholder="Enter Package Value">
+            <input type="text" class="form-control" id="value" name="value_desktop_input" value="{{ value_desktop_input_any }}" >
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="dateReceived">Date Received</label>
-            <input type="text" class="form-control" id="dateReceived" name="date_received_input" value="{{ date_received_input_any }}" placeholder="Date Received of the Unit">
+            <input type="text" class="form-control" id="dateReceived" name="date_received_input" value="{{ date_received_input_any }}" >
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="dateInspected">Date Inspected</label>
-            <input type="text" class="form-control" id="dateInspected" name="date_inspected_input" value="{{ date_inspected_input_any }}" placeholder="Date Inspected of the Unit">
+            <input type="text" class="form-control" id="dateInspected" name="date_inspected_input" value="{{ date_inspected_input_any }}" >
           </div>
         </div>
       </div>    
@@ -349,34 +349,77 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="supplier">Supplier</label>
-            <input type="text" class="form-control" id="supplier" name="supplier_name_input" value="{{ supplier_name_input_any }}" placeholder="Enter Supplier Name">
+            <input type="text" class="form-control" id="supplier" name="supplier_name_input" value="{{ supplier_name_input_any }}" >
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="status">Status</label>
-            <input type="text" class="form-control" id="status" name="status_desktop_input" value="{{ status_desktop_input_any }}" placeholder="Status">
+            <input type="text" class="form-control" id="status" name="status_desktop_input" value="{{ status_desktop_input_any }}" >
           </div>
         </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="computername">Computer Name</label>
-            <input type="text" class="form-control" id="computername" name="computer_name_input" value="{{ computer_name_input_any }}" placeholder="Enter Computer Name">
+            <input type="text" class="form-control" id="computername" name="computer_name_input" value="{{ computer_name_input_any }}" >
           </div>
         </div>
-      </div>  
-      <div class="card-action">
-        <button class="btn btn-success mt-3">Submit</button>
-        <button class="btn btn-danger mt-3" type="reset">Cancel</button>
-      </div>
-    </div>
-
+      
   </div>
-
 </div>
+</div>
+{% comment %} sdf {% endcomment %}
+
+<div id="UserContainer" class="container" style="display: none;">
+  <div class="card col">
+    <div class="card-header">
+      <h3><i class="fas fa-user-alt"> &nbsp;</i>User Details</h3>
+    </div>
+    <div class="card-body">
+      <p>Here you can add extra details specifically related to the selected User.</p>
+
+
+      <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+              <label for="largeSelect">End User</label>
+
+
+              <select class="form-select form-control" id="enduser_input" name="enduser_input">
+                <option value="">Select End User</option>
+                {% for employee in employees %}
+                    <option value="{{ employee.id }}">
+                        {{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}
+                    </option>
+                {% endfor %}
+            </select>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="propertynumber">Asset Owner</label>
+            <select class="form-select form-control" id="assetowner_input" name="assetowner_input">
+              <option value="">Select Asset User</option>
+              {% for employee in employees %}
+                  <option value="{{ employee.id }}">
+                      {{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}
+                  </option>
+              {% endfor %}
+          </select>
+          </div>
+        </div>
+      
  
+        
+        
 
-
+  <div class="card-action">
+    <button class="btn btn-success mt-3">Submit</button>
+    <button class="btn btn-danger mt-3" type="reset">Cancel</button>
+  </div>  
+</div>
+</div>
 
 <!-- JavaScript for Dynamic Form Display -->
 <script>
@@ -393,6 +436,8 @@
     document.getElementById('MouseContainer').style.display = 'none';
     document.getElementById('UPSContainer').style.display = 'none';
     document.getElementById('DocumentsContainer').style.display = 'none';
+    document.getElementById('UserContainer').style.display = 'none';
+    
 
 
 
@@ -405,6 +450,9 @@
       document.getElementById('MouseContainer').style.display = 'block';
       document.getElementById('UPSContainer').style.display = 'block';
       document.getElementById('DocumentsContainer').style.display = 'block';
+      document.getElementById('UserContainer').style.display = 'block';
+      
+      
 
 
     } else if (selectedValue === 'Laptop') {

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 from django.utils import timezone
+
+
 # Create your models here.
 
 
@@ -62,18 +64,14 @@ class MonitorDetails(models.Model):
     
  #userdetails   
 class UserDetails(models.Model):  
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment 
-    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='user', on_delete=models.CASCADE, null=True) 
-    user_Asset_owner = models.CharField(max_length=100, blank=True, null=True)
-    user_Asset_designation = models.CharField(max_length=100, blank=True, null=True)
-    user_Asset_section = models.CharField(max_length=100, blank=True, null=True)
-    user_Enduser = models.CharField(max_length=100, blank=True, null=True)
-    user_Enduser_designation = models.CharField(max_length=100, blank=True, null=True)
-    user_Enduser_section = models.CharField(max_length=100, blank=True, null=True)
-    created_at = models.DateTimeField(default=timezone.now)  # Date when the user was added
+    id = models.AutoField(primary_key=True)  
+    desktop_package_db = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True)  
+    user_Enduser = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='enduser_details')
+    user_Assetowner = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='assetowner_details')
+    created_at = models.DateTimeField(auto_now_add=True)  
 
     def __str__(self):
-        return f"{self.user_Asset_owner} {self.user_Asset_designation} ({self.user_Asset_section})" 
+        return f"{self.user_Enduser}"
     
  
 
@@ -188,7 +186,7 @@ class OwnershipHistory(models.Model):
         return f"Transfer of {self.desktop_package} on {self.transfer_date}"
     
 class Employee(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE, null=True)
     employee_fname = models.CharField(max_length=100, blank=True, null=True)
     employee_mname = models.CharField(max_length=100, blank=True, null=True)
     employee_lname = models.CharField(max_length=100, blank=True, null=True)
@@ -197,4 +195,4 @@ class Employee(models.Model):
     employee_status = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.employee_fname} {self.employee_office}"
+        return f"{self.employee_fname} {self.employee_lname} - {self.employee_office}"

@@ -578,7 +578,7 @@
                 <tbody>
                   <tr>
                     <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                    <td>{{ ups_detailse.desktop_package}}</td>
+                    <td>{{ ups_detailse.desktop_package}}</td>  
                   </tr>
                   <tr>
                     <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -586,11 +586,11 @@
                   </tr>
                   <tr>
                     <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
-                    <td>{{ ups_detailse.brand_db }}</td>
+                    <td>{{ ups_detailse.ups_brand_db }}</td>
                   </tr>
                   <tr>
                     <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
-                    <td>{{ ups_detailse.model_db }}</td>
+                    <td>{{ ups_detailse.ups_model_db }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -718,31 +718,31 @@
             </tr>
             <tr>
               <td><strong>Asset Owner:</strong></td>
-              <td>{{ user_details.user_Asset_owner }}</td>
+              <td>{{ user_details.user_Assetowner.employee_fname }} {{ user_details.user_Assetowner.employee_lname }} </td>
             </tr>
             <tr>
               <td><strong>Asset Owner Designation</strong></td>
-              <td>{{ user_details.user_Asset_designation }}</td>
+              <td>{{ user_details.user_Assetowner.employee_position }}</td>
             </tr>
             <tr>
-              <td><strong>Asset Owner Section:</strong></td>
-              <td>{{ user_details.user_Asset_section }}</td>
+              <td><strong>Asset Owner Office:</strong></td>
+              <td>{{ user_details.user_Assetowner.employee_office }}</td>
             </tr>
             <tr>
               <td><strong>End User:</strong></td>
-              <td>{{ user_details.user_Enduser }}</td>
+              <td>{{ user_details.user_Enduser.employee_fname }}</td>
             </tr>
             <tr>
               <td><strong>End User Designation:</strong></td>
-              <td>{{ user_details.user_Enduser_designation }}</td>
+              <td>{{ user_details.user_Enduser.employee_position }}</td>
             </tr>
             <tr>
-              <td><strong>End User Section:</strong></td>
-              <td>{{ user_details.user_Enduser_section }}</td>
+              <td><strong>End User Office:</strong></td>
+              <td>{{ user_details.user_Enduser.employee_office }}</td>
             </tr>
           </tbody>
         </table>
-        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editEndUserModal">Edit EndUser</a>
+        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editEndUserModal">Edit User</a>
         <a href="" class="btn btn-warning">Transfer Ownership</a>
       {% else %}
         <p class="text-danger">No available user for this desktop package.</p>
@@ -754,80 +754,29 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editEndUserModalLabel">Edit End User Details</h5>
+        <h5 class="modal-title">Edit End User</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="editEndUserForm" method="post">
           {% csrf_token %}
-          <div class="mb-3">
-            <label for="enduser" class="form-label">End User</label>
-            <input type="text" name="enduser" id="enduser" class="form-control" value="{{ user_details.user_Enduser }}" required>
-          </div>
-          <div class="mb-3">
-            <label for="enduser_designation" class="form-label">End User Designation</label>
-            <input type="text" name="enduser_designation" id="enduser_designation" class="form-control" value="{{ user_details.user_Enduser_designation }}" required>
-          </div>
-          <div class="mb-3">
-            <label for="enduser_section" class="form-label">End User Section</label>
-            <input type="text" name="enduser_section" id="enduser_section" class="form-control" value="{{ user_details.user_Enduser_section }}" required>
-          </div>
+          <select class="form-select form-control" id="enduser_input" name="enduser_input">
+            <option value="">Select End User</option>
+            {% for employee in employees %}
+              <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
+            {% endfor %}
+          </select>
           <button type="submit" class="btn btn-primary">Save Changes</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-
     
   </div>
 
   
-<!-- Ownership Transfer History Tab -->
-
-<div class="card">
-  <div class="card-header">
-    <h4 class="card-title">Ownership Transfer History</h4>
-  </div>
-  <div class="card-body">
-    <!-- {% if transfer_history %} -->
-      <table class="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th>Transferred From</th>
-            <th>Transferred To</th>
-            <th>Designation</th>
-            <th>Section</th>
-            <th>Transfer Date</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- {% for transfer in transfer_history %} -->
-            <tr>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          <!-- {% endfor %} -->
-        </tbody>
-      </table>
-    <!-- {% else %} -->
-      <p>No transfer history available.</p>
-    <!-- {% endif %} -->
-  </div>
-</div>
-</div>
-<!-- End User Details Tab -->
-
-
-<!-- End Ownership Transfer History Tab -->
-
 
       <!-- Documents Tab -->
      
@@ -898,6 +847,33 @@
         tab.show();
       }
     }
+  });
+</script>
+<script>
+  $(document).ready(function () {
+    $("#editEndUserForm").submit(function (event) {
+      event.preventDefault();  // Prevent default form submission
+
+      let desktopId = "{{ desktop_package.id }}";  // Get the desktop package ID
+      let formData = $(this).serialize();  // Serialize form data
+
+      $.ajax({
+        type: "POST",
+        url: "/updateeee_end_user/" + desktopId + "/",
+        data: formData,
+        success: function (response) {
+          if (response.success) {
+            alert("End User updated successfully!");
+            location.reload();  // Reload page to reflect changes
+          } else {
+            alert("Failed to update End User.");
+          }
+        },
+        error: function () {
+          alert("Error updating End User.");
+        },
+      });
+    });
   });
 </script>
 {% endblock %}

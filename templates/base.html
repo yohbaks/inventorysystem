@@ -11,6 +11,7 @@
   <head> 
 
     {% block head %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
     <meta
@@ -131,6 +132,11 @@
                     <li>
                       <a href="{% url 'add_desktop_package_with_details' %}">
                         <span class="sub-item">Add Item</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'employee_list' %}">
+                        <span class="sub-item">Add Employee</span>
                       </a>
                     </li>
                     <li>

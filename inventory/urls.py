@@ -54,6 +54,7 @@ urlpatterns = [
     #employees
 
     path('employees/', views.employee_list, name='employee_list'),  # Handles both GET (list) and POST (add)
+    path('updateeee_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # Update end user
 
 
 

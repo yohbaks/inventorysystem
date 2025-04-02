@@ -22,3 +22,4 @@ admin.site.register(DocumentsDetails)
 admin.site.register(Employee)
 
 
+
