@@ -559,18 +559,43 @@ def recent_it_equipment_base(request):
 ########## this data will render test only for template
 
 
+# def employee_list(request):
+#     if request.method == 'POST':
+#          # Getting the form data
+#         first_name = request.POST.get('firstName')
+#         middle_initial = request.POST.get('middleInitial')
+#         last_name = request.POST.get('lastName')
+#         position = request.POST.get('position', 'Unknown')  # Default if missing
+#         office = request.POST.get('office', 'Unknown')  # Default if missing
+#         status = request.POST.get('status')
+
+#         # Create new employee
+#         Employee.objects.create(
+#             employee_fname=first_name,
+#             employee_mname=middle_initial,
+#             employee_lname=last_name,
+#             employee_position=position,
+#             employee_office=office,
+#             employee_status=status
+#         )
+
+#         return redirect('employee_list')  # Reload the page with new employee added
+
+#     employees = Employee.objects.all()
+#     return render(request, 'employees.html', {'employees': employees})
+
 def employee_list(request):
     if request.method == 'POST':
-         # Getting the form data
+        # Get form data
         first_name = request.POST.get('firstName')
-        middle_initial = request.POST.get('middleInitial')
+        middle_initial = request.POST.get('middleInitial', '')
         last_name = request.POST.get('lastName')
         position = request.POST.get('position', 'Unknown')  # Default if missing
         office = request.POST.get('office', 'Unknown')  # Default if missing
         status = request.POST.get('status')
 
         # Create new employee
-        Employee.objects.create(
+        new_employee = Employee.objects.create(
             employee_fname=first_name,
             employee_mname=middle_initial,
             employee_lname=last_name,
@@ -579,7 +604,10 @@ def employee_list(request):
             employee_status=status
         )
 
-        return redirect('employee_list')  # Reload the page with new employee added
+        # Store the newly added employee in Django messages
+        messages.success(request, f"✅ {first_name} {last_name} has been added successfully!")
+
+        return redirect('employee_list')  # Reload the page
 
     employees = Employee.objects.all()
     return render(request, 'employees.html', {'employees': employees})

@@ -4,23 +4,23 @@
 <div class="container">
   <div class="page-inner">
     <div class="page-header">
-      <h3 class="fw-bold mb-3">DataTables.Net</h3>
+      <h3 class="fw-bold mb-3">Employees Management</h3>
       <ul class="breadcrumbs mb-3">
         <li class="nav-home">
-          <a href="#">
-            <i class="icon-home"></i>
-          </a>
+          <a href="#"><i class="icon-home"></i></a>
         </li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
         <li class="nav-item"><a href="#">Tables</a></li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
-        <li class="nav-item"><a href="#">Datatables</a></li>
+        <li class="nav-item"><a href="#">Employees</a></li>
       </ul>
     </div>
+
     
+
     <!-- Add Employee Button -->
     <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Add Employee</button>
-    
+
     <!-- Add Employee Modal -->
     <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
       <div class="modal-dialog">
@@ -55,19 +55,21 @@
               <div class="mb-3">
                 <label for="status" class="form-label">Status</label>
                 <select class="form-control" name="status" required>
-                  <option value="Regular">Regular</option>
-                  <option value="Job Order">Job Order</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
               </div>
-              <button type="submit" class="btn btn-success">Add Employee</button>
+              <button type="submit" class="btn btn-primary">Add Employee</button>
             </form>
           </div>
         </div>
       </div>
-    </div>
+
+     
     
-    <!-- Employee Table -->
-    <div class="row">
+    </div>
+     <!-- Employee Table -->
+     <div class="row">
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
@@ -106,44 +108,31 @@
         </div>
       </div>
     </div>
-  </div>
 </div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <script>
-    $(document).ready(function () {
-      $("#editEndUserForm").submit(function (event) { 
-        event.preventDefault();  // Prevent default form submission
-  
-        let desktopId = "{{ desktop_package.id }}";  // Get desktop package ID
-        let formData = $(this).serialize();  // Serialize form data
-  
-        $.ajax({
-          type: "POST",
-          url: "/updateeee_end_user/" + desktopId + "/",
-          data: formData,
-          success: function (response) {
-            if (response.success) {
-              Swal.fire({
-                title: "Success!",
-                text: "End User updated successfully!",
-                icon: "success",
-                showConfirmButton: false,
-                timer: 2000
-              }).then(() => {
-                location.reload();  // Reload page to reflect changes
-              });
-            } else {
-              Swal.fire("Error!", "Failed to update End User.", "error");
-            }
-          },
-          error: function () {
-            Swal.fire("Error!", "Something went wrong!", "error");
-          },
-        });
-      });
-    });
+<!-- Display Toast Notification -->
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  {% for message in messages %}
+  <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+<!-- Bootstrap Toast Auto-hide Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let toastElement = document.querySelector('.toast');
+    if (toastElement) {
+      let toast = new bootstrap.Toast(toastElement);
+      toast.show();
+    }
+  });
 </script>
+
 {% endblock %}
