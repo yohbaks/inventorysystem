@@ -103,6 +103,28 @@
                     </td>
                   </tr>
 
+                   <!-- Delete Employee Modal -->
+        <div class="modal fade" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to delete {{ employee.employee_fname }}?</p>
+              </div>
+              <div class="modal-footer">
+                <form method="POST" action="{% url 'delete_employee' employee.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
               <!-- View Employee Modal -->
         <div class="modal fade" id="viewEmployeeModal{{ employee.id }}" tabindex="-1">
           <div class="modal-dialog modal-lg">
@@ -180,27 +202,7 @@
           </div>
         </div>
 
-        <!-- Delete Employee Modal -->
-        <div class="modal fade" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <p>Are you sure you want to delete {{ employee.employee_fname }}?</p>
-              </div>
-              <div class="modal-footer">
-                <form method="POST" action="{% url 'delete_employee' employee.id %}">
-                  {% csrf_token %}
-                  <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              </div>
-            </div>
-          </div>
-        </div>
+       
        
                   {% endfor %}
 
