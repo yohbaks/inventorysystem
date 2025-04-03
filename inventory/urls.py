@@ -53,8 +53,11 @@ urlpatterns = [
 
     #employees
 
-    path('employees/', views.employee_list, name='employee_list'),  # Handles both GET (list) and POST (add)
-    path('updateeee_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # Update end user
+    path('employees/', views.employee_list, name='employee_list'),  # Handles both GET (list) and POST (add) employees
+    path('employees/update/<int:employee_id>/', views.update_employee, name='update_employee'), # update employee
+    path('employees/delete/<int:employee_id>/', views.delete_employee, name='delete_employee'), # delete employee
+    path('updateeee_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # update user
+
 
 
 

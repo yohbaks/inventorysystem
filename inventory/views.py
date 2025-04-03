@@ -556,33 +556,7 @@ def recent_it_equipment_base(request):
         # 'recent_keyboards': recent_keyboards,
     })
 
-########## this data will render test only for template
-
-
-# def employee_list(request):
-#     if request.method == 'POST':
-#          # Getting the form data
-#         first_name = request.POST.get('firstName')
-#         middle_initial = request.POST.get('middleInitial')
-#         last_name = request.POST.get('lastName')
-#         position = request.POST.get('position', 'Unknown')  # Default if missing
-#         office = request.POST.get('office', 'Unknown')  # Default if missing
-#         status = request.POST.get('status')
-
-#         # Create new employee
-#         Employee.objects.create(
-#             employee_fname=first_name,
-#             employee_mname=middle_initial,
-#             employee_lname=last_name,
-#             employee_position=position,
-#             employee_office=office,
-#             employee_status=status
-#         )
-
-#         return redirect('employee_list')  # Reload the page with new employee added
-
-#     employees = Employee.objects.all()
-#     return render(request, 'employees.html', {'employees': employees})
+#employees
 
 def employee_list(request):
     if request.method == 'POST':
@@ -611,6 +585,31 @@ def employee_list(request):
 
     employees = Employee.objects.all()
     return render(request, 'employees.html', {'employees': employees})
+
+def update_employee(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    if request.method == 'POST':
+        employee.employee_fname = request.POST.get('firstName')
+        employee.employee_mname = request.POST.get('middleInitial')
+        employee.employee_lname = request.POST.get('lastName')
+        employee.employee_position = request.POST.get('position')
+        employee.employee_office = request.POST.get('office')
+        employee.employee_status = request.POST.get('status')
+
+        employee.save()
+        return redirect('employee_list')
+
+    return render(request, 'edit_employee.html', {'employee': employee})
+
+def delete_employee(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    if request.method == 'POST':
+        employee.delete()
+        return redirect('employee_list')
+
+    return render(request, 'delete_employee.html', {'employee': employee})
 
 ######update enduser at my viewpage
 def update_end_user(request, desktop_id):
