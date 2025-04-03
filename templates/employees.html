@@ -231,6 +231,17 @@
   {% endfor %}
 </div>
 {% endif %}
+
+{% if the_messages %}
+<div class="alert-container position-fixed top-0 end-0 p-3">
+  {% for messagee in the_messages %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert" font>
+    {{ messagee }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 <!-- Bootstrap Toast Auto-hide Script -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {

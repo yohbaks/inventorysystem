@@ -598,6 +598,7 @@ def update_employee(request, employee_id):
         employee.employee_status = request.POST.get('status')
 
         employee.save()
+        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been added updated!")
         return redirect('employee_list')
 
     return render(request, 'edit_employee.html', {'employee': employee})
@@ -607,9 +608,11 @@ def delete_employee(request, employee_id):
     
     if request.method == 'POST':
         employee.delete()
+        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been Deleted!")
         return redirect('employee_list')
-
-    return render(request, 'delete_employee.html', {'employee': employee})
+    
+    the_messages = get_messages(request)  # Get all messages
+    return render(request, 'delete_employee.html', {'employee': employee, 'the_messages': the_messages } )
 
 ######update enduser at my viewpage
 def update_end_user(request, desktop_id):
