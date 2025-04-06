@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, EndUserChangeHistory
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, EndUserChangeHistory, AssetOwnerChangeHistory
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -66,6 +66,7 @@ def desktop_details_view(request, desktop_id):
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
     desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
     enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
     employees = Employee.objects.all()
     
     # Get all keyboards,mouse, monitor in desktop_details_view related to the desktop package
@@ -109,6 +110,7 @@ def desktop_details_view(request, desktop_id):
         'user_details' : user_details,
         'employees': employees,  # Pass the list of employees to the template
         'enduser_history': enduser_history,
+        'assetowner_history': assetowner_history,
         'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
        })
 
@@ -375,83 +377,6 @@ def disposed_mice(request):
     return render(request, 'disposed_mice.html', {'disposed_mice': disposed_mice})
 
 
-# END ################ (MOUSE END)
-
-
-
-# # adding Desktop packages
-# def add_desktop_package_with_details(request):
-#     if request.method == 'POST':
-#         with transaction.atomic():  # Ensure all or nothing for database changes
-#             # Create Desktop Package
-#             desktop_package = Desktop_Package.objects.create(is_disposed=False)
-#             package_id = desktop_package.id  # Retrieve the auto-generated ID
-
-#             # Create Desktop Details without manually setting id
-#             DesktopDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 serial_no=request.POST.get('desktop_serial_no'),
-#                 computer_name=request.POST.get('computer_name'),
-#                 brand_name=request.POST.get('desktop_brand_name'),
-#                 model=request.POST.get('desktop_model'),
-#                 processor=request.POST.get('desktop_processor'),
-#                 memory=request.POST.get('desktop_memory'),
-#                 drive=request.POST.get('desktop_drive'),
-#                 asset_owner=request.POST.get('asset_owner'),
-#                 desktop_Graphics=request.POST.get('desktop_Graphics'),
-#                 desktop_Graphics_Size=request.POST.get('desktop_Graphics_Size'),
-#                 desktop_OS=request.POST.get('desktop_OS'),
-#                 desktop_Office=request.POST.get('desktop_Office'),
-#                 desktop_OS_keys=request.POST.get('desktop_OS_keys'),
-#                 desktop_Office_keys=request.POST.get('desktop_Office_keys')
-#             )
-
-#             MonitorDetails.objects.create(
-#                 desktop_package_db=desktop_package,
-#                 monitor_sn_db=request.POST.get('monitor_sn'),
-#                 monitor_brand_db=request.POST.get('monitor_brand'),
-#                 monitor_model_db=request.POST.get('monitor_model'),
-#                 monitor_size_db=request.POST.get('monitor_size')    
-#             )
-
-#             KeyboardDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 keyboard_sn_db=request.POST.get('keyboard_sn'),
-#                 keyboard_brand_db=request.POST.get('keyboard_brand'),
-#                 keyboard_model_db=request.POST.get('monitor_model'),
-#                 keyboard_size_db=request.POST.get('monitor_size')
-#             )
-
-#             MouseDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 mouse_sn_db=request.POST.get('mouse_sn'),
-#                 mouse_brand_db=request.POST.get('mouse_brand'),
-#                 mouse_model_db=request.POST.get('mouse_model')
-#             )
-
-#             UPSDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 ups_sn_db=request.POST.get('ups_sn'),
-#                 ups_brand_db=request.POST.get('ups_brand'),
-#                 ups_model_db=request.POST.get('ups_model'),
-#                 ups_capacity_db=request.POST.get('ups_capacity')
-#             )
-
-#             DocumentsDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 docs_PAR=request.POST.get('par_number_input'),
-#                 docs_Propertyno=request.POST.get('property_number_input'),
-#                 docs_Acquisition_Type=request.POST.get('acquisition_type_input'),    
-#                 docs_Value=request.POST.get('value_desktop_input'),
-#                 docs_Datereceived=request.POST.get('date_received_input'),
-#                 docs_Dateinspected=request.POST.get('date_inspected_input'),
-#                 docs_Supplier=request.POST.get('supplier_name_input'),
-#                 docs_Status=request.POST.get('status_desktop_input')
-#             )
-
-#         return redirect('success_add_page')
-
-#     return render(request, 'add_desktop_package_with_details.html')
 
 
 def add_desktop_package_with_details(request):
@@ -614,6 +539,42 @@ def delete_employee(request, employee_id):
     the_messages = get_messages(request)  # Get all messages
     return render(request, 'delete_employee.html', {'employee': employee, 'the_messages': the_messages } )
 
+##update asset owner
+
+def update_asset_owner(request, desktop_id):
+    if request.method == 'POST':
+        try:
+            new_assetowner_id = request.POST.get('assetowner_input')
+            new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
+
+            # Get UserDetails instead of DesktopDetails
+            user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
+            old_assetowner = user_details.user_Assetowner  # Store old asset owner
+
+            # Debugging prints
+            print(f"Old Asset Owner: {old_assetowner}")  
+            print(f"New Asset Owner: {new_assetowner}")  
+            print(f"User Making Change: {request.user}")  
+
+            # Update asset owner
+            user_details.user_Assetowner = new_assetowner
+            user_details.save()
+
+            # Save history record
+            history_entry = AssetOwnerChangeHistory(
+                desktop_package=user_details.desktop_package_db,
+                old_assetowner=old_assetowner if old_assetowner else None,  # Prevent NoneType errors
+                new_assetowner=new_assetowner,
+                changed_by=request.user,
+                changed_at=timezone.now()
+            )
+            history_entry.save()
+            print("History entry saved successfully!")  # Debugging
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f"Error updating Asset Owner: {e}"})
+
 ######update enduser at my viewpage
 def update_end_user(request, desktop_id):
     if request.method == 'POST':
@@ -649,4 +610,6 @@ def update_end_user(request, desktop_id):
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"Error updating End User: {e}"})
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+
 

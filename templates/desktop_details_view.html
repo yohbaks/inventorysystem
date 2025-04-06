@@ -693,8 +693,7 @@
         </div>
       </div>
 
-
-      <!-- User Details Tab -->
+<!-- User Details Tab -->
 <div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -743,128 +742,167 @@
           </tbody>
         </table>
         <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editEndUserModal">Edit User</a>
-        <a href="" class="btn btn-warning">Transfer Ownership</a>
+        <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editAssetOwnerModal">Transfer Ownership</a>
+
       {% else %}
         <p class="text-danger">No available user for this desktop package.</p>
       {% endif %}
     </div>
 
-
-    
-
-
-
-<!-- Edit EndUser Modal -->
-<div class="modal fade" id="editEndUserModal" tabindex="-1" aria-labelledby="editEndUserModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit End User</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editEndUserForm" method="post">
-          {% csrf_token %}
-          <select class="form-select form-control" id="enduser_input" name="enduser_input">
-            <option value="">Select End User</option>
-            {% for employee in employees %}
-              <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
-            {% endfor %}
-          </select>
-          <br>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
-      </div>
-    </div>
-  </div>
-  
-</div>
-<hr>
-<div class="card-body">
-  <div class="table-responsive">
-  {% comment %} the end user change history view {% endcomment %}
-  <h3>End User Change History</h3>
-  <p>Below is the history of changes made to the End User for this desktop package.</p>
-
-  <table class="table table-head-bg-danger table-bordered table-hover">
-      <thead>
-          <tr>
-              <th>Old End User</th>
-              <th>New End User</th>
-              <th>Changed By</th>
-              <th>Changed At</th>
-          </tr>
-      </thead>
-      <tbody>
-          {% for record in enduser_history %}
-          <tr>
-              <td>{{ record.old_enduser.employee_fname }} {{ record.old_enduser.employee_lname }}</td>
-              <td>{{ record.new_enduser.employee_fname }} {{ record.new_enduser.employee_lname }}</td>
-              <td>{{ record.changed_by.username }}</td>
-              <td>{{ record.changed_at }}</td>
-          </tr>
-          {% empty %}
-          <tr>
-              <td colspan="4">No history available.</td>
-          </tr>
-          {% endfor %}
-      </tbody>
-  </table>  
-</div>
-</div>
-  </div>
-
-  {% comment %} the end user change history view {% endcomment %}
-
-  
- 
-  
-      </div>
-
-      
-    </div>
-  
-    
-      <!-- Documents Tab -->
-     
-      <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Documents Details</div>
+    <!-- Edit EndUser Modal -->
+    <div class="modal fade" id="editEndUserModal" tabindex="-1" aria-labelledby="editEndUserModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit End User</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="card-body">
-            <table class="table table-head-bg-success table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
-                  <th scope="col">DETAILS</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ keyboard_detailsx.package_no }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
-                  <td>{{ keyboard_detailsx.serial_no }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
-                  <td>{{ keyboard_detailsx.brand_name }}</td>
-                </tr>
-                <tr>
-                  <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
-                  <td>{{ keyboard_detailsx.model }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+          <div class="modal-body">
+            <form id="editEndUserForm" method="post">
+              {% csrf_token %}
+              <select class="form-select form-control" id="enduser_input" name="enduser_input">
+                <option value="">Select End User</option>
+                {% for employee in employees %}
+                  <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
+                {% endfor %}
+              </select>
+              <br>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
           </div>
         </div>
       </div>
+    </div>
+    
+    <!-- Edit AssetOwner Modal -->
+    <div class="modal fade" id="editAssetOwnerModal" tabindex="-1" aria-labelledby="editAssetOwnerModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Asset Owner</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editAssetOwnerForm" method="post">
+              {% csrf_token %}
+              <select class="form-select form-control" id="assetowner_input" name="assetowner_input">
+                <option value="">Select End User</option>
+                {% for employee in employees %}
+                  <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
+                {% endfor %}
+              </select>
+              <br>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+{% comment %} Table to show the change history of ender user {% endcomment %}
+    <hr>
+    <div class="card-body">
+      <div class="table-responsive">
+        {% comment %} the end user change history view {% endcomment %}
+        <h3>End User Change History</h3>
+        <p>Below is the history of changes made to the End User for this desktop package.</p>
 
+        <table class="table table-head-bg-danger table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Old End User</th>
+                    <th>New End User</th>
+                    <th>Changed By</th>
+                    <th>Changed At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in enduser_history %}
+                <tr>
+                    <td>{{ record.old_enduser.employee_fname }} {{ record.old_enduser.employee_lname }}</td>
+                    <td>{{ record.new_enduser.employee_fname }} {{ record.new_enduser.employee_lname }}</td>
+                    <td>{{ record.changed_by.username }}</td>
+                    <td>{{ record.changed_at }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No history available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>  
+      </div>
+    </div>
+{% comment %} Table to show the change history of asset owner {% endcomment %}
+    <hr>
+    <div class="card-body">
+      <div class="table-responsive">
+        {% comment %} the end user change history view {% endcomment %}
+        <h3>Asset Owner Transfer History</h3>
+        <p>Below is the transfer history of Assetowner for this desktop package.</p>
 
+        <table class="table table-head-bg-danger table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Old Asset Owner</th>
+                    <th>New Asset Owner</th>
+                    <th>Changed By</th>
+                    <th>Changed At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in assetowner_history %}
+                <tr>
+                    <td>{{ record.old_assetowner.employee_fname }} {{ record.old_assetowner.employee_lname }}</td>
+                    <td>{{ record.new_assetowner.employee_fname }} {{ record.new_assetowner.employee_lname }}</td>
+                    <td>{{ record.changed_by.username }}</td>
+                    <td>{{ record.changed_at }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No history available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>  
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Documents Tab -->
+<div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Documents Details</div>
+    </div>
+    <div class="card-body">
+      <table class="table table-head-bg-success table-bordered table-hover">
+        <thead>
+          <tr>
+            <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+            <th scope="col">DETAILS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+            <td>{{ keyboard_detailsx.package_no }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+            <td>{{ keyboard_detailsx.serial_no }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+            <td>{{ keyboard_detailsx.brand_name }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+            <td>{{ keyboard_detailsx.model }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
     </div>
   </div>
 </div>
@@ -898,10 +936,21 @@
 </script>
 <!-- Bootstrap Toast for success message -->
 <div class="toast-container position-fixed top-0 end-0 p-3">
-  <div id="updateSuccessToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+  <div id="updateSuccessToast_End_User" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="d-flex">
       <div class="toast-body">
         ✅ End User updated successfully!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  <div id="updateSuccessToast_Asset_Owner" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        ✅ Asset Owner updated successfully!
       </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
@@ -922,7 +971,7 @@
         success: function (response) {
           if (response.success) {
             // Show Bootstrap Toast on success
-            let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast'));
+            let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_End_User'));
             toast.show();
 
             // Close modal after a short delay
@@ -949,6 +998,48 @@
     });
   });
 </script>
-{% endblock %}
 
+<script>
+  $(document).ready(function () {
+    $("#editAssetOwnerForm").submit(function (event) {
+      event.preventDefault();  // Prevent default form submission
+
+      let desktopId = "{{ desktop_package.id }}";  // Get the desktop package ID
+      let formData = $(this).serialize();  // Serialize form data
+
+      $.ajax({
+        type: "POST",
+        url: "/updateeee_asset_onwer/" + desktopId + "/",
+        data: formData,
+        success: function (response) {
+          if (response.success) {
+            // Show Bootstrap Toast on success
+            let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_Asset_Owner'));
+            toast.show();
+
+            // Close modal after a short delay
+            setTimeout(function () {
+              $("#editAssetOwnerModal").modal("hide");
+              location.reload(); // Reload to reflect changes
+            }, 1500);
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Failed to update End User!",
+            });
+          }
+        },
+        error: function () {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Something went wrong while updating the End User.",
+          });
+        },
+      });
+    });
+  });
+</script>
+{% endblock %}
 

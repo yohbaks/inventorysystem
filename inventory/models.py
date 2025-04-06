@@ -186,3 +186,10 @@ class EndUserChangeHistory(models.Model):
     new_enduser = models.ForeignKey(Employee, related_name="new_enduser", on_delete=models.CASCADE, null=True)
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
+
+class AssetOwnerChangeHistory(models.Model):
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    old_assetowner = models.ForeignKey(Employee, related_name="old_assetowner", on_delete=models.SET_NULL, null=True, blank=True)
+    new_assetowner = models.ForeignKey(Employee, related_name="new_assetowner", on_delete=models.CASCADE, null=True)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
