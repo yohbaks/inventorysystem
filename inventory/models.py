@@ -52,7 +52,7 @@ class DesktopDetails(models.Model):
         return f"{self.brand_name} {self.model} ({self.serial_no})"
 
 class MonitorDetails(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    # id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
     monitor_sn_db = models.CharField(max_length=255)
     monitor_brand_db = models.CharField(max_length=255)

@@ -8,16 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from django.utils import timezone
 from django.db import transaction
-
-# ########## this data will render test only for template
-# def employees(request):
-#     return render(request, 'desktop_details.html', {
-#         'desktops_with_items': [],  # Empty list to avoid errors in the template
-#     })
- 
+from django.views.decorators.http import require_POST
 
 
-# Create your views here.
 ##############################################################################
 # code for the list in the homepage
 def desktop_list_func(request):
@@ -133,6 +126,9 @@ def keyboard_detailed_view(request, keyboard_id):
     keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
     # Render the detailed view of the keyboard
     return render(request, 'keyboard_detailed_view.html', {'keyboard': keyboard})
+
+def keyboard_update(request, keyboard_id):
+    keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
     
 
 
@@ -287,6 +283,23 @@ def add_monitor_to_package(request, package_id):
     
     return redirect('desktop_details_view', package_id=package_id)
 
+
+@require_POST
+def update_monitor(request, pk):
+    monitor = get_object_or_404(MonitorDetails, pk=pk)
+
+    # Update the monitor details
+    # monitor.desktop_package_db = Desktop_Package.objects.get(id=request.POST.get('monitor_desktop_package_db'))  # Ensure correct assignment of foreign key
+    # monitor.desktop_package_db_id = request.POST.get('monitor_desktop_package_db')
+    monitor.monitor_sn_db = request.POST.get('monitor_sn_db')
+    monitor.monitor_brand_db = request.POST.get('monitor_brand_db')
+    monitor.monitor_model_db = request.POST.get('monitor_model_db')
+    monitor.monitor_size_db = request.POST.get('monitor_size_db')
+    
+    monitor.save()
+
+    # Assuming the desktop package id is the key for the redirect
+    return redirect('desktop_details_view', desktop_id=monitor.desktop_package_db.id)
 
 #viewing of all keyboard disposed
 def disposed_keyboards(request):

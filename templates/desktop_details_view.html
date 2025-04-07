@@ -173,8 +173,66 @@
             </table>
 
         
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMonitorModal">Edit</button>
+            <button 
+            class="btn btn-primary edit-monitor-btn" 
+            data-bs-toggle="modal" 
+            data-bs-target="#editMonitorModal"
+            data-id="{{ monitor_detailse.id }}"
+            data-package="{{ monitor_detailse.desktop_package_db.id }}"
+            data-sn="{{ monitor_detailse.monitor_sn_db }}"
+            data-brand="{{ monitor_detailse.monitor_brand_db }}"
+            data-model="{{ monitor_detailse.monitor_model_db }}"
+            data-size="{{ monitor_detailse.monitor_size_db }}"
+          >
+            Edittt
+          </button>
+          
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal_Monitor">Dispose Monitor</button>
+
+            <!-- Update Monitor Modal -->
+
+        <div class="modal fade" id="editMonitorModal" tabindex="-1" aria-labelledby="editMonitorModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <form method="POST" action="{% url 'update_monitor' pk=monitor_detailse.id %}">
+              {% csrf_token %}
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editMonitorModalLabel">Edit Monitor</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="hidden" id="monitorId">
+        
+                  
+                  <div class="mb-3">
+                    <label for="editSN" class="form-label">Serial Number</label>
+                    <input type="text" class="form-control" id="editSN" name="monitor_sn_db" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="editBrand" class="form-label">Brand</label>
+                    <input type="text" class="form-control" id="editBrand" name="monitor_brand_db" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="editModel" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="editModel" name="monitor_model_db">
+                  </div>
+                  <div class="mb-3">
+                    <label for="editSize" class="form-label">Monitor Size</label>
+                    <input type="text" class="form-control" id="editSize" name="monitor_size_db">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Update Monitor</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+
+
+
 
                 <!-- Disposal Confirmation Modal -->
                 <div class="modal fade" id="confirmDisposeModal_Monitor" tabindex="-1" aria-labelledby="confirmDisposeModal_Monitor" aria-hidden="true">
@@ -1043,3 +1101,33 @@
 </script>
 {% endblock %}
 
+
+
+{% comment %} update script for monitor {% endcomment %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const editButtons = document.querySelectorAll('.edit-monitor-btn');
+    const form = document.getElementById('editMonitorForm');
+
+    editButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.dataset.id;
+        const packageId = button.dataset.package;
+        const sn = button.dataset.sn;
+        const brand = button.dataset.brand;
+        const model = button.dataset.model;
+        const size = button.dataset.size;
+
+        // Fill form fields
+        document.getElementById('editPackage').value = packageId;
+        document.getElementById('editSN').value = sn;
+        document.getElementById('editBrand').value = brand;
+        document.getElementById('editModel').value = model;
+        document.getElementById('editSize').value = size;
+
+        // Set form action dynamically
+        form.action = `/monitor/${id}/update/`;
+      });
+    });
+  });
+</script>

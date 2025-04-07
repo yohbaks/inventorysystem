@@ -59,7 +59,7 @@ urlpatterns = [
     path('updateeee_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # update user
     path('updateeee_asset_onwer/<int:desktop_id>/', views.update_asset_owner, name='update_asset_owner'), # update asset owner
 
-
+    path('monitor/<int:pk>/update/', views.update_monitor, name='update_monitor'),
 
 
 
