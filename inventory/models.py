@@ -193,3 +193,19 @@ class AssetOwnerChangeHistory(models.Model):
     new_assetowner = models.ForeignKey(Employee, related_name="new_assetowner", on_delete=models.CASCADE, null=True)
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
+
+class DesktopDisposed(models.Model):
+    # ForeignKey to Desktop_Package to associate the disposal with a specific desktop package
+    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    
+    # Date when the desktop was disposed of
+    disposal_date = models.DateField(default=timezone.now)
+    
+    # An optional reason for disposal (e.g., "motherboard broken", "irreparable", etc.)
+    disposal_reason = models.CharField(max_length=255, null=True, blank=True)
+    
+    # A flag to indicate whether the desktop was fully disposed or if parts of it were salvaged
+    is_full_disposal = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"Disposed Desktop {self.desktop_package} on {self.disposal_date}"

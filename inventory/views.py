@@ -9,6 +9,8 @@ from django.utils.timezone import now
 from django.utils import timezone
 from django.db import transaction
 from django.views.decorators.http import require_POST
+from django.urls import reverse
+
 
 
 ##############################################################################
@@ -157,6 +159,47 @@ def keyboard_disposed(request, keyboard_id):
     # Fallback in case the request method is not POST
     return redirect('desktop_details_view', package_id=keyboard.desktop_package.id)
 
+
+
+#MONITORS
+def add_monitor_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        monitor_sn = request.POST.get('monitor_sn')
+        monitor_brand = request.POST.get('monitor_brand')
+        monitor_model = request.POST.get('monitor_model')
+        
+        # Create a new keyboard associated with the desktop package
+        MonitorDetails.objects.create(
+            desktop_package_db=desktop_package,
+            monitor_sn_db=monitor_sn,
+            monitor_brand_db=monitor_brand,
+            monitor_model_db=monitor_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Keyboard tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-monitor')
+    
+    return redirect('desktop_details_view', package_id=package_id)
+
+
+@require_POST
+def update_monitor(request, pk):
+    monitor = get_object_or_404(MonitorDetails, pk=pk)
+    monitor.monitor_sn_db = request.POST.get('monitor_sn_db')
+    monitor.monitor_brand_db = request.POST.get('monitor_brand_db')
+    monitor.monitor_model_db = request.POST.get('monitor_model_db')
+    monitor.monitor_size_db = request.POST.get('monitor_size_db')
+    
+    monitor.save()
+
+    base_url = reverse('desktop_details_view', kwargs={'desktop_id': monitor.desktop_package_db.pk})
+    return redirect(f'{base_url}#pills-monitor')
+
+
 def monitor_disposed(request, monitor_id):
     if request.method == 'POST':
         # Retrieve the keyboard by its ID
@@ -260,46 +303,7 @@ def add_keyboard_to_package(request, package_id):
     
     return redirect('desktop_details_view', package_id=package_id)
 
-def add_monitor_to_package(request, package_id):
-    if request.method == 'POST':
-        # Retrieve the desktop package by its ID
-        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
-        
-        # Get form data
-        monitor_sn = request.POST.get('monitor_sn')
-        monitor_brand = request.POST.get('monitor_brand')
-        monitor_model = request.POST.get('monitor_model')
-        
-        # Create a new keyboard associated with the desktop package
-        MonitorDetails.objects.create(
-            desktop_package_db=desktop_package,
-            monitor_sn_db=monitor_sn,
-            monitor_brand_db=monitor_brand,
-            monitor_model_db=monitor_model
-        )
-        
-        # Redirect back to the desktop details view, focusing on the Keyboard tab
-        return redirect(f'/desktop_details_view/{package_id}/#pills-monitor')
-    
-    return redirect('desktop_details_view', package_id=package_id)
 
-
-@require_POST
-def update_monitor(request, pk):
-    monitor = get_object_or_404(MonitorDetails, pk=pk)
-
-    # Update the monitor details
-    # monitor.desktop_package_db = Desktop_Package.objects.get(id=request.POST.get('monitor_desktop_package_db'))  # Ensure correct assignment of foreign key
-    # monitor.desktop_package_db_id = request.POST.get('monitor_desktop_package_db')
-    monitor.monitor_sn_db = request.POST.get('monitor_sn_db')
-    monitor.monitor_brand_db = request.POST.get('monitor_brand_db')
-    monitor.monitor_model_db = request.POST.get('monitor_model_db')
-    monitor.monitor_size_db = request.POST.get('monitor_size_db')
-    
-    monitor.save()
-
-    # Assuming the desktop package id is the key for the redirect
-    return redirect('desktop_details_view', desktop_id=monitor.desktop_package_db.id)
 
 #viewing of all keyboard disposed
 def disposed_keyboards(request):

@@ -62,7 +62,8 @@ urlpatterns = [
     path('monitor/<int:pk>/update/', views.update_monitor, name='update_monitor'),
 
 
-
+    # path('desktop/<int:desktop_id>/details/', views.desktop_details_view, name='desktop_details_view'),
+    # path('desktop/<int:desktop_id>/dispose/', views.dispose_desktop, name='dispose_desktop'),
 
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
