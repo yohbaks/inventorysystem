@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, EndUserChangeHistory, AssetOwnerChangeHistory
+from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -200,30 +200,7 @@ def update_monitor(request, pk):
     return redirect(f'{base_url}#pills-monitor')
 
 
-def monitor_disposed(request, monitor_id):
-    if request.method == 'POST':
-        # Retrieve the keyboard by its ID
-        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
-        
-        # Set the keyboard as disposed and save
-        monitor.is_disposed = True
-        monitor.save()
-        
-        # Create a new DisposedKeyboard entry
-        disposed_monitor = DisposedMonitor(
-            monitor_disposed_db=monitor,
-            disposal_date=timezone.now()
-        )
-        disposed_monitor.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = monitor.desktop_package_db.id
-        
-        # Redirect back to the desktop details view with the Keyboard tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
-
-    # Fallback in case the request method is not POST
-    return redirect('desktop_details_view', package_id=monitor_id)
 
 def mouse_disposed(request, mouse_id):
     # Only proceed if the request is POST
@@ -629,4 +606,98 @@ def update_end_user(request, desktop_id):
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 
+# def dispose_desktop(request, desktop_id):
+#     if request.method == 'POST':
+#         desktop = get_object_or_404(DesktopDetails, id=desktop_id)
+#         reason = request.POST.get('reason')
 
+#         disposal_record = DisposedDesktopDetail.objects.create(
+#             desktop=desktop,
+#             reason=reason
+#         )
+
+#         if 'monitor' in request.POST:
+#             monitors = MonitorDetails.objects.filter(desktop_package_db=desktop.desktop_package)
+#             for m in monitors:
+#                 DisposedMonitor.objects.create(monitor_disposed_db=m, disposed_under=disposal_record)
+#                 m.is_disposed = True
+#                 m.save()
+
+#         desktop.is_disposed = True
+#         desktop.save()
+
+#         return redirect('desktop_details_view', desktop_id=desktop.id)
+
+#     return redirect('desktop_list')
+
+def dispose_desktop(request, desktop_id):
+    if request.method == 'POST':
+        desktop = get_object_or_404(DesktopDetails, id=desktop_id)
+        reason = request.POST.get('reason')
+
+        # Create disposal record for the desktop (without package code)
+        disposal_record = DisposedDesktopDetail.objects.create(
+            desktop=desktop,
+            reason=reason,
+            serial_no=desktop.serial_no,
+            brand_name=desktop.brand_name,
+            model=desktop.model,
+            asset_owner=desktop.asset_owner,
+            date_disposed=timezone.now()
+        )
+
+        # Handle attached monitors if checkbox was selected
+        if request.POST.get('monitor'):
+            monitors = MonitorDetails.objects.filter(
+                desktop_package_db=desktop.desktop_package,
+                is_disposed=False
+            )
+            for m in monitors:
+                DisposedMonitor.objects.create(
+                    monitor_disposed_db=m,
+                    disposed_under=disposal_record,
+                    monitor_sn=m.monitor_sn_db,
+                    monitor_brand=m.monitor_brand_db,
+                    monitor_model=m.monitor_model_db,
+                    monitor_size=m.monitor_size_db,
+                    disposal_date=timezone.now()
+                )
+                m.is_disposed = True
+                m.save()
+
+        # Mark the desktop itself as disposed
+        desktop.is_disposed = True
+        desktop.save()
+
+        # Redirect back to the desktop detail view
+        return redirect('desktop_details_view', desktop_id=desktop.id)
+
+    return redirect('desktop_list')
+
+
+
+#THIS IS WORKING
+def monitor_disposed(request, monitor_id):
+    if request.method == 'POST':
+        # Retrieve the keyboard by its ID
+        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
+        
+        # Set the keyboard as disposed and save
+        monitor.is_disposed = True
+        monitor.save()
+        
+        # Create a new DisposedKeyboard entry
+        disposed_monitor = DisposedMonitor(
+            monitor_disposed_db=monitor,
+            disposal_date=timezone.now()
+        )
+        disposed_monitor.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = monitor.desktop_package_db.id
+        
+        # Redirect back to the desktop details view with the Keyboard tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
+
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=monitor_id)

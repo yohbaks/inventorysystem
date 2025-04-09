@@ -23,7 +23,9 @@ class Desktop_Package(models.Model):
         return f"Desktop Package No.({self.pk})"
 
     
-
+# =============================
+# Desktop
+# =============================
 class DesktopDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='desktop_details', on_delete=models.CASCADE)
@@ -50,6 +52,25 @@ class DesktopDetails(models.Model):
 
     def __str__(self):
         return f"{self.brand_name} {self.model} ({self.serial_no})"
+    
+    
+class DisposedDesktopDetail(models.Model):
+    desktop = models.ForeignKey("DesktopDetails", on_delete=models.CASCADE)
+    desktop_package_number = models.CharField(max_length=255, blank=True, null=True)
+    serial_no = models.CharField(max_length=255, blank=True, null=True)
+    brand_name = models.CharField(max_length=255, blank=True, null=True)
+    model = models.CharField(max_length=255, blank=True, null=True)
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)
+    reason = models.TextField()
+    date_disposed = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Disposed {self.desktop.computer_name or self.serial_no}"
+
+
+# =============================
+# Monitor
+# =============================
 
 class MonitorDetails(models.Model):
     # id = models.IntegerField(primary_key=True)  # Allow manual assignment
@@ -64,6 +85,19 @@ class MonitorDetails(models.Model):
     def __str__(self):
         return f"{self.monitor_brand_db} {self.monitor_model_db} ({self.monitor_sn_db})"
     
+    
+class DisposedMonitor(models.Model):
+    monitor_disposed_db = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
+    monitor_sn = models.CharField(max_length=255, blank=True, null=True)
+    monitor_brand = models.CharField(max_length=255, blank=True, null=True)
+    monitor_model = models.CharField(max_length=255, blank=True, null=True)
+    monitor_size = models.CharField(max_length=255, blank=True, null=True)
+    disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"Disposed Monitor: {self.monitor_disposed_db.monitor_sn_db}"
+    
  #userdetails   
 class UserDetails(models.Model):  
     id = models.AutoField(primary_key=True)  
@@ -77,12 +111,7 @@ class UserDetails(models.Model):
     
  
 
-class DisposedMonitor(models.Model):
-    monitor_disposed_db = models.ForeignKey(MonitorDetails, on_delete=models.CASCADE)
-    disposal_date = models.DateField(default=timezone.now)
 
-    def __str__(self):
-        return f"Disposed: {self.monitor}"
 
 class KeyboardDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
@@ -105,7 +134,7 @@ class DisposedKeyboard(models.Model):
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"Disposed: {self.keyboard}"
+        return f"Disposed: {self.keyboard_dispose_db.keyboard_sn_db}"
 
 class MouseDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
@@ -145,7 +174,7 @@ class DisposedUPS(models.Model):
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"Disposed: {self.ups}"
+        return f"Disposed: {self.ups_db.ups_sn_db}"
     
 
 class DocumentsDetails(models.Model):
@@ -194,18 +223,5 @@ class AssetOwnerChangeHistory(models.Model):
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
-class DesktopDisposed(models.Model):
-    # ForeignKey to Desktop_Package to associate the disposal with a specific desktop package
-    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+
     
-    # Date when the desktop was disposed of
-    disposal_date = models.DateField(default=timezone.now)
-    
-    # An optional reason for disposal (e.g., "motherboard broken", "irreparable", etc.)
-    disposal_reason = models.CharField(max_length=255, null=True, blank=True)
-    
-    # A flag to indicate whether the desktop was fully disposed or if parts of it were salvaged
-    is_full_disposal = models.BooleanField(default=True)
-    
-    def __str__(self):
-        return f"Disposed Desktop {self.desktop_package} on {self.disposal_date}"
