@@ -321,9 +321,22 @@
                   </div>
                 </div>
                 {% endif %}
+
+
+
                 {% if not has_active_monitor and not has_active_desktop %}
                 <p class="text-danger">This Monitor was completely disposed under the whole package.</p>
-                {% else %}
+                {% endif %}
+
+                
+                {% comment %} {% if has_active_monitor%}
+                <p class="text-danger">has active monitor</p>
+                {% endif %} {% endcomment %}
+                  
+                  {% if not has_active_monitor and has_active_desktop %}
+
+                
+
 
                  
                 <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
