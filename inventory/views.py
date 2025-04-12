@@ -59,12 +59,14 @@ def desktop_package_base(request):
 def desktop_details_view(request, desktop_id):
     # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
+    
     desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
     enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
     assetowner_history = AssetOwnerChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
     employees = Employee.objects.all()
     
-    # Get all keyboards,mouse, monitor in desktop_details_view related to the desktop package
+    # Get all active keyboards,mouse, monitor in desktop_details_view related to the desktop package (for displaying or further processing)
+
     keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False)
@@ -73,28 +75,35 @@ def desktop_details_view(request, desktop_id):
     
 
     # Get disposed keyboards,mouse, monitor in desktop_details_view
+    disposed_desktop = DisposedDesktopDetail.objects.filter(desktop__desktop_package=desktop_package)
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package=desktop_package)
     disposed_mouse = DisposedMouse.objects.filter(mouse_db__desktop_package=desktop_package)
     disposed_monitor = DisposedMonitor.objects.filter(monitor_disposed_db__desktop_package_db=desktop_package)
     disposed_ups = DisposedUPS.objects.filter(ups_db__desktop_package=desktop_package)
 
 
-    # active keyboards,mouse, monitor in desktop_details_view
-    has_active_keyboards = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
+    # just checks if any active exist (for conditional logic)
+    has_active_desktop = DesktopDetails.objects.filter(id=desktop_id, is_disposed=False).exists()
+    has_active_keyboards = keyboard_detailsx.exists()
     has_active_mouse = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
     has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
     has_active_ups = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
+
+    desktops_disposed_filter = DesktopDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
 
     #ownership
     # transfer_history = OwnershipTransfer.objects.filter(desktop_package=desktop_package).order_by('-transfer_date')
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
+
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
+        'disposed_desktop': disposed_desktop,
         'disposed_keyboards': disposed_keyboards,
         'disposed_mouse' : disposed_mouse,
         'disposed_monitor' : disposed_monitor,
         'disposed_ups' : disposed_ups,
+        'has_active_desktop': has_active_desktop,
         'has_active_keyboards': has_active_keyboards,
         'has_active_mouse': has_active_mouse,
         'has_active_monitor': has_active_monitor,
@@ -107,6 +116,10 @@ def desktop_details_view(request, desktop_id):
         'enduser_history': enduser_history,
         'assetowner_history': assetowner_history,
         'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
+
+       
+        'desktops_disposed_filter': desktops_disposed_filter,  # Added this line
+
        })
 
 
@@ -570,65 +583,79 @@ def update_asset_owner(request, desktop_id):
             return JsonResponse({'success': False, 'error': f"Error updating Asset Owner: {e}"})
 
 ######update enduser at my viewpage
+# def update_end_user(request, desktop_id):
+#     if request.method == 'POST':
+#         try:
+#             new_enduser_id = request.POST.get('enduser_input')
+#             new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+
+#             # Get UserDetails instead of DesktopDetails
+#             user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
+#             old_enduser = user_details.user_Enduser  # Store old end user
+
+#             # Debugging prints
+#             print(f"Old End User: {old_enduser}")  
+#             print(f"New End User: {new_enduser}")  
+#             print(f"User Making Change: {request.user}")  
+
+#             # Update end user
+#             user_details.user_Enduser = new_enduser
+#             user_details.save()
+
+#             # Save history record
+#             history_entry = EndUserChangeHistory(
+#                 desktop_package=user_details.desktop_package_db,
+#                 old_enduser=old_enduser if old_enduser else None,  # Prevent NoneType errors
+#                 new_enduser=new_enduser,
+#                 changed_by=request.user,
+#                 changed_at=timezone.now()
+#             )
+#             history_entry.save()
+#             print("History entry saved successfully!")  # Debugging
+
+#             return JsonResponse({'success': True})
+#         except Exception as e:
+#             return JsonResponse({'success': False, 'error': f"Error updating End User: {e}"})
+#     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+    
 def update_end_user(request, desktop_id):
     if request.method == 'POST':
         try:
-            new_enduser_id = request.POST.get('enduser_input')
-            new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+            with transaction.atomic():
+                new_enduser_id = request.POST.get('enduser_input')
+                if not new_enduser_id:
+                    return JsonResponse({'success': False, 'error': 'Please select an end user'})
 
-            # Get UserDetails instead of DesktopDetails
-            user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
-            old_enduser = user_details.user_Enduser  # Store old end user
+                new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+                user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
+                old_enduser = user_details.user_Enduser
 
-            # Debugging prints
-            print(f"Old End User: {old_enduser}")  
-            print(f"New End User: {new_enduser}")  
-            print(f"User Making Change: {request.user}")  
+                # Update end user
+                user_details.user_Enduser = new_enduser
+                user_details.save()
 
-            # Update end user
-            user_details.user_Enduser = new_enduser
-            user_details.save()
+                # Save history record
+                EndUserChangeHistory.objects.create(
+                    desktop_package=user_details.desktop_package_db,
+                    old_enduser=old_enduser,
+                    new_enduser=new_enduser,
+                    changed_by=request.user,
+                    changed_at=timezone.now()
+                )
 
-            # Save history record
-            history_entry = EndUserChangeHistory(
-                desktop_package=user_details.desktop_package_db,
-                old_enduser=old_enduser if old_enduser else None,  # Prevent NoneType errors
-                new_enduser=new_enduser,
-                changed_by=request.user,
-                changed_at=timezone.now()
-            )
-            history_entry.save()
-            print("History entry saved successfully!")  # Debugging
-
-            return JsonResponse({'success': True})
+                return JsonResponse({'success': True})
+                
         except Exception as e:
-            return JsonResponse({'success': False, 'error': f"Error updating End User: {e}"})
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+            return JsonResponse({
+                'success': False, 
+                'error': f"Error updating End User: {str(e)}"
+            }, status=400)
+    
+    return JsonResponse({
+        'success': False, 
+        'error': 'Invalid request method.'
+    }, status=405)
 
-
-# def dispose_desktop(request, desktop_id):
-#     if request.method == 'POST':
-#         desktop = get_object_or_404(DesktopDetails, id=desktop_id)
-#         reason = request.POST.get('reason')
-
-#         disposal_record = DisposedDesktopDetail.objects.create(
-#             desktop=desktop,
-#             reason=reason
-#         )
-
-#         if 'monitor' in request.POST:
-#             monitors = MonitorDetails.objects.filter(desktop_package_db=desktop.desktop_package)
-#             for m in monitors:
-#                 DisposedMonitor.objects.create(monitor_disposed_db=m, disposed_under=disposal_record)
-#                 m.is_disposed = True
-#                 m.save()
-
-#         desktop.is_disposed = True
-#         desktop.save()
-
-#         return redirect('desktop_details_view', desktop_id=desktop.id)
-
-#     return redirect('desktop_list')
 
 def dispose_desktop(request, desktop_id):
     if request.method == 'POST':
@@ -655,6 +682,7 @@ def dispose_desktop(request, desktop_id):
             for m in monitors:
                 DisposedMonitor.objects.create(
                     monitor_disposed_db=m,
+                    desktop_package_db=desktop.desktop_package,
                     disposed_under=disposal_record,
                     monitor_sn=m.monitor_sn_db,
                     monitor_brand=m.monitor_brand_db,

@@ -7,9 +7,6 @@ from django.utils.timezone import now
 
 # Create your models here.
 
-
-
-
 #################
 class Desktop_Package(models.Model):
     
@@ -88,6 +85,7 @@ class MonitorDetails(models.Model):
     
 class DisposedMonitor(models.Model):
     monitor_disposed_db = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
+    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
     monitor_sn = models.CharField(max_length=255, blank=True, null=True)
     monitor_brand = models.CharField(max_length=255, blank=True, null=True)
