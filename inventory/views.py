@@ -55,7 +55,6 @@ def desktop_package_base(request):
         'desktops_with_items': desktops_with_items,
     })      
 
-
 def desktop_details_view(request, desktop_id):
     # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
@@ -88,8 +87,8 @@ def desktop_details_view(request, desktop_id):
     has_active_mouse = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
     has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
     has_active_ups = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
-
     desktops_disposed_filter = DesktopDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+    
 
     #ownership
     # transfer_history = OwnershipTransfer.objects.filter(desktop_package=desktop_package).order_by('-transfer_date')
@@ -198,6 +197,20 @@ def add_monitor_to_package(request, package_id):
     
     return redirect('desktop_details_view', package_id=package_id)
 
+@require_POST
+def update_desktop(request, pk):
+    desktop = get_object_or_404(DesktopDetails, pk=pk)
+    desktop.serial_no = request.POST.get('desktop_sn_form')
+    desktop.brand_name = request.POST.get('desktop_brand_form')
+    desktop.model = request.POST.get('desktop_model_form')
+    desktop.processor = request.POST.get('desktop_proccessor_form')
+    desktop.memory = request.POST.get('desktop_memory_form')
+    desktop.drive = request.POST.get('desktop_drive_form')
+    
+    desktop.save()
+
+    base_url = reverse('desktop_details_view', kwargs={'desktop_id': desktop.desktop_package.pk})
+    return redirect(f'{base_url}#pills-desktop')
 
 @require_POST
 def update_monitor(request, pk):
@@ -367,8 +380,8 @@ def add_ups_to_package(request, package_id):
         UPSDetails.objects.create(
             desktop_package=desktop_package,
             ups_sn_db=ups_sn,
-            brand_db=ups_brand,
-            model_db=ups_model
+            ups_brand_db=ups_brand,
+            ups_model_db=ups_model
         )
         
         # Redirect back to the desktop details view, focusing on the Mouse tab
@@ -582,41 +595,6 @@ def update_asset_owner(request, desktop_id):
         except Exception as e:
             return JsonResponse({'success': False, 'error': f"Error updating Asset Owner: {e}"})
 
-######update enduser at my viewpage
-# def update_end_user(request, desktop_id):
-#     if request.method == 'POST':
-#         try:
-#             new_enduser_id = request.POST.get('enduser_input')
-#             new_enduser = get_object_or_404(Employee, id=new_enduser_id)
-
-#             # Get UserDetails instead of DesktopDetails
-#             user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
-#             old_enduser = user_details.user_Enduser  # Store old end user
-
-#             # Debugging prints
-#             print(f"Old End User: {old_enduser}")  
-#             print(f"New End User: {new_enduser}")  
-#             print(f"User Making Change: {request.user}")  
-
-#             # Update end user
-#             user_details.user_Enduser = new_enduser
-#             user_details.save()
-
-#             # Save history record
-#             history_entry = EndUserChangeHistory(
-#                 desktop_package=user_details.desktop_package_db,
-#                 old_enduser=old_enduser if old_enduser else None,  # Prevent NoneType errors
-#                 new_enduser=new_enduser,
-#                 changed_by=request.user,
-#                 changed_at=timezone.now()
-#             )
-#             history_entry.save()
-#             print("History entry saved successfully!")  # Debugging
-
-#             return JsonResponse({'success': True})
-#         except Exception as e:
-#             return JsonResponse({'success': False, 'error': f"Error updating End User: {e}"})
-#     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
     
 def update_end_user(request, desktop_id):
     if request.method == 'POST':

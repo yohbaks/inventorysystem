@@ -60,6 +60,7 @@ urlpatterns = [
     path('updateeee_asset_onwer/<int:desktop_id>/', views.update_asset_owner, name='update_asset_owner'), # update asset owner
 
     path('monitor/<int:pk>/update/', views.update_monitor, name='update_monitor'),
+    path('desktop/<int:pk>/update/', views.update_desktop, name='update_desktop'),
 
 
     # path('desktop/<int:desktop_id>/dispose/', views.dispose_desktop_view, name='dispose_desktop'),
