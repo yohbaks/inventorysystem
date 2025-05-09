@@ -78,13 +78,14 @@
       </div>
     </div>
  
-
+      <!-- Desktop Details Tab -->
     <!-- Tab Content -->
     <div class="tab-content mt-2 mb-3" id="pills-tabContent">
       <!-- Desktop Details Tab -->
       <div class="tab-pane fade show active" id="pills-desktop" role="tabpanel" aria-labelledby="pills-desktop-tab">
         <div class="card">
           <div class="card-header">
+            {% if has_active_desktop %}
             <div class="card-title">Desktop Details</div>
           </div>
           <div class="card-body">
@@ -129,36 +130,59 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#disposeModal">Dispose</button>
 
-            <!-- Dispose Modal -->
-<div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+
+<!-- Update desktop Modal -->
+
+<div class="modal fade" id="editDesktopModal" tabindex="-1" aria-labelledby="editDesktopModal" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
+    <form method="POST" action="{% url 'update_desktop' pk=desktop_detailsx.id %}">
       {% csrf_token %}
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Dispose Desktop</h5>
+          <h5 class="modal-title" id="editDesktopModal">Edit Desktop</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <input type="hidden" id="desktopId">
+
+          
           <div class="mb-3">
-            <label for="reason" class="form-label">Reason for disposal</label>
-            <textarea name="reason" class="form-control" required></textarea>
+            <label for="desktop_sn_form" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="desktop_sn_form" name="desktop_sn_form" value="{{ desktop_detailsx.serial_no }}" required>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="monitor" id="monitor">
-            <label class="form-check-label" for="monitor">Dispose Monitor(s)</label>
+          <div class="mb-3">
+            <label for="desktop_brand_form" class="form-label">Brand</label>
+            <input type="text" class="form-control" id="desktop_brand_form" name="desktop_brand_form" value="{{desktop_detailsx.brand_name}}" required>
+          </div>
+          <div class="mb-3">
+            <label for="desktop_model_form" class="form-label">Model</label>
+            <input type="text" class="form-control" id="desktop_model_form" name="desktop_model_form" value="{{ desktop_detailsx.model }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="desktop_proccessor_form" class="form-label">Proccessor</label>
+            <input type="text" class="form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" value="{{ desktop_detailsx.processor }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="desktop_memory_form" class="form-label">Memory</label>
+            <input type="text" class="form-control" id="desktop_memory_form" name="desktop_memory_form" value="{{ desktop_detailsx.memory }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="desktop_drive_form" class="form-label">Drive</label>
+            <input type="text" class="form-control" id="desktop_drive_form" name="desktop_drive_form" value="{{ desktop_detailsx.drive }}" required>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Dispose</button>
+          <button type="submit" class="btn btn-primary">Update Desktop Package</button>
         </div>
       </div>
     </form>
   </div>
-</div>
+</div>            
 
-{% if disposed_disposed_desktop.exists %}
+           
+  {% endif %}
+{% if disposed_desktop.exists %}
       <hr>
       <h5>Disposed Desktop Details</h5>
       <table class="table table-head-bg-danger table-bordered table-hover">
@@ -171,18 +195,18 @@
           </tr>
         </thead>
         <tbody>
-          {% for disposed_desktop in disposed_desktop %}
+          {% for record in disposed_desktop %}
           <tr>
-            <td>{{ disposed_desktop.desktop.monitor_sn_db }}</td>
-            <td>{{ disposed_desktop.desktop.serial_no }}</td>
-            <td>{{ disposed_desktop.monitor_disposed_db.brand_name }}</td>
-            <td>{{ disposed_desktop.disposal_date }}</td>
+            <td>{{ record.serial_no }}</td>
+            <td>{{ record.brand_name }}</td>
+            <td>{{ record.model }}</td>
+            <td>{{ record.date_disposed|date:"Y-m-d" }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
       {% else %}
-        <p>No disposed Desktop for this desktop package.</p>
+       
       {% endif %}
 
           </div>
@@ -192,14 +216,15 @@
 
 
 
-      {% comment %} <!-- Monitor Details Tab --> {% endcomment %}
+      <!-- Monitor Details Tab --> 
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title">Monitor Details</div>
-            {% if not has_active_monitor %}
+            {% if not has_active_monitor and has_active_desktop %}
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMonitorModal">Add Monitor</button>
             {% endif %}
+           
           </div>
           <div class="card-body">
             {% if monitor_detailse %}
@@ -268,19 +293,19 @@
                   
                   <div class="mb-3">
                     <label for="editSN" class="form-label">Serial Number</label>
-                    <input type="text" class="form-control" id="editSN" name="monitor_sn_db" required>
+                    <input type="text" class="form-control" id="editSN" name="monitor_sn_db" required value="{{ monitor_detailse.monitor_sn_db }}">
                   </div>
                   <div class="mb-3">
                     <label for="editBrand" class="form-label">Brand</label>
-                    <input type="text" class="form-control" id="editBrand" name="monitor_brand_db" required>
+                    <input type="text" class="form-control" id="editBrand" name="monitor_brand_db" value="{{ monitor_detailse.monitor_brand_db}}" required>
                   </div>
                   <div class="mb-3">
                     <label for="editModel" class="form-label">Model</label>
-                    <input type="text" class="form-control" id="editModel" name="monitor_model_db">
+                    <input type="text" class="form-control" id="editModel" name="monitor_model_db" value="{{ monitor_detailse.monitor_model_db }}">
                   </div>
                   <div class="mb-3">
                     <label for="editSize" class="form-label">Monitor Size</label>
-                    <input type="text" class="form-control" id="editSize" name="monitor_size_db">
+                    <input type="text" class="form-control" id="editSize" name="monitor_size_db" value="{{ monitor_detailse.monitor_size_db }}">
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -318,9 +343,33 @@
                     </div>
                   </div>
                 </div>
-                {% else %}
-                <p class="text-danger">No available Monitors for this desktop package.</p>
-                 {% endif %}
+                {% endif %}
+
+
+
+                {% if not has_active_monitor and not has_active_desktop %}
+                <p class="text-danger">This Monitor was completely disposed under the whole package.</p>
+                {% endif %}
+
+                
+                {% comment %} {% if has_active_monitor%}
+                <p class="text-danger">has active monitor</p>
+                {% endif %} {% endcomment %}
+                  
+                  {% if not has_active_monitor and has_active_desktop %}
+
+                
+
+
+                 
+                <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
+                   {% endif %}
+                
+               
+               
+                
+                
+               
 
                  <!-- Disposed Monitor Table -->
       {% if disposed_monitor.exists %}
@@ -347,7 +396,9 @@
         </tbody>
       </table>
       {% else %}
-        <p>No disposed Monitor for this desktop package.</p>
+      
+
+        <p>No disposed Monitor records for this desktop package.</p>
       {% endif %}
 
           </div>
@@ -434,6 +485,46 @@
         <!-- Edit and Dispose Buttons for active keyboard -->
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal">Dispose Keyboard</button>
+
+
+<!-- Update keyboard Modal or edit keyboard-->
+
+<div class="modal fade" id="editKeyboardModal" tabindex="-1" aria-labelledby="editKeyboardModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'update_keyboard' pk=keyboard_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editKeyboardModal">Edit Keyboard</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="keyboardId">
+
+          
+          <div class="mb-3">
+            <label for="editSN" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="editSN" name="keyboard_sn_db" required value="{{ keyboard_detailse.keyboard_sn_db }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editBrand" class="form-label">Brand</label>
+            <input type="text" class="form-control" id="editBrand" name="keyboard_brand_db" value="{{ keyboard_detailse.keyboard_brand_db}}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Model</label>
+            <input type="text" class="form-control" id="editModel" name="keyboard_model_db" value="{{ keyboard_detailse.keyboard_model_db }}" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Keyboard Details</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 
         <!-- Disposal Confirmation Modal -->
         <div class="modal fade" id="confirmDisposeModal" tabindex="-1" aria-labelledby="confirmDisposeModalLabel" aria-hidden="true">
@@ -576,6 +667,44 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMouseModal">Edit</button>
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeMouseModal">Dispose Mouse</button>
 
+<!-- Update Mouse Modal or edit Mouse-->
+
+<div class="modal fade" id="editMouseModal" tabindex="-1" aria-labelledby="editMouseModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'update_mouse' pk=mouse_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editMouseModal">Edit Mouse Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="mouseId">
+
+          
+          <div class="mb-3">
+            <label for="editSN" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="editSN" name="mouse_sn_db" required value="{{ mouse_detailse.mouse_sn_db }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editBrand" class="form-label">Brand</label>
+            <input type="text" class="form-control" id="editBrand" name="mouse_brand_db" value="{{ mouse_detailse.mouse_brand_db}}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Model</label>
+            <input type="text" class="form-control" id="editModel" name="mouse_model_db" value="{{ mouse_detailse.mouse_model_db }}" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Mouse Details</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>        
+
         <!-- Disposal Confirmation Modal -->
         <div class="modal fade" id="confirmDisposeMouseModal" tabindex="-1" aria-labelledby="confirmDisposeMouseModalLabel" aria-hidden="true">
           <div class="modal-dialog">
@@ -712,12 +841,58 @@
                     <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
                     <td>{{ ups_detailse.ups_model_db }}</td>
                   </tr>
+                  <tr>
+                    <td class="col-sm-6 col-md-3"><strong>Capacity:</strong></td>
+                    <td>{{ ups_detailse.ups_capacity_db }}</td>
+                  </tr>
                 </tbody>
               </table>
       
               <!-- Edit and Dispose Buttons for active ups -->
               <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUpsModal">Edit</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">Dispose UPS</button>
+
+
+                 <!-- ups update or edit details -->
+              <div class="modal fade" id="editUpsModal" tabindex="-1" aria-labelledby="editUpsModal" aria-hidden="true">
+                <div class="modal-dialog">
+                  <form method="POST" action="{% url 'update_ups' pk=ups_detailse.id %}">
+                    {% csrf_token %}
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="editUpsModal">Edit UPS Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <input type="hidden" id="upsId">
+              
+                        
+                        <div class="mb-3">
+                          <label for="editSN" class="form-label">Serial Number</label>
+                          <input type="text" class="form-control" id="editSN" name="ups_sn_db" required value="{{ ups_detailse.ups_sn_db }}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="editBrand" class="form-label">Brand</label>
+                          <input type="text" class="form-control" id="editBrand" name="ups_brand_db" value="{{ ups_detailse.ups_brand_db}}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="editModel" class="form-label">Model</label>
+                          <input type="text" class="form-control" id="editModel" name="ups_model_db" value="{{ ups_detailse.ups_model_db }}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="editCapacity" class="form-label">Capacity</label>
+                          <input type="text" class="form-control" id="editCapacity" name="ups_capacity_db" value="{{ ups_detailse.ups_capacity_db }}" required>
+                        </div>
+              
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update UPS Details</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>                      
       
               <!-- Disposal Confirmation Modal -->
               <div class="modal fade" id="confirmDisposeUpsModal" tabindex="-1" aria-labelledby="confirmDisposeUpsModalLabel" aria-hidden="true">
@@ -762,8 +937,8 @@
                 {% for disposed_upsx in disposed_ups %}
                 <tr>
                   <td>{{ disposed_upsx.ups_db.ups_sn_db }}</td>
-                  <td>{{ disposed_upsx.ups_db.brand_db }}</td>
-                  <td>{{ disposed_upsx.ups_db.model_db }}</td>
+                  <td>{{ disposed_upsx.ups_db.ups_brand_db }}</td>
+                  <td>{{ disposed_upsx.ups_db.ups_model_db }}</td>
                   <td>{{ disposed_upsx.disposal_date }}</td>
                 </tr>
                 {% endfor %}
@@ -801,6 +976,10 @@
                   <div class="mb-3">
                     <label for="mouse_model" class="form-label">Model</label>
                     <input type="text" class="form-control" id="ups_model" name="ups_model" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="mouse_capacity" class="form-label">Capacity</label>
+                    <input type="text" class="form-control" id="ups_capacity" name="ups_capacity" required>
                   </div>
                 </div>
                 <div class="modal-footer">
@@ -870,26 +1049,34 @@
     </div>
 
     <!-- Edit EndUser Modal -->
-    <div class="modal fade" id="editEndUserModal" tabindex="-1" aria-labelledby="editEndUserModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editEndUserModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Edit End User</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <form id="editEndUserForm" method="post">
+          <form id="editEndUserForm">
+            <div class="modal-body">
               {% csrf_token %}
-              <select class="form-select form-control" id="enduser_input" name="enduser_input">
-                <option value="">Select End User</option>
-                {% for employee in employees %}
-                  <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
-                {% endfor %}
-              </select>
-              <br>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
-            </form>
-          </div>
+              <div class="mb-3">
+                <label class="form-label">Select End User</label>
+                <select class="form-select" name="enduser_input" required>
+                  <option value="">Select End User</option>
+                  {% for employee in employees %}
+                    <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="submitButton">
+                <span class="button-text">Save Changes</span>
+                <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -988,7 +1175,48 @@
     </div>
   </div>
 </div>
+ <!-- Dispose Modal  for desktop, I put it in here so that tanan pills maka click sa button -->
+  
+ <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Dispose Desktop Package: {{ desktop_detailsx.computer_name }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="reason" class="form-label">Reason for disposal</label>
+            <textarea name="reason" class="form-control" required></textarea>
+          </div>
+          <p class="text-warning">
+            Please <strong>do not dispose of peripherals</strong> such as keyboards, monitors, and other devices if they are still functioning. Keeping equipment that works helps to reduce waste and saves costs!
+          </p>
 
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="monitor" id="monitor">
+            <label class="form-check-label" for="monitor">Dispose Monitor(s)</label> 
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="keyboard" id="keyboard">
+            <label class="form-check-label" for="keyboard">Dispose Keyboard (s)</label> 
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
+            <label class="form-check-label" for="mouse">Dispose Mouse (s)</label> 
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Dispose</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 <!-- Documents Tab -->
 <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
   <div class="card">
@@ -1077,89 +1305,116 @@
   </div>
 </div>
 <script>
-  $(document).ready(function () {
-    $("#editEndUserForm").submit(function (event) {
-      event.preventDefault();  // Prevent default form submission
+  $(document).ready(function() {
+    // Track if form is being submitted
+    let isSubmitting = false;
+    
+    $("#editEndUserForm").submit(function(event) {
+        event.preventDefault();
+        
+        if (isSubmitting) return false;
+        isSubmitting = true;
+        
+        let desktopId = "{{ desktop_package.id }}";
+        let formData = $(this).serialize();
 
-      let desktopId = "{{ desktop_package.id }}";  // Get the desktop package ID
-      let formData = $(this).serialize();  // Serialize form data
+        // Show loading state
+        let submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html(
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...'
+        );
 
-      $.ajax({
-        type: "POST",
-        url: "/updateeee_end_user/" + desktopId + "/",
-        data: formData,
-        success: function (response) {
-          if (response.success) {
-            // Show Bootstrap Toast on success
-            let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_End_User'));
-            toast.show();
-
-            // Close modal after a short delay
-            setTimeout(function () {
-              $("#editEndUserModal").modal("hide");
-              location.reload(); // Reload to reflect changes
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Oops...",
-              text: "Failed to update End User!",
-            });
-          }
-        },
-        error: function () {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Something went wrong while updating the End User.",
-          });
-        },
-      });
+        $.ajax({
+            type: "POST",
+            url: "/updateeee_end_user/" + desktopId + "/",
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    // Hide modal immediately
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('editEndUserModal'));
+                    modal.hide();
+                    
+                    // Show success toast
+                    var toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_End_User'));
+                    toast.show();
+                    
+                    // Full page reload after 1 second
+                    setTimeout(function() {
+                        window.location.href = window.location.href.split('#')[0] + '#pills-user';
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showError(response.error || "Failed to update End User");
+                }
+            },
+            error: function(xhr) {
+                showError(xhr.responseJSON?.error || "Something went wrong");
+            },
+            complete: function() {
+                isSubmitting = false;
+                submitBtn.prop('disabled', false).html('Save Changes');
+            }
+        });
     });
-  });
+
+    // Reset form when modal is closed
+    $('#editEndUserModal').on('hidden.bs.modal', function() {
+        $(this).find('form')[0].reset();
+    });
+});
+
+function showError(message) {
+    Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+    });
+}
 </script>
 
 <script>
   $(document).ready(function () {
-    $("#editAssetOwnerForm").submit(function (event) {
-      event.preventDefault();  // Prevent default form submission
+    $("#editEndUserForm").submit(function (event) {
+        event.preventDefault();
+        
+        let desktopId = "{{ desktop_package.id }}";
+        let formData = $(this).serialize();
 
-      let desktopId = "{{ desktop_package.id }}";  // Get the desktop package ID
-      let formData = $(this).serialize();  // Serialize form data
-
-      $.ajax({
-        type: "POST",
-        url: "/updateeee_asset_onwer/" + desktopId + "/",
-        data: formData,
-        success: function (response) {
-          if (response.success) {
-            // Show Bootstrap Toast on success
-            let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_Asset_Owner'));
-            toast.show();
-
-            // Close modal after a short delay
-            setTimeout(function () {
-              $("#editAssetOwnerModal").modal("hide");
-              location.reload(); // Reload to reflect changes
-            }, 1500);
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Oops...",
-              text: "Failed to update End User!",
-            });
-          }
-        },
-        error: function () {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Something went wrong while updating the End User.",
-          });
-        },
-      });
+        $.ajax({
+            type: "POST",
+            url: "/updateeee_end_user/" + desktopId + "/",
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    // Close the modal first
+                    $('#editEndUserModal').modal('hide');
+                    
+                    // Show success toast
+                    let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_End_User'));
+                    toast.show();
+                    
+                    // Redirect after a short delay to allow modal to close
+                    setTimeout(function() {
+                        window.location.href = `/desktop_details_view/${desktopId}/#pills-user`;
+                    }, 500); // 500ms delay
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: response.error || "Failed to update End User",
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong while updating the End User.",
+                });
+            }
+        });
     });
-  });
+});
 </script>
 {% endblock %}
 

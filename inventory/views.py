@@ -158,6 +158,7 @@ def keyboard_disposed(request, keyboard_id):
         # Create a new DisposedKeyboard entry
         disposed_keyboard = DisposedKeyboard(
             keyboard_dispose_db=keyboard,
+            desktop_package=keyboard.desktop_package,
             disposal_date=timezone.now()
         )
         disposed_keyboard.save()
@@ -746,32 +747,3 @@ def monitor_disposed(request, monitor_id):
 
     # Fallback in case the request method is not POST
     return redirect('desktop_details_view', package_id=monitor_id)
-
-# def monitor_disposed(request, monitor_id):
-#     if request.method == 'POST':
-#         # Retrieve the monitor by its ID
-#         monitor = get_object_or_404(MonitorDetails, id=monitor_id)
-#         reason = request.POST.get('reason', 'No reason provided')
-        
-#         # Create and save the disposal record (one-line version)
-#         DisposedMonitor.objects.create(
-#             monitor_disposed_db=monitor,
-#             desktop_package_db=monitor.desktop_package_db,
-#             monitor_sn=monitor.monitor_sn_db,
-#             monitor_brand=monitor.monitor_brand_db,
-#             monitor_model=monitor.monitor_model_db,
-#             monitor_size=monitor.monitor_size_db,
-#             disposal_date=timezone.now(),
-#             reason=reason
-#         )
-        
-#         # Mark the monitor as disposed
-#         monitor.is_disposed = True
-#         monitor.save()
-        
-#         # Redirect back to the desktop details view with Monitor tab active
-#         return redirect(
-#             reverse('desktop_details_view', kwargs={'package_id': monitor.desktop_package_db.id}) + '#pills-monitor'
-#         )
-
-#     return redirect('desktop_list')

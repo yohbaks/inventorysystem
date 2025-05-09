@@ -130,7 +130,7 @@ class KeyboardDetails(models.Model):
 class DisposedKeyboard(models.Model):
     keyboard_dispose_db = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards_details', on_delete=models.CASCADE, null=True)
-    # desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
+    
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
