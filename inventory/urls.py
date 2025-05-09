@@ -59,8 +59,12 @@ urlpatterns = [
     path('updateeee_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # update user
     path('updateeee_asset_onwer/<int:desktop_id>/', views.update_asset_owner, name='update_asset_owner'), # update asset owner
 
-    path('monitor/<int:pk>/update/', views.update_monitor, name='update_monitor'),
-    path('desktop/<int:pk>/update/', views.update_desktop, name='update_desktop'),
+    #update desktop, monitor, mouse, ups
+    path('desktop/<int:pk>/update/',    views.update_desktop, name='update_desktop'),
+    path('monitor/<int:pk>/update/',    views.update_monitor, name='update_monitor'),
+    path('keyboard/<int:pk>/update/',   views.update_keyboard, name='update_keyboard'),
+    path('mouse/<int:pk>/update/',      views.update_mouse, name='update_mouse'),
+    path('ups/<int:pk>/update/',        views.update_ups, name='update_ups'),
 
 
     # path('desktop/<int:desktop_id>/dispose/', views.dispose_desktop_view, name='dispose_desktop'),

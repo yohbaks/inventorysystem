@@ -197,6 +197,7 @@ def add_monitor_to_package(request, package_id):
     
     return redirect('desktop_details_view', package_id=package_id)
 
+#update desktop details
 @require_POST
 def update_desktop(request, pk):
     desktop = get_object_or_404(DesktopDetails, pk=pk)
@@ -212,20 +213,55 @@ def update_desktop(request, pk):
     base_url = reverse('desktop_details_view', kwargs={'desktop_id': desktop.desktop_package.pk})
     return redirect(f'{base_url}#pills-desktop')
 
+#update monitor details
 @require_POST
 def update_monitor(request, pk):
-    monitor = get_object_or_404(MonitorDetails, pk=pk)
-    monitor.monitor_sn_db = request.POST.get('monitor_sn_db')
-    monitor.monitor_brand_db = request.POST.get('monitor_brand_db')
-    monitor.monitor_model_db = request.POST.get('monitor_model_db')
-    monitor.monitor_size_db = request.POST.get('monitor_size_db')
+    monitor                     = get_object_or_404(MonitorDetails, pk=pk)
+    monitor.monitor_sn_db       = request.POST.get('monitor_sn_db')
+    monitor.monitor_brand_db    = request.POST.get('monitor_brand_db')
+    monitor.monitor_model_db    = request.POST.get('monitor_model_db')
+    monitor.monitor_size_db     = request.POST.get('monitor_size_db')
     
     monitor.save()
 
     base_url = reverse('desktop_details_view', kwargs={'desktop_id': monitor.desktop_package_db.pk})
     return redirect(f'{base_url}#pills-monitor')
 
+#update keyboard details
+@require_POST
+def update_keyboard(request, pk):
+    keyboard                    = get_object_or_404(KeyboardDetails, pk=pk)
+    keyboard.keyboard_sn_db     = request.POST.get('keyboard_sn_db')
+    keyboard.keyboard_brand_db  = request.POST.get('keyboard_brand_db')
+    keyboard.keyboard_model_db  = request.POST.get('keyboard_model_db')
+    
+    keyboard.save()
 
+    base_url = reverse('desktop_details_view', kwargs={'desktop_id': keyboard.desktop_package.pk})
+    return redirect(f'{base_url}#pills-keyboard')
+
+@require_POST
+def update_mouse(request, pk):
+    mouse = get_object_or_404(MouseDetails, pk=pk)
+    mouse.mouse_sn_db       = request.POST.get('mouse_sn_db')
+    mouse.mouse_brand_db    = request.POST.get('mouse_brand_db')
+    mouse.mouse_model_db    = request.POST.get('mouse_model_db')
+
+    mouse.save()
+    base_url = reverse('desktop_details_view', kwargs={'desktop_id': mouse.desktop_package.pk})
+    return redirect(f'{base_url}#pills-mouse')
+
+@require_POST
+def update_ups(request, pk):
+    ups = get_object_or_404(UPSDetails, pk=pk)
+    ups.ups_sn_db       = request.POST.get('ups_sn_db')
+    ups.ups_brand_db    = request.POST.get('ups_brand_db')
+    ups.ups_model_db    = request.POST.get('ups_model_db')
+    ups.ups_capacity_db = request.POST.get('ups_capacity_db')
+
+    ups.save()
+    base_url = reverse('desktop_details_view', kwargs={'desktop_id': ups.desktop_package.pk})
+    return redirect(f'{base_url}#pills-ups')
 
 
 def mouse_disposed(request, mouse_id):
@@ -375,13 +411,15 @@ def add_ups_to_package(request, package_id):
         ups_sn = request.POST.get('ups_sn')
         ups_brand = request.POST.get('ups_brand')
         ups_model = request.POST.get('ups_model')
+        ups_capacity = request.POST.get('ups_capacity')
         
         # Create a new mouse associated with the desktop package
         UPSDetails.objects.create(
             desktop_package=desktop_package,
             ups_sn_db=ups_sn,
             ups_brand_db=ups_brand,
-            ups_model_db=ups_model
+            ups_model_db=ups_model,
+            ups_capacity_db=ups_capacity
         )
         
         # Redirect back to the desktop details view, focusing on the Mouse tab
@@ -634,7 +672,7 @@ def update_end_user(request, desktop_id):
         'error': 'Invalid request method.'
     }, status=405)
 
-
+# sa kadaghanan na dispose katung naay checkbox sa monitor, mouse, keyboard, ups, etc.
 def dispose_desktop(request, desktop_id):
     if request.method == 'POST':
         desktop = get_object_or_404(DesktopDetails, id=desktop_id)
@@ -695,6 +733,7 @@ def monitor_disposed(request, monitor_id):
         # Create a new DisposedKeyboard entry
         disposed_monitor = DisposedMonitor(
             monitor_disposed_db=monitor,
+            desktop_package_db=monitor.desktop_package_db,
             disposal_date=timezone.now()
         )
         disposed_monitor.save()
@@ -707,3 +746,32 @@ def monitor_disposed(request, monitor_id):
 
     # Fallback in case the request method is not POST
     return redirect('desktop_details_view', package_id=monitor_id)
+
+# def monitor_disposed(request, monitor_id):
+#     if request.method == 'POST':
+#         # Retrieve the monitor by its ID
+#         monitor = get_object_or_404(MonitorDetails, id=monitor_id)
+#         reason = request.POST.get('reason', 'No reason provided')
+        
+#         # Create and save the disposal record (one-line version)
+#         DisposedMonitor.objects.create(
+#             monitor_disposed_db=monitor,
+#             desktop_package_db=monitor.desktop_package_db,
+#             monitor_sn=monitor.monitor_sn_db,
+#             monitor_brand=monitor.monitor_brand_db,
+#             monitor_model=monitor.monitor_model_db,
+#             monitor_size=monitor.monitor_size_db,
+#             disposal_date=timezone.now(),
+#             reason=reason
+#         )
+        
+#         # Mark the monitor as disposed
+#         monitor.is_disposed = True
+#         monitor.save()
+        
+#         # Redirect back to the desktop details view with Monitor tab active
+#         return redirect(
+#             reverse('desktop_details_view', kwargs={'package_id': monitor.desktop_package_db.id}) + '#pills-monitor'
+#         )
+
+#     return redirect('desktop_list')

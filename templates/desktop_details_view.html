@@ -216,7 +216,7 @@
 
 
 
-      {% comment %} <!-- Monitor Details Tab --> {% endcomment %}
+      <!-- Monitor Details Tab --> 
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
@@ -486,6 +486,46 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal">Dispose Keyboard</button>
 
+
+<!-- Update keyboard Modal or edit keyboard-->
+
+<div class="modal fade" id="editKeyboardModal" tabindex="-1" aria-labelledby="editKeyboardModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'update_keyboard' pk=keyboard_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editKeyboardModal">Edit Keyboard</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="keyboardId">
+
+          
+          <div class="mb-3">
+            <label for="editSN" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="editSN" name="keyboard_sn_db" required value="{{ keyboard_detailse.keyboard_sn_db }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editBrand" class="form-label">Brand</label>
+            <input type="text" class="form-control" id="editBrand" name="keyboard_brand_db" value="{{ keyboard_detailse.keyboard_brand_db}}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Model</label>
+            <input type="text" class="form-control" id="editModel" name="keyboard_model_db" value="{{ keyboard_detailse.keyboard_model_db }}" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Keyboard Details</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
         <!-- Disposal Confirmation Modal -->
         <div class="modal fade" id="confirmDisposeModal" tabindex="-1" aria-labelledby="confirmDisposeModalLabel" aria-hidden="true">
           <div class="modal-dialog">
@@ -627,6 +667,44 @@
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMouseModal">Edit</button>
         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeMouseModal">Dispose Mouse</button>
 
+<!-- Update Mouse Modal or edit Mouse-->
+
+<div class="modal fade" id="editMouseModal" tabindex="-1" aria-labelledby="editMouseModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'update_mouse' pk=mouse_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editMouseModal">Edit Mouse Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="mouseId">
+
+          
+          <div class="mb-3">
+            <label for="editSN" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="editSN" name="mouse_sn_db" required value="{{ mouse_detailse.mouse_sn_db }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editBrand" class="form-label">Brand</label>
+            <input type="text" class="form-control" id="editBrand" name="mouse_brand_db" value="{{ mouse_detailse.mouse_brand_db}}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Model</label>
+            <input type="text" class="form-control" id="editModel" name="mouse_model_db" value="{{ mouse_detailse.mouse_model_db }}" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Mouse Details</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>        
+
         <!-- Disposal Confirmation Modal -->
         <div class="modal fade" id="confirmDisposeMouseModal" tabindex="-1" aria-labelledby="confirmDisposeMouseModalLabel" aria-hidden="true">
           <div class="modal-dialog">
@@ -763,12 +841,58 @@
                     <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
                     <td>{{ ups_detailse.ups_model_db }}</td>
                   </tr>
+                  <tr>
+                    <td class="col-sm-6 col-md-3"><strong>Capacity:</strong></td>
+                    <td>{{ ups_detailse.ups_capacity_db }}</td>
+                  </tr>
                 </tbody>
               </table>
       
               <!-- Edit and Dispose Buttons for active ups -->
               <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUpsModal">Edit</button>
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">Dispose UPS</button>
+
+
+                 <!-- ups update or edit details -->
+              <div class="modal fade" id="editUpsModal" tabindex="-1" aria-labelledby="editUpsModal" aria-hidden="true">
+                <div class="modal-dialog">
+                  <form method="POST" action="{% url 'update_ups' pk=ups_detailse.id %}">
+                    {% csrf_token %}
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="editUpsModal">Edit UPS Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <input type="hidden" id="upsId">
+              
+                        
+                        <div class="mb-3">
+                          <label for="editSN" class="form-label">Serial Number</label>
+                          <input type="text" class="form-control" id="editSN" name="ups_sn_db" required value="{{ ups_detailse.ups_sn_db }}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="editBrand" class="form-label">Brand</label>
+                          <input type="text" class="form-control" id="editBrand" name="ups_brand_db" value="{{ ups_detailse.ups_brand_db}}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="editModel" class="form-label">Model</label>
+                          <input type="text" class="form-control" id="editModel" name="ups_model_db" value="{{ ups_detailse.ups_model_db }}" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="editCapacity" class="form-label">Capacity</label>
+                          <input type="text" class="form-control" id="editCapacity" name="ups_capacity_db" value="{{ ups_detailse.ups_capacity_db }}" required>
+                        </div>
+              
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update UPS Details</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>                      
       
               <!-- Disposal Confirmation Modal -->
               <div class="modal fade" id="confirmDisposeUpsModal" tabindex="-1" aria-labelledby="confirmDisposeUpsModalLabel" aria-hidden="true">
@@ -813,8 +937,8 @@
                 {% for disposed_upsx in disposed_ups %}
                 <tr>
                   <td>{{ disposed_upsx.ups_db.ups_sn_db }}</td>
-                  <td>{{ disposed_upsx.ups_db.brand_db }}</td>
-                  <td>{{ disposed_upsx.ups_db.model_db }}</td>
+                  <td>{{ disposed_upsx.ups_db.ups_brand_db }}</td>
+                  <td>{{ disposed_upsx.ups_db.ups_model_db }}</td>
                   <td>{{ disposed_upsx.disposal_date }}</td>
                 </tr>
                 {% endfor %}
@@ -852,6 +976,10 @@
                   <div class="mb-3">
                     <label for="mouse_model" class="form-label">Model</label>
                     <input type="text" class="form-control" id="ups_model" name="ups_model" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="mouse_capacity" class="form-label">Capacity</label>
+                    <input type="text" class="form-control" id="ups_capacity" name="ups_capacity" required>
                   </div>
                 </div>
                 <div class="modal-footer">
