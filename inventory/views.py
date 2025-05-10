@@ -735,6 +735,21 @@ def dispose_desktop(request, desktop_id):
                     k.is_disposed = True
                     k.save()
 
+            # Handle mouses
+            if 'mouse' in request.POST:
+                mouses = MouseDetails.objects.filter(
+                    desktop_package=desktop.desktop_package,
+                    is_disposed=False
+                )
+                for mo in mouses:
+                    DisposedMouse.objects.create(
+                        mouse_db=mo,
+                        disposed_under=disposal_record,
+                        disposal_date=timezone.now()
+                    )
+                    mo.is_disposed = True
+                    mo.save()
+
             # Mark desktop as disposed
             desktop.is_disposed = True
             desktop.save()

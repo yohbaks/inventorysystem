@@ -144,10 +144,12 @@ class MouseDetails(models.Model):
     
 
     def __str__(self):
-        return f"{self.mouse_brand_db} {self.mouse_model_db} ({self.mouse_sn_db})"
+        return f"{self.desktop_package} {self.mouse_brand_db} {self.mouse_model_db} ({self.mouse_sn_db})"
 
 class DisposedMouse(models.Model):
     mouse_db = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_details', on_delete=models.CASCADE, null=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_mice", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
