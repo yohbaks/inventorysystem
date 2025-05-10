@@ -18,8 +18,8 @@ urlpatterns = [
     
     #keyboard
     path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
-    path('success_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Add keyboard ID for disposal
-    path('success_disposed_monitor/<int:monitor_id>/', views.monitor_disposed, name='monitor_disposed'),  # Add keyboard ID for disposal change this to mouse
+    path('success_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Dispose keyboard
+    path('success_disposed_monitor/<int:monitor_id>/', views.monitor_disposed, name='monitor_disposed'),  # Dispose of a specific monitor
     path('success_disposed_mouse/<int:mouse_id>/', views.mouse_disposed, name='mouse_disposed'),  # Dispose of a specific mouse
     path('success_disposed_ups/<int:ups_id>/', views.ups_disposed, name='ups_disposed'),  # Dispose of a specific ups
 
@@ -67,7 +67,7 @@ urlpatterns = [
     path('ups/<int:pk>/update/',        views.update_ups, name='update_ups'),
 
 
-    # path('desktop/<int:desktop_id>/dispose/', views.dispose_desktop_view, name='dispose_desktop'),
+    
     path('dispose-desktop/<int:desktop_id>/', views.dispose_desktop, name='dispose_desktop'),
     
     

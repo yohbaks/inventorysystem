@@ -62,7 +62,7 @@ class DisposedDesktopDetail(models.Model):
     date_disposed = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Disposed {self.desktop.computer_name or self.serial_no}"
+        return f" {self.desktop} Disposed {self.desktop.computer_name or self.serial_no}"
 
 
 # =============================
@@ -109,9 +109,6 @@ class UserDetails(models.Model):
         return f"{self.user_Enduser}"
     
  
-
-
-
 class KeyboardDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
@@ -122,7 +119,7 @@ class KeyboardDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)  # Date when the keyboard was added
 
     def __str__(self):
-        return f"{self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
+        return f"{self.desktop_package} - {self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
     
 
     
@@ -130,7 +127,7 @@ class KeyboardDetails(models.Model):
 class DisposedKeyboard(models.Model):
     keyboard_dispose_db = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards_details', on_delete=models.CASCADE, null=True)
-    
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_keyboards", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
@@ -227,5 +224,3 @@ class AssetOwnerChangeHistory(models.Model):
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
-
-    

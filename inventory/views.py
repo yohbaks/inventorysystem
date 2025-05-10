@@ -345,7 +345,7 @@ def add_keyboard_to_package(request, package_id):
 
 
 
-#viewing of all keyboard disposed
+#viewing of all keyboard disposed sa page ni sa keyboard na naay disposed pud.
 def disposed_keyboards(request):
     # Get all disposed keyboards
     disposed_keyboards = DisposedKeyboard.objects.all()
@@ -675,53 +675,80 @@ def update_end_user(request, desktop_id):
 
 # sa kadaghanan na dispose katung naay checkbox sa monitor, mouse, keyboard, ups, etc.
 def dispose_desktop(request, desktop_id):
-    if request.method == 'POST':
-        desktop = get_object_or_404(DesktopDetails, id=desktop_id)
-        reason = request.POST.get('reason')
+    if request.method != 'POST':
+        # Replace 'desktop_list' with your actual list view URL name
+        return redirect(reverse('your_actual_desktop_list_url_name'))  # Change this
+    
+    try:
+        with transaction.atomic():
+            desktop = get_object_or_404(DesktopDetails, id=desktop_id, is_disposed=False)
+            reason = request.POST.get('reason', '').strip()
+            
+            if not reason:
+                # You might want to add an error message here
+                return redirect(reverse('desktop_details_view', args=[desktop.id]))
 
-        # Create disposal record for the desktop (without package code)
-        disposal_record = DisposedDesktopDetail.objects.create(
-            desktop=desktop,
-            reason=reason,
-            serial_no=desktop.serial_no,
-            brand_name=desktop.brand_name,
-            model=desktop.model,
-            asset_owner=desktop.asset_owner,
-            date_disposed=timezone.now()
-        )
-
-        # Handle attached monitors if checkbox was selected
-        if request.POST.get('monitor'):
-            monitors = MonitorDetails.objects.filter(
-                desktop_package_db=desktop.desktop_package,
-                is_disposed=False
+            # Create disposal record
+            disposal_record = DisposedDesktopDetail.objects.create(
+                desktop=desktop,
+                reason=reason,
+                serial_no=desktop.serial_no,
+                brand_name=desktop.brand_name,
+                model=desktop.model,
+                asset_owner=desktop.asset_owner,  # Changed from None to use the field
+                date_disposed=timezone.now()
             )
-            for m in monitors:
-                DisposedMonitor.objects.create(
-                    monitor_disposed_db=m,
+
+            # Handle monitors
+            if 'monitor' in request.POST:
+                monitors = MonitorDetails.objects.filter(
                     desktop_package_db=desktop.desktop_package,
-                    disposed_under=disposal_record,
-                    monitor_sn=m.monitor_sn_db,
-                    monitor_brand=m.monitor_brand_db,
-                    monitor_model=m.monitor_model_db,
-                    monitor_size=m.monitor_size_db,
-                    disposal_date=timezone.now()
+                    is_disposed=False
                 )
-                m.is_disposed = True
-                m.save()
+                for m in monitors:
+                    DisposedMonitor.objects.create(
+                        monitor_disposed_db=m,
+                        desktop_package_db=desktop.desktop_package,
+                        disposed_under=disposal_record,
+                        monitor_sn=m.monitor_sn_db,
+                        monitor_brand=m.monitor_brand_db,
+                        monitor_model=m.monitor_model_db,
+                        monitor_size=m.monitor_size_db,
+                        disposal_date=timezone.now()
+                    )
+                    m.is_disposed = True
+                    m.save()
 
-        # Mark the desktop itself as disposed
-        desktop.is_disposed = True
-        desktop.save()
+            # Handle keyboards
+            if 'keyboard' in request.POST:
+                keyboards = KeyboardDetails.objects.filter(
+                    desktop_package=desktop.desktop_package,
+                    is_disposed=False
+                )
+                for k in keyboards:
+                    DisposedKeyboard.objects.create(
+                        keyboard_dispose_db=k,
+                        desktop_package=desktop.desktop_package,
+                        disposed_under=disposal_record,
+                        disposal_date=timezone.now()
+                    )
+                    k.is_disposed = True
+                    k.save()
 
-        # Redirect back to the desktop detail view
-        return redirect('desktop_details_view', desktop_id=desktop.id)
+            # Mark desktop as disposed
+            desktop.is_disposed = True
+            desktop.save()
 
-    return redirect('desktop_list')
+            return redirect(reverse('desktop_details_view', args=[desktop.id]))
+            
+    except Exception as e:
+        # Log the error (consider adding proper logging)
+        # Redirect to a safe page - replace with your actual list view
+        return redirect(reverse('http://127.0.0.1:8000/desktop_details_view'))  # Change this
 
 
 
-#THIS IS WORKING
+#THIS IS WORKING DISPOSED UNDER THE DESKTOP
 def monitor_disposed(request, monitor_id):
     if request.method == 'POST':
         # Retrieve the keyboard by its ID
@@ -747,3 +774,5 @@ def monitor_disposed(request, monitor_id):
 
     # Fallback in case the request method is not POST
     return redirect('desktop_details_view', package_id=monitor_id)
+
+
