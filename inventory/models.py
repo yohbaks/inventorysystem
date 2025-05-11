@@ -21,7 +21,7 @@ class Desktop_Package(models.Model):
 
     
 # =============================
-# Desktop
+# ++++++++++++++++++++++++++++++Desktop Details , Monitor, Keyboard, Mouse, UPS
 # =============================
 class DesktopDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
@@ -48,27 +48,9 @@ class DesktopDetails(models.Model):
     
 
     def __str__(self):
-        return f"{self.desktop_package} {self.computer_name} {self.brand_name} {self.model} ({self.serial_no})"
-    
-    
-class DisposedDesktopDetail(models.Model):
-    desktop = models.ForeignKey("DesktopDetails", on_delete=models.CASCADE)
-    desktop_package_number = models.CharField(max_length=255, blank=True, null=True)
-    serial_no = models.CharField(max_length=255, blank=True, null=True)
-    brand_name = models.CharField(max_length=255, blank=True, null=True)
-    model = models.CharField(max_length=255, blank=True, null=True)
-    asset_owner = models.CharField(max_length=255, blank=True, null=True)
-    reason = models.TextField()
-    date_disposed = models.DateTimeField(auto_now_add=True)
+        return f"{self.desktop_package} : {self.computer_name} | BRAND: {self.brand_name}"
 
-    def __str__(self):
-        return f" {self.desktop} Disposed {self.desktop.computer_name or self.serial_no}"
-
-
-# =============================
-# Monitor
-# =============================
-
+  #monitor details  
 class MonitorDetails(models.Model):
     # id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
@@ -80,37 +62,11 @@ class MonitorDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)  # Date when the monitor was added
 
     def __str__(self):
-        return f"{self.id} {self.desktop_package_db} {self.monitor_brand_db} {self.monitor_model_db} ({self.monitor_sn_db})"
-    
-    
-class DisposedMonitor(models.Model):
-    monitor_disposed_db = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
-    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
-    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
-    monitor_sn = models.CharField(max_length=255, blank=True, null=True)
-    monitor_brand = models.CharField(max_length=255, blank=True, null=True)
-    monitor_model = models.CharField(max_length=255, blank=True, null=True)
-    monitor_size = models.CharField(max_length=255, blank=True, null=True)
-    disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    reason = models.TextField(blank=True, null=True)
+        return f"{self.desktop_package_db} | BRAND: {self.monitor_brand_db}"
 
-    def __str__(self):
-        return f"Disposed Monitor: {self.desktop_package_db} {self.monitor_disposed_db.monitor_sn_db}"
-    
- #userdetails   
-class UserDetails(models.Model):  
-    id = models.AutoField(primary_key=True)  
-    desktop_package_db = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True)  
-    user_Enduser = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='enduser_details')
-    user_Assetowner = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='assetowner_details')
-    created_at = models.DateTimeField(auto_now_add=True)  
-
-    def __str__(self):
-        return f"{self.user_Enduser}"
-    
- 
+#keyboard details
 class KeyboardDetails(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    # id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
     keyboard_sn_db = models.CharField(max_length=255)
     keyboard_brand_db = models.CharField(max_length=255)
@@ -119,20 +75,9 @@ class KeyboardDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)  # Date when the keyboard was added
 
     def __str__(self):
-        return f"{self.desktop_package} - {self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
+        return f"{self.desktop_package} : - {self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"   
     
-
-    
-
-class DisposedKeyboard(models.Model):
-    keyboard_dispose_db = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards_details', on_delete=models.CASCADE, null=True)
-    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_keyboards", null=True, blank=True)
-    disposal_date = models.DateField(default=timezone.now)
-
-    def __str__(self):
-        return f"Disposed: {self.desktop_package} - {self.keyboard_dispose_db.keyboard_sn_db}"
-
+#mouse details
 class MouseDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_db', on_delete=models.CASCADE)
@@ -145,20 +90,8 @@ class MouseDetails(models.Model):
 
     def __str__(self):
         return f"{self.desktop_package} {self.mouse_brand_db} {self.mouse_model_db} ({self.mouse_sn_db})"
-
-class DisposedMouse(models.Model):
-    mouse_db = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_details', on_delete=models.CASCADE, null=True)
-    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_mice", null=True, blank=True)
-    disposal_date = models.DateField(default=timezone.now)
-
-    def __str__(self):
-        return f"Disposed: {self.mouse_db}"
-
-
-# =============================
-# UPS
-# =============================
+    
+ #ups details
 class UPSDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
@@ -172,12 +105,89 @@ class UPSDetails(models.Model):
     def __str__(self):
         return f" {self.desktop_package} {self.ups_brand_db} {self.ups_model_db} ({self.ups_sn_db}) "
 
-class DisposedUPS(models.Model):
-    ups_db = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
+#user details 
+class UserDetails(models.Model):  
+    id = models.AutoField(primary_key=True)  
+    desktop_package_db = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True)  
+    user_Enduser = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='enduser_details')
+    user_Assetowner = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='assetowner_details')
+    created_at = models.DateTimeField(auto_now_add=True)  
+
+    def __str__(self):
+        return f"{self.user_Enduser}"
+
+# =====================================
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++END OF DESKTOP,KEYBOARD,MOUSE,UPS DETAILS++++++++++++++++++++++++++++++++++++++
+# ======================================
+
+# ======================================
+# +++++++++++++++++++++++++++++++++++++DISPOSED DETAILS DESKTOP, KEYBOARD, MOUSE, UPS++++++++++++
+# ======================================
+
+class DisposedDesktopDetail(models.Model):
+    desktop = models.ForeignKey("DesktopDetails", on_delete=models.CASCADE)
+    # desktop_package_number = models.CharField(max_length=255, blank=True, null=True)
+    serial_no = models.CharField(max_length=255, blank=True, null=True)
+    brand_name = models.CharField(max_length=255, blank=True, null=True)
+    model = models.CharField(max_length=255, blank=True, null=True)
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)
+    reason = models.TextField()
+    date_disposed = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f" Disposed Desktop Package : -  {self.desktop}"
+
+  
+class DisposedMonitor(models.Model):
+    monitor_disposed_db = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
+    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
+    monitor_sn = models.CharField(max_length=255, blank=True, null=True)
+    monitor_brand = models.CharField(max_length=255, blank=True, null=True)
+    monitor_model = models.CharField(max_length=255, blank=True, null=True)
+    monitor_size = models.CharField(max_length=255, blank=True, null=True)
+    disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    reason = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Disposed Monitor : - {self.monitor_disposed_db} "
+    
+
+
+class DisposedKeyboard(models.Model):
+    keyboard_dispose_db = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards_details', on_delete=models.CASCADE, null=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_keyboards", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"Disposed: {self.ups_db.ups_sn_db}"
+        return f"Disposed: - {self.desktop_package} - {self.keyboard_dispose_db.keyboard_sn_db}"
+
+
+
+class DisposedMouse(models.Model):
+    mouse_db = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_details', on_delete=models.CASCADE, null=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_ups", null=True, blank=True)
+    disposal_date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f"Disposed: {self.mouse_db}"
+
+
+# =============================
+# UPS
+# =============================
+
+
+class DisposedUPS(models.Model):
+    ups_db = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='ups_details', on_delete=models.CASCADE, null=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_mice", null=True, blank=True)
+    disposal_date = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f"Disposed: {self.desktop_package} | Brand: {self.ups_db.ups_brand_db} | SN: {self.ups_db.ups_sn_db}  "
     
 
 class DocumentsDetails(models.Model):

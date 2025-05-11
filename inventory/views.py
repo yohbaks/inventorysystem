@@ -146,31 +146,7 @@ def keyboard_update(request, keyboard_id):
     
 
 
-def keyboard_disposed(request, keyboard_id):
-    if request.method == 'POST':
-        # Retrieve the keyboard by its ID
-        keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
-        
-        # Set the keyboard as disposed and save
-        keyboard.is_disposed = True
-        keyboard.save()
-        
-        # Create a new DisposedKeyboard entry
-        disposed_keyboard = DisposedKeyboard(
-            keyboard_dispose_db=keyboard,
-            desktop_package=keyboard.desktop_package,
-            disposal_date=timezone.now()
-        )
-        disposed_keyboard.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = keyboard.desktop_package.id
-        
-        # Redirect back to the desktop details view with the Keyboard tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-keyboard')
-
-    # Fallback in case the request method is not POST
-    return redirect('desktop_details_view', package_id=keyboard.desktop_package.id)
 
 
 
@@ -184,13 +160,15 @@ def add_monitor_to_package(request, package_id):
         monitor_sn = request.POST.get('monitor_sn')
         monitor_brand = request.POST.get('monitor_brand')
         monitor_model = request.POST.get('monitor_model')
+        monitor_size = request.POST.get('monitor_size')
         
         # Create a new keyboard associated with the desktop package
         MonitorDetails.objects.create(
             desktop_package_db=desktop_package,
             monitor_sn_db=monitor_sn,
             monitor_brand_db=monitor_brand,
-            monitor_model_db=monitor_model
+            monitor_model_db=monitor_model,
+            monitor_size_db=monitor_size
         )
         
         # Redirect back to the desktop details view, focusing on the Keyboard tab
@@ -264,7 +242,65 @@ def update_ups(request, pk):
     base_url = reverse('desktop_details_view', kwargs={'desktop_id': ups.desktop_package.pk})
     return redirect(f'{base_url}#pills-ups')
 
+                                            ######## SINGLE DISPOSAL TAB ###########
 
+#monitor disposal under keyboard pill page
+def monitor_disposed(request, monitor_id):
+    if request.method == 'POST':
+        # Retrieve the keyboard by its ID
+        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
+        
+        # Set the keyboard as disposed and save
+        monitor.is_disposed = True
+        monitor.save()
+        
+        # Create a new DisposedKeyboard entry
+        disposed_monitor = DisposedMonitor(
+            monitor_disposed_db=monitor,
+            desktop_package_db=monitor.desktop_package_db,
+            monitor_sn=monitor.monitor_sn_db,
+            disposal_date=timezone.now()
+        )
+        disposed_monitor.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = monitor.desktop_package_db.id
+        
+        # Redirect back to the desktop details view with the Keyboard tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
+
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=monitor_id)
+
+
+#keyboard disposal under keyboard pill page
+def keyboard_disposed(request, keyboard_id):
+    if request.method == 'POST':
+        # Retrieve the keyboard by its ID
+        keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+        
+        # Set the keyboard as disposed and save
+        keyboard.is_disposed = True
+        keyboard.save()
+        
+        # Create a new DisposedKeyboard entry
+        disposed_keyboard = DisposedKeyboard(
+            keyboard_dispose_db=keyboard,
+            desktop_package=keyboard.desktop_package,
+            disposal_date=timezone.now()
+        )
+        disposed_keyboard.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = keyboard.desktop_package.id
+        
+        # Redirect back to the desktop details view with the Keyboard tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-keyboard')
+
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=keyboard.desktop_package.id)
+
+#mouse disposal under mouse pill page
 def mouse_disposed(request, mouse_id):
     # Only proceed if the request is POST
     if request.method == 'POST':
@@ -291,34 +327,34 @@ def mouse_disposed(request, mouse_id):
     # Fallback for non-POST requests: redirect to an appropriate page or show an error
     return redirect('desktop_details_view', package_id=mouse_id)
 
-
-#disposed UPS
+# ups disposal under ups pill page
 def ups_disposed(request, ups_id):
-    # Only proceed if the request is POST
     if request.method == 'POST':
         # Retrieve the UPS by its ID
         ups = get_object_or_404(UPSDetails, id=ups_id)
         
-        # Set the ups as disposed and save
+        # Set the UPS as disposed and save
         ups.is_disposed = True
         ups.save()
         
-        # Create a new DisposedUps entry
-        disposed_mups = DisposedUPS(
+        # Create a new DisposedUPS entry
+        disposed_ups = DisposedUPS(
             ups_db=ups,
+            desktop_package=ups.desktop_package,
             disposal_date=timezone.now()
         )
-        disposed_mups.save()
+        disposed_ups.save()
 
         # Get the package ID to redirect to the same page
         desktop_package_id = ups.desktop_package.id
-
+        
         # Redirect back to the desktop details view with the UPS tab active
         return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-ups')
 
-    # Fallback for non-POST requests: redirect to an appropriate page or show an error
+    # Fallback in case the request method is not POST
     return redirect('desktop_details_view', package_id=ups_id)
 
+                                            ######## SINGLE END TAB ###########
 
 def add_keyboard_to_package(request, package_id):
     if request.method == 'POST':
@@ -603,37 +639,40 @@ def delete_employee(request, employee_id):
 def update_asset_owner(request, desktop_id):
     if request.method == 'POST':
         try:
-            new_assetowner_id = request.POST.get('assetowner_input')
-            new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
+            with transaction.atomic():
+                new_assetowner_id = request.POST.get('assetowner_input')
+                if not new_assetowner_id:
+                    return JsonResponse({'success': False, 'error': 'Please select an asset owner'})
 
-            # Get UserDetails instead of DesktopDetails
-            user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
-            old_assetowner = user_details.user_Assetowner  # Store old asset owner
+                new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
+                user_details = get_object_or_404(UserDetails, desktop_package_db__id=desktop_id)
+                old_assetowner = user_details.user_Assetowner
 
-            # Debugging prints
-            print(f"Old Asset Owner: {old_assetowner}")  
-            print(f"New Asset Owner: {new_assetowner}")  
-            print(f"User Making Change: {request.user}")  
+                # Update asset owner
+                user_details.user_Assetowner = new_assetowner
+                user_details.save()
 
-            # Update asset owner
-            user_details.user_Assetowner = new_assetowner
-            user_details.save()
+                # Save history record
+                AssetOwnerChangeHistory.objects.create(
+                    desktop_package=user_details.desktop_package_db,
+                    old_assetowner=old_assetowner,
+                    new_assetowner=new_assetowner,
+                    changed_by=request.user,
+                    changed_at=timezone.now()
+                )
 
-            # Save history record
-            history_entry = AssetOwnerChangeHistory(
-                desktop_package=user_details.desktop_package_db,
-                old_assetowner=old_assetowner if old_assetowner else None,  # Prevent NoneType errors
-                new_assetowner=new_assetowner,
-                changed_by=request.user,
-                changed_at=timezone.now()
-            )
-            history_entry.save()
-            print("History entry saved successfully!")  # Debugging
-
-            return JsonResponse({'success': True})
+                return JsonResponse({'success': True})
+                
         except Exception as e:
-            return JsonResponse({'success': False, 'error': f"Error updating Asset Owner: {e}"})
-
+            return JsonResponse({
+                'success': False, 
+                'error': f"Error updating Asset Owner: {str(e)}"
+            }, status=400)
+    
+    return JsonResponse({
+        'success': False, 
+        'error': 'Invalid request method.'
+    }, status=405)
     
 def update_end_user(request, desktop_id):
     if request.method == 'POST':
@@ -750,6 +789,21 @@ def dispose_desktop(request, desktop_id):
                     mo.is_disposed = True
                     mo.save()
 
+            # Handle UPS
+            if 'ups' in request.POST:
+                ups = UPSDetails.objects.filter(
+                    desktop_package=desktop.desktop_package,
+                    is_disposed=False
+                )
+                for u in ups:
+                    DisposedUPS.objects.create(
+                        ups_db=u,
+                        disposed_under=disposal_record,
+                        disposal_date=timezone.now()
+                    )
+                    u.is_disposed = True
+                    u.save()
+
             # Mark desktop as disposed
             desktop.is_disposed = True
             desktop.save()
@@ -763,31 +817,7 @@ def dispose_desktop(request, desktop_id):
 
 
 
-#THIS IS WORKING DISPOSED UNDER THE DESKTOP
-def monitor_disposed(request, monitor_id):
-    if request.method == 'POST':
-        # Retrieve the keyboard by its ID
-        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
-        
-        # Set the keyboard as disposed and save
-        monitor.is_disposed = True
-        monitor.save()
-        
-        # Create a new DisposedKeyboard entry
-        disposed_monitor = DisposedMonitor(
-            monitor_disposed_db=monitor,
-            desktop_package_db=monitor.desktop_package_db,
-            disposal_date=timezone.now()
-        )
-        disposed_monitor.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = monitor.desktop_package_db.id
-        
-        # Redirect back to the desktop details view with the Keyboard tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
 
-    # Fallback in case the request method is not POST
-    return redirect('desktop_details_view', package_id=monitor_id)
 
 

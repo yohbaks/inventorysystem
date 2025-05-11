@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %} 
 {% block content %}
 <div class="container">
   <div class="page-inner">
@@ -7,17 +8,23 @@
       <div class="col-md-8">
         <div class="card card-round">
           <div class="card-header">
-            <div class="card-title"><h3>{{ desktop_detailsx.computer_name }}</h3></div>
+            {% comment %} <div class="card-title"><h3>{{ desktop_detailsx.computer_name }}</h3></div> {% endcomment %}
             <div class="card-tools">
+              {% if not desktop_detailsx.is_disposed %}
               <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#disposeModal">
                 <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Return to Supply
               </button>
+              {% endif %}
               <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
                 <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
               </a>
               <a href="#" class="btn btn-label-info btn-round btn-sm">
                 <span class="btn-label"><i class="fa fa-print"></i></span> Print
               </a>
+               {% if desktop_detailsx.is_disposed %}
+                <i class="fas fa-power-off"></i> Disposed
+               {% else %}
+               {% endif %}
             </div>
           </div> 
           <div class="card-body">
@@ -62,22 +69,56 @@
           </div>
         </div>
       </div>
+               {% if desktop_detailsx.is_disposed %}
+                    <div class="col-md-4">
+                <div class="card card-danger bg-danger-gradient">
+                  <div class="card-body curves-shadow">
+                    <img src="{% static 'img/kaiadmin/logo_light.svg' %}" height="20" alt="Visa Logo">
+                    <h1 class="py-4 mb-0">{{ desktop_detailsx.computer_name }}</h1>
+                    <div class="row">
+                      <div class="col-8 pe-0">
+                        <h3 class="fw-bold mb-1">{{ user_details.user_Assetowner.employee_fname}} {{ user_details.user_Assetowner.employee_mname}}. {{ user_details.user_Assetowner.employee_lname}}</h3>
+                        <div class="text-small text-uppercase fw-bold op-8">
+                          {{ user_details.user_Assetowner.employee_position}}
+                        </div>
+                      </div>
+                      <div class="col-4 ps-0 text-end">
+                        <h3 class="fw-bold mb-1">4/26</h3>
+                        <div class="text-small text-uppercase fw-bold op-8">
+                          Date Enetered
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+               {% else %}
+               
 
-      <!-- Right Column for PM green -->
-      <div class="col-md-4">
-        <div class="card card-success bg-success2">
-          <div class="card-body pb-0">
-            <div class="h1 fw-bold float-end">+7%</div>
-            <h2 class="mb-2">{{ desktop_detailsx.computer_name }}</h2>
-            <p>Transactions</p>
-            <div class="pull-in sparkline-fix chart-as-background">
-              <div id="lineChart6"><canvas width="507" height="70" style="display: inline-block; width: 507.984px; height: 70px; vertical-align: top;"></canvas></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
- 
+    <div class="col-md-4">
+                <div class="card card-secondary bg-secondary-gradient">
+                  <div class="card-body curves-shadow">
+                    <img src="{% static 'img/kaiadmin/logo_light.svg' %}" height="20" alt="Visa Logo">
+                    <h1 class="py-4 mb-0">{{ desktop_detailsx.computer_name }}</h1>
+                    <div class="row">
+                      <div class="col-8 pe-0">
+                        <h3 class="fw-bold mb-1">{{ user_details.user_Assetowner.employee_fname}} {{ user_details.user_Assetowner.employee_mname}}. {{ user_details.user_Assetowner.employee_lname}}</h3>
+                        <div class="text-small text-uppercase fw-bold op-8">
+                          {{ user_details.user_Assetowner.employee_position}}
+                        </div>
+                      </div>
+                      <div class="col-4 ps-0 text-end">
+                        <h3 class="fw-bold mb-1">4/26</h3>
+                        <div class="text-small text-uppercase fw-bold op-8">
+                          Date Enetered
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
       <!-- Desktop Details Tab -->
     <!-- Tab Content -->
     <div class="tab-content mt-2 mb-3" id="pills-tabContent">
@@ -160,7 +201,48 @@
           </div>
           <div class="mb-3">
             <label for="desktop_proccessor_form" class="form-label">Proccessor</label>
-            <input type="text" class="form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" value="{{ desktop_detailsx.processor }}" required>
+            {% comment %} <input type="text" class="form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" value="{{ desktop_detailsx.processor }}" required> {% endcomment %}
+            <select class="form-select form-control" id="desktop_processor_form" name="desktop_processor_form" required>
+              <option value="{{ desktop_detailsx.processor }}" selected>{{ desktop_detailsx.processor }}</option>              
+              <optgroup label="Core i9 (Desktop)">
+                            <option value="i9-14900K">Core i9-14900K (14th Gen Raptor Lake)</option>
+                            <option value="i9-13900K">Core i9-13900K (13th Gen Raptor Lake)</option>
+                            <option value="i9-12900K">Core i9-12900K (12th Gen Alder Lake)</option>
+                            <option value="i9-11900K">Core i9-11900K (11th Gen Rocket Lake)</option>
+                            <option value="i9-10900K">Core i9-10900K (10th Gen Comet Lake)</option>
+                          </optgroup>
+                          
+                          <optgroup label="Core i7 (Desktop)">
+                            <option value="i7-14700K">Core i7-14700K (14th Gen)</option>
+                            <option value="i7-13700K">Core i7-13700K (13th Gen)</option>
+                            <option value="i7-12700K">Core i7-12700K (12th Gen)</option>
+                            <option value="i7-11700K">Core i7-11700K (11th Gen)</option>
+                          </optgroup>
+                          
+                          <optgroup label="Core i5 (Desktop)">
+                            <option value="i5-14600K">Core i5-14600K (14th Gen)</option>
+                            <option value="i5-13600K">Core i5-13600K (13th Gen)</option>
+                            <option value="i5-12600K">Core i5-12600K (12th Gen)</option>
+                          </optgroup>
+
+
+
+
+
+
+                          
+                          
+                          <optgroup label="Xeon (Workstation/Server)">
+                            <option value="Xeon W9-3495X">Xeon W9-3495X (Sapphire Rapids)</option>
+                            <option value="Xeon W7-2495X">Xeon W7-2495X</option>
+                            <option value="Xeon Platinum 8490H">Xeon Platinum 8490H</option>
+                          </optgroup>
+                          
+                          <optgroup label="Budget (Pentium/Celeron)">
+                            <option value="Pentium Gold G7400">Pentium Gold G7400</option>
+                            <option value="Celeron G6900">Celeron G6900</option>
+                          </optgroup>
+                        </select>
           </div>
           <div class="mb-3">
             <label for="desktop_memory_form" class="form-label">Memory</label>
@@ -318,9 +400,6 @@
         </div>
 
 
-
-
-
                 <!-- Disposal Confirmation Modal -->
                 <div class="modal fade" id="confirmDisposeModal_Monitor" tabindex="-1" aria-labelledby="confirmDisposeModal_Monitor" aria-hidden="true">
                   <div class="modal-dialog">
@@ -352,14 +431,10 @@
                 {% endif %}
 
                 
-                {% comment %} {% if has_active_monitor%}
-                <p class="text-danger">has active monitor</p>
-                {% endif %} {% endcomment %}
                   
                   {% if not has_active_monitor and has_active_desktop %}
 
-                
-
+            
 
                  
                 <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
@@ -426,6 +501,10 @@
             <div class="mb-3">
               <label for="monitor_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="monitor_model" name="monitor_model" required>
+            </div>
+            <div class="mb-3">
+              <label for="monitor_size" class="form-label">Size</label>
+              <input type="text" class="form-control" id="monitor_size" name="monitor_size" required>
             </div>
           </div>
           <div class="modal-footer">
@@ -917,13 +996,13 @@
                 </div>
               </div>
             {% else %}
-              <p class="text-danger">No available mice for this desktop package.</p>
+              <p class="text-danger">No available UPS for this desktop package.</p>
             {% endif %}
       
             <!-- Disposed UPS Table -->
             {% if disposed_ups.exists %}
             <hr>
-            <h5>Disposed Mice</h5>
+            <h5>Disposed UPS History</h5>
             <table class="table table-head-bg-danger table-bordered table-hover">
               <thead>
                 <tr>
@@ -948,7 +1027,7 @@
             
             <h5 class="text-success">
               <br>
-              No disposed mice for this desktop package.
+              No disposed UPS for this desktop package.
             </h5>
             {% endif %}
           </div>
@@ -1208,6 +1287,11 @@
             <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
             <label class="form-check-label" for="mouse">Dispose Mouse (s)</label> 
           </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="ups" id="ups">
+            <label class="form-check-label" for="ups">Dispose UPS (s)</label>
+          </div>
+          
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1448,3 +1532,4 @@ function showError(message) {
     });
   });
 </script>
+
