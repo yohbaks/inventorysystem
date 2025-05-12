@@ -19,7 +19,7 @@ def desktop_list_func(request):
     
 
     # Get all equipment except the disposed one.
-    desktop_list = DESKTOPPACKAGE.objects.filter(is_disposed=False)
+    desktop_list = Desktop_Package.objects.filter(is_disposed=False)
 
     # Count the total number of equipment
     desktop_count = desktop_list.count()
@@ -70,6 +70,7 @@ def desktop_details_view(request, desktop_id):
     mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False)
     ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+    documents_details = DocumentsDetails.objects.filter(desktop_package=desktop_package)
     user_details = UserDetails.objects.filter(desktop_package_db=desktop_package).first()
     
 
@@ -110,6 +111,7 @@ def desktop_details_view(request, desktop_id):
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
+        'documents_detailse': documents_details.first(),
         'user_details' : user_details,
         'employees': employees,  # Pass the list of employees to the template
         'enduser_history': enduser_history,
