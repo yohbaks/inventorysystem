@@ -1071,6 +1071,55 @@
         </div>
       </div>
 
+<!-- Dispose Modal  for desktop, I put it in here so that tanan pills maka click sa button -->
+  
+ <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Dispose Desktop Package: {{ desktop_detailsx.computer_name }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="reason" class="form-label">Reason for disposal</label>
+            <textarea name="reason" class="form-control" required></textarea>
+          </div>
+          <p class="text-warning">
+            Please <strong>do not dispose of peripherals</strong> such as keyboards, monitors, and other devices if they are still functioning. Keeping equipment that works helps to reduce waste and saves costs!
+          </p>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="monitor" id="monitor">
+            <label class="form-check-label" for="monitor">Dispose Monitor(s)</label> 
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="keyboard" id="keyboard">
+            <label class="form-check-label" for="keyboard">Dispose Keyboard (s)</label> 
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
+            <label class="form-check-label" for="mouse">Dispose Mouse (s)</label> 
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="ups" id="ups">
+            <label class="form-check-label" for="ups">Dispose UPS (s)</label>
+          </div>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Dispose</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 <!-- User Details Tab -->
 <div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
   <div class="card">
@@ -1161,29 +1210,39 @@
     </div>
     
     <!-- Edit AssetOwner Modal -->
-    <div class="modal fade" id="editAssetOwnerModal" tabindex="-1" aria-labelledby="editAssetOwnerModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editAssetOwnerModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Edit Asset Owner</h5>
+            <h5 class="modal-title">Transfer Ownership</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <form id="editAssetOwnerForm" method="post">
+          <form id="editAssetOwnerForm">
+            <div class="modal-body">
               {% csrf_token %}
-              <select class="form-select form-control" id="assetowner_input" name="assetowner_input">
-                <option value="">Select End User</option>
-                {% for employee in employees %}
-                  <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}</option>
-                {% endfor %}
-              </select>
-              <br>
-              <button type="submit" class="btn btn-primary">Save Changes</button>
-            </form>
-          </div>
+              <div class="mb-3">
+                <label class="form-label">Select Asset Owner</label>
+                <select class="form-select" name="assetowner_input" required>
+                  <option value="">Select Asset Owner</option>
+                  {% for employee in employees %}
+                    <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }}</option>
+                  {% endfor %}
+                </select>
+              </div>    
+            </div>    
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="submitButton">
+                <span class="button-text">Save Changes</span>
+                <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
+    {% comment %} Table to show the change history of asset owner {% endcomment %}
+
 {% comment %} Table to show the change history of ender user {% endcomment %}
     <hr>
     <div class="card-body">
@@ -1222,7 +1281,7 @@
     <hr>
     <div class="card-body">
       <div class="table-responsive">
-        {% comment %} the end user change history view {% endcomment %}
+       
         <h3>Asset Owner Transfer History</h3>
         <p>Below is the transfer history of Assetowner for this desktop package.</p>
 
@@ -1254,53 +1313,7 @@
     </div>
   </div>
 </div>
- <!-- Dispose Modal  for desktop, I put it in here so that tanan pills maka click sa button -->
-  
- <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
-      {% csrf_token %}
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Dispose Desktop Package: {{ desktop_detailsx.computer_name }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="reason" class="form-label">Reason for disposal</label>
-            <textarea name="reason" class="form-control" required></textarea>
-          </div>
-          <p class="text-warning">
-            Please <strong>do not dispose of peripherals</strong> such as keyboards, monitors, and other devices if they are still functioning. Keeping equipment that works helps to reduce waste and saves costs!
-          </p>
-
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="monitor" id="monitor">
-            <label class="form-check-label" for="monitor">Dispose Monitor(s)</label> 
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="keyboard" id="keyboard">
-            <label class="form-check-label" for="keyboard">Dispose Keyboard (s)</label> 
-          </div>
-
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
-            <label class="form-check-label" for="mouse">Dispose Mouse (s)</label> 
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="ups" id="ups">
-            <label class="form-check-label" for="ups">Dispose UPS (s)</label>
-          </div>
-          
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Dispose</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
+ 
 <!-- Documents Tab -->
 <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
   <div class="card">
@@ -1344,7 +1357,7 @@
   // Initialize the Bootstrap pill tabs
   var triggerTabList = [].slice.call(document.querySelectorAll('#pills-tab-with-icon a'))
   triggerTabList.forEach(function (triggerEl) {
-    var tabTrigger = new bootstrap.Tab(triggerEl)
+    var tabTrigger = new pbootstrap.Tab(triggerEl)
     triggerEl.addEventListener('click', function (event) {
       event.preventDefault()
       tabTrigger.show()
@@ -1366,6 +1379,7 @@
     }
   });
 </script>
+
 <!-- Bootstrap Toast for success message -->
 <div class="toast-container position-fixed top-0 end-0 p-3">
   <div id="updateSuccessToast_End_User" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -1388,6 +1402,7 @@
     </div>
   </div>
 </div>
+
 <script>
   $(document).ready(function() {
     // Track if form is being submitted
@@ -1456,6 +1471,77 @@ function showError(message) {
 }
 </script>
 
+
+<script>
+  $(document).ready(function() {
+    // Track if form is being submitted
+    let isSubmitting = false;
+    
+    $("#editAssetOwnerForm").submit(function(event) {
+        event.preventDefault();
+        
+        if (isSubmitting) return false;
+        isSubmitting = true;
+        
+        let desktopId = "{{ desktop_package.id }}";
+        let formData = $(this).serialize();
+
+        // Show loading state
+        let submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html(
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...'
+        );
+
+        $.ajax({
+            type: "POST",
+            url: "/updateeee_asset_owner/" + desktopId + "/",
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    // Hide modal immediately
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('editAssetOwnerModal'));
+                    modal.hide();
+                    
+                    // Show success toast
+                    var toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_Asset_Owner'));
+                    toast.show();
+                    
+                    // Full page reload after 1 second
+                    setTimeout(function() {
+                        window.location.href = window.location.href.split('#')[0] + '#pills-user';
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showError(response.error || "Failed to update Asset Owner");
+                }
+            },
+            error: function(xhr) {
+                showError(xhr.responseJSON?.error || "Something went wrong");
+            },
+            complete: function() {
+                isSubmitting = false;
+                submitBtn.prop('disabled', false).html('Save Changes');
+            }
+        });
+    });
+
+    // Reset form when modal is closed
+    $('#editAssetOwnerModal').on('hidden.bs.modal', function() {
+        $(this).find('form')[0].reset();
+    });
+});
+
+function showError(message) {
+    Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: message,
+    });
+}
+</script>
+
+
+
 <script>
   $(document).ready(function () {
     $("#editEndUserForm").submit(function (event) {
@@ -1500,36 +1586,50 @@ function showError(message) {
     });
 });
 </script>
-{% endblock %}
 
-
-
-{% comment %} update script for monitor {% endcomment %}
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const editButtons = document.querySelectorAll('.edit-monitor-btn');
-    const form = document.getElementById('editMonitorForm');
+  $(document).ready(function () {
+    $("#editAssetOwnerForm").submit(function (event) {
+        event.preventDefault();
+        
+        let desktopId = "{{ desktop_package.id }}";
+        let formData = $(this).serialize();
 
-    editButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const id = button.dataset.id;
-        const packageId = button.dataset.package;
-        const sn = button.dataset.sn;
-        const brand = button.dataset.brand;
-        const model = button.dataset.model;
-        const size = button.dataset.size;
-
-        // Fill form fields
-        document.getElementById('editPackage').value = packageId;
-        document.getElementById('editSN').value = sn;
-        document.getElementById('editBrand').value = brand;
-        document.getElementById('editModel').value = model;
-        document.getElementById('editSize').value = size;
-
-        // Set form action dynamically
-        form.action = `/monitor/${id}/update/`;
-      });
+        $.ajax({
+            type: "POST",
+            url: "/updateeee_asset_owner/" + desktopId + "/",
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    // Close the modal first
+                    $('#editAssetOwnerModal').modal('hide');
+                    
+                    // Show success toast
+                    let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_Asset_Owner'));
+                    toast.show();
+                    
+                    // Redirect after a short delay to allow modal to close
+                    setTimeout(function() {
+                        window.location.href = `/desktop_details_view/${desktopId}/#pills-user`;
+                    }, 500); // 500ms delay
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: response.error || "Failed to update Asset Owner",
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong while updating the Asset Owner.",
+                });
+            }
+        });
     });
-  });
-</script>
+});
+</script> 
 
+{% endblock %}
