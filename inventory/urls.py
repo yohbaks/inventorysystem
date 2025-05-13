@@ -64,6 +64,7 @@ urlpatterns = [
     path('monitor/<int:pk>/update/',    views.update_monitor, name='update_monitor'),
     path('keyboard/<int:pk>/update/',   views.update_keyboard, name='update_keyboard'),
     path('mouse/<int:pk>/update/',      views.update_mouse, name='update_mouse'),
+    path('documents<int:pk>/update/',   views.update_documents, name='update_documents'),
     path('ups/<int:pk>/update/',        views.update_ups, name='update_ups'),
 
 

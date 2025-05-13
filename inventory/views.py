@@ -244,6 +244,22 @@ def update_ups(request, pk):
     base_url = reverse('desktop_details_view', kwargs={'desktop_id': ups.desktop_package.pk})
     return redirect(f'{base_url}#pills-ups')
 
+@require_POST
+def update_documents(request, pk):
+    documents = get_object_or_404(DocumentsDetails, pk=pk)
+    documents.docs_PAR = request.POST.get('docs_PAR')
+    documents.docs_Propertyno = request.POST.get('docs_Propertyno')
+    documents.docs_Acquisition_Type = request.POST.get('docs_Acquisition_Type')
+    documents.docs_Value = request.POST.get('docs_Value')
+    documents.docs_Datereceived = request.POST.get('docs_Datereceived')
+    documents.docs_Dateinspected = request.POST.get('docs_Dateinspected')
+    documents.docs_Supplier = request.POST.get('docs_Supplier')
+    documents.docs_Status = request.POST.get('docs_Status')
+
+    documents.save()
+    base_url = reverse('desktop_details_view', kwargs={'desktop_id': documents.desktop_package.pk})
+    return redirect(f'{base_url}#pills-documents')
+
                                             ######## SINGLE DISPOSAL TAB ###########
 
 #monitor disposal under keyboard pill page
@@ -702,6 +718,7 @@ def update_end_user(request, desktop_id):
                 )
 
                 return JsonResponse({'success': True})
+                
                 
         except Exception as e:
             return JsonResponse({

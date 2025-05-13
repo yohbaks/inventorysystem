@@ -296,8 +296,6 @@
       </div>
 
 
-
-
       <!-- Monitor Details Tab --> 
       <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
         <div class="card">
@@ -432,11 +430,7 @@
 
                 
                   
-                  {% if not has_active_monitor and has_active_desktop %}
-
-            
-
-                 
+                {% if not has_active_monitor and has_active_desktop %}
                 <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
                    {% endif %}
                 
@@ -526,7 +520,7 @@
       <div class="card-title">Keyboard Details</div>
       
       <!-- Conditionally show Add Keyboard Button only if no active keyboards are present -->
-      {% if not has_active_keyboards %}
+      {% if not has_active_keyboards and has_active_desktop%} 
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKeyboardModal">Add Keyboard</button>
       {% endif %}
     </div>
@@ -627,9 +621,20 @@
             </div>
           </div>
         </div>
-      {% else %}
-        <p class="text-danger">No available keyboards for this desktop package.</p>
-      {% endif %}
+        {% endif %}
+
+
+
+                {% if not has_active_keyboards and not has_active_desktop %}
+                <p class="text-danger">This Keyboard was completely disposed under the whole package.</p>
+                {% endif %}
+
+                            
+                {% if not has_active_keyboards and has_active_desktop %}
+                <p class="text-danger">No available Keyboard for this desktop package. You can still add a monitor under this packge.</p>
+                {% endif %}
+
+
 
       <!-- Disposed Keyboards Table -->
       {% if disposed_keyboards.exists %}
@@ -699,7 +704,6 @@
 <!-- Keyboard Details Tab END -->
 
       <!-- Mouse Details Tab -->
-      <!-- Mouse Details Tab -->
 <div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
   <div class="card">
     <!-- Card Header with Flexbox to Align Title and Button -->
@@ -707,7 +711,7 @@
       <div class="card-title">Mouse Details</div>
       
       <!-- Conditionally show Add Mouse Button only if no active mice are present -->
-      {% if not has_active_mouse %}
+      {% if not has_active_mouse and has_active_desktop %}
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMouseModal">Add Mouse</button>
       {% endif %}
     </div>
@@ -806,9 +810,15 @@
             </div>
           </div>
         </div>
-      {% else %}
-        <p class="text-danger">No available mice for this desktop package.</p>
       {% endif %}
+                {% if not has_active_mouse and not has_active_desktop %}
+                <p class="text-danger">This Mouse was completely disposed under the whole package.</p>
+                {% endif %}
+
+                            
+                {% if not has_active_mouse and has_active_desktop %}
+                <p class="text-danger">No available Mouse for this desktop package. You can still add a monitor under this packge.</p>
+                {% endif %}
 
       <!-- Disposed Mice Table -->
       {% if disposed_mouse.exists %}
@@ -888,7 +898,7 @@
             <div class="card-title">UPS Details</div>
             
             <!-- Conditionally show Add UPS Button only if no active mice are present -->
-            {% if not has_active_ups %}
+            {% if not has_active_ups and has_active_desktop %}
               <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUpsModal">Add UPS</button>
             {% endif %}
           </div>
@@ -995,9 +1005,17 @@
                   </div>
                 </div>
               </div>
-            {% else %}
-              <p class="text-danger">No available UPS for this desktop package.</p>
             {% endif %}
+
+                {% if not has_active_ups and not has_active_desktop %}
+                <p class="text-danger">This UPS was completely disposed under the whole package.</p>
+                {% endif %}
+
+                            
+                {% if not has_active_ups and has_active_desktop %}
+                <p class="text-danger">No available UPS for this desktop package. You can still add a monitor under this packge.</p>
+                {% endif %}
+
       
             <!-- Disposed UPS Table -->
             {% if disposed_ups.exists %}
@@ -1346,10 +1364,6 @@
             <td>{{ documents_detailse.docs_Acquisition_Type }}</td>
           </tr>          
           <tr>
-            <td class="col-sm-6 col-md-3"><strong>Property Number</strong></td>
-            <td>{{ documents_detailse.docs_Propertyno }}</td>
-          </tr>
-          <tr>
             <td class="col-sm-6 col-md-3"><strong>Package Value</strong></td>
             <td>{{ documents_detailse.docs_Value }}</td>
           </tr>
@@ -1371,10 +1385,66 @@
           </tr>       
         </tbody>
       </table>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsdModal">Edit</button>
     </div>
   </div>
 </div>
+
+{% comment %} update documents modal {% endcomment %}
+<div class="modal fade" id="editDocumentsdModal" tabindex="-1" aria-labelledby="editDocumentsdModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'update_documents' pk=documents_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDocumentdModal">Edit Documents Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="documentsId">
+          
+          <div class="mb-3">
+            <label for="editSN" class="form-label">Document PAR Number</label>
+            <input type="text" class="form-control" id="editSN" name="docs_PAR" required value="{{ documents_detailse.docs_PAR }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editBrand" class="form-label">Property Number</label>
+            <input type="text" class="form-control" id="editBrand" name="docs_Propertyno" value="{{ documents_detailse.docs_Propertyno }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Acuisition Type</label>
+            <input type="text" class="form-control" id="editModel" name="docs_Acquisition_Type" value="{{ documents_detailse.docs_Acquisition_Type }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Package Value</label>
+            <input type="text" class="form-control" id="editModel" name="docs_Value" value="{{ documents_detailse.docs_Value }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Date Received</label>
+            <input type="text" class="form-control" id="editModel" name="docs_Datereceived" value="{{ documents_detailse.docs_Datereceived }}" required>
+          </div>
+         <div class="mb-3">
+            <label for="editModel" class="form-label">Date Inspected</label>
+            <input type="text" class="form-control" id="editModel" name="docs_Dateinspected" value="{{ documents_detailse.docs_Dateinspected }}" required>
+          </div>
+        <div class="mb-3">
+            <label for="editModel" class="form-label">Supplier</label>
+            <input type="text" class="form-control" id="editModel" name="docs_Supplier" value="{{ documents_detailse.docs_Supplier }}" required>
+          </div>
+        <div class="mb-3">
+            <label for="editModel" class="form-label">Status</label>
+            <input type="text" class="form-control" id="editModel" name="docs_Status" value="{{ documents_detailse.docs_Status }}" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Document Details</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>    
 
 <!-- Optional JavaScript -->
 <script>
