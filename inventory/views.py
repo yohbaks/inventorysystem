@@ -58,8 +58,12 @@ def desktop_package_base(request):
 def desktop_details_view(request, desktop_id):
     # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
-    
     desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
+    # Generate QR code if it doesn't exist
+    if not desktop_package.qr_code:
+        desktop_package.generate_qr_code()
+        desktop_package.save()
+
     enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
     assetowner_history = AssetOwnerChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
     employees = Employee.objects.all()
@@ -96,7 +100,7 @@ def desktop_details_view(request, desktop_id):
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
-
+        'desktop_package': desktop_package,
         'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
         'disposed_desktop': disposed_desktop,
         'disposed_keyboards': disposed_keyboards,

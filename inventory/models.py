@@ -3,6 +3,11 @@ from django.utils.text import slugify
 from django.utils import timezone 
 from django.contrib.auth.models import User     # Import the User model if you have a custom user model, otherwise use the default Django User model  
 from django.utils.timezone import now
+import qrcode
+from django.core.files import File # Import File to save the QR code image
+from django.urls import reverse # Import reverse to generate URLs for the QR code image
+from io import BytesIO  # Import BytesIO to handle the image in memory
+
 
 
 # Create your models here.
@@ -14,10 +19,35 @@ class Desktop_Package(models.Model):
     disposal_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-        
+    qr_code = models.ImageField(upload_to='qr_codes', blank=True, null=True)
 
-    def __str__(self):
-        return f"Desktop Package No.({self.pk})"
+    def generate_qr_code(self):
+        # Use the correct URL name 'desktop_details_view' with desktop_id parameter
+        url = reverse('desktop_details_view', kwargs={'desktop_id': self.pk})
+        full_url = f"http://127.0.0.1:8000{url}"  # Replace with your domain in production
+        
+        # Create QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(full_url)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        
+        filename = f'desktop_qr_{self.pk}.png'
+        self.qr_code.save(filename, File(buffer), save=False)
+
+    def save(self, *args, **kwargs):
+        if not self.qr_code:
+            self.generate_qr_code()
+        super().save(*args, **kwargs)
 
     
 # =============================

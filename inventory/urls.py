@@ -15,7 +15,7 @@ urlpatterns = [
     #desktop_details
     path('desktop_details/', views.desktop_package_base, name='desktop_details'),  # URL pattern for desktop details
     path('desktop_details_view/<int:desktop_id>/', views.desktop_details_view, name='desktop_details_view'),  # URL pattern for desktop details view
-    
+
     #keyboard
     path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
     path('success_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Dispose keyboard

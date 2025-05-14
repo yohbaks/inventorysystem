@@ -19,14 +19,41 @@
                 <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
               </a>
               <a href="#" class="btn btn-label-info btn-round btn-sm">
-                <span class="btn-label"><i class="fa fa-print"></i></span> Print
+                <span class="btn-label" ><i class="fa fa-print"></i></span> Print
               </a>
-               {% if desktop_detailsx.is_disposed %}
-                <i class="fas fa-power-off"></i> Disposed
-               {% else %}
-               {% endif %}
+              <!-- Trigger Button for QR CODE -->
+                <button type="button" class="btn btn-label-warning btn-round btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">
+                <i class="fas fa-qrcode"></i> Generate QR Code
+                </button>
+            
             </div>
+
+
           </div> 
+<!-- Trigger Button -->
+
+<!-- Modal Structure of QR CODDE -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrModalLabel">Desktop Package QR Code</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body text-center">
+        {% if desktop_package.qr_code %}
+          <img src="{{ desktop_package.qr_code.url }}" alt="QR Code for Desktop Package {{ desktop_package.pk }}" width="200">
+          <p class="mt-2">Scan to view this desktop package</p>
+        {% else %}
+          <p>No QR code available.</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
           <div class="card-body">
             <!-- Pills Navigation -->
             <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-pills-icons justify-content-center" id="pills-tab-with-icon" role="tablist">
@@ -69,6 +96,7 @@
           </div>
         </div>
       </div>
+      
                {% if desktop_detailsx.is_disposed %}
                     <div class="col-md-4">
                 <div class="card card-danger bg-danger-gradient">
@@ -224,13 +252,6 @@
                             <option value="i5-13600K">Core i5-13600K (13th Gen)</option>
                             <option value="i5-12600K">Core i5-12600K (12th Gen)</option>
                           </optgroup>
-
-
-
-
-
-
-                          
                           
                           <optgroup label="Xeon (Workstation/Server)">
                             <option value="Xeon W9-3495X">Xeon W9-3495X (Sapphire Rapids)</option>
