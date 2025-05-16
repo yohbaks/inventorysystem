@@ -72,7 +72,8 @@
 
                 if (countdown < 0) {
                     clearInterval(interval);
-                    window.location.href = "{% url 'add_desktop_package_with_details' %}";  // Redirect to the desired page (URL name)
+      ; 
+                     window.location.href = "/desktop_details_view/{{ desktop_package_id }}/"; // Redirect to the desired page (URL name)
                 }
             }, 1000);  // 1 second intervals
         }

@@ -229,41 +229,32 @@
           </div>
           <div class="mb-3">
             <label for="desktop_proccessor_form" class="form-label">Proccessor</label>
-            {% comment %} <input type="text" class="form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" value="{{ desktop_detailsx.processor }}" required> {% endcomment %}
-            <select class="form-select form-control" id="desktop_processor_form" name="desktop_processor_form" required>
-              <option value="{{ desktop_detailsx.processor }}" selected>{{ desktop_detailsx.processor }}</option>              
-              <optgroup label="Core i9 (Desktop)">
-                            <option value="i9-14900K">Core i9-14900K (14th Gen Raptor Lake)</option>
-                            <option value="i9-13900K">Core i9-13900K (13th Gen Raptor Lake)</option>
-                            <option value="i9-12900K">Core i9-12900K (12th Gen Alder Lake)</option>
-                            <option value="i9-11900K">Core i9-11900K (11th Gen Rocket Lake)</option>
-                            <option value="i9-10900K">Core i9-10900K (10th Gen Comet Lake)</option>
-                          </optgroup>
-                          
-                          <optgroup label="Core i7 (Desktop)">
-                            <option value="i7-14700K">Core i7-14700K (14th Gen)</option>
-                            <option value="i7-13700K">Core i7-13700K (13th Gen)</option>
-                            <option value="i7-12700K">Core i7-12700K (12th Gen)</option>
-                            <option value="i7-11700K">Core i7-11700K (11th Gen)</option>
-                          </optgroup>
-                          
-                          <optgroup label="Core i5 (Desktop)">
-                            <option value="i5-14600K">Core i5-14600K (14th Gen)</option>
-                            <option value="i5-13600K">Core i5-13600K (13th Gen)</option>
-                            <option value="i5-12600K">Core i5-12600K (12th Gen)</option>
-                          </optgroup>
-                          
-                          <optgroup label="Xeon (Workstation/Server)">
-                            <option value="Xeon W9-3495X">Xeon W9-3495X (Sapphire Rapids)</option>
-                            <option value="Xeon W7-2495X">Xeon W7-2495X</option>
-                            <option value="Xeon Platinum 8490H">Xeon Platinum 8490H</option>
-                          </optgroup>
-                          
-                          <optgroup label="Budget (Pentium/Celeron)">
-                            <option value="Pentium Gold G7400">Pentium Gold G7400</option>
-                            <option value="Celeron G6900">Celeron G6900</option>
-                          </optgroup>
-                        </select>
+           <!-- <input type="text" class="form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" value="{{ desktop_detailsx.processor }}" required>  -->
+            <select class="form-select form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" required>
+
+                <optgroup label="Core i9 (Desktop)">
+                <option value="i9-14900K" {% if desktop_detailsx.processor == 'i9-14900K' %}selected{% endif %}>Core i9-14900K (14th Gen Raptor Lake)</option>
+                <option value="i9-13900K" {% if desktop_detailsx.processor == 'i9-13900K' %}selected{% endif %}>Core i9-13900K (13th Gen Raptor Lake)</option>
+                <option value="i9-12900K" {% if desktop_detailsx.processor == 'i9-12900K' %}selected{% endif %}>Core i9-12900K (12th Gen Alder Lake)</option>
+                <option value="i9-11900K" {% if desktop_detailsx.processor == 'i9-11900K' %}selected{% endif %}>Core i9-11900K (11th Gen Rocket Lake)</option>
+                <option value="i9-10900K" {% if desktop_detailsx.processor == 'i9-10900K' %}selected{% endif %}>Core i9-10900K (10th Gen Comet Lake)</option>
+              </optgroup>
+
+              <optgroup label="Core i7 (Desktop)">
+                <option value="i7-14700K" {% if desktop_detailsx.processor == 'i7-14700K' %}selected{% endif %}>Core i7-14700K (14th Gen)</option>
+                <option value="i7-13700K" {% if desktop_detailsx.processor == 'i7-13700K' %}selected{% endif %}>Core i7-13700K (13th Gen)</option>
+                <option value="i7-12700K" {% if desktop_detailsx.processor == 'i7-12700K' %}selected{% endif %}>Core i7-12700K (12th Gen)</option>
+                <option value="i7-11700K" {% if desktop_detailsx.processor == 'i7-11700K' %}selected{% endif %}>Core i7-11700K (11th Gen)</option>
+              </optgroup>
+
+              <optgroup label="Core i5 (Desktop)">
+                <option value="i5-14600K" {% if desktop_detailsx.processor == 'i5-14600K' %}selected{% endif %}>Core i5-14600K (14th Gen)</option>
+                <option value="i5-13600K" {% if desktop_detailsx.processor == 'i5-13600K' %}selected{% endif %}>Core i5-13600K (13th Gen)</option>
+                <option value="i5-12600K" {% if desktop_detailsx.processor == 'i5-12600K' %}selected{% endif %}>Core i5-12600K (12th Gen)</option>
+                <option value="i5-11600K" {% if desktop_detailsx.processor == 'i5-11600K' %}selected{% endif %}>Core i5-11600K (11th Gen)</option>
+              </optgroup>
+
+            </select>
           </div>
           <div class="mb-3">
             <label for="desktop_memory_form" class="form-label">Memory</label>
@@ -502,6 +493,7 @@
           <h5 class="modal-title" id="addMonitorModalLabel">Add New Monitor</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        {% if desktop_package and desktop_package.id %}
         <form method="POST" action="{% url 'add_monitor_to_package' desktop_package.id %}">
           {% csrf_token %}
           <div class="modal-body">
@@ -527,6 +519,9 @@
             <button type="submit" class="btn btn-primary">Add Monitor</button>
           </div>
         </form>
+        {% else %}
+        <p class="text-danger">Desktop package not available. Please create it first.</p>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -585,6 +580,7 @@
 
 <div class="modal fade" id="editKeyboardModal" tabindex="-1" aria-labelledby="editKeyboardModal" aria-hidden="true">
   <div class="modal-dialog">
+     {% if keyboard_detailse and keyboard_detailse.id %}
     <form method="POST" action="{% url 'update_keyboard' pk=keyboard_detailse.id %}">
       {% csrf_token %}
       <div class="modal-content">
@@ -616,6 +612,12 @@
         </div>
       </div>
     </form>
+
+     {% else %}
+      <div class="alert alert-danger m-3">
+        Cannot edit keyboard: data not available.
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -695,6 +697,7 @@
           <h5 class="modal-title" id="addKeyboardModalLabel">Add New Keyboard</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        {% if keyboard_detailse and keyboard_detailse.id %}
         <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
           {% csrf_token %}
           <div class="modal-body">
@@ -716,6 +719,12 @@
             <button type="submit" class="btn btn-primary">Add Keyboard</button>
           </div>
         </form>
+
+         {% else %}
+      <div class="alert alert-danger m-3">
+        Cannot edit keyboard: data not available.
+      </div>
+    {% endif %}
       </div>
     </div>
   </div>
@@ -883,6 +892,7 @@
           <h5 class="modal-title" id="addMouseModalLabel">Add New Mouse</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        {% if desktop_package and desktop_package.id %}
         <form method="POST" action="{% url 'add_mouse_to_package' desktop_package.id %}">
           {% csrf_token %}
           <div class="modal-body">
@@ -904,6 +914,11 @@
             <button type="submit" class="btn btn-primary">Add Mouse</button>
           </div>
         </form>
+        {% else %}
+  <div class="alert alert-warning">
+    Mouse form not available — desktop package is missing.
+  </div>
+{% endif %}
       </div>  
     </div>
   </div>
@@ -1080,6 +1095,7 @@
                 <h5 class="modal-title" id="addUpsModalLabel">Add New UPS</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
+              {% if desktop_package and desktop_package.id %}
               <form method="POST" action="{% url 'add_ups_to_package' desktop_package.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
@@ -1105,6 +1121,11 @@
                   <button type="submit" class="btn btn-primary">Add UPS</button>
                 </div>
               </form>
+              {% else %}
+               <div class="alert alert-warning">
+                    UPS form cannot be displayed — desktop package is not set.
+                  </div>
+                {% endif %}
             </div>  
           </div>
         </div>
@@ -1114,6 +1135,7 @@
   
  <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
+    {% if desktop_detailsx and desktop_detailsx.id %}
     <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
       {% csrf_token %}
       <div class="modal-content">
@@ -1155,6 +1177,11 @@
         </div>
       </div>
     </form>
+    {% else %}
+  <div class="alert alert-warning">
+    Cannot dispose: Desktop details are missing.
+  </div>
+{% endif %}
   </div>
 </div>
 
@@ -1414,6 +1441,7 @@
 {% comment %} update documents modal {% endcomment %}
 <div class="modal fade" id="editDocumentsdModal" tabindex="-1" aria-labelledby="editDocumentsdModal" aria-hidden="true">
   <div class="modal-dialog">
+    {% if documents_detailse and documents_detailse.id %}
     <form method="POST" action="{% url 'update_documents' pk=documents_detailse.id %}">
       {% csrf_token %}
       <div class="modal-content">
@@ -1464,6 +1492,11 @@
         </div>
       </div>
     </form>
+    {% else %}
+  <div class="alert alert-warning">
+    Cannot update: document details not available.
+  </div>
+  {% endif %}
   </div>
 </div>    
 

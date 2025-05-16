@@ -152,10 +152,6 @@ def keyboard_update(request, keyboard_id):
     
 
 
-
-
-
-
 #MONITORS
 def add_monitor_to_package(request, package_id):
     if request.method == 'POST':
@@ -516,7 +512,7 @@ def add_desktop_package_with_details(request):
             DesktopDetails.objects.create(
                 desktop_package=desktop_package,
                 serial_no=request.POST.get('desktop_serial_no'),
-                computer_name=request.POST.get('computer_name'),
+                computer_name=request.POST.get('computer_name_input'),
                 brand_name=request.POST.get('desktop_brand_name'),
                 model=request.POST.get('desktop_model'),
                 processor=request.POST.get('desktop_processor'),
@@ -542,8 +538,7 @@ def add_desktop_package_with_details(request):
                 desktop_package=desktop_package,
                 keyboard_sn_db=request.POST.get('keyboard_sn'),
                 keyboard_brand_db=request.POST.get('keyboard_brand'),
-                keyboard_model_db=request.POST.get('monitor_model'),
-                keyboard_size_db=request.POST.get('monitor_size')
+                keyboard_model_db=request.POST.get('keyboard_model'),
             )
 
             MouseDetails.objects.create(
@@ -576,7 +571,7 @@ def add_desktop_package_with_details(request):
             UserDetails.objects.create(
                 desktop_package_db=desktop_package,
                 user_Enduser=enduser,  # Save Employee instance, not string
-                 user_Assetowner=assetowner,  # Save Employee instance, not string
+                user_Assetowner=assetowner,  # Save Employee instance, not string
             )
 
         return redirect('success_add_page')

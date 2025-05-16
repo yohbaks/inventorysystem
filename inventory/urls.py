@@ -49,6 +49,7 @@ urlpatterns = [
     
 
     # http://127.0.0.1:8000/add_desktop_package_with_details/
+
     path('add_desktop_package_with_details/', views.add_desktop_package_with_details, name='add_desktop_package_with_details'),
 
     #employees
