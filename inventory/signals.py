@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from .models import Desktop_Package
 
+# This signal will generate a QR code when a new Desktop_Package instance is created
 @receiver(post_save, sender=Desktop_Package)
 def generate_qr_code(sender, instance, created, **kwargs):
     if created and not instance.qr_code:

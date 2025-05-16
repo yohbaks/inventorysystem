@@ -20,7 +20,7 @@ class Desktop_Package(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True, null=True)
-    
+
     def __str__(self):
         return f"Desktop Package {self.pk}"
 
@@ -241,3 +241,8 @@ class AssetOwnerChangeHistory(models.Model):
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
+class Brand(models.Model):
+    brand = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.brand 
