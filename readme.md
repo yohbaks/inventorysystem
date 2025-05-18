@@ -1,3 +1,3 @@
 # Inventory system using django python
 
-1st upload in github
+DPWH IT EQUIPMENT INVENTORY SYSTEM
