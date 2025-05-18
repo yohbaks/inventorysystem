@@ -28,13 +28,25 @@ class Desktop_Package(models.Model):
 # =============================
 # ++++++++++++++++++++++++++++++Desktop Details , Monitor, Keyboard, Mouse, UPS
 # =============================
+
+class Brand(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    is_keyboard = models.BooleanField(default=False)
+    is_mouse = models.BooleanField(default=False)
+    is_monitor = models.BooleanField(default=False)
+    is_ups = models.BooleanField(default=False)
+    is_desktop = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
 class DesktopDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='desktop_details', on_delete=models.CASCADE)
     
     serial_no = models.CharField(max_length=255)
     computer_name = models.CharField(max_length=255, unique=True, null=True)
-    brand_name = models.CharField(max_length=255)
+    brand_name = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True) 
     model = models.CharField(max_length=255, null=True)
     processor = models.CharField(max_length=33, null=True)
     memory = models.CharField(max_length=100, null=True)
@@ -240,9 +252,3 @@ class AssetOwnerChangeHistory(models.Model):
     new_assetowner = models.ForeignKey(Employee, related_name="new_assetowner", on_delete=models.CASCADE, null=True)
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
-
-class Brand(models.Model):
-    brand = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.brand 

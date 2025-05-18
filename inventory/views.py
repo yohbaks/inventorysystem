@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 
-from inventory.models import Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail
+from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
+                              UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
+                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand)
+
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
 from django.views.decorators.csrf import csrf_exempt
@@ -93,6 +96,9 @@ def desktop_details_view(request, desktop_id):
     has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
     has_active_ups = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
     desktops_disposed_filter = DesktopDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
+
+    # ✅ Add this to fetch only brands applicable to Desktop
+    desktop_brands = Brand.objects.filter(is_desktop=True)
     
 
     #ownership
@@ -121,7 +127,7 @@ def desktop_details_view(request, desktop_id):
         'enduser_history': enduser_history,
         'assetowner_history': assetowner_history,
         'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
-
+        'desktop_brands': desktop_brands,  # Pass the list of brands to the template
        
         'desktops_disposed_filter': desktops_disposed_filter,  # Added this line
 
@@ -183,7 +189,10 @@ def add_monitor_to_package(request, package_id):
 def update_desktop(request, pk):
     desktop = get_object_or_404(DesktopDetails, pk=pk)
     desktop.serial_no = request.POST.get('desktop_sn_form')
-    desktop.brand_name = request.POST.get('desktop_brand_form')
+   
+    brand_id = request.POST.get('desktop_brand_form')#check if the brand_id is valid
+    desktop.brand_name = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+
     desktop.model = request.POST.get('desktop_model_form')
     desktop.processor = request.POST.get('desktop_proccessor_form')
     desktop.memory = request.POST.get('desktop_memory_form')
@@ -494,6 +503,12 @@ def disposed_mice(request):
 
 def add_desktop_package_with_details(request):
     employees = Employee.objects.all()  # Fetch all employees
+    # brands = Brand.objects.all()
+
+    # Filter brands per type
+    desktop_brands = Brand.objects.filter(is_desktop=True)
+    keyboard_brands = Brand.objects.filter(is_keyboard=True)
+
 
     if request.method == 'POST':
         with transaction.atomic():  # Ensure all or nothing for database changes
@@ -508,12 +523,20 @@ def add_desktop_package_with_details(request):
             assetowner_id = request.POST.get('assetowner_input')
             assetowner = get_object_or_404(Employee, id=assetowner_id) if assetowner_id else None
 
+            brand_id = request.POST.get('desktop_brand_name')
+            try:
+                brand = Brand.objects.get(id=brand_id)
+            except Brand.DoesNotExist:
+                # Handle the case where the brand doesn't exist
+                # e.g., return an error message or create the brand
+                brand = Brand.objects.create(name=request.POST.get('desktop_brand_name'))
+
             # Create Desktop Details
             DesktopDetails.objects.create(
                 desktop_package=desktop_package,
                 serial_no=request.POST.get('desktop_serial_no'),
                 computer_name=request.POST.get('computer_name_input'),
-                brand_name=request.POST.get('desktop_brand_name'),
+                brand_name=desktop_brands, #use the brand object directly
                 model=request.POST.get('desktop_model'),
                 processor=request.POST.get('desktop_processor'),
                 memory=request.POST.get('desktop_memory'),
@@ -536,7 +559,7 @@ def add_desktop_package_with_details(request):
 
             KeyboardDetails.objects.create(
                 desktop_package=desktop_package,
-                keyboard_sn_db=request.POST.get('keyboard_sn'),
+                keyboard_sn_db=keyboard_brands,
                 keyboard_brand_db=request.POST.get('keyboard_brand'),
                 keyboard_model_db=request.POST.get('keyboard_model'),
             )
@@ -576,7 +599,7 @@ def add_desktop_package_with_details(request):
 
         return redirect('success_add_page')
 
-    return render(request, 'add_desktop_package_with_details.html', {'employees': employees})
+    return render(request, 'add_desktop_package_with_details.html', {'desktop_brands': desktop_brands, 'keyboard_brands': keyboard_brands, 'employees': employees})
 
 
 
@@ -834,8 +857,66 @@ def dispose_desktop(request, desktop_id):
         return redirect(reverse('http://127.0.0.1:8000/desktop_details_view'))  # Change this
 
 
+# def add_brand(request):
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         is_desktop = 'is_desktop' in request.POST
+#         is_keyboard = 'is_keyboard' in request.POST
+#         is_mouse = 'is_mouse' in request.POST
+#         is_monitor = 'is_monitor' in request.POST
+#         is_ups = 'is_ups' in request.POST
+
+#         if not Brand.objects.filter(name=name).exists():
+#             Brand.objects.create(
+#                 name=name,
+#                 is_desktop=is_desktop,
+#                 is_keyboard=is_keyboard,
+#                 is_mouse=is_mouse,
+#                 is_monitor=is_monitor,
+#                 is_ups=is_ups
+#             )
+#             messages.success(request, f"Brand '{name}' added successfully!")
+#         else:
+#             messages.warning(request, f"Brand '{name}' already exists.")
+#         return redirect('add_brand')
+
+#     return render(request, 'add_brand.html')
 
 
 
 
+def add_brand(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        is_desktop = 'is_desktop' in request.POST
+        is_keyboard = 'is_keyboard' in request.POST
+        is_mouse = 'is_mouse' in request.POST
+        is_monitor = 'is_monitor' in request.POST
+        is_ups = 'is_ups' in request.POST
 
+        if not Brand.objects.filter(name=name).exists():
+            Brand.objects.create(
+                name=name,
+                is_desktop=is_desktop,
+                is_keyboard=is_keyboard,
+                is_mouse=is_mouse,
+                is_monitor=is_monitor,
+                is_ups=is_ups
+            )
+        return redirect('add_brand')
+
+    brands = Brand.objects.all()
+    return render(request, 'add_brand.html', {'brands': brands})
+
+def edit_brand(request):
+    if request.method == 'POST':
+        brand_id = request.POST.get('id')
+        brand = Brand.objects.get(pk=brand_id)
+        brand.name = request.POST.get('name')
+        brand.is_desktop = 'is_desktop' in request.POST
+        brand.is_keyboard = 'is_keyboard' in request.POST
+        brand.is_mouse = 'is_mouse' in request.POST
+        brand.is_monitor = 'is_monitor' in request.POST
+        brand.is_ups = 'is_ups' in request.POST
+        brand.save()
+    return redirect('add_brand')

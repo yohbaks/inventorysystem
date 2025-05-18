@@ -221,7 +221,15 @@
           </div>
           <div class="mb-3">
             <label for="desktop_brand_form" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="desktop_brand_form" name="desktop_brand_form" value="{{desktop_detailsx.brand_name}}" required>
+            <select class="form-select form-control" id="desktop_brand_form" name="desktop_brand_form" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandD in desktop_brands %}
+                <option value="{{ brandD.id }}"
+                        {% if desktop_detailsx.brand_name.id == brandD.id %}selected{% endif %}>
+                  {{ brandD.name }}
+                </option>
+              {% endfor %}
+            </select>
           </div>
           <div class="mb-3">
             <label for="desktop_model_form" class="form-label">Model</label>

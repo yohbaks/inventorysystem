@@ -57,11 +57,15 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopBrand">Brand Name</label>
-
-                  <input type="text" name="desktop_brand_name" id="desktop_brand_name" class="form-control" required placeholder="Enter Desktop Brand">
-                </div>
+                    <div class="form-group">
+                      <label for="desktopBrand">Brand Name</label>
+                      <select name="desktop_brand_name" class="form-select" required>
+                        <option value="">-- Select Brand --</option>
+                        {% for brand in desktop_brands %}
+                           <option value="{{ brand.id }}" style="color: black;">{{ brand.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
               </div>
               <div class="col-md-4">
                 <div class="form-group">

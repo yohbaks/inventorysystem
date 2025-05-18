@@ -71,10 +71,9 @@ urlpatterns = [
 
     
     path('dispose-desktop/<int:desktop_id>/', views.dispose_desktop, name='dispose_desktop'),
+    path('add_brand/', views.add_brand, name='add_brand'),
+    path('edit_brand/', views.edit_brand, name='edit_brand'),
     
     
 
-    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-  
