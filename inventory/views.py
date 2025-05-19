@@ -212,9 +212,8 @@ def update_monitor(request, pk):
     monitor.monitor_sn_db       = request.POST.get('monitor_sn_db')
 
     brand_id = request.POST.get('monitor_brand_db')#check if the brand_id is valid
-    monitor.brand_name = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+    monitor.monitor_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
 
-    monitor.monitor_brand_db    = request.POST.get('monitor_brand_db')
     monitor.monitor_model_db    = request.POST.get('monitor_model_db')
     monitor.monitor_size_db     = request.POST.get('monitor_size_db')
     
