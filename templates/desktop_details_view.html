@@ -16,7 +16,7 @@
               </button>
               {% endif %}
               <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
-                <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
+                <span class="btn-label"><i class="fa fa-pencil"></i></span> ExporT
               </a>
               <a href="#" class="btn btn-label-info btn-round btn-sm">
                 <span class="btn-label" ><i class="fa fa-print"></i></span> Print
@@ -397,7 +397,16 @@
                   </div>
                   <div class="mb-3">
                     <label for="editBrand" class="form-label">Brand</label>
-                    <input type="text" class="form-control" id="editBrand" name="monitor_brand_db" value="{{ monitor_detailse.monitor_brand_db}}" required>
+                    
+                    <select class="form-select form-control" id="editBrand" name="monitor_brand_db" required>
+                      <option value="" disabled>Select Brand</option>
+                      {% for brandM in monitor_brands %}
+                        <option value="{{ brandM.id }}"
+                                {% if monitor_detailse.monitor_brand_db.id == brandM.id %}selected{% endif %}>
+                          {{ brandM.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
                   </div>
                   <div class="mb-3">
                     <label for="editModel" class="form-label">Model</label>
@@ -484,10 +493,7 @@
           {% endfor %}
         </tbody>
       </table>
-      {% else %}
-      
 
-        <p>No disposed Monitor records for this desktop package.</p>
       {% endif %}
 
           </div>
@@ -510,7 +516,7 @@
               <input type="text" class="form-control" id="monitor_sn" name="monitor_sn" required>
             </div>
             <div class="mb-3">
-              <label for="monitor_brand" class="form-label">Brand</label>
+              <label for="monitor_brand" class="form-label">Brandd</label>
               <input type="text" class="form-control" id="monitor_brand" name="monitor_brand" required>
             </div>
             <div class="mb-3">

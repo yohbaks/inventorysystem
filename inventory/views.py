@@ -99,6 +99,7 @@ def desktop_details_view(request, desktop_id):
 
     # ✅ Add this to fetch only brands applicable to Desktop
     desktop_brands = Brand.objects.filter(is_desktop=True)
+    monitor_brands = Brand.objects.filter(is_monitor=True)
     
 
     #ownership
@@ -127,7 +128,8 @@ def desktop_details_view(request, desktop_id):
         'enduser_history': enduser_history,
         'assetowner_history': assetowner_history,
         'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
-        'desktop_brands': desktop_brands,  # Pass the list of brands to the template
+        'desktop_brands': desktop_brands,  # Pass the list of desktop brands to the template
+        'monitor_brands': monitor_brands,  # Pass the list of monitor brands to the template
        
         'desktops_disposed_filter': desktops_disposed_filter,  # Added this line
 
@@ -208,6 +210,10 @@ def update_desktop(request, pk):
 def update_monitor(request, pk):
     monitor                     = get_object_or_404(MonitorDetails, pk=pk)
     monitor.monitor_sn_db       = request.POST.get('monitor_sn_db')
+
+    brand_id = request.POST.get('monitor_brand_db')#check if the brand_id is valid
+    monitor.brand_name = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+
     monitor.monitor_brand_db    = request.POST.get('monitor_brand_db')
     monitor.monitor_model_db    = request.POST.get('monitor_model_db')
     monitor.monitor_size_db     = request.POST.get('monitor_size_db')
