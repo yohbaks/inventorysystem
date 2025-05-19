@@ -72,7 +72,7 @@ class MonitorDetails(models.Model):
     # id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
     monitor_sn_db = models.CharField(max_length=255)
-    monitor_brand_db = models.CharField(max_length=255)
+    monitor_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     monitor_model_db = models.CharField(max_length=255)
     monitor_size_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the monitor is dispose
