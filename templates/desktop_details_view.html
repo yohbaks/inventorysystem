@@ -463,11 +463,6 @@
                 <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
                    {% endif %}
                 
-               
-               
-                
-                
-               
 
                  <!-- Disposed Monitor Table -->
       {% if disposed_monitor.exists %}
@@ -612,7 +607,15 @@
           </div>
           <div class="mb-3">
             <label for="editBrand" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="editBrand" name="keyboard_brand_db" value="{{ keyboard_detailse.keyboard_brand_db}}" required>
+            <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandK in keyboard_brands %}
+                <option value="{{ brandK.id }}"
+                        {% if keyboard_detailse.keyboard_brand_db.id == brandK.id %}selected{% endif %}>
+                  {{ brandK.name }}
+                </option>
+              {% endfor %}
+              </select>
           </div>
           <div class="mb-3">
             <label for="editModel" class="form-label">Model</label>
@@ -815,7 +818,15 @@
           </div>
           <div class="mb-3">
             <label for="editBrand" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="editBrand" name="mouse_brand_db" value="{{ mouse_detailse.mouse_brand_db}}" required>
+            <select class="form-select form-control" id="editBrand" name="mouse_brand_db" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandMouse in mouse_brands %}
+                <option value="{{ brandMouse.id }}"
+                        {% if mouse_detailse.mouse_brand_db.id == brandMouse.id %}selected{% endif %}>
+                  {{ brandMouse.name }}
+                </option>
+              {% endfor %}
+              </select>
           </div>
           <div class="mb-3">
             <label for="editModel" class="form-label">Model</label>
@@ -887,13 +898,7 @@
           </tr>
           {% endfor %}
         </tbody>
-      </table>
-      {% else %}
-      
-      <h5 class="text-success">
-        <br>
-        No disposed mice for this desktop package.
-      </h5>
+      </table>   
       {% endif %}
     </div>
   </div>

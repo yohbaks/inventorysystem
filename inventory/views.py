@@ -98,8 +98,10 @@ def desktop_details_view(request, desktop_id):
     desktops_disposed_filter = DesktopDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
 
     # ✅ Add this to fetch only brands applicable to Desktop
-    desktop_brands = Brand.objects.filter(is_desktop=True)
-    monitor_brands = Brand.objects.filter(is_monitor=True)
+    desktop_brands  = Brand.objects.filter(is_desktop=True)
+    monitor_brands  = Brand.objects.filter(is_monitor=True)
+    keyboard_brands = Brand.objects.filter(is_keyboard=True)
+    mouse_brands    = Brand.objects.filter(is_mouse=True)
     
 
     #ownership
@@ -130,7 +132,8 @@ def desktop_details_view(request, desktop_id):
         'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
         'desktop_brands': desktop_brands,  # Pass the list of desktop brands to the template
         'monitor_brands': monitor_brands,  # Pass the list of monitor brands to the template
-       
+        'keyboard_brands': keyboard_brands,
+        'mouse_brands': mouse_brands,  # Pass the list of keyboard brands to the template
         'desktops_disposed_filter': desktops_disposed_filter,  # Added this line
 
        })
@@ -227,7 +230,10 @@ def update_monitor(request, pk):
 def update_keyboard(request, pk):
     keyboard                    = get_object_or_404(KeyboardDetails, pk=pk)
     keyboard.keyboard_sn_db     = request.POST.get('keyboard_sn_db')
-    keyboard.keyboard_brand_db  = request.POST.get('keyboard_brand_db')
+
+    brand_id = request.POST.get('keyboard_brand_db')#check if the brand_id is valid
+    keyboard.keyboard_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+
     keyboard.keyboard_model_db  = request.POST.get('keyboard_model_db')
     
     keyboard.save()
@@ -239,7 +245,10 @@ def update_keyboard(request, pk):
 def update_mouse(request, pk):
     mouse = get_object_or_404(MouseDetails, pk=pk)
     mouse.mouse_sn_db       = request.POST.get('mouse_sn_db')
-    mouse.mouse_brand_db    = request.POST.get('mouse_brand_db')
+
+    brand_id = request.POST.get('mouse_brand_db')#check if the brand_id is valid
+    mouse.mouse_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+
     mouse.mouse_model_db    = request.POST.get('mouse_model_db')
 
     mouse.save()

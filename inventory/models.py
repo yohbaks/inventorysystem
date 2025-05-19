@@ -86,7 +86,7 @@ class KeyboardDetails(models.Model):
     # id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
     keyboard_sn_db = models.CharField(max_length=255)
-    keyboard_brand_db = models.CharField(max_length=255)
+    keyboard_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     keyboard_model_db = models.CharField(max_length=255)
     is_disposed = models.BooleanField(default=False)  # To indicate if the keyboard is disposed
     created_at = models.DateTimeField(default=timezone.now)  # Date when the keyboard was added
@@ -99,7 +99,7 @@ class MouseDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_db', on_delete=models.CASCADE)
     mouse_sn_db = models.CharField(max_length=255, null=True)
-    mouse_brand_db = models.CharField(max_length=255, null=True)
+    mouse_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the mouse is disposed
     created_at = models.DateTimeField(default=timezone.now)  # Date when the mouse was added
