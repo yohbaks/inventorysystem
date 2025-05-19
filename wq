@@ -1,0 +1,311 @@
+[33mcommit 1d963c445604d2069d2d30e099d055d5e227235b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mstaging[m[33m, [m[1;31morigin/staging[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun May 18 21:24:53 2025 +0800
+
+    test another commit
+
+[33mcommit 5e279a4c0fdb82e90181c5fc9b62271e8b2c3aa7[m
+Merge: 68f6bd9 b1d75b9
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun May 18 21:20:33 2025 +0800
+
+    Merge branch 'main' of https://github.com/yohbaks/inventorysystem
+
+[33mcommit 68f6bd9aa8ec692d4b22a3995dfe8e98ab5e9f39[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun May 18 21:12:30 2025 +0800
+
+    brand
+
+[33mcommit b1d75b9d5a6e7baf098fb2d63635defa024ad772[m
+Author: yohbaks <42056629+yohbaks@users.noreply.github.com>
+Date:   Sun May 18 21:04:53 2025 +0800
+
+    Update readme.md
+
+[33mcommit 6faea31b18cca468061856bb0080fa274de6a135[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri May 16 16:16:23 2025 +0800
+
+    QR code fix and adding equipment fix
+
+[33mcommit 64de6eb00765753812683be77fa6f63cf2348e30[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri May 16 15:48:48 2025 +0800
+
+    latest
+
+[33mcommit 388f7eeed29f974fe1e6449c6a04bb5df2b85d39[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed May 14 17:33:26 2025 +0800
+
+    with QR CODE
+
+[33mcommit 9581085e579eaa1d65c81a99194de1bc74331c33[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Tue May 13 12:49:57 2025 +0800
+
+    test
+
+[33mcommit c3efb6cc8c6001e9eabfe57a744c901424cfc860[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon May 12 23:12:53 2025 +0800
+
+    latest
+
+[33mcommit 0caa1e30d0cf7baab5687a05616c55309d7b5def[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon May 12 20:26:20 2025 +0800
+
+    latest update of the userdetails update button all working like asset owner and end user
+
+[33mcommit 78d14007921ebaf3f74cc2c1226fa4b3938c6827[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun May 11 22:26:13 2025 +0800
+
+    latest
+
+[33mcommit d3df5da8b9674303fd704eba5a023502e5cb4765[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sat May 10 13:21:29 2025 +0800
+
+    latest
+
+[33mcommit 34c2a9d6ad8c309323f806ed45ee3a915dbc388e[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sat May 10 13:10:24 2025 +0800
+
+    upto keyboard edit
+
+[33mcommit 4cb78d921f0ff0875ea3e8d03e56841b2483f47f[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri May 9 23:23:09 2025 +0800
+
+    latest
+
+[33mcommit f4d4c750a6f981ceae12165ed2dc7755db9aadad[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri May 9 16:20:09 2025 +0800
+
+    latest
+
+[33mcommit 91777a06a5c2b24a84a7adf0e2828fd0ff0904c2[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu May 8 17:00:25 2025 +0800
+
+    latest 5-8-2025
+
+[33mcommit e2930f9fe4a2df381417c9a2965cf949333dc79b[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed May 7 17:03:57 2025 +0800
+
+    latest
+
+[33mcommit d3eaf3d70fd520fccf5058a24f26812e80e7e922[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu Apr 24 15:19:59 2025 +0800
+
+    idk
+
+[33mcommit bf51f7d221cf4d75417544ff64547c66673d8d05[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun Apr 13 11:55:55 2025 +0800
+
+    test
+
+[33mcommit 6d0c6b2de80dade8e4f26f541dae4cfbd90b1b0e[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun Apr 13 07:04:36 2025 +0800
+
+    fix monitor disposed ntes witht the proper if statements
+
+[33mcommit ee5bdf686704e29b66db11855433ecac316b8d16[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun Apr 13 05:54:30 2025 +0800
+
+    desktop and monitor features with proper disposal(scratch)
+
+[33mcommit 0a593426b646db47858c32dd42e82b1c07e1b0ce[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Apr 9 13:26:55 2025 +0800
+
+    eidt and disposed desktop and disposed monitor main
+
+[33mcommit a1dbd30fe1dbd74ac0b669bf897b96bae04d518e[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Apr 7 20:52:39 2025 +0800
+
+    montior eidt function
+
+[33mcommit 4d5a50207cbfd98b09d189274854958c091fd15b[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Apr 7 17:28:56 2025 +0800
+
+    test
+
+[33mcommit 5ce590e9fda9c06a27705e19eac2e3490bd3e441[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun Apr 6 16:40:55 2025 +0800
+
+    adding asset owner with change history
+
+[33mcommit 5af66c5c75c41d8eb925e9defbfb3aec6cb1f222[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri Apr 4 00:07:52 2025 +0800
+
+    test
+
+[33mcommit 0eb9d3c01cbed62716e5ffb350e79df7fa17d872[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu Apr 3 23:42:06 2025 +0800
+
+    employee
+
+[33mcommit e061994c4a18089f1a3bf785be19c6235898a861[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu Apr 3 23:04:26 2025 +0800
+
+    test
+
+[33mcommit b98b577018a516fbcbcbf2340c802b50788f2b66[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu Apr 3 15:00:27 2025 +0800
+
+    employee
+
+[33mcommit cd85a3e2a4e8e862b44092e7e94d85f2a7897f80[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu Apr 3 07:50:45 2025 +0800
+
+    sss
+
+[33mcommit b96fb5c5396745a5539788fc73418724b56dc54b[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Apr 2 09:23:47 2025 +0800
+
+    test
+
+[33mcommit d63564b9334850b47a4ccb8682ae66744b6fcf58[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Mar 19 16:34:00 2025 +0800
+
+    latest
+
+[33mcommit 9bb66fa8a751360254db330f8faad35a8f9d6ab4[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Tue Mar 18 21:37:57 2025 +0800
+
+    balay
+
+[33mcommit dcc73ab29bc8b3e8bff89d041ea98697640d7e4a[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Tue Mar 18 18:36:17 2025 +0800
+
+    asdf
+
+[33mcommit 1c668d1842b7adbfd7445e8ece1053b5f8cb59d0[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Mar 17 22:03:23 2025 +0800
+
+    latest
+
+[33mcommit 19276674cfe6d9f8d0b1a3e832aa95bfeeef9253[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri Mar 14 16:50:50 2025 +0800
+
+    2
+
+[33mcommit eab4f1317805ba314a30ec9bb7f37f2eaab451c1[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Fri Mar 14 16:49:36 2025 +0800
+
+    latest march 2025
+
+[33mcommit 2d3d8a11e833866f67bee680531fd0824f94a75c[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Nov 6 13:47:05 2024 +0800
+
+    test
+
+[33mcommit f1dd50be69455a298efe0f18902d6f95264b5c9f[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Nov 4 06:57:50 2024 +0800
+
+    aa
+
+[33mcommit 3af52cc0ac85da268348d8da957bbfda868598c3[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Sun Nov 3 07:38:43 2024 +0800
+
+    test
+
+[33mcommit ca99f245cc60148fa491fb8b82bb73e7e7fa2100[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Oct 30 17:00:20 2024 +0800
+
+    latest
+
+[33mcommit c6c03a760a8f45dbd4d200a5936d2466d45664e4[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Oct 30 16:30:53 2024 +0800
+
+    latest
+
+[33mcommit 82b83b073f530fd445c4afc66c356c9a694df25c[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Wed Oct 30 10:23:15 2024 +0800
+
+    test
+
+[33mcommit e2e91a49af07a1009c5abb234578b3001d890dd2[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Oct 21 22:02:45 2024 +0800
+
+    ss
+
+[33mcommit ea389a10ce69edf2db0a69b960c737a88083c076[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Tue Oct 15 16:42:27 2024 +0800
+
+    commit
+
+[33mcommit 3b9d14226641e04eccba9ba34a61ff8fbcef0104[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Tue Oct 15 13:29:50 2024 +0800
+
+    ss
+
+[33mcommit 9be0982af7c1efe570a8e512530152fa72d8ad3d[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Tue Oct 15 11:19:43 2024 +0800
+
+    many features
+
+[33mcommit 27aaa704cb2a89fd88c36dbb9f5fe15256dbff0e[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Oct 14 16:56:19 2024 +0800
+
+    sss
+
+[33mcommit c054bd47a627bd1c5a8d7c2a6ecd143fc202abcb[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Oct 14 14:00:25 2024 +0800
+
+    new
+
+[33mcommit af7330ed3dec1be2245eaf1f6270fe36345ca8d5[m
+Merge: 96fff9f 00e7f30
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Oct 14 13:53:20 2024 +0800
+
+    sss
+
+[33mcommit 96fff9fd58695dfb42c991bec1a7f21cccbd6832[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Mon Oct 14 12:00:56 2024 +0800
+
+    akak
+
+[33mcommit 00e7f30fd5f3fa2b3f7e84b6e13bde4cd8d1d9f5[m
+Author: yohbaks <bobbyyu24@gmail.com>
+Date:   Thu Oct 10 21:15:30 2024 +0800
