@@ -113,7 +113,7 @@ class UPSDetails(models.Model):
     id = models.IntegerField(primary_key=True)  # Allow manual assignment
     desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
     ups_sn_db = models.CharField(max_length=255)
-    ups_brand_db = models.CharField(max_length=255)
+    ups_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     ups_model_db = models.CharField(max_length=255)
     ups_capacity_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the mouse is disposed

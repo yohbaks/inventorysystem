@@ -997,7 +997,7 @@
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">Dispose UPS</button>
 
 
-                 <!-- ups update or edit details -->
+                 <!-- ups update modal or edit details -->
               <div class="modal fade" id="editUpsModal" tabindex="-1" aria-labelledby="editUpsModal" aria-hidden="true">
                 <div class="modal-dialog">
                   <form method="POST" action="{% url 'update_ups' pk=ups_detailse.id %}">
@@ -1017,8 +1017,17 @@
                         </div>
                         <div class="mb-3">
                           <label for="editBrand" class="form-label">Brand</label>
-                          <input type="text" class="form-control" id="editBrand" name="ups_brand_db" value="{{ ups_detailse.ups_brand_db}}" required>
-                        </div>
+                          
+                           <select class="form-select form-control" id="editBrand" name="ups_brand_db" required>
+                            <option value="" disabled>Select Brand</option>
+                            {% for brandUPS in ups_brands %}
+                              <option value="{{ brandUPS.id }}"
+                                      {% if ups_detailse.ups_brand_db.id == brandUPS.id %}selected{% endif %}>
+                                {{ brandUPS.name }}
+                              </option>
+                            {% endfor %}
+                            </select>
+                                      </div>
                         <div class="mb-3">
                           <label for="editModel" class="form-label">Model</label>
                           <input type="text" class="form-control" id="editModel" name="ups_model_db" value="{{ ups_detailse.ups_model_db }}" required>
@@ -1096,12 +1105,7 @@
                 {% endfor %}
               </tbody>
             </table>
-            {% else %}
             
-            <h5 class="text-success">
-              <br>
-              No disposed UPS for this desktop package.
-            </h5>
             {% endif %}
           </div>
         </div>
