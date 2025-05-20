@@ -102,6 +102,7 @@ def desktop_details_view(request, desktop_id):
     monitor_brands  = Brand.objects.filter(is_monitor=True)
     keyboard_brands = Brand.objects.filter(is_keyboard=True)
     mouse_brands    = Brand.objects.filter(is_mouse=True)
+    ups_brands      = Brand.objects.filter(is_ups=True)
     
 
     #ownership
@@ -134,6 +135,7 @@ def desktop_details_view(request, desktop_id):
         'monitor_brands': monitor_brands,  # Pass the list of monitor brands to the template
         'keyboard_brands': keyboard_brands,
         'mouse_brands': mouse_brands,  # Pass the list of keyboard brands to the template
+        'ups_brands': ups_brands,  # Pass the list of mouse brands to the template
         'desktops_disposed_filter': desktops_disposed_filter,  # Added this line
 
        })
@@ -259,7 +261,10 @@ def update_mouse(request, pk):
 def update_ups(request, pk):
     ups = get_object_or_404(UPSDetails, pk=pk)
     ups.ups_sn_db       = request.POST.get('ups_sn_db')
-    ups.ups_brand_db    = request.POST.get('ups_brand_db')
+
+    brand_id = request.POST.get('ups_brand_db')#check if the brand_id is valid
+    ups.ups_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+
     ups.ups_model_db    = request.POST.get('ups_model_db')
     ups.ups_capacity_db = request.POST.get('ups_capacity_db')
 
