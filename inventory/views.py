@@ -13,6 +13,10 @@ from django.utils import timezone
 from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.urls import reverse
+#prints
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 
 
@@ -939,3 +943,28 @@ def edit_brand(request):
         brand.is_ups = 'is_ups' in request.POST
         brand.save()
     return redirect('add_brand')
+
+#print
+def generate_desktop_pdf(request, desktop_id):
+    desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
+    desktop_package = desktop_details.desktop_package
+    keyboard_details = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
+    mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
+    monitor_details = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).first()
+    ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
+    user_details = UserDetails.objects.filter(desktop_package_db=desktop_package).first()
+
+    html_string = render_to_string('pdf_template.html', {
+        'desktop_detailsx': desktop_details,
+        'desktop_package': desktop_package,
+        'keyboard_detailse': keyboard_details,
+        'mouse_detailse': mouse_details,
+        'monitor_detailse': monitor_details,
+        'ups_detailse': ups_details,
+        'user_details': user_details,
+    })
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename=desktop_{desktop_id}_details.pdf'
+    HTML(string=html_string).write_pdf(response)
+    return response

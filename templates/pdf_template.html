@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IT Asset Portfolio | {{ desktop_detailsx.serial_no }}</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --dark: #111827;
+            --darker: #0f172a;
+            --gray: #6b7280;
+            --light-gray: #f3f4f6;
+            --border: #e5e7eb;
+            --success: #10b981;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            margin: 0;
+            padding: 0;
+            font-size: 13.5px;
+            line-height: 1.5;
+            background-color: #f9fafb;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 28px 40px;
+            position: relative;
+        }
+
+        .header::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 100%;
+            height: 24px;
+            background: white;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .report-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+            letter-spacing: -0.3px;
+        }
+
+        .report-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .report-id {
+            position: absolute;
+            top: 28px;
+            right: 40px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 30px 40px;
+        }
+
+        .grid-system {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .asset-card {
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--light-gray);
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 15px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--darker);
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .spec-row {
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            margin-bottom: 10px;
+        }
+
+        .spec-label {
+            font-weight: 500;
+            color: var(--gray);
+            font-size: 12.5px;
+        }
+
+        .spec-value {
+            font-weight: 500;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--light-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            margin: 0 0 2px 0;
+        }
+
+        .user-meta {
+            font-size: 12px;
+            color: var(--gray);
+            margin: 0;
+        }
+
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--light-gray);
+            border-radius: 10px;
+            margin-top: 24px;
+            text-align: center;
+        }
+
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border: 1px dashed var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            color: var(--gray);
+            font-size: 11px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+            font-size: 11.5px;
+            color: var(--gray);
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: var(--success);
+            color: white;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        @media print {
+            body {
+                background: none;
+                font-size: 12px;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 20px 30px;
+            }
+            
+            .content {
+                padding: 20px 30px;
+            }
+            
+            .spec-row {
+                grid-template-columns: 100px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 class="report-title">IT Asset Portfolio</h1>
+                <p class="report-subtitle">Comprehensive equipment summary</p>
+            </div>
+            <div class="report-id">ASSET-{{ desktop_detailsx.serial_no|slice:":8" }}</div>
+        </div>
+
+        <div class="content">
+            <div class="grid-system">
+                <!-- Desktop Section -->
+                <div class="asset-card">
+                    <div class="card-header">
+                        <div class="card-icon">🖥️</div>
+                        <h3 class="card-title">Desktop Workstation <span class="status-badge">ACTIVE</span></h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="spec-row">
+                            <div class="spec-label">Serial Number:</div>
+                            <div class="spec-value">{{ desktop_detailsx.serial_no }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Brand/Model:</div>
+                            <div class="spec-value">{{ desktop_detailsx.brand_name }} {{ desktop_detailsx.model }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Processor:</div>
+                            <div class="spec-value">{{ desktop_detailsx.processor }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Memory:</div>
+                            <div class="spec-value">{{ desktop_detailsx.memory }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Storage:</div>
+                            <div class="spec-value">{{ desktop_detailsx.drive }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitor Section -->
+                {% if monitor_detailse %}
+                <div class="asset-card">
+                    <div class="card-header">
+                        <div class="card-icon">🖥️</div>
+                        <h3 class="card-title">Display Monitor</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="spec-row">
+                            <div class="spec-label">Serial Number:</div>
+                            <div class="spec-value">{{ monitor_detailse.monitor_sn_db }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Brand/Model:</div>
+                            <div class="spec-value">{{ monitor_detailse.monitor_brand_db }} {{ monitor_detailse.monitor_model_db }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Screen Size:</div>
+                            <div class="spec-value">{{ monitor_detailse.monitor_size_db }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Peripherals Section -->
+                <div class="asset-card">
+                    <div class="card-header">
+                        <div class="card-icon">🖱️⌨️</div>
+                        <h3 class="card-title">Input Devices</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if keyboard_detailse %}
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">Keyboard</div>
+                            <div class="spec-row">
+                                <div class="spec-label">Serial No:</div>
+                                <div class="spec-value">{{ keyboard_detailse.keyboard_sn_db }}</div>
+                            </div>
+                            <div class="spec-row">
+                                <div class="spec-label">Brand/Model:</div>
+                                <div class="spec-value">{{ keyboard_detailse.keyboard_brand_db }} {{ keyboard_detailse.keyboard_model_db }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if mouse_detailse %}
+                        <div>
+                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">Mouse</div>
+                            <div class="spec-row">
+                                <div class="spec-label">Serial No:</div>
+                                <div class="spec-value">{{ mouse_detailse.mouse_sn_db }}</div>
+                            </div>
+                            <div class="spec-row">
+                                <div class="spec-label">Brand/Model:</div>
+                                <div class="spec-value">{{ mouse_detailse.mouse_brand_db }} {{ mouse_detailse.mouse_model_db }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- UPS Section -->
+                {% if ups_detailse %}
+                <div class="asset-card">
+                    <div class="card-header">
+                        <div class="card-icon">🔋</div>
+                        <h3 class="card-title">Power Backup</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="spec-row">
+                            <div class="spec-label">Serial Number:</div>
+                            <div class="spec-value">{{ ups_detailse.ups_sn_db }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Brand/Model:</div>
+                            <div class="spec-value">{{ ups_detailse.ups_brand_db }} {{ ups_detailse.ups_model_db }}</div>
+                        </div>
+                        <div class="spec-row">
+                            <div class="spec-label">Capacity:</div>
+                            <div class="spec-value">{{ ups_detailse.ups_capacity_db }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- User Section -->
+                {% if user_details %}
+                <div class="asset-card">
+                    <div class="card-header">
+                        <div class="card-icon">👤</div>
+                        <h3 class="card-title">Assignment Details</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">Asset Owner</div>
+                            <div class="user-profile">
+                                <div class="user-avatar">{{ user_details.user_Assetowner.employee_fname|first|upper }}{{ user_details.user_Assetowner.employee_lname|first|upper }}</div>
+                                <div class="user-info">
+                                    <p class="user-name">{{ user_details.user_Assetowner.employee_fname }} {{ user_details.user_Assetowner.employee_lname }}</p>
+                                    <p class="user-meta">{{ user_details.user_Assetowner.employee_position }} • {{ user_details.user_Assetowner.employee_office }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">End User</div>
+                            <div class="user-profile">
+                                <div class="user-avatar">{{ user_details.user_Enduser.employee_fname|first|upper }}{{ user_details.user_Enduser.employee_lname|first|upper }}</div>
+                                <div class="user-info">
+                                    <p class="user-name">{{ user_details.user_Enduser.employee_fname }} {{ user_details.user_Enduser.employee_lname }}</p>
+                                    <p class="user-meta">{{ user_details.user_Enduser.employee_position }} • {{ user_details.user_Enduser.employee_office }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-placeholder">QR CODE PLACEHOLDER</div>
+                <p style="margin: 0; font-size: 12px; color: var(--gray);">Scan to view digital asset record</p>
+                <p style="margin: 8px 0 0 0; font-size: 11px; color: var(--gray);">Asset ID: {{ desktop_detailsx.serial_no }}</p>
+            </div>
+
+            <div class="footer">
+                <p>This document contains confidential information • Generated on {% now "F j, Y" %} at {% now "g:i A" %}</p>
+                <p>© {% now "Y" %} IT Asset Management System • Valid without signature</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

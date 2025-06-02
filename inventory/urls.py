@@ -69,10 +69,16 @@ urlpatterns = [
     path('ups/<int:pk>/update/',        views.update_ups, name='update_ups'),
 
 
-    
+   
     path('dispose-desktop/<int:desktop_id>/', views.dispose_desktop, name='dispose_desktop'),
+
+    #brands
     path('add_brand/', views.add_brand, name='add_brand'),
     path('edit_brand/', views.edit_brand, name='edit_brand'),
+    #print
+    path('desktop/<int:desktop_id>/pdf/', views.generate_desktop_pdf, name='generate_desktop_pdf'),
+
+
     
     
 

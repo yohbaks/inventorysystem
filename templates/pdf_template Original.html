@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Desktop Package Report</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --gray: #e2e8f0;
+            --border: #e2e8f0;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: white;
+            color: var(--dark);
+            margin: 0;
+            padding: 0;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .report-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .report-meta {
+            text-align: right;
+            color: #64748b;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 8px 12px;
+        }
+
+        .spec-label {
+            font-weight: 500;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .spec-value {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .qr-code {
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+            border: 1px dashed #cbd5e1;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        @media print {
+            body {
+                font-size: 12px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .spec-grid {
+                grid-template-columns: 100px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 class="report-title">Desktop Package Summary</h1>
+                <div class="report-meta">
+                    Generated on: {% now "jS F Y" %}<br>
+                    Report ID: DPK-{{ desktop_detailsx.serial_no|slice:":6" }}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <!-- Desktop Section -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">🖥️</div>
+                    <h2>Desktop</h2>
+                </div>
+                <div class="spec-grid">
+                    <div class="spec-label">Serial No:</div>
+                    <div class="spec-value">{{ desktop_detailsx.serial_no }}</div>
+                    
+                    <div class="spec-label">Brand:</div>
+                    <div class="spec-value">{{ desktop_detailsx.brand_name }}</div>
+                    
+                    <div class="spec-label">Model:</div>
+                    <div class="spec-value">{{ desktop_detailsx.model }}</div>
+                    
+                    <div class="spec-label">Processor:</div>
+                    <div class="spec-value">{{ desktop_detailsx.processor }}</div>
+                    
+                    <div class="spec-label">Memory:</div>
+                    <div class="spec-value">{{ desktop_detailsx.memory }}</div>
+                    
+                    <div class="spec-label">Hard Disk:</div>
+                    <div class="spec-value">{{ desktop_detailsx.drive }}</div>
+                </div>
+            </div>
+
+            <!-- Monitor Section -->
+            {% if monitor_detailse %}
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">🖥️</div>
+                    <h2>Monitor</h2>
+                </div>
+                <div class="spec-grid">
+                    <div class="spec-label">Serial No:</div>
+                    <div class="spec-value">{{ monitor_detailse.monitor_sn_db }}</div>
+                    
+                    <div class="spec-label">Brand:</div>
+                    <div class="spec-value">{{ monitor_detailse.monitor_brand_db }}</div>
+                    
+                    <div class="spec-label">Model:</div>
+                    <div class="spec-value">{{ monitor_detailse.monitor_model_db }}</div>
+                    
+                    <div class="spec-label">Size:</div>
+                    <div class="spec-value">{{ monitor_detailse.monitor_size_db }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Keyboard Section -->
+            {% if keyboard_detailse %}      
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">⌨️</div>
+                    <h2>Keyboard</h2>
+                </div>
+                <div class="spec-grid">
+                    <div class="spec-label">Serial No:</div>
+                    <div class="spec-value">{{ keyboard_detailse.keyboard_sn_db }}</div>
+                    
+                    <div class="spec-label">Brand:</div>
+                    <div class="spec-value">{{ keyboard_detailse.keyboard_brand_db }}</div>
+                    
+                    <div class="spec-label">Model:</div>
+                    <div class="spec-value">{{ keyboard_detailse.keyboard_model_db }}</div>
+                </div>
+            </div>
+           {% endif %}
+
+            <!-- Mouse Section -->
+            {% if mouse_details %}
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">🖱️</div>
+                    <h2>Mouse</h2>
+                </div>
+                <div class="spec-grid">
+                    <div class="spec-label">Serial No:</div>
+                    <div class="spec-value">{{ mouse_detailse.mouse_sn_db }}</div>
+                    
+                    <div class="spec-label">Brand:</div>
+                    <div class="spec-value">{{ mouse_detailse.mouse_brand_db }}</div>
+                    
+                    <div class="spec-label">Model:</div>
+                    <div class="spec-value">{{ mouse_detailse.mouse_model_db }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- UPS Section -->
+            {% if ups_detailse %}
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">🔋</div>
+                    <h2>UPS</h2>
+                </div>
+                <div class="spec-grid">
+                    <div class="spec-label">Serial No:</div>
+                    <div class="spec-value">{{ ups_detailse.ups_sn_db }}</div>
+                    
+                    <div class="spec-label">Brand:</div>
+                    <div class="spec-value">{{ ups_detailse.ups_brand_db }}</div>
+                    
+                    <div class="spec-label">Model:</div>
+                    <div class="spec-value">{{ ups_detailse.ups_model_db }}</div>
+
+                    <div class="spec-label">Capacity:</div>
+                    <div class="spec-value">{{ ups_detailse.ups_capacity_db }}</div>
+                    
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- User Section -->
+            {% if user_details %}
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-icon">👤</div>
+                    <h2>User Details</h2>
+                </div>
+                <div class="spec-grid">
+                    <div class="spec-label">Asset Owner:</div>
+                    <div class="spec-value">{{ user_details.user_Assetowner.employee_fname }} {{ user_details.user_Assetowner.employee_lname }}</div>
+                    
+                    <div class="spec-label">Designation:</div>
+                    <div class="spec-value">{{ user_details.user_Assetowner.employee_position }}</div>
+                    
+                    <div class="spec-label">Section:</div>
+                    <div class="spec-value">{{ user_details.user_Assetowner.employee_office }}</div>
+
+                    <div class="spec-label">End User:</div>
+                    <div class="spec-value">{{ user_details.user_Enduser.employee_fname }}</div>
+
+                    <div class="spec-label">Designation:</div>
+                    <div class="spec-value">{{ user_details.user_Enduser.employee_position }}</div>
+
+                    <div class="spec-label">Section:</div>
+                    <div class="spec-value">{{ user_details.user_Enduser.employee_office }}</div>
+                </div>
+
+               
+            </div>
+            {% endif %}
+
+            <!-- QR Code Section -->
+            <div class="section">
+                <div class="qr-code">
+                    SCAN FOR DIGITAL COPY<br>
+                    (QR CODE PLACEHOLDER)
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            This equipment belongs to Leyte Fourth DEO • Report generated automatically • Valid without stamp
+            <br>IT Department • {% now "Y" %}
+        </div>
+    </div>
+
+</body>
+</html>
