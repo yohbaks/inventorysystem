@@ -18,6 +18,13 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
+#to export to excel
+import io
+import datetime
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
+
+
 
 
 ##############################################################################
@@ -467,27 +474,27 @@ def mouse_detailed_view(request, mouse_id):
 #This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.
 def add_mouse_to_package(request, package_id):
     if request.method == 'POST':
-        # Retrieve the desktop package by its ID
         desktop_package = get_object_or_404(Desktop_Package, id=package_id)
-        
-        # Get form data
+
         mouse_sn = request.POST.get('mouse_sn')
-        mouse_brand = request.POST.get('mouse_brand')
+
+        mouse_brand_id = request.POST.get('mouse_brand_db')
+        mouse_brand_instance = get_object_or_404(Brand, id=mouse_brand_id)
+
         mouse_model = request.POST.get('mouse_model')
+
         
-        # Create a new mouse associated with the desktop package
+
         MouseDetails.objects.create(
             desktop_package=desktop_package,
             mouse_sn_db=mouse_sn,
-            mouse_brand_db=mouse_brand,
+            mouse_brand_db=mouse_brand_instance,
             mouse_model_db=mouse_model
         )
-        
-        # Redirect back to the desktop details view, focusing on the Mouse tab
-        return redirect(f'/desktop_details_view/{package_id}/#pills-mouse')
-    
-    return redirect('desktop_details_view', package_id=package_id)
 
+        return redirect(f'/desktop_details_view/{package_id}/#pills-mouse')
+
+    return redirect('desktop_details_view', package_id=package_id)
 
 def add_ups_to_package(request, package_id):
     if request.method == 'POST':
@@ -880,32 +887,6 @@ def dispose_desktop(request, desktop_id):
         return redirect(reverse('http://127.0.0.1:8000/desktop_details_view'))  # Change this
 
 
-# def add_brand(request):
-#     if request.method == 'POST':
-#         name = request.POST.get('name')
-#         is_desktop = 'is_desktop' in request.POST
-#         is_keyboard = 'is_keyboard' in request.POST
-#         is_mouse = 'is_mouse' in request.POST
-#         is_monitor = 'is_monitor' in request.POST
-#         is_ups = 'is_ups' in request.POST
-
-#         if not Brand.objects.filter(name=name).exists():
-#             Brand.objects.create(
-#                 name=name,
-#                 is_desktop=is_desktop,
-#                 is_keyboard=is_keyboard,
-#                 is_mouse=is_mouse,
-#                 is_monitor=is_monitor,
-#                 is_ups=is_ups
-#             )
-#             messages.success(request, f"Brand '{name}' added successfully!")
-#         else:
-#             messages.warning(request, f"Brand '{name}' already exists.")
-#         return redirect('add_brand')
-
-#     return render(request, 'add_brand.html')
-
-
 
 
 def add_brand(request):
@@ -954,6 +935,10 @@ def generate_desktop_pdf(request, desktop_id):
     ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
     user_details = UserDetails.objects.filter(desktop_package_db=desktop_package).first()
 
+    qr_code_url = None
+    if desktop_package.qr_code:
+        qr_code_url = request.build_absolute_uri(desktop_package.qr_code.url)
+
     html_string = render_to_string('pdf_template.html', {
         'desktop_detailsx': desktop_details,
         'desktop_package': desktop_package,
@@ -962,9 +947,131 @@ def generate_desktop_pdf(request, desktop_id):
         'monitor_detailse': monitor_details,
         'ups_detailse': ups_details,
         'user_details': user_details,
-    })
+        'qr_code_url': qr_code_url,
+    })   
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename=desktop_{desktop_id}_details.pdf'
     HTML(string=html_string).write_pdf(response)
+    return response
+
+
+#export to excel
+def export_desktop_packages_excel(request):
+    template_path = 'C:/Users/yubl/Desktop/django101/inventorysystem/static/excel_template/3f2e3faf-8c25-426f-b673-a2b5fb38e34a.xlsx'
+    wb = load_workbook(template_path)
+    ws = wb.active
+
+    red_fill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
+
+    start_row = 11
+    row = start_row
+
+    desktops = DesktopDetails.objects.select_related('desktop_package', 'brand_name').all()
+
+    for i, desktop in enumerate(desktops, start=1):
+        dp = desktop.desktop_package
+        doc = DocumentsDetails.objects.filter(desktop_package=dp).first()
+        user = UserDetails.objects.filter(desktop_package_db=dp).first()
+
+        # ========== Desktop Details ==========
+        status = "Active" if not desktop.is_disposed else "Disposed"
+
+        ws[f'A{row}'] = f"{i}a"
+        ws[f'B{row}'] = "Desktop"
+        ws[f'C{row}'] = doc.docs_Acquisition_Type if doc else ''
+        ws[f'D{row}'] = desktop.processor
+        ws[f'E{row}'] = desktop.memory
+        ws[f'F{row}'] = desktop.drive
+        ws[f'G{row}'] = desktop.desktop_OS
+        ws[f'H{row}'] = desktop.desktop_Office
+        ws[f'I{row}'] = status
+        ws[f'J{row}'] = doc.docs_PAR if doc else ''
+        ws[f'K{row}'] = desktop.serial_no
+        ws[f'L{row}'] = doc.docs_Propertyno if doc else ''
+        ws[f'M{row}'] = desktop.model
+        ws[f'N{row}'] = desktop.brand_name.name if desktop.brand_name else ''
+        ws[f'O{row}'] = doc.docs_Value if doc else ''
+        ws[f'P{row}'] = f"{user.user_Enduser.employee_fname} {user.user_Enduser.employee_lname}" if user and user.user_Enduser else ''
+        ws[f'Q{row}'] = user.user_Enduser.employee_position if user and user.user_Enduser else ''
+        ws[f'R{row}'] = user.user_Enduser.employee_office if user and user.user_Enduser else ''
+        ws[f'S{row}'] = "Region VIII"
+        ws[f'T{row}'] = "Leyte 4th DEO"
+        ws[f'U{row}'] = f"{user.user_Assetowner.employee_fname} {user.user_Assetowner.employee_lname}" if user and user.user_Assetowner else ''
+        ws[f'V{row}'] = doc.docs_Datereceived if doc else ''
+        ws[f'W{row}'] = doc.docs_Supplier if doc else ''
+        ws[f'X{row}'] = doc.docs_Dateinspected if doc else ''
+        ws[f'Y{row}'] = desktop.computer_name
+        ws[f'Z{row}'] = status
+
+        if status == "Disposed":
+            for col in range(1, 27):  # Columns A to Z
+                ws.cell(row=row, column=col).fill = red_fill
+
+        row += 1
+
+        # ========== Related Components ==========
+        components = [
+            ('Monitor', MonitorDetails.objects.filter(desktop_package_db=dp), 'b'),
+            ('Keyboard', KeyboardDetails.objects.filter(desktop_package=dp), 'c'),
+            ('Mouse', MouseDetails.objects.filter(desktop_package=dp), 'd'),
+            ('UPS', UPSDetails.objects.filter(desktop_package=dp), 'e'),
+        ]
+
+        for label, items, suffix in components:
+            for item in items:
+                status = "Active" if not item.is_disposed else "Disposed"
+
+                ws[f'A{row}'] = f"{i}{suffix}"
+                ws[f'B{row}'] = label
+                ws[f'C{row}'] = doc.docs_Acquisition_Type if doc else ''
+                ws[f'D{row}'] = ws[f'E{row}'] = ws[f'F{row}'] = ws[f'G{row}'] = ws[f'H{row}'] = "N/A"
+                ws[f'I{row}'] = status
+                ws[f'J{row}'] = doc.docs_PAR if doc else ''
+                ws[f'L{row}'] = doc.docs_Propertyno if doc else ''
+                ws[f'O{row}'] = doc.docs_Value if doc else ''
+                ws[f'P{row}'] = f"{user.user_Enduser.employee_fname} {user.user_Enduser.employee_lname}" if user and user.user_Enduser else ''
+                ws[f'Q{row}'] = user.user_Enduser.employee_position if user and user.user_Enduser else ''
+                ws[f'R{row}'] = user.user_Enduser.employee_office if user and user.user_Enduser else ''
+                ws[f'S{row}'] = "Region VIII"
+                ws[f'T{row}'] = "Leyte 4th DEO"
+                ws[f'U{row}'] = f"{user.user_Assetowner.employee_fname} {user.user_Assetowner.employee_lname}" if user and user.user_Assetowner else ''
+                ws[f'V{row}'] = doc.docs_Datereceived if doc else ''
+                ws[f'W{row}'] = doc.docs_Supplier if doc else ''
+                ws[f'X{row}'] = doc.docs_Dateinspected if doc else ''
+                ws[f'Y{row}'] = "N/A"
+                ws[f'Z{row}'] = status
+
+                if label == "Monitor":
+                    ws[f'K{row}'] = item.monitor_sn_db
+                    ws[f'M{row}'] = item.monitor_model_db
+                    ws[f'N{row}'] = item.monitor_brand_db.name if item.monitor_brand_db else ''
+                elif label == "Keyboard":
+                    ws[f'K{row}'] = item.keyboard_sn_db
+                    ws[f'M{row}'] = item.keyboard_model_db
+                    ws[f'N{row}'] = item.keyboard_brand_db.name if item.keyboard_brand_db else ''
+                elif label == "Mouse":
+                    ws[f'K{row}'] = item.mouse_sn_db
+                    ws[f'M{row}'] = item.mouse_model_db
+                    ws[f'N{row}'] = item.mouse_brand_db.name if item.mouse_brand_db else ''
+                elif label == "UPS":
+                    ws[f'K{row}'] = item.ups_sn_db
+                    ws[f'M{row}'] = item.ups_model_db
+                    ws[f'N{row}'] = item.ups_brand_db.name if item.ups_brand_db else ''
+
+                if status == "Disposed":
+                    for col in range(1, 27):
+                        ws.cell(row=row, column=col).fill = red_fill
+
+                row += 1
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename=desktop_bundle_export_{datetime.date.today()}.xlsx'
     return response

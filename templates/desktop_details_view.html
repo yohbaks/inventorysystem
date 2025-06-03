@@ -15,7 +15,7 @@
                 <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Return to Supply
               </button>
               {% endif %}
-              <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+              <a href="{% url 'export_desktop_excel' %}" class="btn btn-label-success btn-round btn-sm me-2">
                 <span class="btn-label"><i class="fa fa-pencil"></i></span> ExporT
               </a>
               <a href="#" class="btn btn-label-info btn-round btn-sm">
@@ -922,10 +922,17 @@
               <label for="mouse_sn" class="form-label">Serial Number</label>
               <input type="text" class="form-control" id="mouse_sn" name="mouse_sn" required>
             </div>
+
             <div class="mb-3">
               <label for="mouse_brand" class="form-label">Brand</label>
-              <input type="text" class="form-control" id="mouse_brand" name="mouse_brand" required>
+              <select class="form-select form-control" id="editBrand" name="mouse_brand_db" required>
+                <option value="" disabled selected>Select Brand</option>
+                {% for brandMouse in mouse_brands %}
+                  <option value="{{ brandMouse.id }}">{{ brandMouse.name }}</option>
+                {% endfor %}
+              </select>
             </div>
+            
             <div class="mb-3">
               <label for="mouse_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="mouse_model" name="mouse_model" required>

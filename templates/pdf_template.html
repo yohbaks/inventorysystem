@@ -410,13 +410,58 @@
                 </div>
                 {% endif %}
             </div>
-
-            <div class="qr-section">
-                <div class="qr-placeholder">QR CODE PLACEHOLDER</div>
-                <p style="margin: 0; font-size: 12px; color: var(--gray);">Scan to view digital asset record</p>
-                <p style="margin: 8px 0 0 0; font-size: 11px; color: var(--gray);">Asset ID: {{ desktop_detailsx.serial_no }}</p>
+ <!-- QR Code Section -->
+<!-- QR Code Section --><br>
+<div class="qr-section" style="text-align: center; margin-top: 20px;">
+    <div class="qr-placeholder" style="
+        border: 1px dashed #ccc;
+        padding: 12px;
+        border-radius: 6px;
+        display: inline-block;
+        width: 200px; /* Fixed width for the placeholder */
+        height: 200px; /* Fixed height for the placeholder */
+        position: relative;
+        text-align: center;
+        overflow: hidden;
+    ">
+        {% if qr_code_url %}
+            <div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                width: 100%;
+            ">
+                <img src="{{ qr_code_url }}" alt="QR Code" style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
+            <p style="margin-top: 8px; font-size: 12px;">QR Code for Desktop Package {{ desktop_package.pk }}</p>
+        {% else %}
+            <div style="
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #aaa;
+                font-size: 12px;
+            ">
+                QR CODE PLACEHOLDER
+            </div>
+            <p style="color: #888; font-size: 12px;">No QR code available.</p>
+        {% endif %}
 
+        <p style="margin-top: 8px; font-size: 11px; color: #666;">
+            Scan to view digital asset record
+        </p>
+        <p style="margin-top: 4px; font-size: 10px; color: #999;">
+            Asset ID: {{ desktop_detailsx.serial_no }}
+        </p>
+    </div>
+     <div class="section">
+                <div class="qr-code">
+                   <p style="margin-top: 8px; font-size: 11px; color: #666;">SCAN FOR DIGITAL INVENTORY</p>
+                </div>
+            </div>
+</div>
             <div class="footer">
                 <p>This document contains confidential information • Generated on {% now "F j, Y" %} at {% now "g:i A" %}</p>
                 <p>© {% now "Y" %} IT Asset Management System • Valid without signature</p>

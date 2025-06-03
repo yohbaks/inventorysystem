@@ -78,7 +78,8 @@ urlpatterns = [
     #print
     path('desktop/<int:desktop_id>/pdf/', views.generate_desktop_pdf, name='generate_desktop_pdf'),
 
-
+    #excel export
+    path('export/desktop/', views.export_desktop_packages_excel, name='export_desktop_excel'),
     
     
 
