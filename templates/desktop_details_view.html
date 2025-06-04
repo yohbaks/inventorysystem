@@ -517,6 +517,17 @@
               <label for="monitor_brand" class="form-label">Brandd</label>
               <input type="text" class="form-control" id="monitor_brand" name="monitor_brand" required>
             </div>
+            
+            <div class="mb-3">
+              <label for="monitor_brand" class="form-label">Brand</label>
+              <select class="form-select form-control" id="editBrand" name="monitor_brand_db" required>
+                <option value="" disabled selected>Select Brand</option>
+                {% for brandMonitor in monitor_brands %}
+                  <option value="{{ brandMonitor.id }}">{{ brandMonitor.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
             <div class="mb-3">
               <label for="monitor_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="monitor_model" name="monitor_model" required>
@@ -541,6 +552,7 @@
 
       
 <!-- Keyboard Details Tab ORGIGNAL -->
+
 <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
   <div class="card">
     <!-- Card Header with Flexbox to Align Title and Button -->
@@ -717,7 +729,7 @@
           <h5 class="modal-title" id="addKeyboardModalLabel">Add New Keyboard</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        {% if keyboard_detailse and keyboard_detailse.id %}
+        {% if desktop_package and desktop_package.id %}
         <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
           {% csrf_token %}
           <div class="modal-body">
@@ -725,10 +737,19 @@
               <label for="keyboard_sn" class="form-label">Serial Number</label>
               <input type="text" class="form-control" id="keyboard_sn" name="keyboard_sn" required>
             </div>
+
+
             <div class="mb-3">
               <label for="keyboard_brand" class="form-label">Brand</label>
-              <input type="text" class="form-control" id="keyboard_brand" name="keyboard_brand" required>
+              <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
+                <option value="" disabled selected>Select Brand</option>
+                {% for brandKeyboard in keyboard_brands %}
+                  <option value="{{ brandKeyboard.id }}">{{ brandKeyboard.name }}</option>
+                {% endfor %}
+              </select>
             </div>
+
+
             <div class="mb-3">
               <label for="keyboard_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="keyboard_model" name="keyboard_model" required>
@@ -1136,10 +1157,19 @@
                     <label for="mouse_sn" class="form-label">Serial Number</label>
                     <input type="text" class="form-control" id="ups_sn" name="ups_sn" required>
                   </div>
+
+
+
                   <div class="mb-3">
-                    <label for="mouse_brand" class="form-label">Brand</label>
-                    <input type="text" class="form-control" id="ups_brand" name="ups_brand" required>
+                    <label for="ups_brand" class="form-label">Brand</label>
+                    <select class="form-select form-control" id="editBrand" name="ups_brand_form" required>
+                      <option value="" disabled selected>Select Brand</option>
+                      {% for brandUps in ups_brands %}
+                        <option value="{{ brandUps.id }}">{{ brandUps.name }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
+
                   <div class="mb-3">
                     <label for="mouse_model" class="form-label">Model</label>
                     <input type="text" class="form-control" id="ups_model" name="ups_model" required>

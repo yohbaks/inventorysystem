@@ -176,31 +176,7 @@ def keyboard_update(request, keyboard_id):
     
 
 
-#MONITORS
-def add_monitor_to_package(request, package_id):
-    if request.method == 'POST':
-        # Retrieve the desktop package by its ID
-        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
-        
-        # Get form data
-        monitor_sn = request.POST.get('monitor_sn')
-        monitor_brand = request.POST.get('monitor_brand')
-        monitor_model = request.POST.get('monitor_model')
-        monitor_size = request.POST.get('monitor_size')
-        
-        # Create a new keyboard associated with the desktop package
-        MonitorDetails.objects.create(
-            desktop_package_db=desktop_package,
-            monitor_sn_db=monitor_sn,
-            monitor_brand_db=monitor_brand,
-            monitor_model_db=monitor_model,
-            monitor_size_db=monitor_size
-        )
-        
-        # Redirect back to the desktop details view, focusing on the Keyboard tab
-        return redirect(f'/desktop_details_view/{package_id}/#pills-monitor')
-    
-    return redirect('desktop_details_view', package_id=package_id)
+
 
 #update desktop details
 @require_POST
@@ -301,33 +277,7 @@ def update_documents(request, pk):
 
                                             ######## SINGLE DISPOSAL TAB ###########
 
-#monitor disposal under keyboard pill page
-def monitor_disposed(request, monitor_id):
-    if request.method == 'POST':
-        # Retrieve the keyboard by its ID
-        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
-        
-        # Set the keyboard as disposed and save
-        monitor.is_disposed = True
-        monitor.save()
-        
-        # Create a new DisposedKeyboard entry
-        disposed_monitor = DisposedMonitor(
-            monitor_disposed_db=monitor,
-            desktop_package_db=monitor.desktop_package_db,
-            monitor_sn=monitor.monitor_sn_db,
-            disposal_date=timezone.now()
-        )
-        disposed_monitor.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = monitor.desktop_package_db.id
-        
-        # Redirect back to the desktop details view with the Keyboard tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
-
-    # Fallback in case the request method is not POST
-    return redirect('desktop_details_view', package_id=monitor_id)
 
 
 #keyboard disposal under keyboard pill page
@@ -413,28 +363,6 @@ def ups_disposed(request, ups_id):
 
                                             ######## SINGLE END TAB ###########
 
-def add_keyboard_to_package(request, package_id):
-    if request.method == 'POST':
-        # Retrieve the desktop package by its ID
-        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
-        
-        # Get form data
-        keyboard_sn = request.POST.get('keyboard_sn')
-        keyboard_brand = request.POST.get('keyboard_brand')
-        keyboard_model = request.POST.get('keyboard_model')
-        
-        # Create a new keyboard associated with the desktop package
-        KeyboardDetails.objects.create(
-            desktop_package=desktop_package,
-            keyboard_sn_db=keyboard_sn,
-            keyboard_brand_db=keyboard_brand,
-            keyboard_model_db=keyboard_model
-        )
-        
-        # Redirect back to the desktop details view, focusing on the Keyboard tab
-        return redirect(f'/desktop_details_view/{package_id}/#pills-keyboard')
-    
-    return redirect('desktop_details_view', package_id=package_id)
 
 
 
@@ -467,8 +395,99 @@ def mouse_detailed_view(request, mouse_id):
     # Render the detailed view of the mouse
     return render(request, 'mouse_detailed_view.html', {'mouse': mouse})
 
-#This function marks a specific mouse as disposed, saves it, and then redirects back to the desktop details view with the "Mouse" tab active.
 
+
+#This function allows the disposal of a specific mouse by its ID.
+#monitor disposal under keyboard pill page
+def monitor_disposed(request, monitor_id):
+    if request.method == 'POST':
+        # Retrieve the keyboard by its ID
+        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
+        
+        # Set the keyboard as disposed and save
+        monitor.is_disposed = True
+        monitor.save()
+        
+        # Create a new DisposedKeyboard entry
+        disposed_monitor = DisposedMonitor(
+            monitor_disposed_db=monitor,
+            desktop_package_db=monitor.desktop_package_db,
+            monitor_sn=monitor.monitor_sn_db,
+            disposal_date=timezone.now()
+        )
+        disposed_monitor.save()
+
+        # Get the package ID to redirect to the same page
+        desktop_package_id = monitor.desktop_package_db.id
+        
+        # Redirect back to the desktop details view with the Keyboard tab active
+        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-monitor')
+
+    # Fallback in case the request method is not POST
+    return redirect('desktop_details_view', package_id=monitor_id)
+
+
+#MONITORS
+def add_monitor_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        monitor_sn = request.POST.get('monitor_sn') 
+
+        monitor_brand_id = request.POST.get('monitor_brand_db')
+        monitor_brand_instance = get_object_or_404(Brand, id=monitor_brand_id)
+
+
+
+        monitor_model = request.POST.get('monitor_model')
+        monitor_size = request.POST.get('monitor_size')
+        
+        # Create a new keyboard associated with the desktop package
+        MonitorDetails.objects.create(
+            desktop_package_db=desktop_package,
+            monitor_sn_db=monitor_sn,
+            monitor_brand_db=monitor_brand_instance,
+            monitor_model_db=monitor_model,
+            monitor_size_db=monitor_size
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Keyboard tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-monitor')
+    
+    return redirect('desktop_details_view', package_id=package_id)
+
+
+
+#This function allows adding a new keyboard to a specific desktop package, then redirects back to the "Keyboard" tab of the desktop details view.
+
+def add_keyboard_to_package(request, package_id):
+    if request.method == 'POST':
+        # Retrieve the desktop package by its ID
+        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
+        
+        # Get form data
+        keyboard_sn = request.POST.get('keyboard_sn')
+        
+        keyboard_brand_id = request.POST.get('keyboard_brand_db')
+        keyboard_brand_instance = get_object_or_404(Brand, id=keyboard_brand_id)
+        
+
+        keyboard_model = request.POST.get('keyboard_model')
+        
+        # Create a new keyboard associated with the desktop package
+        KeyboardDetails.objects.create(
+            desktop_package=desktop_package,
+            keyboard_sn_db=keyboard_sn,
+            keyboard_brand_db=keyboard_brand_instance,
+            keyboard_model_db=keyboard_model
+        )
+        
+        # Redirect back to the desktop details view, focusing on the Keyboard tab
+        return redirect(f'/desktop_details_view/{package_id}/#pills-keyboard')
+    
+    return redirect('desktop_details_view', package_id=package_id)
 
 
 #This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.
@@ -503,15 +522,18 @@ def add_ups_to_package(request, package_id):
         
         # Get form data
         ups_sn = request.POST.get('ups_sn')
-        ups_brand = request.POST.get('ups_brand')
+       
+        ups_brand_id = request.POST.get('ups_brand_form')
+        ups_brand_instance = get_object_or_404(Brand, id=ups_brand_id)
+
         ups_model = request.POST.get('ups_model')
         ups_capacity = request.POST.get('ups_capacity')
         
-        # Create a new mouse associated with the desktop package
+        
         UPSDetails.objects.create(
             desktop_package=desktop_package,
             ups_sn_db=ups_sn,
-            ups_brand_db=ups_brand,
+            ups_brand_db=ups_brand_instance,
             ups_model_db=ups_model,
             ups_capacity_db=ups_capacity
         )
