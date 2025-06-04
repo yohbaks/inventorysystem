@@ -980,7 +980,7 @@ def generate_desktop_pdf(request, desktop_id):
 
 #export to excel
 def export_desktop_packages_excel(request):
-    template_path = 'C:/Users/yubl/Desktop/django101/inventorysystem/static/excel_template/3f2e3faf-8c25-426f-b673-a2b5fb38e34a.xlsx'
+    template_path = 'static/excel_template/3f2e3faf-8c25-426f-b673-a2b5fb38e34a.xlsx'
     wb = load_workbook(template_path)
     ws = wb.active
 
