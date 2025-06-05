@@ -23,12 +23,13 @@ import io
 import datetime
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
-
+from django.contrib.auth.decorators import login_required
 
 
 
 ##############################################################################
 # code for the list in the homepage
+
 def desktop_list_func(request):
     
 
@@ -50,6 +51,7 @@ def success_page(request):
 
 
 #Template: Desktop_details_view
+@login_required
 def desktop_package_base(request):
     # Fetch all desktop details
     desktop_details = DesktopDetails.objects.all()
@@ -67,8 +69,10 @@ def desktop_package_base(request):
 
     return render(request, 'desktop_details.html', {
         'desktops_with_items': desktops_with_items,
-    })      
+    })   
 
+
+@login_required
 def desktop_details_view(request, desktop_id):
     # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
