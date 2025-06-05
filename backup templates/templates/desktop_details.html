@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-head-row">
+              <h4 class="card-title">Desktop Details</h4>
+              <div class="card-tools">
+                <a href="#" class="btn btn-label-danger btn-round btn-sm me-2">
+                  <span class="btn-label">
+                    <i class="fa fa-pencil"></i>
+                  </span>
+                  Return to Supply
+                </a>
+                <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+                  <span class="btn-label">
+                    <i class="fa fa-pencil"></i>
+                  </span>
+                  Export
+                </a>
+                <a href="#" class="btn btn-label-info btn-round btn-sm">
+                  <span class="btn-label">
+                    <i class="fa fa-print"></i>
+                  </span>
+                  Print
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="multi-filter-select" class="display table table-striped table-hover">
+                <thead>
+                  <tr>
+                    
+                    <th>Computer Name</th>
+                    <th>Serial No.</th>
+                    <th>Brand Name</th>
+
+                    <th>Processor</th>
+                    <th>Memory</th>
+                    <th>Enduser</th>
+                    <th>Asset Owner</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    
+                    <th>Computer Name</th>
+                    <th>Serial No.</th>
+
+                    <th>Model</th>
+                    <th>Processor</th>
+                    <th>Memory</th>
+                    <th>Enduser</th>
+                    <th>Asset Owner</th>
+                    <th>Actions</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  
+                  <tr>{% for item in desktops_with_items %}
+                    <td>{{ item.desktop.computer_name }}</td>
+                    <td>{{ item.desktop.serial_no }}</td>
+                    <td>{{ item.desktop.brand_name }}</td>
+                    <td>{{ item.desktop.processor }}</td>
+
+                    <td>{{ item.desktop.memory }}</td>
+
+                    <td>
+                      {% for userx in item.user %}
+                          {{ userx.user_Enduser }}<br> <!-- Show each keyboard's serial number -->
+                      {% endfor %}
+                  </td>
+                    
+                    
+                    <td>
+                      {% for userx in item.user %}
+                          {{ userx.user_Asset_owner }}<br> <!-- Show each keyboard's serial number -->
+                      {% endfor %}
+                  </td>
+                    <td>
+                      <a href="{% url 'desktop_details_view' item.desktop.id %}" class="btn btn-primary btn-sm">
+                        View Details
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

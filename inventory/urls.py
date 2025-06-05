@@ -9,7 +9,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
 
-    path('', views.recent_it_equipment_base, name='recent_it_equipment'),
+    #recent and conting in the base (combined) view
+    path('', views.recent_it_equipment_and_count_base, name='recent_it_equipment'),
     path('success_add/', views.success_page, name='success_add_page'),
 
     #desktop_details
@@ -82,10 +83,10 @@ urlpatterns = [
     path('export/desktop/', views.export_desktop_packages_excel, name='export_desktop_excel'),
     
     #login
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-
+    
     
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

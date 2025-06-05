@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Employees Management</h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+          <a href="#"><i class="icon-home"></i></a>
+        </li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Tables</a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Employees</a></li>
+      </ul>
+    </div>
+
+    <!-- Add Employee Button -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Add Employee</button>
+
+    <!-- Add Employee Modal -->
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEmployeeModalLabel">Add Employee</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="addEmployeeForm" method="POST" action="{% url 'employee_list' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" name="firstName" required>
+              </div>
+              <div class="mb-3">
+                <label for="middleInitial" class="form-label">Middle Initial</label>
+                <input type="text" class="form-control" name="middleInitial" maxlength="1">
+              </div>
+              <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="lastName" required>
+              </div>
+              <div class="mb-3">
+                <label for="position" class="form-label">Position</label>
+                <input type="text" class="form-control" name="position" required>
+              </div>
+              <div class="mb-3">
+                <label for="office" class="form-label">Office</label>
+                <input type="text" class="form-control" name="office" required>
+              </div>
+              <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-control" name="status" required>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Add Employee</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+     <!-- Employee Table -->
+     <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Employees</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="multi-filter-select" class="display table table-striped table-hover dataTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for employee in employees %}
+                  <tr>
+                    <td>
+                      {{ employee.employee_fname }}
+                      {% if employee.employee_mname %} {{ employee.employee_mname }}.{% endif %}
+                      {{ employee.employee_lname }}
+                    </td>
+                    <td>{{ employee.employee_position }}</td>
+                    <td>{{ employee.employee_office }}</td>
+                    <td>{{ employee.employee_status }}</td>
+                    <td>
+                      <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewEmployeeModal{{ employee.id }}">View</button>
+                      <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ employee.id }}">Edit</button>
+                      <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal{{ employee.id }}">Delete</button>
+                    </td>
+                  </tr>
+
+                   <!-- Delete Employee Modal -->
+        <div class="modal fade" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to delete {{ employee.employee_fname }}?</p>
+              </div>
+              <div class="modal-footer">
+                <form method="POST" action="{% url 'delete_employee' employee.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+              <!-- View Employee Modal -->
+        <div class="modal fade" id="viewEmployeeModal{{ employee.id }}" tabindex="-1">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Employee Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="avatar bg-light-primary text-primary me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                    {{ employee.employee_fname|first }}{{ employee.employee_lname|first }}
+                  </div>
+                  <div>
+                    <h4 class="fw-bold mb-1">{{ employee.employee_fname }} {{ employee.employee_lname }}</h4>
+                    <p class="text-muted mb-0">{{ employee.employee_position }}</p>
+                  </div>
+                </div>
+                <hr>
+                <p><strong>Middle Initial:</strong> {{ employee.employee_mname }}</p>
+                <p><strong>Office:</strong> {{ employee.employee_office }}</p>
+                <p><strong>Status:</strong> <span class="badge bg-success">{{ employee.employee_status }}</span></p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+                    <!-- Edit Employee Modal -->
+        <div class="modal fade" id="editEmployeeModal{{ employee.id }}" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Employee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <form method="POST" action="{% url 'update_employee' employee.id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="id" value="{{ employee.id }}">
+                  <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-control" name="firstName" value="{{ employee.employee_fname }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Middle Initial</label>
+                    <input type="text" class="form-control" name="middleInitial" value="{{ employee.employee_mname }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-control" name="lastName" value="{{ employee.employee_lname }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Position</label>
+                    <input type="text" class="form-control" name="position" value="{{ employee.employee_position }}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Office</label>
+                    <input type="text" class="form-control" name="office" value="{{ employee.employee_office }}" required>
+                  </div>
+                  <div class="mb-3">
+                     <label class="form-label">Status</label>
+                    <select class="form-control" name="status" required>
+                      <option value="Active" {% if employee.employee_status == "Active" %}selected{% endif %}>Active</option>
+                      <option value="Inactive" {% if employee.employee_status == "Inactive" %}selected{% endif %}>Inactive</option>
+                    </select>
+                    <hr>
+                  <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+       
+       
+                  {% endfor %}
+
+                  
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Display Toast Notification -->
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  {% for message in messages %}
+  <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ message }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if the_messages %}
+<div class="alert-container position-fixed top-0 end-0 p-3">
+  {% for messagee in the_messages %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert" font>
+    {{ messagee }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+<!-- Bootstrap Toast Auto-hide Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    let toastElement = document.querySelector('.toast');
+    if (toastElement) {
+      let toast = new bootstrap.Toast(toastElement);
+      toast.show();
+    }
+  });
+</script>
+
+{% endblock %}

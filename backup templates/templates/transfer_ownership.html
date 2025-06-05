@@ -1,0 +1,40 @@
+
+
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+<div class="col-md-12">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Sizing</h4>
+
+    </div>
+    <h2>Transfer Ownership for {{ desktop_package }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="new_owner" class="form-label">New Owner</label>
+            <input type="text" name="new_owner" id="new_owner" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label for="new_designation" class="form-label">Designation</label>
+          <input type="text" class="form-control" id="new_designation" name="new_designation" required>
+      </div>
+      <div class="mb-3">
+          <label for="new_section" class="form-label">Section</label>
+          <input type="text" class="form-control" id="new_section" name="new_section" required>
+      </div>
+        <div class="mb-3">
+            <label for="notes" class="form-label">Transfer Notes</label>
+            <textarea name="notes" id="notes" class="form-control"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Transfer Ownership</button>
+    </form>
+    <p>Current Owner: {{ current_owner }}</p>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

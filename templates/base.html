@@ -1,9 +1,9 @@
 {% load static %}
 
 <!-- Bootstrap CSS -->
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+<!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet"> -->
 <!-- Font Awesome for icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> -->
 
 
 <!DOCTYPE html>
@@ -11,7 +11,7 @@
   <head> 
 
     {% block head %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
     <meta
@@ -26,7 +26,7 @@
 
     <!-- Fonts and icons -->
     <script src="{% static 'js/plugin/webfont/webfont.min.js' %}"></script>
-    {% comment %} <script src="assets/js/plugin/webfont/webfont.min.js"></script> {% endcomment %}
+    
     <script>
       WebFont.load({
         google: { families: ["Public Sans:300,400,500,600,700"] },
@@ -64,14 +64,15 @@
         <div class="sidebar-logo">
           <!-- Logo Header -->
           <div class="logo-header" data-background-color="dark">
-            {% comment %} <a href="{% url 'desktop_list_page' %}" class="logo"> {% endcomment %}
-              <img 
-                src="{% static 'img/kaiadmin/logo_light.svg' %}"
-                alt="navbar brand"
-                class="navbar-brand"
-                height="20"
-              />
-            </a>
+            <a href="http://127.0.0.1:8000/" class="logo">
+                <img
+                  
+                  src= "{% static 'img/kaiadmin/logo_light.svg' %}"
+                  alt="navbar brand"
+                  class="navbar-brand"
+                  height="20"
+                />
+              </a>
             <div class="nav-toggle">
               <button class="btn btn-toggle toggle-sidebar">
                 <i class="gg-menu-right"></i>
@@ -174,6 +175,7 @@
                 </div>
               </li>
 
+              
             </ul>
           </div>
         </div>
@@ -186,7 +188,7 @@
           <div class="main-header-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-              <a href="index.html" class="logo">
+              <a href="#" class="logo">
                 <img
                   
                   src= "{% static 'img/kaiadmin/logo_light.svg' %}"
@@ -259,10 +261,7 @@
                     </form>
                   </ul>
                 </li>
-                      <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link">Logout</button>
-                      </form>
+                     
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
                     class="nav-link dropdown-toggle"
@@ -457,17 +456,17 @@
                               <span class="text">Calendar</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'add_desktop_package_with_details' %}">
                             <div class="quick-actions-item">
                               <div
-                                class="avatar-item bg-warning rounded-circle"
+                                class="avatar-item bg-success rounded-circle"
                               >
-                                <i class="fas fa-map"></i>
+                                <i class="fas fa-edit"></i>
                               </div>
-                              <span class="text">Maps</span>
+                              <span class="text">Add Item</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'export_desktop_excel' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-info rounded-circle">
                                 <i class="fas fa-file-excel"></i>
@@ -478,7 +477,7 @@
                           <a class="col-6 col-md-4 p-0" href="#">
                             <div class="quick-actions-item">
                               <div
-                                class="avatar-item bg-success rounded-circle"
+                                class="avatar-item bg-warning rounded-circle"
                               >
                                 <i class="fas fa-envelope"></i>
                               </div>
@@ -520,14 +519,14 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile.jpg"
+                        src="{% static 'assets/img/profile.jpg' %}" 
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Hi,</span>
-                      <span class="fw-bold">Hizrian</span>
+                      <span class="fw-bold">Bobby</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -536,7 +535,7 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile.jpg"
+                              src="{% static 'assets/img/profile.jpg' %}"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
@@ -560,7 +559,12 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Account Setting</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Logout</a>
+
+                         <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">Logout</button>
+                      </form>
+                        
                       </li>
                     </div>
                   </ul>
@@ -602,14 +606,15 @@
                       </div>
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
-                          <p class="card-category">Total IT Equipment:</p>
-                          <h4 class="card-title">{{ desktop_count }}</h4>
+                          <p class="card-category">Total Desktop Packages:</p>
+                          <h4 class="card-title"> {{ total_count }} </h4>
                         </div> 
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+              
               <div class="col-sm-6 col-md-3">
                 <div class="card card-stats card-round">
                   <div class="card-body">
@@ -675,6 +680,8 @@
               </div>
             </div>
             
+
+
             <div class="row">
               <div class="col-md-12">
                 <div class="card">
@@ -744,7 +751,7 @@
     <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/core/popper.min.js' %}"></script>
     <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
    
 
 
@@ -815,8 +822,6 @@
     </script>
     
 
-
-
     <script>
       $(document).ready(function () {
         $("#basic-datatables").DataTable({});
@@ -876,8 +881,7 @@
     </script>
 
     {% endblock %}
-
-  </body>
+ </body>
 </html>
 
 

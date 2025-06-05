@@ -30,22 +30,35 @@ from django.contrib.auth.decorators import login_required
 ##############################################################################
 # code for the list in the homepage
 
-def desktop_list_func(request):
+
+
+# def desktop_package_count_view(request):
+#     total_count = Desktop_Package.objects.count()
+#     active_count = Desktop_Package.objects.filter(is_disposed=False).count()
+#     disposed_count = Desktop_Package.objects.filter(is_disposed=True).count()
+
+#     return render(request, 'base.html', {
+#         'total_count': total_count,
+#         'active_count': active_count,
+#         'disposed_count': disposed_count,
+#     })
+# def desktop_list_func(request):
     
 
-    # Get all equipment except the disposed one.
-    desktop_list = Desktop_Package.objects.filter(is_disposed=False)
+#     # Get all equipment except the disposed one.
+#     desktop_list = Desktop_Package.objects.filter(is_disposed=False)
 
-    # Count the total number of equipment
-    desktop_count = desktop_list.count()
+#     # Count the total number of equipment
+#     desktop_count = desktop_list.count()
 
-    # Render the list of equipment and the count to the template
-    return render(request, 'base.html', {'desktop_List': desktop_list, 'desktop_count': desktop_count})
+#     # Render the list of equipment and the count to the template
+#     return render(request, 'base.html', {'desktop_List': desktop_list, 'desktop_count': desktop_count})
     
 
 ##############################################################################
 
- #####################################   
+ #####################################  
+@login_required  
 def success_page(request):
     return render(request, 'success_add.html')  # Render the success page template
 
@@ -663,13 +676,20 @@ def add_desktop_package_with_details(request):
 
 ############### (RECENT at BASE)
 
-def recent_it_equipment_base(request):
+def recent_it_equipment_and_count_base(request):
+    # Get 10 most recent non-disposed desktops
     recent_desktops = DesktopDetails.objects.filter(is_disposed=False).order_by('-created_at')[:10]
 
+    # Count totals from the Desktop_Package model
+    total_count = Desktop_Package.objects.count()
+    active_count = Desktop_Package.objects.filter(is_disposed=False).count()
+    disposed_count = Desktop_Package.objects.filter(is_disposed=True).count()
 
     return render(request, 'base.html', {
         'recent_desktops': recent_desktops,
-        # 'recent_keyboards': recent_keyboards,
+        'total_count': total_count,
+        'active_count': active_count,
+        'disposed_count': disposed_count,
     })
 
 #employees
@@ -990,7 +1010,7 @@ def export_desktop_packages_excel(request):
 
     red_fill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
 
-    start_row = 11
+    start_row = 9
     row = start_row
 
     desktops = DesktopDetails.objects.select_related('desktop_package', 'brand_name').all()

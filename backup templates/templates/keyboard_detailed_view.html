@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-head-row">
+              <h4 class="card-title">Keyboard Details</h4>
+              <div class="card-tools">
+                <a href="{% url 'keyboard_details' %}" class="btn btn-label-info btn-round btn-sm">
+                  <span class="btn-label">
+                    <i class="fa fa-arrow-left"></i>
+                  </span>
+                  Back to List
+                </a>
+                <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+                  <span class="btn-label">
+                    <i class="fa fa-pencil"></i>
+                  </span>
+                  Edit
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h5>General Information</h5>
+                <p><strong>Brand:</strong> <i>{{ keyboard.keyboard_brand_db }}</i></p>
+                <p><strong>Model:</strong> <i>{{ keyboard.keyboard_model_db }}</i></p>
+                <p><strong>Serial Number:</strong> {{ keyboard.keyboard_sn_db }}</p>
+              </div>
+              <div class="col-md-6">
+                <h5>Associated Desktop Package</h5>
+                <p><strong>Package Name:</strong><i> {{ keyboard.computer_name }}</i></p>
+                <p><strong>Owner:</strong><i> {{ keyboard.asset_owner_details }}</i></p>
+                <p><strong>Purchase Date:</strong><i> {{ keyboard.asset_owner_details }}</i></p>
+              </div>
+            </div>
+            <hr>
+            <div class="text-end">
+              <form method="POST" action="{% url 'keyboard_disposed' keyboard.id %}" class="dispose-keyboard-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Dispose Keyboard</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelector('.dispose-keyboard-form').addEventListener('submit', function(event) {
+    if (!confirm("Are you sure you want to dispose of this keyboard?")) {
+      event.preventDefault();
+    }
+  });
+</script>
+{% endblock %}
