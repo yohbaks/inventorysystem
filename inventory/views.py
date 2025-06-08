@@ -404,6 +404,10 @@ def mouse_details(request):
     # Render the list of mice and the count to the template
     return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
 
+def monitor_details(request):
+    monitors = MonitorDetails.objects.all().order_by('-created_at')  # Or filter to only show active ones
+    return render(request, 'monitor_details.html', {'monitors': monitors})
+
 
 #This function retrieves the details of a specific mouse by its ID.
 def mouse_detailed_view(request, mouse_id):

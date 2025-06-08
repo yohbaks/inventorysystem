@@ -40,6 +40,10 @@ urlpatterns = [
 
     # Mouse URLs
     path('mouse_details/', views.mouse_details, name='mouse_details'),  # View all mice
+
+    # Monitr Details
+    path('monitor_details/', views.monitor_details, name='monitor_details'),
+    
    
 
     # Mouse detailed view
