@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Preventive Maintenance Checklist</h4>
+                    {% if pm_schedule_date %}
+            <div class="alert alert-info mt-3">
+            <strong>Scheduled Preventive Maintenance:</strong><br>
+            Date: <strong>{{ pm_schedule_date }}</strong><br>
+            {% if pm_schedule_notes %}
+                Notes: {{ pm_schedule_notes }}
+            {% endif %}
+            </div>
+            {% endif %}
+      </div>
+      <div class="card-body">
+        <h3 class="mb-3">{{ desktop_details.computer_name }}</h3>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label><strong>Office:</strong></label>
+              <input type="text" name="office" class="form-control" value="{{ office }}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label><strong>End User:</strong></label>
+              <input type="text" name="end_user" class="form-control" value="{{ end_user }}" readonly>
+            </div>
+          </div>
+
+          <div class="form-group mb-4">
+            <label><strong>Date Accomplished:</strong></label>
+            <input type="date" name="date_accomplished" class="form-control" required>
+          </div>
+
+          <hr>
+          <h5 class="mt-4 mb-3">Checklist Items</h5>
+          <div class="row">
+            {% for i in range %}
+              <div class="col-md-6 mb-4">
+                <div class="d-flex">
+                  <div class="form-check me-2 pt-1">
+                    <input class="form-check-input" type="checkbox" name="task_{{ i }}">
+                  </div>
+                  <div class="flex-grow-1">
+                    <label class="fw-bold">Task {{ i }}:</label>
+                    <p class="mb-1">{{ checklist_labels|get_item:i }}</p>
+                    <textarea name="note_{{ i }}" class="form-control" rows="3" placeholder="Notes or actions taken"></textarea>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <button type="submit" class="btn btn-primary mt-3">Save Checklist</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  textarea.form-control {
+    font-size: 0.95rem;
+    resize: vertical;
+    margin-top: 5px;
+  }
+  .form-check-input {
+    margin-top: 6px;
+  }
+</style>
+{% endblock %}

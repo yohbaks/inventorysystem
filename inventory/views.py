@@ -3,7 +3,7 @@ from django.contrib import messages
 
 from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
-                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand)
+                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance)
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -20,7 +20,8 @@ from weasyprint import HTML
 
 #to export to excel
 import io
-import datetime
+
+from datetime import datetime, timedelta
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 from django.contrib.auth.decorators import login_required
@@ -173,13 +174,13 @@ def desktop_details_view(request, desktop_id):
 
 ################# (KEYBOAR AND MOUSE)
 
-def keyboard_details(request):
-   # Get all equipment
-    keyboard_details = KeyboardDetails.objects.all()
-    mouse_details = MouseDetails.objects.all()
-    # Render the list of equipment and the count to the template
-    return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details, 
-                                                     'mouse_details': mouse_details})
+# def keyboard_details(request):
+#    # Get all equipment
+#     keyboard_details = KeyboardDetails.objects.all()
+#     mouse_details = MouseDetails.objects.all()
+#     # Render the list of equipment and the count to the template
+#     return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details, 
+#                                                      'mouse_details': mouse_details})
 
 
 def keyboard_detailed_view(request, keyboard_id):
@@ -398,15 +399,27 @@ def disposed_keyboards(request):
 # BEGIN ################ (MOUSE)
 
 #This function retrieves all mouse records and renders them in a similar way as mouse_details.
-def mouse_details(request):
-    # Get all mouse equipment
-    mouse_details = MouseDetails.objects.all()
-    # Render the list of mice and the count to the template
-    return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
-
 def monitor_details(request):
     monitors = MonitorDetails.objects.all().order_by('-created_at')  # Or filter to only show active ones
     return render(request, 'monitor_details.html', {'monitors': monitors})
+
+def mouse_details(request):
+    # Get all mouse equipment
+    mouse_details = MouseDetails.objects.all().order_by('-created_at')
+    # Render the list of mice and the count to the template
+    return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
+
+def keyboard_details(request):
+    # Get all keyboard equipment
+    keyboard_details = KeyboardDetails.objects.all().order_by('-created_at')
+    # Render the list of keyboards and the count to the template
+    return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details})
+
+def ups_details(request):
+    # Get all UPS equipment
+    ups_details = UPSDetails.objects.all().order_by('-created_at')
+    # Render the list of UPS and the count to the template
+    return render(request, 'ups_details.html', {'ups_details': ups_details})
 
 
 #This function retrieves the details of a specific mouse by its ID.
@@ -1123,5 +1136,93 @@ def export_desktop_packages_excel(request):
         output,
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename=desktop_bundle_export_{datetime.date.today()}.xlsx'
+    
+    response['Content-Disposition'] = f'attachment; filename=desktop_bundle_export_{datetime.today().date()}.xlsx'
     return response
+
+def add_maintenance(request, desktop_id):
+    desktop = get_object_or_404(Desktop_Package, id=desktop_id)
+
+    if request.method == 'POST':
+        maintenance_date = request.POST.get('maintenance_date')
+        performed_by = request.POST.get('performed_by')
+        notes = request.POST.get('notes')
+
+        # Convert maintenance_date to a Python date object
+        maintenance_date_obj = datetime.strptime(maintenance_date, '%Y-%m-%d').date()
+        next_schedule = maintenance_date_obj + timedelta(days=30)
+
+        PreventiveMaintenance.objects.create(
+            desktop_package=desktop,
+            maintenance_date=maintenance_date,
+            next_schedule=next_schedule,
+            performed_by=performed_by,
+            notes=notes,
+            is_completed=True
+        )
+        return redirect('maintenance_history', desktop_id=desktop.id)
+
+    return render(request, 'maintenance/add_maintenance.html', {'desktop': desktop})
+
+
+def maintenance_history(request, desktop_id):
+    desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
+    maintenance_records = PreventiveMaintenance.objects.filter(desktop_package=desktop)
+
+    # Get related user details
+    user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
+    desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
+
+    for record in maintenance_records:
+        record.task_done_list = [
+            f"Task {i}" for i in range(1, 10) if getattr(record, f"task_{i}")
+        ]
+
+    return render(request, 'maintenance/history.html', {
+        'desktop': desktop,
+        'maintenance_records': maintenance_records,
+        'user_details': user_details,
+        'desktop_details': desktop_details,
+    })
+
+def add_checklist(request, desktop_id):
+    desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
+    checklist_labels = {
+        1: "Check if configured and connected to the DPWH domain",
+        2: "Check if able to access the intranet services",
+        3: "Check if installed with anti-virus software authorized by IMS",
+        4: "Check if anti-virus definition files are up-to-date",
+        5: "Perform full virus scan using updated virus removal tool",
+        6: "Remove all un-authorized software installations",
+        7: "Remove all un-authorized files (e.g. movies)",
+        8: "Check working condition of hardware devices/components",
+        9: "Clean hardware and components, and organize cables",
+    }
+
+    user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
+    office = user_details.user_Enduser.employee_office if user_details and user_details.user_Enduser else ''
+    end_user = f"{user_details.user_Enduser.employee_fname} {user_details.user_Enduser.employee_lname}" if user_details and user_details.user_Enduser else ''
+    desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
+
+    if request.method == "POST":
+        PreventiveMaintenance.objects.create(
+            desktop_package=desktop,
+            office=office,
+            end_user=end_user,
+            date_accomplished=request.POST.get('date_accomplished'),
+            maintenance_date=timezone.now(),
+            **{f"task_{i}": request.POST.get(f"task_{i}") == "on" for i in range(1, 10)},
+            **{f"note_{i}": request.POST.get(f"note_{i}", "") for i in range(1, 10)},
+        )
+        return redirect('maintenance_history', desktop_id=desktop_id)
+
+    return render(request, 'maintenance/add_checklist.html', {
+        'desktop': desktop,
+        'checklist_labels': checklist_labels,
+        'office': office,
+        'end_user': end_user,
+        'range': range(1, 10),
+        'desktop_details': desktop_details,
+        'pm_schedule_date': desktop.pm_schedule_date,
+        'pm_schedule_notes': desktop.pm_schedule_notes,
+    })

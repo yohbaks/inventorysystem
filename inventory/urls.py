@@ -17,8 +17,8 @@ urlpatterns = [
     path('desktop_details/', views.desktop_package_base, name='desktop_details'),  # URL pattern for desktop details
     path('desktop_details_view/<int:desktop_id>/', views.desktop_details_view, name='desktop_details_view'),  # URL pattern for desktop details view
 
-    #keyboard
-    path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
+    
+    
     path('success_disposed/<int:keyboard_id>/', views.keyboard_disposed, name='keyboard_disposed'),  # Dispose keyboard
     path('success_disposed_monitor/<int:monitor_id>/', views.monitor_disposed, name='monitor_disposed'),  # Dispose of a specific monitor
     path('success_disposed_mouse/<int:mouse_id>/', views.mouse_disposed, name='mouse_disposed'),  # Dispose of a specific mouse
@@ -37,12 +37,11 @@ urlpatterns = [
     # Keyboard disposal paths
     path('disposed_keyboards/', views.disposed_keyboards, name='disposed_keyboards'),
 
-
-    # Mouse URLs
+    # Keyboard, mouse, monitor,  ups details page
+    path('keyboard_details/', views.keyboard_details, name='keyboard_details'),
     path('mouse_details/', views.mouse_details, name='mouse_details'),  # View all mice
-
-    # Monitr Details
     path('monitor_details/', views.monitor_details, name='monitor_details'),
+    path('ups_details/', views.ups_details, name='ups_details'),
     
    
 
@@ -91,6 +90,11 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     
+    #maintenance
+  
+    path('maintenance/history/<int:desktop_id>/', views.maintenance_history, name='maintenance_history'),
+    path('maintenance/checklist/<int:desktop_id>/', views.add_checklist, name='add_checklist'),
     
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
