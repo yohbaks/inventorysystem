@@ -1497,6 +1497,59 @@
         </tbody>
       </table>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsdModal">Edit</button>
+
+       
+       
+      
+
+
+
+    </div>
+  </div>
+  <div class="col-md-6">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">Preventive Maintenance Schedule</h4>
+    </div>
+    <div class="card-body">
+      <ul class="nav nav-pills nav-secondary" id="pm-schedule-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <a class="nav-link active" id="q1-tab" data-bs-toggle="pill" href="#q1" role="tab">1st Quarter</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="q2-tab" data-bs-toggle="pill" href="#q2" role="tab">2nd Quarter</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="q3-tab" data-bs-toggle="pill" href="#q3" role="tab">3rd Quarter</a>
+        </li>
+        <li class="nav-item" role="presentation">
+          <a class="nav-link" id="q4-tab" data-bs-toggle="pill" href="#q4" role="tab">4th Quarter</a>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-3" id="pm-schedule-content">
+        {% for quarter, schedules in quartered_pm_schedule.items %}
+        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="q{{ quarter }}" role="tabpanel">
+          {% if schedules %}
+            <ul class="list-group">
+              {% for schedule in schedules %}
+              <li class="list-group-item">
+                <strong>{{ schedule.pm_schedule_start }} - {{ schedule.pm_schedule_end }}</strong><br>
+                <small>{{ schedule.notes }}</small><br>
+                {% if schedule.is_admin %}
+                    <span class="badge bg-primary">Admin</span>
+                  {% endif %}
+                  
+                
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted">No schedules found.</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
     </div>
   </div>
 </div>

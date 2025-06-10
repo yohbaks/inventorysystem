@@ -31,6 +31,29 @@ class Desktop_Package(models.Model):
 # =============================
 # ++++++++++++++++++++++++++++++Desktop Details , Monitor, Keyboard, Mouse, UPS
 # =============================
+class PM_Schedule_1stQuarter(models.Model):
+    pm_schedule_start = models.DateField(null=True, blank=True)
+    pm_schedule_end = models.DateField(null=True, blank=True)
+
+    is_admin = models.BooleanField(default=False)         # For admin section
+    is_finance = models.BooleanField(default=False)       # For finance section
+    is_construction = models.BooleanField(default=False)  # For construction section
+
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        roles = []
+        if self.is_admin:
+            roles.append("Admin")
+        if self.is_finance:
+            roles.append("Finance")
+        if self.is_construction:
+            roles.append("Construction")
+
+        roles_str = ", ".join(roles) if roles else "No Role"
+        return f"PM Schedule from {self.pm_schedule_start} to {self.pm_schedule_end} ({roles_str})"
+    
+
 
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -221,6 +244,7 @@ class DocumentsDetails(models.Model):
     docs_Dateinspected = models.CharField(max_length=100, blank=True, null=True)
     docs_Supplier = models.CharField(max_length=100, blank=True, null=True)
     docs_Status = models.CharField(max_length=100, blank=True, null=True)
+    PM_Schedule_1stQuarter = models.ForeignKey(PM_Schedule_1stQuarter, on_delete=models.SET_NULL, null=True, blank=True)  # Link to PM_Schedule
 
     def __str__(self):
         return f"{self.docs_PAR} {self.docs_Datereceived} ({self.docs_Status})"

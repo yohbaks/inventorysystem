@@ -3,7 +3,7 @@ from django.contrib import messages
 
 from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
-                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance)
+                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance, PM_Schedule_1stQuarter)
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -26,39 +26,12 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill
 from django.contrib.auth.decorators import login_required
 
+from collections import defaultdict # for grouping items by desktop package PM Schedule
+
 
 
 ##############################################################################
-# code for the list in the homepage
 
-
-
-# def desktop_package_count_view(request):
-#     total_count = Desktop_Package.objects.count()
-#     active_count = Desktop_Package.objects.filter(is_disposed=False).count()
-#     disposed_count = Desktop_Package.objects.filter(is_disposed=True).count()
-
-#     return render(request, 'base.html', {
-#         'total_count': total_count,
-#         'active_count': active_count,
-#         'disposed_count': disposed_count,
-#     })
-# def desktop_list_func(request):
-    
-
-#     # Get all equipment except the disposed one.
-#     desktop_list = Desktop_Package.objects.filter(is_disposed=False)
-
-#     # Count the total number of equipment
-#     desktop_count = desktop_list.count()
-
-#     # Render the list of equipment and the count to the template
-#     return render(request, 'base.html', {'desktop_List': desktop_list, 'desktop_count': desktop_count})
-    
-
-##############################################################################
-
- #####################################  
 @login_required  
 def success_page(request):
     return render(request, 'success_add.html')  # Render the success page template
@@ -86,101 +59,105 @@ def desktop_package_base(request):
     })   
 
 
+
 @login_required
 def desktop_details_view(request, desktop_id):
-    # Get the specific desktop by ID
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
-    desktop_package = desktop_details.desktop_package  # Get the associated package directly from desktop_details
-    # Generate QR code if it doesn't exist
+    desktop_package = desktop_details.desktop_package
+
+    # Generate QR code if missing
     if not desktop_package.qr_code:
         desktop_package.generate_qr_code()
         desktop_package.save()
 
-    enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
-    assetowner_history = AssetOwnerChangeHistory.objects.filter(desktop_package=desktop_details.desktop_package)
-    employees = Employee.objects.all()
-    
-    # Get all active keyboards,mouse, monitor in desktop_details_view related to the desktop package (for displaying or further processing)
-
+    # Active component details
     keyboard_detailsx = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     monitor_detailsx = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False)
     ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
     documents_details = DocumentsDetails.objects.filter(desktop_package=desktop_package)
     user_details = UserDetails.objects.filter(desktop_package_db=desktop_package).first()
-    
 
-    # Get disposed keyboards,mouse, monitor in desktop_details_view
+    # Disposed components
     disposed_desktop = DisposedDesktopDetail.objects.filter(desktop__desktop_package=desktop_package)
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package=desktop_package)
     disposed_mouse = DisposedMouse.objects.filter(mouse_db__desktop_package=desktop_package)
     disposed_monitor = DisposedMonitor.objects.filter(monitor_disposed_db__desktop_package_db=desktop_package)
     disposed_ups = DisposedUPS.objects.filter(ups_db__desktop_package=desktop_package)
 
-
-    # just checks if any active exist (for conditional logic)
+    # Flags for existence
     has_active_desktop = DesktopDetails.objects.filter(id=desktop_id, is_disposed=False).exists()
     has_active_keyboards = keyboard_detailsx.exists()
-    has_active_mouse = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
-    has_active_monitor = MonitorDetails.objects.filter(desktop_package_db=desktop_package, is_disposed=False).exists()
-    has_active_ups = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).exists()
+    has_active_mouse = mouse_details.exists()
+    has_active_monitor = monitor_detailsx.exists()
+    has_active_ups = ups_details.exists()
     desktops_disposed_filter = DesktopDetails.objects.filter(desktop_package=desktop_package, is_disposed=False)
 
-    # ✅ Add this to fetch only brands applicable to Desktop
+    # Brand filters
     desktop_brands  = Brand.objects.filter(is_desktop=True)
     monitor_brands  = Brand.objects.filter(is_monitor=True)
     keyboard_brands = Brand.objects.filter(is_keyboard=True)
     mouse_brands    = Brand.objects.filter(is_mouse=True)
     ups_brands      = Brand.objects.filter(is_ups=True)
-    
 
-    #ownership
-    # transfer_history = OwnershipTransfer.objects.filter(desktop_package=desktop_package).order_by('-transfer_date')
+    # Schedule Filters
+    admin_schedule          = PM_Schedule_1stQuarter.objects.filter(is_admin=True)
+    finance_schedule        = PM_Schedule_1stQuarter.objects.filter(is_finance=True)
+    construction_schedule   = PM_Schedule_1stQuarter.objects.filter(is_construction=True)
+
+    # Group PM schedule by quarter
+    pm_schedules = PM_Schedule_1stQuarter.objects.all()
+    quartered_pm_schedule = defaultdict(list)
+    for sched in pm_schedules:
+        if sched.pm_schedule_start:
+            month = sched.pm_schedule_start.month
+            quarter = (month - 1) // 3 + 1
+            quartered_pm_schedule[quarter].append(sched)
+
+    # Change history
+    enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_package)
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(desktop_package=desktop_package)
+
+    # Employees for dropdowns
+    employees = Employee.objects.all()
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
         'desktop_package': desktop_package,
-        'keyboard_detailse': keyboard_detailsx.first(),  # Assuming you only need one related keyboard detail
-        'disposed_desktop': disposed_desktop,
-        'disposed_keyboards': disposed_keyboards,
-        'disposed_mouse' : disposed_mouse,
-        'disposed_monitor' : disposed_monitor,
-        'disposed_ups' : disposed_ups,
-        'has_active_desktop': has_active_desktop,
-        'has_active_keyboards': has_active_keyboards,
-        'has_active_mouse': has_active_mouse,
-        'has_active_monitor': has_active_monitor,
-        'has_active_ups' : has_active_ups, 
+        'keyboard_detailse': keyboard_detailsx.first(),
         'monitor_detailse': monitor_detailsx.first(),
         'mouse_detailse': mouse_details.first(),
         'ups_detailse': ups_details.first(),
         'documents_detailse': documents_details.first(),
-        'user_details' : user_details,
-        'employees': employees,  # Pass the list of employees to the template
+        'user_details': user_details,
+        'disposed_desktop': disposed_desktop,
+        'disposed_keyboards': disposed_keyboards,
+        'disposed_mouse': disposed_mouse,
+        'disposed_monitor': disposed_monitor,
+        'disposed_ups': disposed_ups,
+        'has_active_desktop': has_active_desktop,
+        'has_active_keyboards': has_active_keyboards,
+        'has_active_mouse': has_active_mouse,
+        'has_active_monitor': has_active_monitor,
+        'has_active_ups': has_active_ups,
+        'desktops_disposed_filter': desktops_disposed_filter,
+        'desktop_brands': desktop_brands,
+        'monitor_brands': monitor_brands,
+        'keyboard_brands': keyboard_brands,
+        'mouse_brands': mouse_brands,
+        'ups_brands': ups_brands,
+        'admin_schedule': admin_schedule,
+        'finance_schedule': finance_schedule,
+        'construction_schedule': construction_schedule,
+        'quartered_pm_schedule': dict(quartered_pm_schedule),
+        'employees': employees,
         'enduser_history': enduser_history,
         'assetowner_history': assetowner_history,
-        'desktop_package': desktop_package,  # Pass desktop_package to the template for URL resolution
-        'desktop_brands': desktop_brands,  # Pass the list of desktop brands to the template
-        'monitor_brands': monitor_brands,  # Pass the list of monitor brands to the template
-        'keyboard_brands': keyboard_brands,
-        'mouse_brands': mouse_brands,  # Pass the list of keyboard brands to the template
-        'ups_brands': ups_brands,  # Pass the list of mouse brands to the template
-        'desktops_disposed_filter': desktops_disposed_filter,  # Added this line
-
-       })
+    })
 
 
 
 
-################# (KEYBOAR AND MOUSE)
-
-# def keyboard_details(request):
-#    # Get all equipment
-#     keyboard_details = KeyboardDetails.objects.all()
-#     mouse_details = MouseDetails.objects.all()
-#     # Render the list of equipment and the count to the template
-#     return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details, 
-#                                                      'mouse_details': mouse_details})
 
 
 def keyboard_detailed_view(request, keyboard_id):
