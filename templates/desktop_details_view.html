@@ -95,6 +95,7 @@
                   <i class="fas fa-file-alt"></i> Documents
                 </a>
               </li>
+              
             </ul>
           </div>
         </div>
@@ -201,7 +202,6 @@
             </table>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#disposeModal">Dispose</button>
-
 
 <!-- Update desktop Modal -->
 
@@ -316,6 +316,80 @@
 
           </div>
         </div>
+
+<!-- Preventive Maintenance Schedule and status -->
+        <div class="col-md-8">
+                <div class="card card-round">
+                  <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                      <div class="card-title">Preventive Maintenance Schedule</div>
+                      <div class="card-tools">
+                        <div class="dropdown">
+                          <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body p-0">
+                    {% if pm_assignments %}
+                    <div class="table-responsive">
+                      <!-- Projects table -->
+                      <table class="table align-items-center mb-0">
+                        <thead class="thead-light">
+                          <tr>
+                            <th scope="col">Quarter</th>
+                            <th scope="col">Section</th>
+                            <th scope="col" class="text-end">Start Date</th>
+                            <th scope="col" class="text-end">End Date</th>
+                            <th scope="col" class="text-end">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                           {% for assignment in pm_assignments %}
+                          <tr>
+                            <th scope="row">
+                              {% if assignment.is_completed %}
+                              <button class="btn btn-icon btn-round btn-success btn-sm me-2">
+                                <i class="fa fa-check"></i>
+                              </button>
+                              {% else %}
+                              <button class="btn btn-icon btn-round btn-warning btn-sm me-2">
+                                <i class="fa fa-check"></i>
+                              </button>
+                              {% endif %}
+                              {{ assignment.pm_section_schedule.quarter_schedule.quarter }}
+                             {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                            </th>
+                            <td class="text">{{ assignment.pm_section_schedule.section.name }}</td>
+                            <td class="text-end">{{ assignment.pm_section_schedule.start_date }}</td>
+                            <td class="text-end">{{ assignment.pm_section_schedule.end_date }}</td>
+                            <td class="text-end">
+                             {% if assignment.is_completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+                          </tr>
+                        
+                          {% endfor %}
+                        </tbody>
+                        {% else %}
+                            <p>No preventive maintenance schedule found for this desktop.</p>
+                        {% endif %}
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
       </div>
 
 
@@ -1498,11 +1572,7 @@
       </table>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsdModal">Edit</button>
 
-       
-       
-      
-
-
+    
 
     </div>
   </div>
@@ -1527,29 +1597,48 @@
         </li>
       </ul>
 
-      <div class="tab-content mt-3" id="pm-schedule-content">
-        {% for quarter, schedules in quartered_pm_schedule.items %}
-        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="q{{ quarter }}" role="tabpanel">
-          {% if schedules %}
-            <ul class="list-group">
-              {% for schedule in schedules %}
-              <li class="list-group-item">
-                <strong>{{ schedule.pm_schedule_start }} - {{ schedule.pm_schedule_end }}</strong><br>
-                <small>{{ schedule.notes }}</small><br>
-                {% if schedule.is_admin %}
-                    <span class="badge bg-primary">Admin</span>
-                  {% endif %}
-                  
-                
-              </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p class="text-muted">No schedules found.</p>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
+      <div class="card mt-4">
+    <div class="card-header">
+        <h4 class="card-title">Preventive Maintenance Schedule</h4>
+    </div>
+    <div class="card-body">
+        {% if pm_assignments %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Quarter</th>
+                        <th>Section</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in pm_assignments %}
+                        <tr>
+                            <td>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</td>
+                            <td>{{ assignment.pm_section_schedule.section.name }}</td>
+                            <td>{{ assignment.pm_section_schedule.start_date }}</td>
+                            <td>{{ assignment.pm_section_schedule.end_date }}</td>
+                            <td>
+                                {% if assignment.is_completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ assignment.remarks|default:"No remarks" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No preventive maintenance schedule found for this desktop.</p>
+        {% endif %}
+    </div>
+</div>
+
     </div>
   </div>
 </div>
@@ -1615,6 +1704,8 @@
   {% endif %}
   </div>
 </div>    
+
+
 
 <!-- Optional JavaScript -->
 <script>

@@ -2,7 +2,8 @@ from django.contrib import admin
 from .models import (
     Desktop_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor, 
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
-    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance, PM_Schedule_1stQuarter   
+    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
+    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment 
 )
 
 # Register your models here.
@@ -25,6 +26,10 @@ admin.site.register(AssetOwnerChangeHistory)
 admin.site.register(DisposedDesktopDetail)
 admin.site.register(Brand)
 admin.site.register(PreventiveMaintenance)
-admin.site.register(PM_Schedule_1stQuarter)
+admin.site.register(OfficeSection)
+admin.site.register(QuarterSchedule)
+admin.site.register(PMSectionSchedule)
+admin.site.register(PMScheduleAssignment)
+
 
 

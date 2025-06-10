@@ -3,7 +3,8 @@ from django.contrib import messages
 
 from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
-                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance, PM_Schedule_1stQuarter)
+                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance,
+                              PMScheduleAssignment )
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -100,19 +101,15 @@ def desktop_details_view(request, desktop_id):
     mouse_brands    = Brand.objects.filter(is_mouse=True)
     ups_brands      = Brand.objects.filter(is_ups=True)
 
-    # Schedule Filters
-    admin_schedule          = PM_Schedule_1stQuarter.objects.filter(is_admin=True)
-    finance_schedule        = PM_Schedule_1stQuarter.objects.filter(is_finance=True)
-    construction_schedule   = PM_Schedule_1stQuarter.objects.filter(is_construction=True)
+    #Preventive Maintenance
+    # Preventive Maintenance Schedule Assignments
+    pm_assignments = PMScheduleAssignment.objects.filter(
+        desktop_package=desktop_package
+    ).select_related(
+        'pm_section_schedule__section',
+        'pm_section_schedule__quarter_schedule'
+    )
 
-    # Group PM schedule by quarter
-    pm_schedules = PM_Schedule_1stQuarter.objects.all()
-    quartered_pm_schedule = defaultdict(list)
-    for sched in pm_schedules:
-        if sched.pm_schedule_start:
-            month = sched.pm_schedule_start.month
-            quarter = (month - 1) // 3 + 1
-            quartered_pm_schedule[quarter].append(sched)
 
     # Change history
     enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_package)
@@ -120,7 +117,7 @@ def desktop_details_view(request, desktop_id):
 
     # Employees for dropdowns
     employees = Employee.objects.all()
-
+    
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
         'desktop_package': desktop_package,
@@ -146,13 +143,11 @@ def desktop_details_view(request, desktop_id):
         'keyboard_brands': keyboard_brands,
         'mouse_brands': mouse_brands,
         'ups_brands': ups_brands,
-        'admin_schedule': admin_schedule,
-        'finance_schedule': finance_schedule,
-        'construction_schedule': construction_schedule,
-        'quartered_pm_schedule': dict(quartered_pm_schedule),
+
         'employees': employees,
         'enduser_history': enduser_history,
         'assetowner_history': assetowner_history,
+        'pm_assignments': pm_assignments,
     })
 
 
