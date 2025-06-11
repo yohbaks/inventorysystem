@@ -11,6 +11,11 @@
             <div class="card-head-row">
               <h4 class="card-title">Preventive Maintenance History</h4>
               <a href="{% url 'checklist' desktop.id %}" class="btn btn-primary btn-sm ms-auto">+ Add Maintenance</a>
+              {% if pm %}
+              <a href="{% url 'generate_pm_pdf' pm.id %}" class="btn btn-sm btn-outline-primary ms-2">
+                <i class="fa fa-file-pdf"></i> Download PDF
+              </a>
+              {% endif %}
             </div>
           </div>
 
@@ -56,7 +61,6 @@
                       <th>Date Accomplished</th>
                       <th>Office</th>
                       <th>Maintenance Task Details</th>
-                      <th>Actions</th> <!-- PDF column -->
                     </tr>
                   </thead>
                   <tbody>
@@ -90,11 +94,6 @@
                             {% endwith %}
                           {% endfor %}
                         </ul>
-                      </td>
-                      <td class="text-center">
-                        <a href="{% url 'generate_pm_pdf' record.id %}" class="btn btn-sm btn-outline-danger" title="Download PDF">
-                          <i class="fa fa-file-pdf"></i>
-                        </a>
                       </td>
                     </tr>
                     {% endfor %}

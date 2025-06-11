@@ -8,20 +8,28 @@
     <div class="card">
       <div class="card-header">
         <h4 class="card-title">Preventive Maintenance Checklist</h4>
-                    {% if pm_schedule_date %}
-            <div class="alert alert-info mt-3">
-            <strong>Scheduled Preventive Maintenance:</strong><br>
-            Date: <strong>{{ pm_schedule_date }}</strong><br>
-            {% if pm_schedule_notes %}
-                Notes: {{ pm_schedule_notes }}
-            {% endif %}
-            </div>
-            {% endif %}
       </div>
+
       <div class="card-body">
         <h3 class="mb-3">{{ desktop_details.computer_name }}</h3>
+
         <form method="POST">
           {% csrf_token %}
+
+          <!-- Quarter Schedule Dropdown -->
+          <div class="form-group mb-4">
+            <label><strong>Select Quarter Schedule:</strong></label>
+            <select name="quarter_schedule_id" class="form-select" required id="quarter_schedule">
+              <option value="" disabled selected>Select a quarter</option>
+              {% for quarter in quarter_schedules %}
+                <option value="{{ quarter.id }}">
+                  {{ quarter.get_quarter_display }} {{ quarter.year }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Office and End User -->
           <div class="row mb-3">
             <div class="col-md-6">
               <label><strong>Office:</strong></label>
@@ -33,11 +41,14 @@
             </div>
           </div>
 
+          <!-- Date Accomplished -->
           <div class="form-group mb-4">
             <label><strong>Date Accomplished:</strong></label>
-            <input type="date" name="date_accomplished" class="form-control" required>
+            <input type="date" name="date_accomplished" class="form-control" id="date_accomplished" required>
+            <small class="text-muted" id="date-range-info"></small>
           </div>
 
+          <!-- Checklist Tasks -->
           <hr>
           <h5 class="mt-4 mb-3">Checklist Items</h5>
           <div class="row">
@@ -74,4 +85,28 @@
     margin-top: 6px;
   }
 </style>
+
+<!-- ✅ Script for setting date range -->
+<script>
+  const quarterSelect = document.getElementById("quarter_schedule");
+  const dateInput = document.getElementById("date_accomplished");
+  const dateRangeInfo = document.getElementById("date-range-info");
+
+  quarterSelect.addEventListener("change", function () {
+    const quarterId = this.value;
+    fetch(`/maintenance/get_schedule_dates/${quarterId}/`)
+      .then(response => response.json())
+      .then(data => {
+        dateInput.min = data.start_date;
+        dateInput.max = data.end_date;
+        dateInput.value = "";
+        dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
+      })
+      .catch(() => {
+        dateInput.min = "";
+        dateInput.max = "";
+        dateRangeInfo.innerText = "Unable to load schedule date range.";
+      });
+  });
+</script>
 {% endblock %}

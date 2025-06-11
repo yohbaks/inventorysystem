@@ -4,7 +4,7 @@ from django.contrib import messages
 from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
                               EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance,
-                              PMScheduleAssignment )
+                              PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule)
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -21,6 +21,7 @@ from weasyprint import HTML
 
 #to export to excel
 import io
+import os
 
 from datetime import datetime, timedelta
 from openpyxl import load_workbook
@@ -28,7 +29,13 @@ from openpyxl.styles import PatternFill
 from django.contrib.auth.decorators import login_required
 
 from collections import defaultdict # for grouping items by desktop package PM Schedule
-
+from fpdf import FPDF # for PDF generation preventive maintenance
+from django.conf import settings # for accessing media files
+from docx import Document #docs on pdf on maintenance
+from docx2pdf import convert # for converting docx to pdf use in preventive maintenance
+import pythoncom # for Windows COM support, needed for docx2pdf on Windows
+from django.http import FileResponse #  for serving files in Django use in preventivemaintenace pdf
+from win32com.client import Dispatch # for Windows COM support, needed for docx2pdf on Windows preventive maintenance
 
 
 ##############################################################################
@@ -1137,28 +1144,36 @@ def add_maintenance(request, desktop_id):
     return render(request, 'maintenance/add_maintenance.html', {'desktop': desktop})
 
 
-def maintenance_history(request, desktop_id):
+def maintenance_history_view(request, desktop_id):
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
-    maintenance_records = PreventiveMaintenance.objects.filter(desktop_package=desktop)
-
-    # Get related user details
-    user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
+    user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
+    maintenance_history = PreventiveMaintenance.objects.filter(desktop_package=desktop).order_by('date_accomplished')
 
-    for record in maintenance_records:
-        record.task_done_list = [
-            f"Task {i}" for i in range(1, 10) if getattr(record, f"task_{i}")
-        ]
+    latest_pm = maintenance_history.last()  # ✅ Get the latest record
 
     return render(request, 'maintenance/history.html', {
         'desktop': desktop,
-        'maintenance_records': maintenance_records,
-        'user_details': user_details,
         'desktop_details': desktop_details,
+        'user_details': user_details,
+        'maintenance_history': maintenance_history,
+        'maintenance_records': maintenance_history,
+        'pm': latest_pm,  # ✅ Pass the latest PM record to template
     })
 
-def add_checklist(request, desktop_id):
+def get_schedule_date_range(request, quarter_id):
+    schedule = PMSectionSchedule.objects.filter(quarter_schedule_id=quarter_id).first()
+    if schedule:
+        return JsonResponse({
+            "start_date": schedule.start_date.strftime("%Y-%m-%d"),
+            "end_date": schedule.end_date.strftime("%Y-%m-%d")
+        })
+    return JsonResponse({}, status=404)
+
+# This function handles the checklist for preventive maintenance of a desktop package.
+def checklist(request, desktop_id):
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
+
     checklist_labels = {
         1: "Check if configured and connected to the DPWH domain",
         2: "Check if able to access the intranet services",
@@ -1175,26 +1190,92 @@ def add_checklist(request, desktop_id):
     office = user_details.user_Enduser.employee_office if user_details and user_details.user_Enduser else ''
     end_user = f"{user_details.user_Enduser.employee_fname} {user_details.user_Enduser.employee_lname}" if user_details and user_details.user_Enduser else ''
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
+    quarter_schedules = QuarterSchedule.objects.all().order_by('-year', 'quarter')
 
     if request.method == "POST":
-        PreventiveMaintenance.objects.create(
+        quarter_id = request.POST.get("quarter_schedule_id")
+        date_accomplished = request.POST.get("date_accomplished")
+        quarter = QuarterSchedule.objects.get(id=quarter_id) if quarter_id else None
+
+        matched_schedule = PMScheduleAssignment.objects.filter(
             desktop_package=desktop,
+            pm_section_schedule__quarter_schedule=quarter,
+            pm_section_schedule__start_date__lte=date_accomplished,
+            pm_section_schedule__end_date__gte=date_accomplished
+        ).first()
+
+        pm = PreventiveMaintenance.objects.create(
+            desktop_package=desktop,
+            pm_schedule_assignment=matched_schedule if matched_schedule else None,
             office=office,
             end_user=end_user,
-            date_accomplished=request.POST.get('date_accomplished'),
-            maintenance_date=timezone.now(),
+            maintenance_date=timezone.now().date(),
+            date_accomplished=date_accomplished,
+            performed_by=request.user.get_full_name() if request.user.is_authenticated else "Technician",
+            is_completed=True,
             **{f"task_{i}": request.POST.get(f"task_{i}") == "on" for i in range(1, 10)},
             **{f"note_{i}": request.POST.get(f"note_{i}", "") for i in range(1, 10)},
         )
+
+        for i in range(1, 10):
+            MaintenanceChecklistItem.objects.create(
+                maintenance=pm,
+                item_text=checklist_labels[i],
+                is_checked=request.POST.get(f"task_{i}") == "on"
+            )
+
+        if matched_schedule:
+            matched_schedule.is_completed = True
+            matched_schedule.remarks = "Checklist completed"
+            matched_schedule.save()
+
         return redirect('maintenance_history', desktop_id=desktop_id)
 
-    return render(request, 'maintenance/add_checklist.html', {
+    return render(request, 'maintenance/checklist.html', {  # You can rename the template file if needed
         'desktop': desktop,
+        'desktop_details': desktop_details,
         'checklist_labels': checklist_labels,
         'office': office,
         'end_user': end_user,
         'range': range(1, 10),
-        'desktop_details': desktop_details,
-        'pm_schedule_date': desktop.pm_schedule_date,
-        'pm_schedule_notes': desktop.pm_schedule_notes,
+        'quarter_schedules': quarter_schedules,
     })
+
+
+def generate_pm_excel_report(request, pm_id):
+    pythoncom.CoInitialize()
+
+    pm = get_object_or_404(PreventiveMaintenance, pk=pm_id)
+    desktop_details = DesktopDetails.objects.filter(desktop_package=pm.desktop_package).first()
+
+    template_path = os.path.join(settings.BASE_DIR, 'static', 'excel_template', 'PM checklist.xlsx')
+    output_xlsx_path = os.path.join(settings.MEDIA_ROOT, f'PM_Report_{pm.id}.xlsx')
+    output_pdf_path = os.path.join(settings.MEDIA_ROOT, f'PM_Report_{pm.id}.pdf')
+
+    # Fill Excel file
+    wb = load_workbook(template_path)
+    ws = wb.active
+
+    ws['C7'] = pm.office or ''
+    ws['C8'] = desktop_details.computer_name if desktop_details else ''
+    ws['C9'] = pm.end_user or ''
+    ws['C10'] = str(pm.date_accomplished or '')
+
+    for i in range(1, 10):
+        note_value = getattr(pm, f'note_{i}', '')
+        cell = f'E{13 + i}'
+        ws[cell] = note_value
+
+    wb.save(output_xlsx_path)
+
+    # Convert Excel to PDF using COM automation
+    excel = Dispatch("Excel.Application")
+    excel.Visible = False
+    wb_com = excel.Workbooks.Open(output_xlsx_path)
+    wb_com.ExportAsFixedFormat(0, output_pdf_path)  # 0 = PDF format
+    wb_com.Close(False)
+    excel.Quit()
+    pythoncom.CoUninitialize()
+
+    return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
+

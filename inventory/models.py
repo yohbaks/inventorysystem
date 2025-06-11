@@ -285,18 +285,60 @@ class AssetOwnerChangeHistory(models.Model):
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
 
+# class PreventiveMaintenance(models.Model):
+#     desktop_package = models.ForeignKey("Desktop_Package", related_name='maintenances', on_delete=models.CASCADE)
+#     maintenance_date = models.DateField()
+#     next_schedule = models.DateField(blank=True, null=True)
+#     performed_by = models.CharField(max_length=255)
+#     notes = models.TextField(blank=True, null=True)
+#     is_completed = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+#     date_accomplished = models.DateField(null=True, blank=True)
+#     office = models.CharField(max_length=255, blank=True, null=True)
+#     end_user = models.CharField(max_length=255, blank= True, null=True)    
+#     task_1 = models.BooleanField(default=False)
+#     note_1 = models.TextField(blank=True, null=True)
+#     task_2 = models.BooleanField(default=False)
+#     note_2 = models.TextField(blank=True, null=True)
+#     task_3 = models.BooleanField(default=False)
+#     note_3 = models.TextField(blank=True, null=True)
+#     task_4 = models.BooleanField(default=False)
+#     note_4 = models.TextField(blank=True, null=True)
+#     task_5 = models.BooleanField(default=False)
+#     note_5 = models.TextField(blank=True, null=True)
+#     task_6 = models.BooleanField(default=False)
+#     note_6 = models.TextField(blank=True, null=True)
+#     task_7 = models.BooleanField(default=False)
+#     note_7 = models.TextField(blank=True, null=True)
+#     task_8 = models.BooleanField(default=False)
+#     note_8 = models.TextField(blank=True, null=True)
+#     task_9 = models.BooleanField(default=False)
+#     note_9 = models.TextField(blank=True, null=True)
+
+#     def __str__(self):
+#         return f"{self.desktop_package} - {self.maintenance_date}"
+
+# class MaintenanceChecklistItem(models.Model):
+#     maintenance = models.ForeignKey(PreventiveMaintenance, on_delete=models.CASCADE, related_name='items')
+#     item_text = models.CharField(max_length=255)
+#     is_checked = models.BooleanField(default=False)
+
+#Preventivemaintenance REAL
 class PreventiveMaintenance(models.Model):
     desktop_package = models.ForeignKey("Desktop_Package", related_name='maintenances', on_delete=models.CASCADE)
+    pm_schedule_assignment = models.ForeignKey('PMScheduleAssignment', on_delete=models.SET_NULL, null=True, blank=True, related_name='maintenances')
     maintenance_date = models.DateField()
     next_schedule = models.DateField(blank=True, null=True)
     performed_by = models.CharField(max_length=255)
     notes = models.TextField(blank=True, null=True)
     is_completed = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-
     date_accomplished = models.DateField(null=True, blank=True)
     office = models.CharField(max_length=255, blank=True, null=True)
-    end_user = models.CharField(max_length=255, blank= True, null=True)    
+    end_user = models.CharField(max_length=255, blank=True, null=True)
+
+    # Task fields
     task_1 = models.BooleanField(default=False)
     note_1 = models.TextField(blank=True, null=True)
     task_2 = models.BooleanField(default=False)
@@ -324,9 +366,12 @@ class MaintenanceChecklistItem(models.Model):
     item_text = models.CharField(max_length=255)
     is_checked = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.item_text} ({'✔' if self.is_checked else '✘'})"
 
 
-#Preventivemaintenance REAL
+
+
 class OfficeSection(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
@@ -365,3 +410,4 @@ class PMScheduleAssignment(models.Model):
 
     def __str__(self):
         return f"{self.desktop_package} -> {self.pm_section_schedule}"
+#END - Preventivemaintenance REAL - END

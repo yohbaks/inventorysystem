@@ -3,7 +3,7 @@ from .models import (
     Desktop_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor, 
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
     UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
-    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment 
+    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment, MaintenanceChecklistItem 
 )
 
 # Register your models here.
@@ -30,6 +30,7 @@ admin.site.register(OfficeSection)
 admin.site.register(QuarterSchedule)
 admin.site.register(PMSectionSchedule)
 admin.site.register(PMScheduleAssignment)
+admin.site.register(MaintenanceChecklistItem)
 
 
 

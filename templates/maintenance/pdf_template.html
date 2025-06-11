@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h1, h3 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 6px; border: 1px solid #444; text-align: left; }
+    .checked { color: green; font-weight: bold; }
+    .not-checked { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Preventive Maintenance Checklist</h1>
+  <h3>Date Accomplished: {{ date_accomplished }}</h3>
+
+  <p><strong>Office:</strong> {{ office }}</p>
+  <p><strong>End User:</strong> {{ end_user }}</p>
+  <p><strong>Computer Name:</strong> {{ computer_name }}</p>
+  <p><strong>Brand:</strong> {{ brand }}</p>
+  <p><strong>Model:</strong> {{ model }}</p>
+  <p><strong>Serial Number:</strong> {{ serial }}</p>
+
+  <h3>Tasks</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Task</th>
+        <th>Status</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ task.label }}</td>
+        <td>
+          {% if task.completed %}
+            <span class="checked">✔ Completed</span>
+          {% else %}
+            <span class="not-checked">✘ Not Done</span>
+          {% endif %}
+        </td>
+        <td>{{ task.note }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

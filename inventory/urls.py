@@ -92,8 +92,16 @@ urlpatterns = [
     
     #maintenance
   
-    path('maintenance/history/<int:desktop_id>/', views.maintenance_history, name='maintenance_history'),
-    path('maintenance/checklist/<int:desktop_id>/', views.add_checklist, name='add_checklist'),
+    path('maintenance/history/<int:desktop_id>/', views.maintenance_history_view, name='maintenance_history'),
+    path('maintenance/checklist/<int:desktop_id>/', views.checklist, name='checklist'),
+    path('maintenance/checklist/<int:desktop_id>/<int:schedule_id>/', views.checklist, name='checklist_scheduled'),
+
+    path('maintenance/get_schedule_dates/<int:quarter_id>/', views.get_schedule_date_range, name='get_schedule_dates'),
+    # path('maintenance/pdf/<int:pm_id>/', views.generate_pm_pdf, name='generate_pm_pdf'), #pdf prevenitve maintenance
+
+    path('maintenance/pdf/<int:pm_id>/', views.generate_pm_excel_report, name='generate_pm_pdf'), #pdf prevenitve maintenance
+    
+    
     
 
 
