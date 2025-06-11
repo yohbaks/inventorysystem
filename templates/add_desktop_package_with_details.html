@@ -165,11 +165,17 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="form-group">
+          
+            <div class="form-group">
             <label for="MonitorBrand">Monitor Brand</label>
-            <input type="text" name="monitor_brand" id="monitor_brand" class="form-control">
+           <select name="monitor_brand" class="form-select" required>
+              <option value="">-- Select Brand --</option>
+              {% for brand in monitor_brands %}
+                <option value="{{ brand.id }}">{{ brand.name }}</option>
+              {% endfor %}
+            </select>
+            </div>
           </div>
-        </div>
         <div class="col-md-4">
           <div class="form-group">
             <label for="MonitorModel">Monitor Model</label>
@@ -209,7 +215,12 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="keyboardBrand">Keyboard Brand</label>
-            <input type="text" name="keyboard_brand" id="keyboard_brand" class="form-control">
+            <select name="keyboard_brand" id="keyboard_brand" class="form-select" required>
+              <option value="">-- Select Keyboard Brand --</option>
+              {% for brand in keyboard_brands %}
+                <option value="{{ brand.id }}">{{ brand.name }}</option>
+              {% endfor %}
+            </select>
           </div>
         </div>
         <div class="col-md-4">
@@ -243,7 +254,12 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="MouseBrand">Mouse Brand</label>
-            <input type="text" name="mouse_brand" id="mousebrand" class="form-control">
+            <select name="mouse_brand" id="mouse_brand" class="form-select" required>
+              <option value="">-- Select Mouse Brand --</option>
+              {% for brand in mouse_brands %}
+                <option value="{{ brand.id }}">{{ brand.name }}</option>
+              {% endfor %}
+            </select>
           </div>
         </div>
         <div class="col-md-4">
@@ -278,7 +294,12 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="UPSBrand">UPS Brand</label>
-            <input type="text" name="ups_brand" id="upsbrand" class="form-control">
+            <select name="ups_brand" id="ups_brand" class="form-select" required>
+                <option value="">-- Select UPS Brand --</option>
+                {% for brand in ups_brands %}
+                  <option value="{{ brand.id }}">{{ brand.name }}</option>
+                {% endfor %}
+              </select>
           </div>
         </div>
         <div class="col-md-4">

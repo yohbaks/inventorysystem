@@ -567,41 +567,45 @@ def disposed_mice(request):
 
 
 def add_desktop_package_with_details(request):
-    employees = Employee.objects.all()  # Fetch all employees
-    # brands = Brand.objects.all()
-
-    # Filter brands per type
+    employees = Employee.objects.all()
     desktop_brands = Brand.objects.filter(is_desktop=True)
     keyboard_brands = Brand.objects.filter(is_keyboard=True)
-
+    mouse_brands = Brand.objects.filter(is_mouse=True)
+    monitor_brands = Brand.objects.filter(is_monitor=True)
+    ups_brands = Brand.objects.filter(is_ups=True)
 
     if request.method == 'POST':
-        with transaction.atomic():  # Ensure all or nothing for database changes
-            # Create Desktop Package
+        with transaction.atomic():
             desktop_package = Desktop_Package.objects.create(is_disposed=False)
 
-            # Fetch the selected employee as end user
-            enduser_id = request.POST.get('enduser_input')  
+            enduser_id = request.POST.get('enduser_input')
             enduser = get_object_or_404(Employee, id=enduser_id) if enduser_id else None  
 
-             # Fetch the selected employee as asset owner
             assetowner_id = request.POST.get('assetowner_input')
             assetowner = get_object_or_404(Employee, id=assetowner_id) if assetowner_id else None
 
-            brand_id = request.POST.get('desktop_brand_name')
-            try:
-                brand = Brand.objects.get(id=brand_id)
-            except Brand.DoesNotExist:
-                # Handle the case where the brand doesn't exist
-                # e.g., return an error message or create the brand
-                brand = Brand.objects.create(name=request.POST.get('desktop_brand_name'))
+            # Fetch brand instances using selected IDs
+            desktop_brand_id = request.POST.get('desktop_brand_name')
+            desktop_brand = get_object_or_404(Brand, id=desktop_brand_id)
 
-            # Create Desktop Details
+            monitor_brand_id = request.POST.get('monitor_brand')
+            monitor_brand = get_object_or_404(Brand, id=monitor_brand_id)
+
+            keyboard_brand_id = request.POST.get('keyboard_brand')
+            keyboard_brand = get_object_or_404(Brand, id=keyboard_brand_id)
+
+            mouse_brand_id = request.POST.get('mouse_brand')
+            mouse_brand = get_object_or_404(Brand, id=mouse_brand_id)
+
+            ups_brand_id = request.POST.get('ups_brand')
+            ups_brand = get_object_or_404(Brand, id=ups_brand_id)
+
+            # Desktop
             DesktopDetails.objects.create(
                 desktop_package=desktop_package,
                 serial_no=request.POST.get('desktop_serial_no'),
                 computer_name=request.POST.get('computer_name_input'),
-                brand_name=desktop_brands, #use the brand object directly
+                brand_name=desktop_brand,
                 model=request.POST.get('desktop_model'),
                 processor=request.POST.get('desktop_processor'),
                 memory=request.POST.get('desktop_memory'),
@@ -614,36 +618,41 @@ def add_desktop_package_with_details(request):
                 desktop_Office_keys=request.POST.get('desktop_Office_keys')
             )
 
+            # Monitor
             MonitorDetails.objects.create(
                 desktop_package_db=desktop_package,
                 monitor_sn_db=request.POST.get('monitor_sn'),
-                monitor_brand_db=request.POST.get('monitor_brand'),
+                monitor_brand_db=monitor_brand,
                 monitor_model_db=request.POST.get('monitor_model'),
-                monitor_size_db=request.POST.get('monitor_size')    
+                monitor_size_db=request.POST.get('monitor_size')
             )
 
+            # Keyboard
             KeyboardDetails.objects.create(
                 desktop_package=desktop_package,
-                keyboard_sn_db=keyboard_brands,
-                keyboard_brand_db=request.POST.get('keyboard_brand'),
-                keyboard_model_db=request.POST.get('keyboard_model'),
+                keyboard_sn_db=request.POST.get('keyboard_sn'),
+                keyboard_brand_db=keyboard_brand,
+                keyboard_model_db=request.POST.get('keyboard_model')
             )
 
+            # Mouse
             MouseDetails.objects.create(
                 desktop_package=desktop_package,
                 mouse_sn_db=request.POST.get('mouse_sn'),
-                mouse_brand_db=request.POST.get('mouse_brand'),
+                mouse_brand_db=mouse_brand,
                 mouse_model_db=request.POST.get('mouse_model')
             )
 
+            # UPS
             UPSDetails.objects.create(
                 desktop_package=desktop_package,
                 ups_sn_db=request.POST.get('ups_sn'),
-                ups_brand_db=request.POST.get('ups_brand'),
+                ups_brand_db=ups_brand,
                 ups_model_db=request.POST.get('ups_model'),
                 ups_capacity_db=request.POST.get('ups_capacity')
             )
 
+            # Documents
             DocumentsDetails.objects.create(
                 desktop_package=desktop_package,
                 docs_PAR=request.POST.get('par_number_input'),
@@ -656,15 +665,25 @@ def add_desktop_package_with_details(request):
                 docs_Status=request.POST.get('status_desktop_input')
             )
 
+            # User Details
             UserDetails.objects.create(
                 desktop_package_db=desktop_package,
-                user_Enduser=enduser,  # Save Employee instance, not string
-                user_Assetowner=assetowner,  # Save Employee instance, not string
+                user_Enduser=enduser,
+                user_Assetowner=assetowner
             )
 
         return redirect('success_add_page')
 
-    return render(request, 'add_desktop_package_with_details.html', {'desktop_brands': desktop_brands, 'keyboard_brands': keyboard_brands, 'employees': employees})
+    return render(request, 'add_desktop_package_with_details.html', {
+        'desktop_brands': desktop_brands,
+        'keyboard_brands': keyboard_brands,
+        'monitor_brands': monitor_brands,
+        'mouse_brands': mouse_brands,
+        'ups_brands': ups_brands,
+        'employees': employees
+    })
+
+
 
 
 
@@ -1245,30 +1264,41 @@ def checklist(request, desktop_id):
 def generate_pm_excel_report(request, pm_id):
     pythoncom.CoInitialize()
 
+    # Get preventive maintenance and related desktop details
     pm = get_object_or_404(PreventiveMaintenance, pk=pm_id)
     desktop_details = DesktopDetails.objects.filter(desktop_package=pm.desktop_package).first()
 
+    # Define paths
     template_path = os.path.join(settings.BASE_DIR, 'static', 'excel_template', 'PM checklist.xlsx')
     output_xlsx_path = os.path.join(settings.MEDIA_ROOT, f'PM_Report_{pm.id}.xlsx')
     output_pdf_path = os.path.join(settings.MEDIA_ROOT, f'PM_Report_{pm.id}.pdf')
 
-    # Fill Excel file
+    # Load Excel template
     wb = load_workbook(template_path)
     ws = wb.active
 
+    # Fill basic info
     ws['C7'] = pm.office or ''
     ws['C8'] = desktop_details.computer_name if desktop_details else ''
     ws['C9'] = pm.end_user or ''
     ws['C10'] = str(pm.date_accomplished or '')
 
+    # Fill checklist: checkmarks and notes
     for i in range(1, 10):
-        note_value = getattr(pm, f'note_{i}', '')
-        cell = f'E{13 + i}'
-        ws[cell] = note_value
+        # Checkmark (✓) in column D
+        is_checked = getattr(pm, f"task_{i}", False)
+        check_cell = f'D{13 + i}'  # D14 to D22
+        ws[check_cell] = "✓" if is_checked else ""
 
+        # Notes in column E
+        note_value = getattr(pm, f'note_{i}', '')
+        note_cell = f'E{13 + i}'  # E14 to E22
+        ws[note_cell] = note_value
+
+    # Save updated Excel file
     wb.save(output_xlsx_path)
 
-    # Convert Excel to PDF using COM automation
+    # Convert to PDF using Excel COM
     excel = Dispatch("Excel.Application")
     excel.Visible = False
     wb_com = excel.Workbooks.Open(output_xlsx_path)
@@ -1277,5 +1307,5 @@ def generate_pm_excel_report(request, pm_id):
     excel.Quit()
     pythoncom.CoUninitialize()
 
+    # Return the PDF file as download
     return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
-
