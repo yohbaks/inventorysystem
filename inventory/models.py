@@ -257,7 +257,8 @@ class Employee(models.Model):
     employee_mname = models.CharField(max_length=100, blank=True, null=True)
     employee_lname = models.CharField(max_length=100, blank=True, null=True)
     employee_position = models.CharField(max_length=100, blank=True, null=True)   
-    employee_office = models.CharField(max_length=100, blank=True, null=True)
+
+    employee_office_section = models.ForeignKey('OfficeSection', on_delete=models.SET_NULL, null=True, blank=True)
     employee_status = models.CharField(max_length=100, blank=True, null=True)
 
     @property
@@ -265,7 +266,7 @@ class Employee(models.Model):
         return f"{self.employee_fname} {self.employee_lname}".strip()
     
     def __str__(self):
-        return f"{self.employee_fname} {self.employee_lname} - {self.employee_office}"
+        return f"{self.employee_fname} {self.employee_lname} - {self.employee_office_section}"
     
 
 #This tracks which user changed the End User and when.

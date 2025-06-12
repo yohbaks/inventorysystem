@@ -92,11 +92,17 @@
                       {{ employee.employee_lname }}
                     </td>
                     <td>{{ employee.employee_position }}</td>
-                    <td>{{ employee.employee_office }}</td>
+                    <td><select class="form-control" name="office_section" required>
+  <option value="" disabled selected>Select office section</option>
+  {% for section in office_sections %}
+    <option value="{{ section.id }}">{{ section.name }}</option>
+  {% endfor %}
+</select></td>
                     <td>{{ employee.employee_status }}</td>
+                    
                     <td><button class='btn btn-danger btn-sm'>Delete</button></td>
                   </tr>
-                  {% endfor %}
+                  {% endfor %}  
                 </tbody>
               </table>
             </div>

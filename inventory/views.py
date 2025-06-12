@@ -4,7 +4,7 @@ from django.contrib import messages
 from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
                               EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance,
-                              PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule)
+                              PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule, OfficeSection)
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -715,55 +715,66 @@ def employee_list(request):
         first_name = request.POST.get('firstName')
         middle_initial = request.POST.get('middleInitial', '')
         last_name = request.POST.get('lastName')
-        position = request.POST.get('position', 'Unknown')  # Default if missing
-        office = request.POST.get('office', 'Unknown')  # Default if missing
+        position = request.POST.get('position', 'Unknown')
+        office_section_id = request.POST.get('office_section')  # Now this is the foreign key
         status = request.POST.get('status')
 
         # Create new employee
-        new_employee = Employee.objects.create(
+        Employee.objects.create(
             employee_fname=first_name,
             employee_mname=middle_initial,
             employee_lname=last_name,
             employee_position=position,
-            employee_office=office,
+            employee_office_section_id=office_section_id,
             employee_status=status
         )
 
-        # Store the newly added employee in Django messages
         messages.success(request, f"✅ {first_name} {last_name} has been added successfully!")
-
-        return redirect('employee_list')  # Reload the page
+        return redirect('employee_list')
 
     employees = Employee.objects.all()
-    return render(request, 'employees.html', {'employees': employees})
+    office_sections = OfficeSection.objects.all()
+    return render(request, 'employees.html', {
+        'employees': employees,
+        'office_sections': office_sections
+    })
+
 
 def update_employee(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
-    
+
     if request.method == 'POST':
         employee.employee_fname = request.POST.get('firstName')
         employee.employee_mname = request.POST.get('middleInitial')
         employee.employee_lname = request.POST.get('lastName')
         employee.employee_position = request.POST.get('position')
-        employee.employee_office = request.POST.get('office')
+        employee.employee_office_section_id = request.POST.get('office_section')  # FK update
         employee.employee_status = request.POST.get('status')
-
         employee.save()
-        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been added updated!")
+
+        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been updated!")
         return redirect('employee_list')
 
-    return render(request, 'edit_employee.html', {'employee': employee})
+    office_sections = OfficeSection.objects.all()
+    return render(request, 'edit_employee.html', {
+        'employee': employee,
+        'office_sections': office_sections
+    })
+
 
 def delete_employee(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
-    
+
     if request.method == 'POST':
         employee.delete()
-        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been Deleted!")
+        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been deleted!")
         return redirect('employee_list')
-    
-    the_messages = get_messages(request)  # Get all messages
-    return render(request, 'delete_employee.html', {'employee': employee, 'the_messages': the_messages } )
+
+    the_messages = get_messages(request)
+    return render(request, 'delete_employee.html', {
+        'employee': employee,
+        'the_messages': the_messages
+    })
 
 ##update asset owner
 
