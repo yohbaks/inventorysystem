@@ -1598,68 +1598,7 @@
 
     </div>
   </div>
-  <div class="col-md-6">
-  <div class="card">
-    <div class="card-header">
-      <h4 class="card-title">Preventive Maintenance Schedule</h4>
-    </div>
-    <div class="card-body">
-      <ul class="nav nav-pills nav-secondary" id="pm-schedule-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <a class="nav-link active" id="q1-tab" data-bs-toggle="pill" href="#q1" role="tab">1st Quarter</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="q2-tab" data-bs-toggle="pill" href="#q2" role="tab">2nd Quarter</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="q3-tab" data-bs-toggle="pill" href="#q3" role="tab">3rd Quarter</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="q4-tab" data-bs-toggle="pill" href="#q4" role="tab">4th Quarter</a>
-        </li>
-      </ul>
-
-      <div class="card mt-4">
-    <div class="card-header">
-        <h4 class="card-title">Preventive Maintenance Schedule</h4>
-    </div>
-    <div class="card-body">
-        {% if pm_assignments %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Quarter</th>
-                        <th>Section</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Status</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for assignment in pm_assignments %}
-                        <tr>
-                            <td>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</td>
-                            <td>{{ assignment.pm_section_schedule.section.name }}</td>
-                            <td>{{ assignment.pm_section_schedule.start_date }}</td>
-                            <td>{{ assignment.pm_section_schedule.end_date }}</td>
-                            <td>
-                                {% if assignment.is_completed %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ assignment.remarks|default:"No remarks" }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No preventive maintenance schedule found for this desktop.</p>
-        {% endif %}
-    </div>
-</div>
+  
 
     </div>
   </div>

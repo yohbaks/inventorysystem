@@ -102,6 +102,12 @@ urlpatterns = [
     path('maintenance/pdf/<int:pm_id>/', views.generate_pm_excel_report, name='generate_pm_pdf'), #pdf prevenitve maintenance
     
     
+    #pm overview
+    path('maintenance/overview/', views.pm_overview_view, name='pm_overview'),
+    path('maintenance/assign_pm_schedule/', views.assign_pm_schedule, name='assign_pm_schedule'),
+    path('maintenance/schedules/', views.section_schedule_list_view, name='section_schedule_list'), # section schedule list view of pm
+    
+    
     
 
 

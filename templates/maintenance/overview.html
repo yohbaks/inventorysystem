@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card shadow-sm rounded">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Preventive Maintenance Overview Summary</h4>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Assign Desktop to Schedule</button>
+          </div>
+
+          <!-- Add Schedule Modal -->
+          <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <form method="POST" action="{% url 'assign_pm_schedule' %}">
+                {% csrf_token %}
+                <div class="modal-content">
+                  <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Assign Desktop to Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label">Desktop Package</label>
+                      <select id="desktopSelect" class="form-select" name="desktop_package_id" required>
+                        <option value="">-- Select Desktop --</option>
+                        {% for d in desktops %}
+                          {% with d.user_details.first as u %}
+                            {% if u and u.user_Enduser %}
+                              <option value="{{ d.id }}" data-section="{{ u.user_Enduser.employee_office_section.name }}">
+                                {{ d.computer_name }} — {{ u.user_Enduser.full_name }} — {{ u.user_Enduser.employee_office_section.name }}
+                              </option>
+                            {% else %}
+                              <option value="{{ d.id }}">
+                                {{ d.computer_name|default:"[No Computer Name]" }}
+                              </option>
+                            {% endif %}
+                          {% endwith %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Schedule</label>
+                      <select id="scheduleSelect" class="form-select" name="schedule_id" required>
+                        <option value="">-- Select Schedule --</option>
+                        {% for s in schedules %}
+                          <option value="{{ s.id }}" data-section="{{ s.section.name }}">
+                            {{ s.section.name }} — {{ s.quarter_schedule.get_quarter_display }} {{ s.quarter_schedule.year }} - (PM Schedule)
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Assign</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="card-body">
+            {% if messages %}
+            <script>
+              $(document).ready(function () {
+                {% for message in messages %}
+                  $.notify({
+                    message: "{{ message|escapejs }}",
+                    title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
+                    icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
+                  }, {
+                    type: "{{ message.tags }}",
+                    placement: { from: "bottom", align: "right" },
+                    delay: 4000,
+                    z_index: 9999
+                  });
+                {% endfor %}
+              });
+            </script>
+            {% endif %}
+
+            <div class="table-responsive">
+              <table id="pm-table" class="display table table-striped table-bordered table-hover">
+                <thead class="text-white">
+                  <tr>
+                    <th style="background-color:#6861ce;">Quarter</th>
+                    <th style="background-color:#6861ce;">Section</th>
+                    <th style="background-color:#6861ce;">Computer Name</th>
+                    <th style="background-color:#6861ce;">Start Date</th>
+                    <th style="background-color:#6861ce;">End Date</th>
+                    <th style="background-color:#6861ce;">Status</th>
+                    <th style="background-color:#6861ce;">Actions</th>
+                  </tr>
+                  <tr class="bg-white text-dark">
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Quarter" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Section" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Computer" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Start" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search End" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Status" /></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for assignment in pm_assignments %}
+                  <tr class="clickable-row" data-href="{% url 'maintenance_history' assignment.desktop_package.id %}">
+                    <td>
+                      <span class="badge bg-info">
+                          {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                        </span>
+                    </td>
+                    <td>{{ assignment.pm_section_schedule.section.name }}</td>
+                    <td>{{ assignment.computer_name }}</td>
+                    <td>{{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}</td>
+                    <td>{{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}</td>
+                    <td>
+                      {% if assignment.is_completed %}
+                      <span class="badge bg-success">Completed</span>
+                      {% else %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-center">
+                      <a href="{% url 'maintenance_history' assignment.desktop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    // DataTables with per-column search
+    var table = $('#pm-table').DataTable({
+      orderCellsTop: true,
+      fixedHeader: true,
+      pageLength: 10
+    });
+
+    $('#pm-table thead tr:eq(1) th').each(function (i) {
+      $('input', this).on('keyup change', function () {
+        if (table.column(i).search() !== this.value) {
+          table.column(i).search(this.value).draw();
+        }
+      });
+    });
+
+    $('.clickable-row').on('click', function () {
+      const href = $(this).data('href');
+      if (href) window.location.href = href;
+    });
+
+    // Dynamic filtering for schedules based on selected desktop
+    $('#desktopSelect').on('change', function () {
+      var selectedSection = $(this).find(':selected').data('section');
+      $('#scheduleSelect option').each(function () {
+        var scheduleSection = $(this).data('section');
+        if (!scheduleSection || scheduleSection === selectedSection || $(this).val() === '') {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+      $('#scheduleSelect').val('');
+    });
+  });
+</script>
+{% endblock %}

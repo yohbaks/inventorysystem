@@ -36,6 +36,7 @@ from docx2pdf import convert # for converting docx to pdf use in preventive main
 import pythoncom # for Windows COM support, needed for docx2pdf on Windows
 from django.http import FileResponse #  for serving files in Django use in preventivemaintenace pdf
 from win32com.client import Dispatch # for Windows COM support, needed for docx2pdf on Windows preventive maintenance
+from django.db.models import Prefetch # for optimizing queries, in PM scheduling or assigning PM schedule in workstation (overview template PM)
 
 
 ##############################################################################
@@ -1173,14 +1174,20 @@ def add_maintenance(request, desktop_id):
 
     return render(request, 'maintenance/add_maintenance.html', {'desktop': desktop})
 
-
 def maintenance_history_view(request, desktop_id):
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
     user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
-    maintenance_history = PreventiveMaintenance.objects.filter(desktop_package=desktop).order_by('date_accomplished')
 
-    latest_pm = maintenance_history.last()  # ✅ Get the latest record
+    # Load related schedule data
+    maintenance_history = (
+        PreventiveMaintenance.objects
+        .filter(desktop_package=desktop)
+        .select_related('pm_schedule_assignment__pm_section_schedule__quarter_schedule')
+        .order_by('date_accomplished')
+    )
+
+    latest_pm = maintenance_history.last()
 
     return render(request, 'maintenance/history.html', {
         'desktop': desktop,
@@ -1188,7 +1195,7 @@ def maintenance_history_view(request, desktop_id):
         'user_details': user_details,
         'maintenance_history': maintenance_history,
         'maintenance_records': maintenance_history,
-        'pm': latest_pm,  # ✅ Pass the latest PM record to template
+        'pm': latest_pm,
     })
 
 def get_schedule_date_range(request, quarter_id):
@@ -1201,6 +1208,7 @@ def get_schedule_date_range(request, quarter_id):
     return JsonResponse({}, status=404)
 
 # This function handles the checklist for preventive maintenance of a desktop package.
+
 def checklist(request, desktop_id):
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
 
@@ -1217,7 +1225,7 @@ def checklist(request, desktop_id):
     }
 
     user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
-    office = user_details.user_Enduser.employee_office if user_details and user_details.user_Enduser else ''
+    office = user_details.user_Enduser.employee_office_section if user_details and user_details.user_Enduser else ''
     end_user = f"{user_details.user_Enduser.employee_fname} {user_details.user_Enduser.employee_lname}" if user_details and user_details.user_Enduser else ''
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
     quarter_schedules = QuarterSchedule.objects.all().order_by('-year', 'quarter')
@@ -1234,9 +1242,37 @@ def checklist(request, desktop_id):
             pm_section_schedule__end_date__gte=date_accomplished
         ).first()
 
+        # Auto-create schedule assignment if not found
+        if not matched_schedule and quarter:
+            section = user_details.user_Enduser.employee_office_section if user_details and user_details.user_Enduser else None
+            pm_section_schedule = PMSectionSchedule.objects.filter(
+                quarter_schedule=quarter,
+                section=section
+            ).first()
+
+            # Auto-create PMSectionSchedule if missing
+            if not pm_section_schedule and section:
+                pm_section_schedule = PMSectionSchedule.objects.create(
+                    quarter_schedule=quarter,
+                    section=section,
+                    start_date=date_accomplished,
+                    end_date=date_accomplished,
+                    notes="Auto-created from checklist"
+                )
+
+            # Auto-create PMScheduleAssignment
+            if pm_section_schedule:
+                matched_schedule = PMScheduleAssignment.objects.create(
+                    desktop_package=desktop,
+                    pm_section_schedule=pm_section_schedule,
+                    is_completed=True,
+                    remarks="Auto-assigned via checklist"
+                )
+
+        # Create PreventiveMaintenance record
         pm = PreventiveMaintenance.objects.create(
             desktop_package=desktop,
-            pm_schedule_assignment=matched_schedule if matched_schedule else None,
+            pm_schedule_assignment=matched_schedule,
             office=office,
             end_user=end_user,
             maintenance_date=timezone.now().date(),
@@ -1247,6 +1283,7 @@ def checklist(request, desktop_id):
             **{f"note_{i}": request.POST.get(f"note_{i}", "") for i in range(1, 10)},
         )
 
+        # Save checklist items
         for i in range(1, 10):
             MaintenanceChecklistItem.objects.create(
                 maintenance=pm,
@@ -1254,6 +1291,7 @@ def checklist(request, desktop_id):
                 is_checked=request.POST.get(f"task_{i}") == "on"
             )
 
+        # ✅ Mark the assignment as completed
         if matched_schedule:
             matched_schedule.is_completed = True
             matched_schedule.remarks = "Checklist completed"
@@ -1261,7 +1299,7 @@ def checklist(request, desktop_id):
 
         return redirect('maintenance_history', desktop_id=desktop_id)
 
-    return render(request, 'maintenance/checklist.html', {  # You can rename the template file if needed
+    return render(request, 'maintenance/checklist.html', {
         'desktop': desktop,
         'desktop_details': desktop_details,
         'checklist_labels': checklist_labels,
@@ -1320,3 +1358,144 @@ def generate_pm_excel_report(request, pm_id):
 
     # Return the PDF file as download
     return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
+
+
+# def pm_overview_view(request):
+#     pm_assignments = PMScheduleAssignment.objects.select_related(
+#         'desktop_package',
+#         'pm_section_schedule__quarter_schedule',
+#         'pm_section_schedule__section'
+#     ).all()
+
+#     # Attach computer_name to each assignment
+#     for assignment in pm_assignments:
+#         desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
+#         assignment.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
+
+#     quarters = QuarterSchedule.objects.all().order_by('-year', 'quarter')
+#     sections = OfficeSection.objects.all()
+#     desktops = Desktop_Package.objects.prefetch_related('desktop_details').all()
+#     schedules = PMSectionSchedule.objects.select_related('quarter_schedule', 'section').order_by('-start_date')
+
+#     return render(request, 'maintenance/overview.html', {
+#         'pm_assignments': pm_assignments,
+#         'quarters': quarters,
+#         'sections': sections,
+#         'desktops': desktops,
+#         'schedules': schedules,
+#     })
+
+def pm_overview_view(request):
+    pm_assignments = PMScheduleAssignment.objects.select_related(
+        'desktop_package',
+        'pm_section_schedule__quarter_schedule',
+        'pm_section_schedule__section'
+    ).all()
+
+    # Attach computer_name for each assignment
+    for assignment in pm_assignments:
+        desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
+        assignment.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
+
+    # Annotate computer_name for desktops (for dropdown)
+    desktops = list(Desktop_Package.objects.prefetch_related(
+        Prefetch('user_details', queryset=UserDetails.objects.select_related('user_Enduser__employee_office_section'))
+    ))
+
+    for desktop in desktops:
+        desktop_detail = DesktopDetails.objects.filter(desktop_package=desktop).first()
+        desktop.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
+
+    schedules = PMSectionSchedule.objects.select_related('section', 'quarter_schedule')
+    schedules_by_section = {}
+    for s in schedules:
+        section_name = s.section.name if s.section else 'Other'
+        schedules_by_section.setdefault(section_name, []).append(s)
+
+    quarters = QuarterSchedule.objects.all().order_by('-year', 'quarter')
+    sections = OfficeSection.objects.all()
+
+    return render(request, 'maintenance/overview.html', {
+        'pm_assignments': pm_assignments,
+        'desktops': desktops,
+        'schedules': schedules,
+        'schedules_by_section': schedules_by_section,
+        'quarters': quarters,
+        'sections': sections,
+    })
+
+
+        
+
+    # # Get all schedules, categorized by section
+    # schedules_by_section = {}
+    # all_schedules = PMSectionSchedule.objects.select_related('section', 'quarter_schedule')
+    # for schedule in all_schedules:
+    #     section_name = schedule.section.name if schedule.section else "Unknown"
+    #     schedules_by_section.setdefault(section_name, []).append(schedule)
+
+    # quarters = QuarterSchedule.objects.all().order_by('-year', 'quarter')
+    # sections = OfficeSection.objects.all()
+
+    # return render(request, 'maintenance/overview.html', {
+    #     'pm_assignments': pm_assignments,
+    #     'quarters': quarters,
+    #     'sections': sections,
+    #     'desktops': desktops,
+    #     'schedules_by_section': schedules_by_section,
+    # })
+
+
+def assign_pm_schedule(request):
+    if request.method == 'POST':
+        desktop_id = request.POST.get('desktop_package_id')
+        schedule_id = request.POST.get('schedule_id')
+
+        desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
+        schedule = get_object_or_404(PMSectionSchedule, pk=schedule_id)
+
+        if PMScheduleAssignment.objects.filter(desktop_package=desktop, pm_section_schedule=schedule).exists():
+            messages.warning(request, "This desktop is already assigned to this schedule.")
+            return redirect('pm_overview')
+
+        PMScheduleAssignment.objects.create(desktop_package=desktop, pm_section_schedule=schedule)
+        messages.success(request, "Schedule successfully assigned.")
+        return redirect('pm_overview')
+
+
+def section_schedule_list_view(request):
+    schedules = PMSectionSchedule.objects.select_related('quarter_schedule', 'section').order_by('-start_date')
+    quarters = QuarterSchedule.objects.all().order_by('-year')
+    sections = OfficeSection.objects.all().order_by('name')
+
+    if request.method == 'POST':
+        quarter_id = request.POST.get('quarter_schedule_id')
+        section_id = request.POST.get('section_id')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+
+        quarter = get_object_or_404(QuarterSchedule, pk=quarter_id)
+        section = get_object_or_404(OfficeSection, pk=section_id)
+
+        # Prevent duplicate schedule for same section and quarter
+        if PMSectionSchedule.objects.filter(quarter_schedule=quarter, section=section).exists():
+            messages.warning(request, f"A schedule already exists for {section.name} in {quarter.get_quarter_display()} {quarter.year}.")
+            return redirect('section_schedule_list')
+
+        # Create schedule if not existing
+        PMSectionSchedule.objects.create(
+            quarter_schedule=quarter,
+            section=section,
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        messages.success(request, "Schedule added successfully.")
+        return redirect('section_schedule_list')
+
+    return render(request, 'maintenance/section_schedule_list.html', {
+        'schedules': schedules,
+        'quarters': quarters,
+        'sections': sections,
+    })
+

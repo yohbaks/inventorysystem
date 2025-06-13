@@ -151,7 +151,7 @@ class UPSDetails(models.Model):
 #user details 
 class UserDetails(models.Model):  
     id = models.AutoField(primary_key=True)  
-    desktop_package_db = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True)  
+    desktop_package_db = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True, related_name='user_details')  
     user_Enduser = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='enduser_details')
     user_Assetowner = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='assetowner_details')
     created_at = models.DateTimeField(auto_now_add=True)  

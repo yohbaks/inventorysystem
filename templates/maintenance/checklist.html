@@ -47,7 +47,11 @@
             <input type="date" name="date_accomplished" class="form-control" id="date_accomplished" required>
             <small class="text-muted" id="date-range-info"></small>
           </div>
-
+          <!-- ✅ Performed By -->
+          <div class="form-group mb-4">
+            <label><strong>Performed By:</strong></label>
+            <input type="text" name="performed_by" class="form-control" placeholder="Enter technician's name" required>
+          </div>
           <!-- Checklist Tasks -->
           <hr>
           <h5 class="mt-4 mb-3">Checklist Items</h5>
@@ -67,8 +71,11 @@
               </div>
             {% endfor %}
           </div>
-
-          <button type="submit" class="btn btn-primary mt-3">Save Checklist</button>
+          
+          <div class="d-flex justify-content-between mt-3">
+            <a href="{% url 'maintenance_history' desktop.id %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Checklist</button>
+          </div>
         </form>
       </div>
     </div>
