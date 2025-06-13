@@ -310,7 +310,7 @@
           {% endfor %}
         </tbody>
       </table>
-      
+      {% else %}
        
       {% endif %}
 
@@ -320,99 +320,99 @@
 
     </div>
 <!-- Preventive Maintenance Schedule and status -->
-<div class="card card-round mb-3">
-  <div class="card-header py-2 px-3">
-    <div class="d-flex justify-content-between align-items-center">
-      <div class="card-title mb-0">Preventive Maintenance Schedule and Status</div>
-      <div class="card-tools">
-        <div class="dropdown">
-          <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-ellipsis-h"></i>
-          </button>
-          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
-            <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
-            <a class="dropdown-item" href="#">PM All View</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="col-md-8">
+                <div class="card card-round">
+                  <div class="card-header">
+                    <div class="card-head-row card-tools-still-right">
+                      <div class="card-title">Preventive Maintenance Schedule and Status</div>
+                      <div class="card-tools">
+                        <div class="dropdown">
+                          <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i>
+                          </button>
+                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
+                            <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
+                            <a class="dropdown-item" href="#">PM All View</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body p-0">
+                    {% if pm_assignments %}
+                    <div class="table-responsive">
+                      <!-- Projects table -->
+                      <table class="table align-items-center mb-0 table-hover">
+                        <thead class="thead-light">
+                          <tr>
+                            <th scope="col">Quarter</th>
+                            <th scope="col">Section</th>
+                            <th scope="col" class="text-end">Start Date</th>
+                            <th scope="col" class="text-end">End Date</th>
+                            <th scope="col" class="text-end">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in pm_assignments %}
+                              {% if assignment.is_completed %}
+                                {% url 'maintenance_history' assignment.desktop_package.id as target_url %}
+                              {% else %}
+                                {% url 'checklist' assignment.desktop_package.id as target_url %}
+                              {% endif %}
+                              <tr class="clickable-row" data-href="{{ target_url }}">
+                                <th scope="row">
+                                  {% if assignment.is_completed %}
+                                    <span class="btn btn-icon btn-round btn-success btn-sm me-2" title="View History">
+                                      <i class="fa fa-check"></i>
+                                    </span>
+                                  {% else %}
+                                    <span class="btn btn-icon btn-round btn-warning btn-sm me-2" title="Do Checklist">
+                                      <i class="fas fa-wrench"></i>
+                                    </span>
+                                  {% endif %}
+                                  {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </th>
+                                <td class="text">{{ assignment.pm_section_schedule.section.name }}</td>
+                                <td class="text-end">{{ assignment.pm_section_schedule.start_date }}</td>
+                                <td class="text-end">{{ assignment.pm_section_schedule.end_date }}</td>
+                                <td class="text-end">
+                                  {% if assignment.is_completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                  {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                  {% endif %}
+                                </td>
+                              </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% else %}
+                            <p>No preventive maintenance schedule found for this desktop.</p>
+                        {% endif %}
+                      </table>
 
-  <div class="card-body p-2">
-    {% if pm_assignments %}
-    <div class="table-responsive">
-      <table class="table table-hover table-sm mb-0 align-middle">
-        <thead class="thead-light">
-          <tr>
-            <th scope="col">Quarter</th>
-            <th scope="col">Section</th>
-            <th scope="col" class="text-end">Start Date</th>
-            <th scope="col" class="text-end">End Date</th>
-            <th scope="col" class="text-end">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for assignment in pm_assignments %}
-            {% if assignment.is_completed %}
-              {% url 'maintenance_history' assignment.desktop_package.id as target_url %}
-            {% else %}
-              {% url 'checklist' assignment.desktop_package.id as target_url %}
-            {% endif %}
-            <tr class="clickable-row" data-href="{{ target_url }}">
-              <td>
-                {% if assignment.is_completed %}
-                  <span class="btn btn-icon btn-round btn-success btn-sm me-2" title="View History">
-                    <i class="fa fa-check"></i>
-                  </span>
-                {% else %}
-                  <span class="btn btn-icon btn-round btn-warning btn-sm me-2" title="Do Checklist">
-                    <i class="fas fa-wrench"></i>
-                  </span>
-                {% endif %}
-                {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-              </td>
-              <td>{{ assignment.pm_section_schedule.section.name }}</td>
-              <td class="text-end">{{ assignment.pm_section_schedule.start_date }}</td>
-              <td class="text-end">{{ assignment.pm_section_schedule.end_date }}</td>
-              <td class="text-end">
-                {% if assignment.is_completed %}
-                  <span class="badge bg-success">Completed</span>
-                {% else %}
-                  <span class="badge bg-warning text-dark">Pending</span>
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-      <p class="text-muted m-0">No preventive maintenance schedule found for this desktop.</p>
-    {% endif %}
-  </div>
-</div>
+                                <script>
+                                  document.addEventListener("DOMContentLoaded", function () {
+                                    const rows = document.querySelectorAll(".clickable-row");
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const rows = document.querySelectorAll(".clickable-row");
-
-    rows.forEach(row => {
-      row.style.cursor = "pointer";
-      row.addEventListener("click", function () {
-        const href = this.getAttribute("data-href");
-        if (href) {
-          window.location.href = href;
-        }
-      });
-    });
-  });
-</script>
+                                    rows.forEach(row => {
+                                      row.style.cursor = "pointer";
+                                      row.addEventListener("click", function () {
+                                        const href = this.getAttribute("data-href");
+                                        if (href) {
+                                          window.location.href = href;
+                                        }
+                                      });
+                                    });
+                                  });
+                                </script>
 
 
-
-
-
+                    </div>
+                  </div>
+                </div>
+              </div>
+             
       </div>
 
 
