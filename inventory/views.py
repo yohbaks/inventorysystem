@@ -1174,12 +1174,14 @@ def add_maintenance(request, desktop_id):
 
     return render(request, 'maintenance/add_maintenance.html', {'desktop': desktop})
 
+
 def maintenance_history_view(request, desktop_id):
+    # Get the desktop package and related details
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
     user_details = UserDetails.objects.filter(desktop_package_db=desktop).first()
 
-    # Load related schedule data
+    # Completed maintenance history
     maintenance_history = (
         PreventiveMaintenance.objects
         .filter(desktop_package=desktop)
@@ -1187,7 +1189,19 @@ def maintenance_history_view(request, desktop_id):
         .order_by('date_accomplished')
     )
 
+    # Get the latest completed PM (if any)
     latest_pm = maintenance_history.last()
+
+    # Current (pending) PM assignments
+    current_pm_schedule = PMScheduleAssignment.objects.filter(
+        desktop_package=desktop
+    ).select_related(
+        'pm_section_schedule__quarter_schedule',
+        'pm_section_schedule__section'
+    ).order_by(
+        'pm_section_schedule__quarter_schedule__year',
+        'pm_section_schedule__quarter_schedule__quarter'
+    )
 
     return render(request, 'maintenance/history.html', {
         'desktop': desktop,
@@ -1196,6 +1210,7 @@ def maintenance_history_view(request, desktop_id):
         'maintenance_history': maintenance_history,
         'maintenance_records': maintenance_history,
         'pm': latest_pm,
+        'current_pm_schedule': current_pm_schedule,  # New table data
     })
 
 def get_schedule_date_range(request, quarter_id):

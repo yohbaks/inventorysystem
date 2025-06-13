@@ -430,54 +430,69 @@
                     </li>
                   </ul>
                 </li>
+
                 {% comment %} notification area for PM {% endcomment %}
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-    <i class="fa fa-bell"></i>
-    {% if pending_pm_count > 0 %}
-      <span class="notification">{{ pending_pm_count }}</span>
-    {% endif %}
-  </a>
-  <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
-    <li>
-      <div class="dropdown-title">
-        {% if pending_pm_count > 0 %}
-          You have {{ pending_pm_count }} pending PM assignment{{ pending_pm_count|pluralize }}
-        {% else %}
-          No pending PM
-        {% endif %}
-      </div>
-    </li>
-    <li>
-      <div class="notif-scroll scrollbar-outer">
-        <div class="notif-center">
-          {% for assignment in pending_pm_list %}
-          <a href="{% url 'maintenance_history' assignment.desktop_package.id %}">
-            <div class="notif-icon notif-warning"><i class="fa fa-exclamation-triangle"></i></div>
-            <div class="notif-content">
-              <span class="block">
-                PM pending for {{ assignment.desktop_package.desktopdetails_set.first.computer_name|default:"Unnamed Desktop" }}
-              </span>
-              <span class="time">
-                {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
-              </span>
-            </div>
-          </a>
-          {% empty %}
-          <div class="notif-content">
-            <span class="block">No pending PM tasks.</span>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-    </li>
-    <li>
-      <a class="see-all" href="{% url 'pm_overview' %}">
-        See all PM Tasks <i class="fa fa-angle-right"></i>
-      </a>
-    </li>
-  </ul>
-</li>
+               <li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-bell"></i>
+                    {% if pending_pm_count > 0 %}
+                      <span class="notification">{{ pending_pm_count }}</span>
+                    {% endif %}
+                  </a>
+                  <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                    <li>
+                      <div class="dropdown-title">
+                        {% if pending_pm_count > 0 %}
+                          You have {{ pending_pm_count }} pending PM assignment{{ pending_pm_count|pluralize }}
+                        {% else %}
+                          No pending PM
+                        {% endif %}
+                      </div>
+                    </li>
+                    <li>
+                      <div class="notif-scroll scrollbar-outer">
+                        <div class="notif-center">
+                          {% for assignment in pending_pm_list %}
+                            <a href="{% url 'maintenance_history' assignment.desktop_package.id %}">
+                              <div class="notif-icon notif-warning">
+                                <i class="fa fa-exclamation-triangle"></i>
+                              </div>
+                              <div class="notif-content">
+                                <span class="block">
+                                  PM pending for 
+                                  {% if assignment.computer_name %}
+                                    {{ assignment.computer_name }}
+                                  {% else %}
+                                    Desktop #{{ assignment.desktop_package.id }}
+                                  {% endif %}
+                                </span>
+                                <span class="time">
+                                  {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
+                                  {% if assignment.is_overdue %}
+                                    <span class="badge bg-danger ms-1">Overdue</span>
+                                  {% else %}
+                                    <span class="badge bg-warning text-dark ms-1">Upcoming</span>
+                                  {% endif %}
+                                </span>
+                              </div>
+                            </a>
+                          {% empty %}
+                            <div class="notif-content">
+                              <span class="block">No pending PM tasks.</span>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <a class="see-all" href="{% url 'pm_overview' %}">
+                        See all PM Tasks <i class="fa fa-angle-right"></i>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+{% comment %} end notification area for PM  {% endcomment %}
+
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
                     class="nav-link"
