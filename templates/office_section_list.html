@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Office Section Management</h3>
+    </div>
+
+    <!-- Add Office Section Button -->
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addOfficeModal">Add Office Section</button>
+
+    <!-- Add Office Section Modal -->
+    <div class="modal fade" id="addOfficeModal" tabindex="-1">
+      <div class="modal-dialog">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Add Office Section</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Section Name</label>
+                <input type="text" class="form-control" name="section_name" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Table of Office Sections -->
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">List of Office Sections</h4>
+      </div>
+      <div class="card-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Section Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for section in office_sections %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ section.name }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No sections added yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  {% for message in messages %}
+  <div class="toast show align-items-center text-bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">{{ message }}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    let toastEl = document.querySelector('.toast');
+    if (toastEl) new bootstrap.Toast(toastEl).show();
+  });
+</script>
+{% endblock %}

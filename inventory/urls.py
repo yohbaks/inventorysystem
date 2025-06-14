@@ -106,9 +106,14 @@ urlpatterns = [
     path('maintenance/overview/', views.pm_overview_view, name='pm_overview'),
     path('maintenance/assign_pm_schedule/', views.assign_pm_schedule, name='assign_pm_schedule'),
     path('maintenance/schedules/', views.section_schedule_list_view, name='section_schedule_list'), # section schedule list view of pm
-    
-    
-    
+    path('office-sections/', views.office_section_list, name='office_section_list'), #office section list view
+
+    #disposal
+    path('disposal/', views.disposal_overview, name='disposal_overview'), #overview of disposal
+    path('dispose/<str:category>/<int:id>/', views.dispose_component, name='dispose_component'), #logic for disposing components
+
+
+
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

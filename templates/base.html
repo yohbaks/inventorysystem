@@ -173,17 +173,22 @@
                   <ul class="nav nav-collapse">
                     <li>
                       <a href="{% url 'add_desktop_package_with_details' %}">
-                        <span class="sub-item">Add IT Equipment</span>
+                        <span class="sub-item">✍🏻 Add IT Equipment</span>
                       </a>
                     </li>
                      <li>
                       <a href="{% url 'employee_list' %}">
-                        <span class="sub-item">Employee </span>
+                         <span class="sub-item">🙍🏻‍♂️ Employee </span>
                       </a>
                     </li>
                     <li>
                       <a href="{% url 'add_brand' %}">
-                        <span class="sub-item">Brand Management</span>
+                        <span class="sub-item">🏷️ Brand Management</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'office_section_list' %}">
+                        <span class="sub-item">💼 Office Section</span>
                       </a>
                     </li>
                   </ul>
@@ -199,8 +204,8 @@
                 <div class="collapse" id="disposalLayouts">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="{% url 'add_desktop_package_with_details' %}">
-                        <span class="sub-item">Disposed Desktops</span>
+                      <a href="{% url 'disposal_overview' %}">
+                        <span class="sub-item">🗑️ Disposed Overview</span>
                       </a>
                     </li>
                      <li>
@@ -510,12 +515,12 @@
                     <div class="quick-actions-scroll scrollbar-outer">
                       <div class="quick-actions-items">
                         <div class="row m-0">
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'section_schedule_list' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-danger rounded-circle">
                                 <i class="far fa-calendar-alt"></i>
                               </div>
-                              <span class="text">Calendar</span>
+                              <span class="text">PM Sched</span>
                             </div>
                           </a>
                           <a class="col-6 col-md-4 p-0" href="{% url 'add_desktop_package_with_details' %}">
@@ -551,19 +556,19 @@
                               <div
                                 class="avatar-item bg-primary rounded-circle"
                               >
-                                <i class="fas fa-file-invoice-dollar"></i>
+                                <i class="far fa-trash-alt"></i>
                               </div>
-                              <span class="text">Invoice</span>
+                              <span class="text">Disposals</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'employee_list' %}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-secondary rounded-circle"
                               >
-                                <i class="fas fa-credit-card"></i>
+                                <i class="fas fa-user"></i>
                               </div>
-                              <span class="text">Payments</span>
+                              <span class="text">Employee</span>
                             </div>
                           </a>
                         </div>

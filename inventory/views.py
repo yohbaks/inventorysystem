@@ -41,6 +41,7 @@ from django.db.models import Prefetch # for optimizing queries, in PM scheduling
 
 ##############################################################################
 
+
 @login_required  
 def success_page(request):
     return render(request, 'success_add.html')  # Render the success page template
@@ -1062,7 +1063,6 @@ def export_desktop_packages_excel(request):
         doc = DocumentsDetails.objects.filter(desktop_package=dp).first()
         user = UserDetails.objects.filter(desktop_package_db=dp).first()
 
-        # ========== Desktop Details ==========
         status = "Active" if not desktop.is_disposed else "Disposed"
 
         ws[f'A{row}'] = f"{i}a"
@@ -1082,7 +1082,7 @@ def export_desktop_packages_excel(request):
         ws[f'O{row}'] = doc.docs_Value if doc else ''
         ws[f'P{row}'] = f"{user.user_Enduser.employee_fname} {user.user_Enduser.employee_lname}" if user and user.user_Enduser else ''
         ws[f'Q{row}'] = user.user_Enduser.employee_position if user and user.user_Enduser else ''
-        ws[f'R{row}'] = user.user_Enduser.employee_office if user and user.user_Enduser else ''
+        ws[f'R{row}'] = user.user_Enduser.employee_office_section.name if user and user.user_Enduser and user.user_Enduser.employee_office_section else ''
         ws[f'S{row}'] = "Region VIII"
         ws[f'T{row}'] = "Leyte 4th DEO"
         ws[f'U{row}'] = f"{user.user_Assetowner.employee_fname} {user.user_Assetowner.employee_lname}" if user and user.user_Assetowner else ''
@@ -1093,12 +1093,12 @@ def export_desktop_packages_excel(request):
         ws[f'Z{row}'] = status
 
         if status == "Disposed":
-            for col in range(1, 27):  # Columns A to Z
+            for col in range(1, 27):
                 ws.cell(row=row, column=col).fill = red_fill
 
         row += 1
 
-        # ========== Related Components ==========
+        # Components
         components = [
             ('Monitor', MonitorDetails.objects.filter(desktop_package_db=dp), 'b'),
             ('Keyboard', KeyboardDetails.objects.filter(desktop_package=dp), 'c'),
@@ -1120,7 +1120,7 @@ def export_desktop_packages_excel(request):
                 ws[f'O{row}'] = doc.docs_Value if doc else ''
                 ws[f'P{row}'] = f"{user.user_Enduser.employee_fname} {user.user_Enduser.employee_lname}" if user and user.user_Enduser else ''
                 ws[f'Q{row}'] = user.user_Enduser.employee_position if user and user.user_Enduser else ''
-                ws[f'R{row}'] = user.user_Enduser.employee_office if user and user.user_Enduser else ''
+                ws[f'R{row}'] = user.user_Enduser.employee_office_section.name if user and user.user_Enduser and user.user_Enduser.employee_office_section else ''
                 ws[f'S{row}'] = "Region VIII"
                 ws[f'T{row}'] = "Leyte 4th DEO"
                 ws[f'U{row}'] = f"{user.user_Assetowner.employee_fname} {user.user_Assetowner.employee_lname}" if user and user.user_Assetowner else ''
@@ -1130,6 +1130,7 @@ def export_desktop_packages_excel(request):
                 ws[f'Y{row}'] = "N/A"
                 ws[f'Z{row}'] = status
 
+                # Component-specific fields
                 if label == "Monitor":
                     ws[f'K{row}'] = item.monitor_sn_db
                     ws[f'M{row}'] = item.monitor_model_db
@@ -1161,7 +1162,6 @@ def export_desktop_packages_excel(request):
         output,
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    
     response['Content-Disposition'] = f'attachment; filename=desktop_bundle_export_{datetime.today().date()}.xlsx'
     return response
 
@@ -1519,4 +1519,97 @@ def section_schedule_list_view(request):
         'quarters': quarters,
         'sections': sections,
     })
+
+# # View to handle office section list and addition    
+def office_section_list(request):
+    if request.method == 'POST':
+        section_name = request.POST.get('section_name')
+        if section_name:
+            if not OfficeSection.objects.filter(name__iexact=section_name).exists():
+                OfficeSection.objects.create(name=section_name)
+                messages.success(request, f'Office Section "{section_name}" added successfully.')
+            else:
+                messages.error(request, f'Office Section "{section_name}" already exists.')
+        return redirect('office_section_list')  # replace with your URL name
+
+    office_sections = OfficeSection.objects.all()
+    return render(request, 'office_section_list.html', {'office_sections': office_sections})
+
+
+
+#disposal overview page
+
+def disposal_overview(request):
+    desktops = DesktopDetails.objects.all()
+    monitors = MonitorDetails.objects.all()
+    keyboards = KeyboardDetails.objects.all()
+    mice = MouseDetails.objects.all()
+    ups_list = UPSDetails.objects.all()
+
+    categories = [
+        {'label': 'Desktops', 'items': desktops, 'category': 'desktop'},
+        {'label': 'Monitors', 'items': monitors, 'category': 'monitor'},
+        {'label': 'Keyboards', 'items': keyboards, 'category': 'keyboard'},
+        {'label': 'Mice', 'items': mice, 'category': 'mouse'},
+        {'label': 'UPS', 'items': ups_list, 'category': 'ups'},
+    ]
+
+    return render(request, 'disposal/disposal_overview.html', {'categories': categories})
+
+def dispose_component(request, category, id):
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    model_map = {
+        'DesktopDetails': DesktopDetails,
+        'MonitorDetails': MonitorDetails,
+        'KeyboardDetails': KeyboardDetails,
+        'MouseDetails': MouseDetails,
+        'UPSDetails': UPSDetails,
+    }
+
+    model = model_map.get(category)
+    if not model:
+        return redirect('disposal_overview')
+
+    item = get_object_or_404(model, id=id)
+    item.is_disposed = True
+    item.save()
+
+    # Log to Disposed model (simplified)
+    if category == 'DesktopDetails':
+        DisposedDesktopDetail.objects.create(
+            desktop=item,
+            serial_no=item.serial_no,
+            brand_name=str(item.brand_name),
+            model=item.model,
+            asset_owner=item.asset_owner,
+            reason="Disposed via system"
+        )
+    elif category == 'MonitorDetails':
+        DisposedMonitor.objects.create(
+            monitor_disposed_db=item,
+            desktop_package_db=item.desktop_package_db,
+            monitor_sn=item.monitor_sn_db,
+            monitor_brand=str(item.monitor_brand_db),
+            monitor_model=item.monitor_model_db,
+            monitor_size=item.monitor_size_db
+        )
+    elif category == 'KeyboardDetails':
+        DisposedKeyboard.objects.create(
+            keyboard_dispose_db=item,
+            desktop_package=item.desktop_package
+        )
+    elif category == 'MouseDetails':
+        DisposedMouse.objects.create(
+            mouse_db=item,
+            desktop_package=item.desktop_package
+        )
+    elif category == 'UPSDetails':
+        DisposedUPS.objects.create(
+            ups_db=item,
+            desktop_package=item.desktop_package
+        )
+
+    return redirect('disposal_overview')
 

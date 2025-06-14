@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <h3 class="fw-bold mb-4">🗑️ Disposal Overview</h3>
+
+    <!-- Pills Navigation -->
+    <ul class="nav nav-pills nav-secondary" id="disposal-tabs" role="tablist">
+      {% for group in categories %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ group.category }}" data-bs-toggle="pill" data-bs-target="#content-{{ group.category }}" type="button" role="tab">
+          {{ group.label }}
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Pills Content -->
+    <div class="tab-content" id="disposal-tabs-content">
+      {% for group in categories %}
+      <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="content-{{ group.category }}" role="tabpanel">
+        <div class="card shadow-sm rounded mb-4">
+          <div class="card-header bg-light">
+            <h4 class="card-title text-uppercase fw-bold text-primary mb-0">{{ group.label }}</h4>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped" id="table-{{ group.category }}">
+                <thead class="text-white">
+                  <tr>
+                    <th style="background-color: #d33f49;">Package #</th>
+                    <th style="background-color: #d33f49;">Computer Name</th>
+                    <th style="background-color: #d33f49;">Serial No</th>
+                    <th style="background-color: #d33f49;">Model</th>
+                    <th style="background-color: #d33f49;">Brand</th>
+                    <th style="background-color: #d33f49;">Status</th>
+                    <th style="background-color: #d33f49;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in group.items %}
+                  <tr class="{% if item.is_disposed %}table-danger{% endif %}">
+                    <!-- Package # -->
+                    <!-- Package # -->
+<td>
+  {% if group.category == 'desktop' %}
+    {{ item.desktop_package.id }}
+  {% else %}
+    {{ item.desktop_package_db.id|default:"N/A" }}
+  {% endif %}
+</td>
+
+                    <!-- Computer Name -->
+                    <td>
+                      {% if group.category == 'desktop' %}
+                        {{ item.computer_name }}
+                      {% else %}
+                        {{ item.desktop_package_db.computer_name|default:"N/A" }}
+                      {% endif %}
+                    </td>
+
+                    <!-- Serial Number -->
+                    <td>
+                      {% if group.category == 'monitor' %}
+                        {{ item.monitor_sn_db }}
+                      {% elif group.category == 'keyboard' %}
+                        {{ item.keyboard_sn_db }}
+                      {% elif group.category == 'mouse' %}
+                        {{ item.mouse_sn_db }}
+                      {% elif group.category == 'ups' %}
+                        {{ item.ups_sn_db }}
+                      {% else %}
+                        {{ item.serial_no }}
+                      {% endif %}
+                    </td>
+
+                    <!-- Model -->
+                    <td>
+                      {% if group.category == 'monitor' %}
+                        {{ item.monitor_model_db }}
+                      {% elif group.category == 'keyboard' %}
+                        {{ item.keyboard_model_db }}
+                      {% elif group.category == 'mouse' %}
+                        {{ item.mouse_model_db }}
+                      {% elif group.category == 'ups' %}
+                        {{ item.ups_model_db }}
+                      {% else %}
+                        {{ item.model }}
+                      {% endif %}
+                    </td>
+
+                    <!-- Brand -->
+                    <td>
+                      {% if group.category == 'monitor' %}
+                        {{ item.monitor_brand_db }}
+                      {% elif group.category == 'keyboard' %}
+                        {{ item.keyboard_brand_db }}
+                      {% elif group.category == 'mouse' %}
+                        {{ item.mouse_brand_db }}
+                      {% elif group.category == 'ups' %}
+                        {{ item.ups_brand_db }}
+                      {% else %}
+                        {{ item.brand_name }}
+                      {% endif %}
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                      {% if item.is_disposed %}
+                        <span class="badge bg-danger">Disposed</span>
+                      {% else %}
+                        <span class="badge bg-success">Active</span>
+                      {% endif %}
+                    </td>
+
+                    <!-- Action -->
+                    <td>
+                      {% if not item.is_disposed %}
+                      <form method="POST" action="{% url 'dispose_component' category=group.label id=item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Dispose</button>
+                      </form>
+                      {% else %}
+                        <em>N/A</em>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- DataTables -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    {% for group in categories %}
+    $('#table-{{ group.category }}').DataTable({
+      pageLength: 5,
+      orderCellsTop: true,
+      fixedHeader: true
+    });
+    {% endfor %}
+  });
+</script>
+{% endblock %}
