@@ -208,19 +208,12 @@
                         <span class="sub-item">🗑️ Disposed Overview</span>
                       </a>
                     </li>
-                     <li>
-                      <a href="{% url 'employee_list' %}">
-                        <span class="sub-item">Disposed Laptops</span>
+                    <li>
+                      <a href="{% url 'dashboard_view_chart' %}">
+                        <span class="sub-item">📊 Disposed Chart</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="{% url 'add_brand' %}">
-                        <span class="sub-item">Disposed Monitors</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{% url 'disposed_keyboards' %}">
-                        <span class="sub-item">Disposed Keyboards</span>
+                     
                       </a>
                     </li>
                   </ul>
@@ -541,17 +534,17 @@
                               <span class="text">Reports</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'dashboard_view_chart' %}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-warning rounded-circle"
                               >
                                 <i class="fas fa-envelope"></i>
                               </div>
-                              <span class="text">Emails</span>
+                              <span class="text">Dashboard</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'disposal_overview' %}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-primary rounded-circle"
@@ -661,94 +654,138 @@
             </div>
               
               
-             <div class="row">
-  <!-- Total Desktop Packages -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-round shadow-sm">
-      <div class="card-body">
-        <div class="row align-items-center">
-          <div class="col-icon">
-            <div class="icon-big text-center icon-primary bubble-shadow-small">
-              <i class="fas fa-boxes"></i>
-            </div>
-          </div>
-          <div class="col col-stats ms-3">
-            <div class="numbers">
-              <p class="card-category text-muted">Desktop Packages</p>
-              <h4 class="card-title fw-bold">{{ total_count }}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+             
 
-  <!-- Total Desktops -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-round shadow-sm">
-      <div class="card-body">
-        <div class="row align-items-center">
-          <div class="col-icon">
-            <div class="icon-big text-center icon-info bubble-shadow-small">
-              <i class="fas fa-desktop"></i>
-            </div>
-          </div>
-          <div class="col col-stats ms-3">
-            <div class="numbers">
-              <p class="card-category text-muted">Desktops</p>
-              <h4 class="card-title fw-bold">{{ total_desktops }}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Total Laptops -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-round shadow-sm">
-      <div class="card-body">
-        <div class="row align-items-center">
-          <div class="col-icon">
-            <div class="icon-big text-center icon-success bubble-shadow-small">
-              <i class="fas fa-laptop"></i>
-            </div>
-          </div>
-          <div class="col col-stats ms-3">
-            <div class="numbers">
-              <p class="card-category text-muted">Laptops</p>
-              <h4 class="card-title fw-bold">{{ total_laptops }}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Total Disposed -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-round shadow-sm">
-      <div class="card-body">
-        <div class="row align-items-center">
-          <div class="col-icon">
-            <div class="icon-big text-center icon-secondary bubble-shadow-small">
-              <i class="fas fa-trash-alt"></i>
+{% comment %} car stats {% endcomment %}
+
+
+              <div class="row">
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-primary card-round">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
+                          <i class="fas fa-boxes"></i>
+                        </div>
+                      </div>
+                      <div class="col-7 col-stats">
+                        <div class="numbers">
+                          <p class="card-category">Desktop Packages</p>
+                          <h4 class="card-title">{{ total_count }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-info card-round">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
+                          <i class="fas fa-user-check"></i>
+                        </div>
+                      </div>
+                      <div class="col-7 col-stats">
+                        <div class="numbers">
+                          <p class="card-category">Laptops</p>
+                          <h4 class="card-title">1303</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-success card-round">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
+                          <i class="fas fa-chart-pie"></i>
+                        </div>
+                      </div>
+                      <div class="col-7 col-stats">
+                        <div class="numbers">
+                          <p class="card-category">Printers</p>
+                          <h4 class="card-title">$ 1,345</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-secondary card-round">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
+                          <i class="far fa-check-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col-7 col-stats">
+                        <div class="numbers">
+                          <p class="card-category">Other IT Equipments</p>
+                          <h4 class="card-title">576</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="col col-stats ms-3">
-            <div class="numbers">
-              <p class="card-category text-muted">Disposed</p>
-              <h4 class="card-title fw-bold">{{ total_disposed }}</h4>
-            </div>
-          </div>
+            
+{% comment %} statistics {% endcomment %}
+
+<div class="row">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body pb-0">
+                    <div class="h1 fw-bold float-end text-primary">+5%</div>
+                    <h2 class="mb-2">17</h2>
+                    <p class="text-muted">Users online</p>
+                    <div class="pull-in sparkline-fix">
+                      <div id="lineChart"><canvas width="552" height="70" style="display: inline-block; width: 552.109px; height: 70px; vertical-align: top;"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+             <div class="col-md-4">
+  <div class="card">
+    <div class="card-body pb-0">
+      <div class="h1 fw-bold float-end text-danger">-3%</div>
+      <h2 class="mb-2">{{ total_disposed }}</h2>
+      <p class="text-muted">Total Disposed</p>
+      <div class="pull-in sparkline-fix">
+        <div id="lineChart2">
+          <!-- Optional: Add a mini chart later -->
         </div>
       </div>
     </div>
   </div>
 </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body pb-0">
+                    <div class="h1 fw-bold float-end text-warning">+7%</div>
+                    <h2 class="mb-2">213</h2>
+                    <p class="text-muted">Transactions</p>
+                    <div class="pull-in sparkline-fix">
+                      <div id="lineChart3"><canvas width="552" height="70" style="display: inline-block; width: 552.109px; height: 70px; vertical-align: top;"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
             
-
-
+{% comment %} Recently Added IT Equipments {% endcomment %}
             <div class="row">
               <div class="col-md-12">
                 <div class="card">
@@ -815,9 +852,15 @@
 
     <!--   Core JS Files   -->
     {% block scripts %}
-   
+   <!-- Bootstrap 5.3 Bundle JS (includes Popper and modal functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="{% static 'js/core/popper.min.js' %}"></script>
-    <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
+  
+
+<script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script> 
+
 
 
 <script src="{% static 'js/plugin/datatables/jquery.dataTables.min.js' %}"></script>

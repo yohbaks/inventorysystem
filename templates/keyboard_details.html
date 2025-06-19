@@ -51,37 +51,42 @@
                     <th></th>
                   </tr>
                 </thead>
-                <tbody>
-                  {% for keyboard in keyboard_details %}
-                  <tr {% if keyboard.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
-                    <td>{{ keyboard.keyboard_sn_db }}</td>
-                    <td>{{ keyboard.keyboard_brand_db.brand_name }}</td>
-                    <td>{{ keyboard.keyboard_model_db }}</td>
-                    <td>
-                      {% with user_detail=keyboard.desktop_package.userdetails_set.first %}
-                        {% if user_detail and user_detail.user_Enduser %}
-                          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
-                          <small class="text-muted">{{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office }}</small>
-                        {% else %}
-                          <span class="text-muted">N/A</span>
-                        {% endif %}
-                      {% endwith %}
-                    </td>
-                    <td>
-                      {% if keyboard.is_disposed %}
-                        <span class="badge bg-danger">Disposed</span>
-                      {% else %}
-                        <span class="badge bg-success">Active</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <a href="{% url 'desktop_details_view' keyboard.desktop_package.id %}#pills-keyboard" class="btn btn-sm btn-primary">
-                        <i class="fa fa-eye"></i> View
-                      </a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
+               <tbody>
+  {% for keyboard in keyboard_details %}
+  <tr {% if keyboard.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
+    <td>{{ keyboard.keyboard_sn_db }}</td>
+    <td>{{ keyboard.keyboard_brand_db }}</td>
+    
+    <td>{{ keyboard.keyboard_model_db }}</td>
+    <td>
+      {% with user_detail=keyboard.desktop_package.user_details.first %}
+        {% if user_detail and user_detail.user_Enduser %}
+          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
+          <small class="text-muted">
+            {{ user_detail.user_Enduser.employee_position }} - 
+            {{ user_detail.user_Enduser.employee_office_section }}
+          </small>
+        {% else %}
+          <span class="text-muted">N/A</span>
+        {% endif %}
+      {% endwith %}
+    </td>
+    <td>
+      {% if keyboard.is_disposed %}
+        <span class="badge bg-danger">Disposed</span>
+      {% else %}
+        <span class="badge bg-success">Active</span>
+      {% endif %}
+    </td>
+    <td>
+      <a href="{% url 'desktop_details_view' keyboard.desktop_package.id %}#pills-keyboard" class="btn btn-sm btn-primary">
+        <i class="fa fa-eye"></i> View
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
               </table>
             </div>
           </div>

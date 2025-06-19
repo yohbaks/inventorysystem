@@ -57,34 +57,32 @@
                   {% for ups in ups_details %}
                   <tr {% if ups.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
                     <td>{{ ups.ups_sn_db }}</td>
-                    <td>{{ ups.ups_brand_db.name }}</td>
+                    <td>{{ ups.ups_brand_db }}</td>
                     <td>{{ ups.ups_model_db }}</td>
                     <td>{{ ups.ups_capacity_db }}</td>
                     <td>
-                      {% with user_detail=ups.desktop_package.userdetails_set.first %}
-                        {% if user_detail and user_detail.user_Enduser %}
-                          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
-                          <small class="text-muted">{{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office }}</small>
-                        {% else %}
-                          <span class="text-muted">N/A</span>
-                        {% endif %}
+                      {% with user_detail=ups.desktop_package.user_details.first %}
+                      {{ user_detail.user_Enduser }}
                       {% endwith %}
                     </td>
                     <td>
                       {% if ups.is_disposed %}
-                        <span class="badge bg-danger">Disposed</span>
+                     <span class="badge bg-danger">Disposed</span>
                       {% else %}
-                        <span class="badge bg-success">Active</span>
+                     <span class="badge bg-success">Active</span>
                       {% endif %}
                     </td>
                     <td>
+                      <!-- Actions can be added here -->
+                    
                       <a href="{% url 'desktop_details_view' ups.desktop_package.id %}#pills-ups" class="btn btn-sm btn-primary">
                         <i class="fa fa-eye"></i> View
                       </a>
                     </td>
                   </tr>
+                  {% empty %}
+                  <tr><td colspan="7">No UPS records found.</td></tr>
                   {% endfor %}
-                </tbody>
               </table>
             </div>
           </div>

@@ -320,6 +320,7 @@
 
     </div>
 <!-- Preventive Maintenance Schedule and status -->
+<!-- Preventive Maintenance Schedule and status -->
 <div class="card card-round mb-3">
   <div class="card-header py-2 px-3">
     <div class="d-flex justify-content-between align-items-center">
@@ -331,7 +332,9 @@
           </button>
           <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
             <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
-            <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
+            {% if desktop_detailsx %}
+              <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
+            {% endif %}
             <a class="dropdown-item" href="#">PM All View</a>
           </div>
         </div>
@@ -359,7 +362,10 @@
             {% else %}
               {% url 'checklist' assignment.desktop_package.id as target_url %}
             {% endif %}
-            <tr class="clickable-row" data-href="{{ target_url }}">
+            <tr class="clickable-row"
+                data-href="{{ target_url }}"
+                data-disposed="{{ desktop_detailsx.is_disposed|yesno:'true,false' }}"
+                data-status="{{ assignment.is_completed|yesno:'completed,pending' }}">
               <td>
                 {% if assignment.is_completed %}
                   <span class="btn btn-icon btn-round btn-success btn-sm me-2" title="View History">
@@ -390,9 +396,49 @@
     {% else %}
       <p class="text-muted m-0">No preventive maintenance schedule found for this desktop.</p>
     {% endif %}
+
+    {% if messages %}
+            <script>
+              $(document).ready(function () {
+                {% for message in messages %}
+                  $.notify({
+                    message: "{{ message|escapejs }}",
+                    title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
+                    icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
+                  }, {
+                    type: "{{ message.tags }}",
+                    placement: { from: "bottom", align: "right" },
+                    delay: 4000,
+                    z_index: 9999
+                  });
+                {% endfor %}
+              });
+            </script>
+            {% endif %}
   </div>
 </div>
 
+<!-- Modal: Disposed Warning -->
+<div class="modal fade" id="disposedWarningModal" tabindex="-1" aria-labelledby="disposedWarningLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-warning">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="disposedWarningLabel">🚫 Preventive Maintenance Warning</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fw-bold text-danger">
+          This desktop has already been disposed.<br>No further preventive maintenance is required.
+        </p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script to handle row click and disposal warning -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const rows = document.querySelectorAll(".clickable-row");
@@ -400,14 +446,21 @@
     rows.forEach(row => {
       row.style.cursor = "pointer";
       row.addEventListener("click", function () {
-        const href = this.getAttribute("data-href");
-        if (href) {
+        const isDisposed = this.dataset.disposed === "true";
+        const isPending = this.dataset.status === "pending";
+        const href = this.dataset.href;
+
+        if (isDisposed && isPending) {
+          const modal = new bootstrap.Modal(document.getElementById("disposedWarningModal"));
+          modal.show();
+        } else if (href) {
           window.location.href = href;
         }
       });
     });
   });
 </script>
+
 
 
 
@@ -438,7 +491,7 @@
               <tbody>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ monitor_detailse.desktop_package_db }}</td>
+                  <td>{{ monitor_detailse.desktop_package }}</td>
                 </tr>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -465,7 +518,7 @@
             data-bs-toggle="modal" 
             data-bs-target="#editMonitorModal"
             data-id="{{ monitor_detailse.id }}"
-            data-package="{{ monitor_detailse.desktop_package_db.id }}"
+            data-package="{{ monitor_detailse.desktop_package.id }}"
             data-sn="{{ monitor_detailse.monitor_sn_db }}"
             data-brand="{{ monitor_detailse.monitor_brand_db }}"
             data-model="{{ monitor_detailse.monitor_model_db }}"
@@ -1366,7 +1419,7 @@
           <tbody>
             <tr>
               <td><strong>Package Number:</strong></td>
-              <td>{{ user_details.desktop_package_db }}</td>
+              <td>{{ user_details.desktop_package }}</td>
             </tr>
             <tr>
               <td><strong>Asset Owner:</strong></td>
@@ -1949,5 +2002,6 @@ function showError(message) {
     });
 });
 </script> 
+
 
 {% endblock %}

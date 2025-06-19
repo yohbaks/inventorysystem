@@ -31,11 +31,11 @@
                           {% with d.user_details.first as u %}
                             {% if u and u.user_Enduser %}
                               <option value="{{ d.id }}" data-section="{{ u.user_Enduser.employee_office_section.name }}">
-                                {{ d.computer_name }} — {{ u.user_Enduser.full_name }} — {{ u.user_Enduser.employee_office_section.name }}
+                                {{ d.computer_name_display }} — {{ u.user_Enduser.full_name }} — {{ u.user_Enduser.employee_office_section.name }}
                               </option>
                             {% else %}
                               <option value="{{ d.id }}">
-                                {{ d.computer_name|default:"[No Computer Name]" }}
+                                {{ d.computer_name_display|default:"[No Computer Name]" }}
                               </option>
                             {% endif %}
                           {% endwith %}

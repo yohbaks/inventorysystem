@@ -55,23 +55,25 @@
                   {% for mouse in mouse_details %}
                   <tr {% if mouse.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
                     <td>{{ mouse.mouse_sn_db }}</td>
-                    <td>{{ mouse.mouse_brand_db.name }}</td>
+                    <td>{{ mouse.mouse_brand_db }}</td>
                     <td>{{ mouse.mouse_model_db }}</td>
                     <td>
-                      {% with user_detail=mouse.desktop_package.userdetails_set.first %}
-                        {% if user_detail and user_detail.user_Enduser %}
-                          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
-                          <small class="text-muted">{{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office }}</small>
-                        {% else %}
-                          <span class="text-muted">N/A</span>
-                        {% endif %}
+                      {% with user_detail=mouse.desktop_package.user_details.first %}
+                      {% if user_detail and user_detail.user_Enduser %}
+                      <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
+                      <small class="text-muted">
+                        {{ user_detail.user_Enduser.employee_id }} - {{ user_detail.user_Enduser.employee_department }}
+                      </small>
+                      {% else %}
+                      <span class="text-muted">N/A</span>
+                      {% endif %}
                       {% endwith %}
                     </td>
                     <td>
                       {% if mouse.is_disposed %}
-                        <span class="badge bg-danger">Disposed</span>
+                      <span class="badge bg-danger">Disposed</span>
                       {% else %}
-                        <span class="badge bg-success">Active</span>
+                      <span class="badge bg-success">Active</span>
                       {% endif %}
                     </td>
                     <td>

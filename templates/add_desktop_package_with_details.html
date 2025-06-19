@@ -1,9 +1,8 @@
-<!-- templates/add_equipment.html -->
+<!-- templates/add_desktop_package_with_details.html -->
 {% extends 'base.html' %}
-<style>
-
-</style>
+{% load static %}
 {% block content %}
+
 
 <!-- Forms begins here -->
 <div class="container">
@@ -29,14 +28,14 @@
           <div class="card-title">ADD ICT EQUIPMENT</div>
         </div>
         
-        <form method="post" action="">
+      <form method="post" action="{% url 'add_desktop_package_with_details' %}" id="addEquipmentForm">
           {% csrf_token %}
 
           <!-- Equipment Selection Dropdown -->
           <div class="card-body">
             <div class="form-group">
               <label for="equipmentSelect"><h5>Equipment Type</h5></label>
-              <select class="form-select form-control" id="equipmentSelect" name="name_input">
+              <select class="form-select form-control" id="equipmentSelect" name="name_input"  required>
                 <option value="" selected disabled>Select Equipment Type</option>
                 <option value="Desktop" {% if equipment_type == 'Desktop' %}selected{% endif %}>Desktop</option>
                 <option value="Laptop" {% if equipment_type == 'Laptop' %}selected{% endif %}>Laptop</option>
@@ -59,7 +58,7 @@
               <div class="col-md-4">
                     <div class="form-group">
                       <label for="desktopBrand">Brand Name</label>
-                      <select name="desktop_brand_name" class="form-select" required>
+                      <select name="desktop_brand_name" id="desktop_brand_name" class="form-select" required>
                         <option value="">-- Select Brand --</option>
                         {% for brand in desktop_brands %}
                            <option value="{{ brand.id }}" style="color: black;">{{ brand.name }}</option>
@@ -386,7 +385,8 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="computername">Computer Name</label>
-            <input type="text" class="form-control" id="computername" name="computer_name_input" value="{{ computer_name_input_any }}" >
+            
+            <input type="text" class="form-control" id="computername" name="computer_name_input" value="{{ computer_name_input_any }}">
           </div>
         </div>
       
@@ -410,7 +410,7 @@
               <label for="largeSelect">End User</label>
 
 
-              <select class="form-select form-control" id="enduser_input" name="enduser_input">
+              <select class="form-select form-control" id="enduser_input" name="enduser_input" required>
                 <option value="">Select End User</option>
                 {% for employee in employees %}
                     <option value="{{ employee.id }}">
@@ -424,7 +424,7 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="propertynumber">Asset Owner</label>
-            <select class="form-select form-control" id="assetowner_input" name="assetowner_input">
+            <select class="form-select form-control" id="assetowner_input" name="assetowner_input" required>
               <option value="">Select Asset User</option>
               {% for employee in employees %}
                   <option value="{{ employee.id }}">
@@ -432,18 +432,42 @@
                   </option>
               {% endfor %}
           </select>
-          </div>
-        </div>
-      
- 
-        
-        
+             </div> <!-- close col-md-4 (Asset Owner) -->
+      </div> <!-- close row -->
+    </div> <!-- close card-body -->
+  </div> <!-- close card.col -->
+</div> <!-- close #UserContainer -->
 
-  <div class="card-action">
-    <button class="btn btn-success mt-3">Submit</button>
-    <button class="btn btn-danger mt-3" type="reset">Cancel</button>
-  </div>  
+<!-- Submit/Reset Buttons (inside form) -->
+<div class="card-action">
+  <button type="submit" class="btn btn-success mt-3">Submit</button>
+  <button type="reset" class="btn btn-danger mt-3">Cancel</button>
 </div>
+</form> <!-- ✅ End of form -->
+
+<!-- Scripts and Modals -->
+
+<!-- jQuery -->
+<script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
+<!-- Bootstrap Bundle -->
+<script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script>
+
+<!-- Modal for Duplicate Computer Name -->
+<div class="modal fade" id="duplicateComputerModal" tabindex="-1" aria-labelledby="duplicateComputerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="duplicateComputerModalLabel">🚫 Duplicate Computer Name</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>The computer name you entered already exists. Please enter a unique name.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Okay</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- JavaScript for Dynamic Form Display -->
@@ -487,6 +511,47 @@
     }
   });
 </script>
+  
+ 
+
+<script>// Always prevent to run validation first
+  async function checkDuplicateName(name) {
+    const response = await fetch(`/check_computer_name/?computer_name=${encodeURIComponent(name)}`);
+    const data = await response.json();
+    return data.exists;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('addEquipmentForm');
+    const input = document.getElementById('computername');
+    const modalEl = document.getElementById('duplicateComputerModal');
+
+    if (!form || !input || !modalEl) return;
+
+    const modal = new bootstrap.Modal(modalEl);
+
+    form.addEventListener('submit', async function (e) { 
+      e.preventDefault();  // Always prevent to run validation first
+      const name = input.value.trim();
+
+      if (!name) {
+        input.classList.add('is-invalid');
+        return;
+      }
+
+      const isDuplicate = await checkDuplicateName(name);
+      if (isDuplicate) {
+        input.classList.add('is-invalid');
+        modal.show();
+      } else {
+        input.classList.remove('is-invalid');
+        // Submit only when validated and not duplicate
+        form.submit();  // ✅ this will truly submit the form
+      }
+    });
+  });
+</script> 
 
 
 {% endblock %}
+
