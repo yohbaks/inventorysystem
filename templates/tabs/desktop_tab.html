@@ -1,0 +1,124 @@
+<div class="tab-pane fade show active" id="pills-desktop" role="tabpanel" aria-labelledby="pills-desktop-tab">
+  <div class="card">
+    <div class="card-header">
+      {% if has_active_desktop %}
+      <div class="card-title">Desktop Details</div>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <table class="table table-head-bg-success table-bordered table-hover">
+        <thead>
+          <tr>
+            <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+            <th scope="col">DETAILS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
+            <td>{{ desktop_detailsx.desktop_package }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+            <td>{{ desktop_detailsx.serial_no }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+            <td>{{ desktop_detailsx.brand_name }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+            <td>{{ desktop_detailsx.model }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Processor:</strong></td>
+            <td>{{ desktop_detailsx.processor }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Memory:</strong></td>
+            <td>{{ desktop_detailsx.memory }}</td>
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><strong>Drive:</strong></td>
+            <td>{{ desktop_detailsx.drive }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
+      <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#disposeModal">Dispose</button>
+    </div>
+  </div>
+
+  <!-- Edit Desktop Modal -->
+  <div class="modal fade" id="editDesktopModal" tabindex="-1" aria-labelledby="editDesktopModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <form method="POST" action="{% url 'update_desktop' pk=desktop_detailsx.id %}">
+        {% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editDesktopModal">Edit Desktop</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="desktopId">
+
+            <div class="mb-3">
+              <label for="desktop_sn_form" class="form-label">Serial Number</label>
+              <input type="text" class="form-control" id="desktop_sn_form" name="desktop_sn_form" value="{{ desktop_detailsx.serial_no }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="desktop_brand_form" class="form-label">Brand</label>
+              <select class="form-select form-control" id="desktop_brand_form" name="desktop_brand_form" required>
+                <option value="" disabled>Select Brand</option>
+                {% for brandD in desktop_brands %}
+                  <option value="{{ brandD.id }}" {% if desktop_detailsx.brand_name.id == brandD.id %}selected{% endif %}>{{ brandD.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="desktop_model_form" class="form-label">Model</label>
+              <input type="text" class="form-control" id="desktop_model_form" name="desktop_model_form" value="{{ desktop_detailsx.model }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="desktop_proccessor_form" class="form-label">Processor</label>
+              <select class="form-select form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" required>
+                <optgroup label="Core i9 (Desktop)">
+                  <option value="i9-14900K" {% if desktop_detailsx.processor == 'i9-14900K' %}selected{% endif %}>Core i9-14900K</option>
+                  <option value="i9-13900K" {% if desktop_detailsx.processor == 'i9-13900K' %}selected{% endif %}>Core i9-13900K</option>
+                  <option value="i9-12900K" {% if desktop_detailsx.processor == 'i9-12900K' %}selected{% endif %}>Core i9-12900K</option>
+                  <option value="i9-11900K" {% if desktop_detailsx.processor == 'i9-11900K' %}selected{% endif %}>Core i9-11900K</option>
+                  <option value="i9-10900K" {% if desktop_detailsx.processor == 'i9-10900K' %}selected{% endif %}>Core i9-10900K</option>
+                </optgroup>
+                <optgroup label="Core i7 (Desktop)">
+                  <option value="i7-14700K" {% if desktop_detailsx.processor == 'i7-14700K' %}selected{% endif %}>Core i7-14700K</option>
+                  <option value="i7-13700K" {% if desktop_detailsx.processor == 'i7-13700K' %}selected{% endif %}>Core i7-13700K</option>
+                  <option value="i7-12700K" {% if desktop_detailsx.processor == 'i7-12700K' %}selected{% endif %}>Core i7-12700K</option>
+                  <option value="i7-11700K" {% if desktop_detailsx.processor == 'i7-11700K' %}selected{% endif %}>Core i7-11700K</option>
+                </optgroup>
+                <optgroup label="Core i5 (Desktop)">
+                  <option value="i5-14600K" {% if desktop_detailsx.processor == 'i5-14600K' %}selected{% endif %}>Core i5-14600K</option>
+                  <option value="i5-13600K" {% if desktop_detailsx.processor == 'i5-13600K' %}selected{% endif %}>Core i5-13600K</option>
+                  <option value="i5-12600K" {% if desktop_detailsx.processor == 'i5-12600K' %}selected{% endif %}>Core i5-12600K</option>
+                  <option value="i5-11600K" {% if desktop_detailsx.processor == 'i5-11600K' %}selected{% endif %}>Core i5-11600K</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="desktop_memory_form" class="form-label">Memory</label>
+              <input type="text" class="form-control" id="desktop_memory_form" name="desktop_memory_form" value="{{ desktop_detailsx.memory }}" required>
+            </div>
+            <div class="mb-3">
+              <label for="desktop_drive_form" class="form-label">Drive</label>
+              <input type="text" class="form-control" id="desktop_drive_form" name="desktop_drive_form" value="{{ desktop_detailsx.drive }}" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Desktop Package</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

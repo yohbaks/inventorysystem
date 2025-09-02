@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="page-inner">
+    <h3 class="fw-bold mb-3">Disposal Charts</h3>
+    <div class="page-category mb-4">
+      Visual overview of disposed IT equipment per category.
+      <a href="https://www.chartjs.org/docs/" target="_blank">View Docs</a>
+    </div>
+
+    <div class="row">
+      {% for item in chart_data %}
+      <div class="col-md-6 mb-4">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">{{ item.label }} Disposal Trend</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="chart-{{ item.label }}" width="804" height="300" style="display: block; width: 100%; height: 300px;" class="chartjs-render-monitor"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- JS dependencies -->
+<script src="{% static 'js/plugin/chart.js/chart.min.js' %}"></script>
+<script src="{% static 'assets/js/plugin/chart.js/chartjs-adapter-date-fns.bundle.min.js' %}"></script>
+
+<script>
+  const chartData = {{ chart_data|safe }};
+
+  chartData.forEach(item => {
+    const ctx = document.getElementById(`chart-${item.label}`).getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: item.labels,
+        datasets: [{
+          label: `${item.label} Disposed`,
+          data: item.data,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom'
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false
+          }
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'day',
+              tooltipFormat: 'MMM dd, yyyy',
+              displayFormats: { day: 'MMM dd' }
+            },
+            title: { display: true, text: 'Date' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Disposal Count' }
+          }
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

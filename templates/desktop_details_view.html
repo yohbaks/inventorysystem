@@ -310,7 +310,7 @@
           {% endfor %}
         </tbody>
       </table>
-      {% else %}
+      
        
       {% endif %}
 
@@ -318,100 +318,154 @@
 
           
 
-        </div>
+    </div>
 <!-- Preventive Maintenance Schedule and status -->
-        <div class="col-md-8">
-                <div class="card card-round">
-                  <div class="card-header">
-                    <div class="card-head-row card-tools-still-right">
-                      <div class="card-title">Preventive Maintenance Schedule and Status</div>
-                      <div class="card-tools">
-                        <div class="dropdown">
-                          <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-h"></i>
-                          </button>
-                          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
-                            <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
-                            <a class="dropdown-item" href="#">PM All View</a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="card-body p-0">
-                    {% if pm_assignments %}
-                    <div class="table-responsive">
-                      <!-- Projects table -->
-                      <table class="table align-items-center mb-0 table-hover">
-                        <thead class="thead-light">
-                          <tr>
-                            <th scope="col">Quarter</th>
-                            <th scope="col">Section</th>
-                            <th scope="col" class="text-end">Start Date</th>
-                            <th scope="col" class="text-end">End Date</th>
-                            <th scope="col" class="text-end">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            {% for assignment in pm_assignments %}
-                              {% if assignment.is_completed %}
-                                {% url 'maintenance_history' assignment.desktop_package.id as target_url %}
-                              {% else %}
-                                {% url 'checklist' assignment.desktop_package.id as target_url %}
-                              {% endif %}
-                              <tr class="clickable-row" data-href="{{ target_url }}">
-                                <th scope="row">
-                                  {% if assignment.is_completed %}
-                                    <span class="btn btn-icon btn-round btn-success btn-sm me-2" title="View History">
-                                      <i class="fa fa-check"></i>
-                                    </span>
-                                  {% else %}
-                                    <span class="btn btn-icon btn-round btn-warning btn-sm me-2" title="Do Checklist">
-                                      <i class="fas fa-wrench"></i>
-                                    </span>
-                                  {% endif %}
-                                  {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                                </th>
-                                <td class="text">{{ assignment.pm_section_schedule.section.name }}</td>
-                                <td class="text-end">{{ assignment.pm_section_schedule.start_date }}</td>
-                                <td class="text-end">{{ assignment.pm_section_schedule.end_date }}</td>
-                                <td class="text-end">
-                                  {% if assignment.is_completed %}
-                                    <span class="badge bg-success">Completed</span>
-                                  {% else %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                  {% endif %}
-                                </td>
-                              </tr>
-                            {% endfor %}
-                        </tbody>
-                        {% else %}
-                            <p>No preventive maintenance schedule found for this desktop.</p>
-                        {% endif %}
-                      </table>
+<!-- Preventive Maintenance Schedule and status -->
+<div class="card card-round mb-3">
+  <div class="card-header py-2 px-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="card-title mb-0">Preventive Maintenance Schedule and Status</div>
+      <div class="card-tools">
+        <div class="dropdown">
+          <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
+            {% if desktop_detailsx %}
+              <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
+            {% endif %}
+            <a class="dropdown-item" href="#">PM All View</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-                                <script>
-                                  document.addEventListener("DOMContentLoaded", function () {
-                                    const rows = document.querySelectorAll(".clickable-row");
+  <div class="card-body p-2">
+    {% if pm_assignments %}
+    <div class="table-responsive">
+      <table class="table table-hover table-sm mb-0 align-middle">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Quarter</th>
+            <th scope="col">Section</th>
+            <th scope="col" class="text-end">Start Date</th>
+            <th scope="col" class="text-end">End Date</th>
+            <th scope="col" class="text-end">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assignment in pm_assignments %}
+            {% if assignment.is_completed %}
+              {% url 'maintenance_history' assignment.desktop_package.id as target_url %}
+            {% else %}
+              {% url 'checklist' assignment.desktop_package.id as target_url %}
+            {% endif %}
+            <tr class="clickable-row"
+                data-href="{{ target_url }}"
+                data-disposed="{{ desktop_detailsx.is_disposed|yesno:'true,false' }}"
+                data-status="{{ assignment.is_completed|yesno:'completed,pending' }}">
+              <td>
+                {% if assignment.is_completed %}
+                  <span class="btn btn-icon btn-round btn-success btn-sm me-2" title="View History">
+                    <i class="fa fa-check"></i>
+                  </span>
+                {% else %}
+                  <span class="btn btn-icon btn-round btn-warning btn-sm me-2" title="Do Checklist">
+                    <i class="fas fa-wrench"></i>
+                  </span>
+                {% endif %}
+                {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+              </td>
+              <td>{{ assignment.pm_section_schedule.section.name }}</td>
+              <td class="text-end">{{ assignment.pm_section_schedule.start_date }}</td>
+              <td class="text-end">{{ assignment.pm_section_schedule.end_date }}</td>
+              <td class="text-end">
+                {% if assignment.is_completed %}
+                  <span class="badge bg-success">Completed</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-muted m-0">No preventive maintenance schedule found for this desktop.</p>
+    {% endif %}
 
-                                    rows.forEach(row => {
-                                      row.style.cursor = "pointer";
-                                      row.addEventListener("click", function () {
-                                        const href = this.getAttribute("data-href");
-                                        if (href) {
-                                          window.location.href = href;
-                                        }
-                                      });
-                                    });
-                                  });
-                                </script>
+    {% if messages %}
+            <script>
+              $(document).ready(function () {
+                {% for message in messages %}
+                  $.notify({
+                    message: "{{ message|escapejs }}",
+                    title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
+                    icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
+                  }, {
+                    type: "{{ message.tags }}",
+                    placement: { from: "bottom", align: "right" },
+                    delay: 4000,
+                    z_index: 9999
+                  });
+                {% endfor %}
+              });
+            </script>
+            {% endif %}
+  </div>
+</div>
+
+<!-- Modal: Disposed Warning -->
+<div class="modal fade" id="disposedWarningModal" tabindex="-1" aria-labelledby="disposedWarningLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-warning">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="disposedWarningLabel">🚫 Preventive Maintenance Warning</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fw-bold text-danger">
+          This desktop has already been disposed.<br>No further preventive maintenance is required.
+        </p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script to handle row click and disposal warning -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const rows = document.querySelectorAll(".clickable-row");
+
+    rows.forEach(row => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", function () {
+        const isDisposed = this.dataset.disposed === "true";
+        const isPending = this.dataset.status === "pending";
+        const href = this.dataset.href;
+
+        if (isDisposed && isPending) {
+          const modal = new bootstrap.Modal(document.getElementById("disposedWarningModal"));
+          modal.show();
+        } else if (href) {
+          window.location.href = href;
+        }
+      });
+    });
+  });
+</script>
 
 
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+
+
+
       </div>
 
 
@@ -437,7 +491,7 @@
               <tbody>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ monitor_detailse.desktop_package_db }}</td>
+                  <td>{{ monitor_detailse.desktop_package }}</td>
                 </tr>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -464,7 +518,7 @@
             data-bs-toggle="modal" 
             data-bs-target="#editMonitorModal"
             data-id="{{ monitor_detailse.id }}"
-            data-package="{{ monitor_detailse.desktop_package_db.id }}"
+            data-package="{{ monitor_detailse.desktop_package.id }}"
             data-sn="{{ monitor_detailse.monitor_sn_db }}"
             data-brand="{{ monitor_detailse.monitor_brand_db }}"
             data-model="{{ monitor_detailse.monitor_model_db }}"
@@ -1365,7 +1419,7 @@
           <tbody>
             <tr>
               <td><strong>Package Number:</strong></td>
-              <td>{{ user_details.desktop_package_db }}</td>
+              <td>{{ user_details.desktop_package }}</td>
             </tr>
             <tr>
               <td><strong>Asset Owner:</strong></td>
@@ -1598,72 +1652,12 @@
 
     </div>
   </div>
-  <div class="col-md-6">
-  <div class="card">
-    <div class="card-header">
-      <h4 class="card-title">Preventive Maintenance Schedule</h4>
-    </div>
-    <div class="card-body">
-      <ul class="nav nav-pills nav-secondary" id="pm-schedule-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <a class="nav-link active" id="q1-tab" data-bs-toggle="pill" href="#q1" role="tab">1st Quarter</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="q2-tab" data-bs-toggle="pill" href="#q2" role="tab">2nd Quarter</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="q3-tab" data-bs-toggle="pill" href="#q3" role="tab">3rd Quarter</a>
-        </li>
-        <li class="nav-item" role="presentation">
-          <a class="nav-link" id="q4-tab" data-bs-toggle="pill" href="#q4" role="tab">4th Quarter</a>
-        </li>
-      </ul>
-
-      <div class="card mt-4">
-    <div class="card-header">
-        <h4 class="card-title">Preventive Maintenance Schedule</h4>
-    </div>
-    <div class="card-body">
-        {% if pm_assignments %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Quarter</th>
-                        <th>Section</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Status</th>
-                        <th>Remarks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for assignment in pm_assignments %}
-                        <tr>
-                            <td>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</td>
-                            <td>{{ assignment.pm_section_schedule.section.name }}</td>
-                            <td>{{ assignment.pm_section_schedule.start_date }}</td>
-                            <td>{{ assignment.pm_section_schedule.end_date }}</td>
-                            <td>
-                                {% if assignment.is_completed %}
-                                    <span class="badge bg-success">Completed</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ assignment.remarks|default:"No remarks" }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No preventive maintenance schedule found for this desktop.</p>
-        {% endif %}
-    </div>
-</div>
+  
 
     </div>
   </div>
 </div>
+
 
 {% comment %} update documents modal {% endcomment %}
 <div class="modal fade" id="editDocumentsdModal" tabindex="-1" aria-labelledby="editDocumentsdModal" aria-hidden="true">
@@ -2008,5 +2002,6 @@ function showError(message) {
     });
 });
 </script> 
+
 
 {% endblock %}

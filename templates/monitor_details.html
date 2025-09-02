@@ -56,37 +56,43 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% for monitor in monitors %}
-                  <tr {% if monitor.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
-                    <td>{{ monitor.monitor_sn_db }}</td>
-                    <td>{{ monitor.monitor_brand_db }}</td>
-                    <td>{{ monitor.monitor_model_db }}</td>
-                    <td>{{ monitor.monitor_size_db }}</td>
-                    <td>
-                      {% with user_detail=monitor.desktop_package_db.userdetails_set.first %}
-                        {% if user_detail and user_detail.user_Enduser %}
-                          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
-                          <small class="text-muted">{{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office }}</small>
-                        {% else %}
-                          <span class="text-muted">N/A</span>
-                        {% endif %}
-                      {% endwith %}
-                    </td>
-                    <td>
-                      {% if monitor.is_disposed %}
-                        <span class="badge bg-danger">Disposed</span>
-                      {% else %}
-                        <span class="badge bg-success">Active</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <a href="{% url 'desktop_details_view' monitor.desktop_package_db.id %}#pills-mouse" class="btn btn-sm btn-primary">
-                        <i class="fa fa-eye"></i> View
-                      </a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
+  {% for monitor in monitors %}
+  <tr {% if monitor.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
+    <td>{{ monitor.monitor_sn_db }}</td>
+    <td>{{ monitor.monitor_brand_db }}</td>
+    <td>{{ monitor.monitor_model_db }}</td>
+    <td>{{ monitor.monitor_size_db }}</td>
+    
+    <td>
+      {% with user_detail=monitor.desktop_package.user_details.first %}
+        {% if user_detail and user_detail.user_Enduser %}
+          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
+          <small class="text-muted">
+            {{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office_section }}
+          </small>
+        {% else %}
+          <span class="text-muted">N/A</span>
+        {% endif %}
+      {% endwith %}
+    </td>
+
+    <td>
+      {% if monitor.is_disposed %}
+        <span class="badge bg-danger">Disposed</span>
+      {% else %}
+        <span class="badge bg-success">Active</span>
+      {% endif %}
+    </td>
+
+    <td>
+      <a href="{% url 'desktop_details_view' monitor.desktop_package.id %}#pills-monitor" class="btn btn-sm btn-primary">
+        <i class="fa fa-eye"></i> View
+      </a>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
               </table>
             </div>
           </div>

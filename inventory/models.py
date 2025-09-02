@@ -14,46 +14,30 @@ from io import BytesIO  # Import BytesIO to handle the image in memory
 
 #################
 class Desktop_Package(models.Model):
-    
     is_disposed = models.BooleanField(default=False)
     disposal_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     qr_code = models.ImageField(upload_to='qr_codes', blank=True, null=True)
 
-    pm_schedule_date = models.DateField(null=True, blank=True)  # Date assigned for scheduled maintenance
-    pm_schedule_notes = models.TextField(null=True, blank=True)  # Optional: additional info
+    pm_schedule_date = models.DateField(null=True, blank=True)
+    pm_schedule_notes = models.TextField(null=True, blank=True)
+
+    # Helper to get the first linked DesktopDetails's computer name
+    @property
+    def computer_name(self):
+        desktop = self.desktop_details.first()
+        return desktop.computer_name if desktop else "N/A"
+
+    # Helper to get this package's ID
+    @property
+    def package_number(self):
+        return self.id
 
     def __str__(self):
         return f"Desktop Package {self.pk}"
 
-    
-# =============================
-# ++++++++++++++++++++++++++++++Desktop Details , Monitor, Keyboard, Mouse, UPS
-# =============================
-# class PM_Schedule_1stQuarter(models.Model):
-#     pm_schedule_start = models.DateField(null=True, blank=True)
-#     pm_schedule_end = models.DateField(null=True, blank=True)
-
-#     is_admin = models.BooleanField(default=False)         # For admin section
-#     is_finance = models.BooleanField(default=False)       # For finance section
-#     is_construction = models.BooleanField(default=False)  # For construction section
-
-#     notes = models.TextField(blank=True, null=True)
-
-#     def __str__(self):
-#         roles = []
-#         if self.is_admin:
-#             roles.append("Admin")
-#         if self.is_finance:
-#             roles.append("Finance")
-#         if self.is_construction:
-#             roles.append("Construction")
-
-#         roles_str = ", ".join(roles) if roles else "No Role"
-#         return f"PM Schedule from {self.pm_schedule_start} to {self.pm_schedule_end} ({roles_str})"
-    
-
+  
 
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -67,8 +51,9 @@ class Brand(models.Model):
         return self.name
 
 class DesktopDetails(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    
     desktop_package = models.ForeignKey(Desktop_Package, related_name='desktop_details', on_delete=models.CASCADE)
+    
     
     serial_no = models.CharField(max_length=255)
     computer_name = models.CharField(max_length=255, unique=True, null=True)
@@ -77,8 +62,7 @@ class DesktopDetails(models.Model):
     processor = models.CharField(max_length=33, null=True)
     memory = models.CharField(max_length=100, null=True)
     drive = models.CharField(max_length=332, null=True)
-    asset_owner = models.CharField(max_length=255, null=True)
-
+   
     desktop_Graphics = models.CharField(max_length=100, blank=True, null=True)
     desktop_Graphics_Size = models.CharField(max_length=100, blank=True, null=True)
     
@@ -95,8 +79,8 @@ class DesktopDetails(models.Model):
 
   #monitor details  
 class MonitorDetails(models.Model):
-    # id = models.IntegerField(primary_key=True)  # Allow manual assignment
-    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
+    
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
     monitor_sn_db = models.CharField(max_length=255)
     monitor_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     monitor_model_db = models.CharField(max_length=255)
@@ -105,11 +89,11 @@ class MonitorDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)  # Date when the monitor was added
 
     def __str__(self):
-        return f"{self.desktop_package_db} | BRAND: {self.monitor_brand_db}"
+        return f"{self.desktop_package} | BRAND: {self.monitor_brand_db}"
 
 #keyboard details
 class KeyboardDetails(models.Model):
-    # id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
     keyboard_sn_db = models.CharField(max_length=255)
     keyboard_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
@@ -122,7 +106,7 @@ class KeyboardDetails(models.Model):
     
 #mouse details
 class MouseDetails(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    
     desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_db', on_delete=models.CASCADE)
     mouse_sn_db = models.CharField(max_length=255, null=True)
     mouse_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
@@ -136,7 +120,7 @@ class MouseDetails(models.Model):
     
  #ups details
 class UPSDetails(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    
     desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
     ups_sn_db = models.CharField(max_length=255)
     ups_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
@@ -150,8 +134,8 @@ class UPSDetails(models.Model):
 
 #user details 
 class UserDetails(models.Model):  
-    id = models.AutoField(primary_key=True)  
-    desktop_package_db = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True)  
+    
+    desktop_package = models.ForeignKey("Desktop_Package", on_delete=models.CASCADE, null=True, related_name='user_details')  
     user_Enduser = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='enduser_details')
     user_Assetowner = models.ForeignKey("Employee", on_delete=models.SET_NULL, null=True, blank=True, related_name='assetowner_details')
     created_at = models.DateTimeField(auto_now_add=True)  
@@ -183,10 +167,10 @@ class DisposedDesktopDetail(models.Model):
   
 class DisposedMonitor(models.Model):
     monitor_disposed_db = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
-    desktop_package_db = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
     monitor_sn = models.CharField(max_length=255, blank=True, null=True)
-    monitor_brand = models.CharField(max_length=255, blank=True, null=True)
+    monitor_brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     monitor_model = models.CharField(max_length=255, blank=True, null=True)
     monitor_size = models.CharField(max_length=255, blank=True, null=True)
     disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -234,7 +218,7 @@ class DisposedUPS(models.Model):
     
 
 class DocumentsDetails(models.Model):
-    id = models.IntegerField(primary_key=True)  # Allow manual assignment
+    
     desktop_package = models.ForeignKey(Desktop_Package, related_name='docs', on_delete=models.CASCADE)
     docs_PAR = models.CharField(max_length=100, blank=True, null=True)
     docs_Propertyno = models.CharField(max_length=100, blank=True, null=True)
@@ -286,46 +270,8 @@ class AssetOwnerChangeHistory(models.Model):
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
 
-# class PreventiveMaintenance(models.Model):
-#     desktop_package = models.ForeignKey("Desktop_Package", related_name='maintenances', on_delete=models.CASCADE)
-#     maintenance_date = models.DateField()
-#     next_schedule = models.DateField(blank=True, null=True)
-#     performed_by = models.CharField(max_length=255)
-#     notes = models.TextField(blank=True, null=True)
-#     is_completed = models.BooleanField(default=True)
-#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
-#     date_accomplished = models.DateField(null=True, blank=True)
-#     office = models.CharField(max_length=255, blank=True, null=True)
-#     end_user = models.CharField(max_length=255, blank= True, null=True)    
-#     task_1 = models.BooleanField(default=False)
-#     note_1 = models.TextField(blank=True, null=True)
-#     task_2 = models.BooleanField(default=False)
-#     note_2 = models.TextField(blank=True, null=True)
-#     task_3 = models.BooleanField(default=False)
-#     note_3 = models.TextField(blank=True, null=True)
-#     task_4 = models.BooleanField(default=False)
-#     note_4 = models.TextField(blank=True, null=True)
-#     task_5 = models.BooleanField(default=False)
-#     note_5 = models.TextField(blank=True, null=True)
-#     task_6 = models.BooleanField(default=False)
-#     note_6 = models.TextField(blank=True, null=True)
-#     task_7 = models.BooleanField(default=False)
-#     note_7 = models.TextField(blank=True, null=True)
-#     task_8 = models.BooleanField(default=False)
-#     note_8 = models.TextField(blank=True, null=True)
-#     task_9 = models.BooleanField(default=False)
-#     note_9 = models.TextField(blank=True, null=True)
-
-#     def __str__(self):
-#         return f"{self.desktop_package} - {self.maintenance_date}"
-
-# class MaintenanceChecklistItem(models.Model):
-#     maintenance = models.ForeignKey(PreventiveMaintenance, on_delete=models.CASCADE, related_name='items')
-#     item_text = models.CharField(max_length=255)
-#     is_checked = models.BooleanField(default=False)
-
-#Preventivemaintenance REAL
+#Preventivemaintenance 
 class PreventiveMaintenance(models.Model):
     desktop_package = models.ForeignKey("Desktop_Package", related_name='maintenances', on_delete=models.CASCADE)
     pm_schedule_assignment = models.ForeignKey('PMScheduleAssignment', on_delete=models.SET_NULL, null=True, blank=True, related_name='maintenances')
@@ -372,12 +318,13 @@ class MaintenanceChecklistItem(models.Model):
 
 
 
-
 class OfficeSection(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
+    
+
     
 class QuarterSchedule(models.Model):
     QUARTERS = [

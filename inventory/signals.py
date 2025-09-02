@@ -13,7 +13,7 @@ from .models import Desktop_Package
 def generate_qr_code(sender, instance, created, **kwargs):
     if created and not instance.qr_code:
         # Build full URL for this desktop package
-        url = reverse('desktop_details_view', kwargs={'desktop_id': instance.pk})
+        url = reverse('desktop_details_view', kwargs={'package_id': instance.pk})
         full_url = f"http://127.0.0.1:8000{url}"  # Replace with your domain in production
 
         # Generate the QR code image
