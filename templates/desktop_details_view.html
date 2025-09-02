@@ -15,11 +15,14 @@
                 <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Return to Supply
               </button>
               {% endif %}
-              <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+              <a href="{% url 'export_desktop_excel' %}" class="btn btn-label-success btn-round btn-sm me-2">
                 <span class="btn-label"><i class="fa fa-pencil"></i></span> ExporT
               </a>
-              <a href="#" class="btn btn-label-info btn-round btn-sm">
-                <span class="btn-label" ><i class="fa fa-print"></i></span> Print
+              <a href="{% url 'maintenance_history' desktop_package.id %}" class="btn btn-label-info btn-round btn-sm">
+                <span class="btn-label" ><i class="fa fa-print"></i></span> Maintenance
+              </a>
+              <a href="{% url 'generate_desktop_pdf' desktop_package.id %}" class="btn btn-label-success btn-round btn-sm me-2">
+                  <i class="fa fa-file-pdf"></i> Download PDF
               </a>
               <!-- Trigger Button for QR CODE -->
                 <button type="button" class="btn btn-label-warning btn-round btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">
@@ -92,6 +95,7 @@
                   <i class="fas fa-file-alt"></i> Documents
                 </a>
               </li>
+              
             </ul>
           </div>
         </div>
@@ -196,9 +200,8 @@
                 </tr>
               </tbody>
             </table>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Editon</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#disposeModal">Dispose</button>
-
 
 <!-- Update desktop Modal -->
 
@@ -307,12 +310,162 @@
           {% endfor %}
         </tbody>
       </table>
-      {% else %}
+      
        
       {% endif %}
 
           </div>
+
+          
+
+    </div>
+<!-- Preventive Maintenance Schedule and status -->
+<!-- Preventive Maintenance Schedule and status -->
+<div class="card card-round mb-3">
+  <div class="card-header py-2 px-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="card-title mb-0">Preventive Maintenance Schedule and Status</div>
+      <div class="card-tools">
+        <div class="dropdown">
+          <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-h"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
+            {% if desktop_detailsx %}
+              <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
+            {% endif %}
+            <a class="dropdown-item" href="#">PM All View</a>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body p-2">
+    {% if pm_assignments %}
+    <div class="table-responsive">
+      <table class="table table-hover table-sm mb-0 align-middle">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Quarter</th>
+            <th scope="col">Section</th>
+            <th scope="col" class="text-end">Start Date</th>
+            <th scope="col" class="text-end">End Date</th>
+            <th scope="col" class="text-end">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for assignment in pm_assignments %}
+            {% if assignment.is_completed %}
+              {% url 'maintenance_history' assignment.desktop_package.id as target_url %}
+            {% else %}
+              {% url 'checklist' assignment.desktop_package.id as target_url %}
+            {% endif %}
+            <tr class="clickable-row"
+                data-href="{{ target_url }}"
+                data-disposed="{{ desktop_detailsx.is_disposed|yesno:'true,false' }}"
+                data-status="{{ assignment.is_completed|yesno:'completed,pending' }}">
+              <td>
+                {% if assignment.is_completed %}
+                  <span class="btn btn-icon btn-round btn-success btn-sm me-2" title="View History">
+                    <i class="fa fa-check"></i>
+                  </span>
+                {% else %}
+                  <span class="btn btn-icon btn-round btn-warning btn-sm me-2" title="Do Checklist">
+                    <i class="fas fa-wrench"></i>
+                  </span>
+                {% endif %}
+                {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+              </td>
+              <td>{{ assignment.pm_section_schedule.section.name }}</td>
+              <td class="text-end">{{ assignment.pm_section_schedule.start_date }}</td>
+              <td class="text-end">{{ assignment.pm_section_schedule.end_date }}</td>
+              <td class="text-end">
+                {% if assignment.is_completed %}
+                  <span class="badge bg-success">Completed</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="text-muted m-0">No preventive maintenance schedule found for this desktop.</p>
+    {% endif %}
+
+    {% if messages %}
+            <script>
+              $(document).ready(function () {
+                {% for message in messages %}
+                  $.notify({
+                    message: "{{ message|escapejs }}",
+                    title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
+                    icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
+                  }, {
+                    type: "{{ message.tags }}",
+                    placement: { from: "bottom", align: "right" },
+                    delay: 4000,
+                    z_index: 9999
+                  });
+                {% endfor %}
+              });
+            </script>
+            {% endif %}
+  </div>
+</div>
+
+<!-- Modal: Disposed Warning -->
+<div class="modal fade" id="disposedWarningModal" tabindex="-1" aria-labelledby="disposedWarningLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-warning">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="disposedWarningLabel">🚫 Preventive Maintenance Warning</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p class="fw-bold text-danger">
+          This desktop has already been disposed.<br>No further preventive maintenance is required.
+        </p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script to handle row click and disposal warning -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const rows = document.querySelectorAll(".clickable-row");
+
+    rows.forEach(row => {
+      row.style.cursor = "pointer";
+      row.addEventListener("click", function () {
+        const isDisposed = this.dataset.disposed === "true";
+        const isPending = this.dataset.status === "pending";
+        const href = this.dataset.href;
+
+        if (isDisposed && isPending) {
+          const modal = new bootstrap.Modal(document.getElementById("disposedWarningModal"));
+          modal.show();
+        } else if (href) {
+          window.location.href = href;
+        }
+      });
+    });
+  });
+</script>
+
+
+
+
+
+
       </div>
 
 
@@ -338,7 +491,7 @@
               <tbody>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ monitor_detailse.desktop_package_db }}</td>
+                  <td>{{ monitor_detailse.desktop_package }}</td>
                 </tr>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -365,7 +518,7 @@
             data-bs-toggle="modal" 
             data-bs-target="#editMonitorModal"
             data-id="{{ monitor_detailse.id }}"
-            data-package="{{ monitor_detailse.desktop_package_db.id }}"
+            data-package="{{ monitor_detailse.desktop_package.id }}"
             data-sn="{{ monitor_detailse.monitor_sn_db }}"
             data-brand="{{ monitor_detailse.monitor_brand_db }}"
             data-model="{{ monitor_detailse.monitor_model_db }}"
@@ -463,11 +616,6 @@
                 <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
                    {% endif %}
                 
-               
-               
-                
-                
-               
 
                  <!-- Disposed Monitor Table -->
       {% if disposed_monitor.exists %}
@@ -519,6 +667,17 @@
               <label for="monitor_brand" class="form-label">Brandd</label>
               <input type="text" class="form-control" id="monitor_brand" name="monitor_brand" required>
             </div>
+            
+            <div class="mb-3">
+              <label for="monitor_brand" class="form-label">Brand</label>
+              <select class="form-select form-control" id="editBrand" name="monitor_brand_db" required>
+                <option value="" disabled selected>Select Brand</option>
+                {% for brandMonitor in monitor_brands %}
+                  <option value="{{ brandMonitor.id }}">{{ brandMonitor.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
             <div class="mb-3">
               <label for="monitor_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="monitor_model" name="monitor_model" required>
@@ -543,6 +702,7 @@
 
       
 <!-- Keyboard Details Tab ORGIGNAL -->
+
 <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
   <div class="card">
     <!-- Card Header with Flexbox to Align Title and Button -->
@@ -612,7 +772,15 @@
           </div>
           <div class="mb-3">
             <label for="editBrand" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="editBrand" name="keyboard_brand_db" value="{{ keyboard_detailse.keyboard_brand_db}}" required>
+            <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandK in keyboard_brands %}
+                <option value="{{ brandK.id }}"
+                        {% if keyboard_detailse.keyboard_brand_db.id == brandK.id %}selected{% endif %}>
+                  {{ brandK.name }}
+                </option>
+              {% endfor %}
+              </select>
           </div>
           <div class="mb-3">
             <label for="editModel" class="form-label">Model</label>
@@ -711,7 +879,7 @@
           <h5 class="modal-title" id="addKeyboardModalLabel">Add New Keyboard</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        {% if keyboard_detailse and keyboard_detailse.id %}
+        {% if desktop_package and desktop_package.id %}
         <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
           {% csrf_token %}
           <div class="modal-body">
@@ -719,10 +887,19 @@
               <label for="keyboard_sn" class="form-label">Serial Number</label>
               <input type="text" class="form-control" id="keyboard_sn" name="keyboard_sn" required>
             </div>
+
+
             <div class="mb-3">
               <label for="keyboard_brand" class="form-label">Brand</label>
-              <input type="text" class="form-control" id="keyboard_brand" name="keyboard_brand" required>
+              <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
+                <option value="" disabled selected>Select Brand</option>
+                {% for brandKeyboard in keyboard_brands %}
+                  <option value="{{ brandKeyboard.id }}">{{ brandKeyboard.name }}</option>
+                {% endfor %}
+              </select>
             </div>
+
+
             <div class="mb-3">
               <label for="keyboard_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="keyboard_model" name="keyboard_model" required>
@@ -815,7 +992,15 @@
           </div>
           <div class="mb-3">
             <label for="editBrand" class="form-label">Brand</label>
-            <input type="text" class="form-control" id="editBrand" name="mouse_brand_db" value="{{ mouse_detailse.mouse_brand_db}}" required>
+            <select class="form-select form-control" id="editBrand" name="mouse_brand_db" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandMouse in mouse_brands %}
+                <option value="{{ brandMouse.id }}"
+                        {% if mouse_detailse.mouse_brand_db.id == brandMouse.id %}selected{% endif %}>
+                  {{ brandMouse.name }}
+                </option>
+              {% endfor %}
+              </select>
           </div>
           <div class="mb-3">
             <label for="editModel" class="form-label">Model</label>
@@ -887,13 +1072,7 @@
           </tr>
           {% endfor %}
         </tbody>
-      </table>
-      {% else %}
-      
-      <h5 class="text-success">
-        <br>
-        No disposed mice for this desktop package.
-      </h5>
+      </table>   
       {% endif %}
     </div>
   </div>
@@ -914,10 +1093,17 @@
               <label for="mouse_sn" class="form-label">Serial Number</label>
               <input type="text" class="form-control" id="mouse_sn" name="mouse_sn" required>
             </div>
+
             <div class="mb-3">
               <label for="mouse_brand" class="form-label">Brand</label>
-              <input type="text" class="form-control" id="mouse_brand" name="mouse_brand" required>
+              <select class="form-select form-control" id="editBrand" name="mouse_brand_db" required>
+                <option value="" disabled selected>Select Brand</option>
+                {% for brandMouse in mouse_brands %}
+                  <option value="{{ brandMouse.id }}">{{ brandMouse.name }}</option>
+                {% endfor %}
+              </select>
             </div>
+            
             <div class="mb-3">
               <label for="mouse_model" class="form-label">Model</label>
               <input type="text" class="form-control" id="mouse_model" name="mouse_model" required>
@@ -992,7 +1178,7 @@
               <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">Dispose UPS</button>
 
 
-                 <!-- ups update or edit details -->
+                 <!-- ups update modal or edit details -->
               <div class="modal fade" id="editUpsModal" tabindex="-1" aria-labelledby="editUpsModal" aria-hidden="true">
                 <div class="modal-dialog">
                   <form method="POST" action="{% url 'update_ups' pk=ups_detailse.id %}">
@@ -1012,8 +1198,17 @@
                         </div>
                         <div class="mb-3">
                           <label for="editBrand" class="form-label">Brand</label>
-                          <input type="text" class="form-control" id="editBrand" name="ups_brand_db" value="{{ ups_detailse.ups_brand_db}}" required>
-                        </div>
+                          
+                           <select class="form-select form-control" id="editBrand" name="ups_brand_db" required>
+                            <option value="" disabled>Select Brand</option>
+                            {% for brandUPS in ups_brands %}
+                              <option value="{{ brandUPS.id }}"
+                                      {% if ups_detailse.ups_brand_db.id == brandUPS.id %}selected{% endif %}>
+                                {{ brandUPS.name }}
+                              </option>
+                            {% endfor %}
+                            </select>
+                                      </div>
                         <div class="mb-3">
                           <label for="editModel" class="form-label">Model</label>
                           <input type="text" class="form-control" id="editModel" name="ups_model_db" value="{{ ups_detailse.ups_model_db }}" required>
@@ -1091,12 +1286,7 @@
                 {% endfor %}
               </tbody>
             </table>
-            {% else %}
             
-            <h5 class="text-success">
-              <br>
-              No disposed UPS for this desktop package.
-            </h5>
             {% endif %}
           </div>
         </div>
@@ -1117,10 +1307,19 @@
                     <label for="mouse_sn" class="form-label">Serial Number</label>
                     <input type="text" class="form-control" id="ups_sn" name="ups_sn" required>
                   </div>
+
+
+
                   <div class="mb-3">
-                    <label for="mouse_brand" class="form-label">Brand</label>
-                    <input type="text" class="form-control" id="ups_brand" name="ups_brand" required>
+                    <label for="ups_brand" class="form-label">Brand</label>
+                    <select class="form-select form-control" id="editBrand" name="ups_brand_form" required>
+                      <option value="" disabled selected>Select Brand</option>
+                      {% for brandUps in ups_brands %}
+                        <option value="{{ brandUps.id }}">{{ brandUps.name }}</option>
+                      {% endfor %}
+                    </select>
                   </div>
+
                   <div class="mb-3">
                     <label for="mouse_model" class="form-label">Model</label>
                     <input type="text" class="form-control" id="ups_model" name="ups_model" required>
@@ -1220,7 +1419,7 @@
           <tbody>
             <tr>
               <td><strong>Package Number:</strong></td>
-              <td>{{ user_details.desktop_package_db }}</td>
+              <td>{{ user_details.desktop_package }}</td>
             </tr>
             <tr>
               <td><strong>Asset Owner:</strong></td>
@@ -1232,7 +1431,7 @@
             </tr>
             <tr>
               <td><strong>Asset Owner Office:</strong></td>
-              <td>{{ user_details.user_Assetowner.employee_office }}</td>
+              <td>{{ user_details.user_Assetowner.employee_office_section }}</td>
             </tr>
             <tr>
               <td><strong>End User:</strong></td>
@@ -1244,7 +1443,7 @@
             </tr>
             <tr>
               <td><strong>End User Office:</strong></td>
-              <td>{{ user_details.user_Enduser.employee_office }}</td>
+              <td>{{ user_details.user_Enduser.employee_office_section }}</td>
             </tr>
           </tbody>
         </table>
@@ -1448,9 +1647,17 @@
         </tbody>
       </table>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsdModal">Edit</button>
+
+    
+
+    </div>
+  </div>
+  
+
     </div>
   </div>
 </div>
+
 
 {% comment %} update documents modal {% endcomment %}
 <div class="modal fade" id="editDocumentsdModal" tabindex="-1" aria-labelledby="editDocumentsdModal" aria-hidden="true">
@@ -1513,6 +1720,8 @@
   {% endif %}
   </div>
 </div>    
+
+
 
 <!-- Optional JavaScript -->
 <script>
@@ -1793,5 +2002,6 @@ function showError(message) {
     });
 });
 </script> 
+
 
 {% endblock %}

@@ -1,0 +1,85 @@
+<!-- templates/add_equipment.html -->
+{% extends 'base.html' %} 
+
+
+
+{% block content %}
+
+
+
+<!-- Forms begins here -->
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Forms</h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+          <a href="#">
+            <i class="icon-home"></i>
+          </a>
+        </li>
+        <li class="separator">
+          <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+          <a href="#">Forms</a>
+        </li>
+        <li class="separator">
+          <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+          <a href="#">Basic Form</a>
+        </li>
+      </ul>
+    </div>
+
+
+    {% comment %} the error and success message {% endcomment %}
+
+    {% for mesg in messages %} 
+    <div class="alert alert-{{ mesg.tags }} alert-dismissible fade show" role="success">
+      <strong>Holy guacamole!</strong> {{ mesg }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Form Submission Successful!</div>
+        </div>
+<div>
+     
+  <center><h4><p class="text-success">Thank you for submitting your equipment details.</p></h4></center>
+  <center> <p>You will be redirected back to the add equipment page in <span id="countdown">5</span> seconds...</p></center>
+</div>
+  <!-- Add similar forms for other equipment types as needed -->
+</div>
+<!-- Forms ends here -->
+
+
+
+<!-- JavaScript for showing/hiding forms -->
+    <script>
+        // Function to handle the countdown and redirect
+        function redirectCountdown() {
+            let countdown = 5;  // Set countdown to 5 seconds
+            const countdownElement = document.getElementById("countdown");
+
+            const interval = setInterval(() => {
+                countdownElement.innerHTML = countdown;
+                countdown--;
+
+                if (countdown < 0) {
+                    clearInterval(interval);
+      ; 
+                     window.location.href = "/desktop_details_view/{{ desktop_package_id }}/"; // Redirect to the desired page (URL name)
+                }
+            }, 1000);  // 1 second intervals
+        }
+
+        // Start countdown when the page loads
+        window.onload = redirectCountdown;
+    </script>
+
+{% endblock %}

@@ -1,17 +1,17 @@
 {% load static %}
 
 <!-- Bootstrap CSS -->
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+<!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet"> -->
 <!-- Font Awesome for icons -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> -->
 
-
+ <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
 <!DOCTYPE html>
 <html lang="en">  
   <head> 
 
     {% block head %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
     <meta
@@ -26,7 +26,7 @@
 
     <!-- Fonts and icons -->
     <script src="{% static 'js/plugin/webfont/webfont.min.js' %}"></script>
-    {% comment %} <script src="assets/js/plugin/webfont/webfont.min.js"></script> {% endcomment %}
+    
     <script>
       WebFont.load({
         google: { families: ["Public Sans:300,400,500,600,700"] },
@@ -64,14 +64,15 @@
         <div class="sidebar-logo">
           <!-- Logo Header -->
           <div class="logo-header" data-background-color="dark">
-            {% comment %} <a href="{% url 'desktop_list_page' %}" class="logo"> {% endcomment %}
-              <img 
-                src="{% static 'img/kaiadmin/logo_light.svg' %}"
-                alt="navbar brand"
-                class="navbar-brand"
-                height="20"
-              />
-            </a>
+            <a href="http://127.0.0.1:8000/" class="logo">
+                <img
+                  
+                  src= "{% static 'img/kaiadmin/logo_light.svg' %}"
+                  alt="navbar brand"
+                  class="navbar-brand"
+                  height="20"
+                />
+              </a>
             <div class="nav-toggle">
               <button class="btn btn-toggle toggle-sidebar">
                 <i class="gg-menu-right"></i>
@@ -116,64 +117,140 @@
                 </span>
                 <h4 class="text-section">Components</h4>
               </li>
+
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#base">
                   <i class="fas fa-layer-group"></i>
-                  <p>Base</p>
+                  <p>IT Equipments</p>
                   <span class="caret"></span>
                 </a>
                 <div class="collapse" id="base">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="{% url 'add_desktop_package_with_details' %}">
-                        <span class="sub-item">IT Equipments</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{% url 'add_desktop_package_with_details' %}">
-                        <span class="sub-item">Add Item</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{% url 'employee_list' %}">
-                        <span class="sub-item">Add Employee</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{% url 'add_brand' %}">
-                        <span class="sub-item">Add Brand</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{% url 'add_desktop_package_with_details' %}">
-                        <span class="sub-item">Disposed Desktops</span>
-                      </a>
-                    </li>
-
-                    <li>
-                      <a href="{% url 'disposed_keyboards' %}">
-                        <span class="sub-item">Disposed Keyboards</span>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="{% url 'keyboard_details' %}">
-                        <span class="sub-item">Keyboard Details</span>
+                      <a href="{% url 'desktop_details' %}">
+                        <span class="sub-item">🗄️ Desktops Packages</span>
                       </a>
                     </li>
                     <li>
                       <a href="{% url 'desktop_details' %}">
-                        <span class="sub-item">Desktop Detaills</span>
+                        <span class="sub-item">💻 Laptops Packages</span>
                       </a>
                     </li>
                     <li>
+                     <a href="{% url 'monitor_details' %}">
+                       <span class="sub-item">🖥️ Monitor </span>
+                     </a>
+                   </li>
+                
+                   <li>
+                     <a href="{% url 'keyboard_details' %}">
+                       <span class="sub-item">⌨️ Keyboard </span>
+                     </a>
+                   </li>
+                   <li>
+                      <a href="{% url 'mouse_details' %}">
+                        <span class="sub-item">🖱️ Mouse </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'ups_details' %}">
+                        <span class="sub-item">⚡ UPS </span>
+                      </a>
+                    </li>
+
+                   
+                  </ul>
+                </div>
+              </li>
+
+               <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#sidebarLayouts">
+                  <i class="fas fa-th-list"></i>
+                  <p>Miscelanous</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="sidebarLayouts">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{% url 'add_desktop_package_with_details' %}">
+                        <span class="sub-item">✍🏻 Add IT Equipment</span>
+                      </a>
+                    </li>
+                     <li>
                       <a href="{% url 'employee_list' %}">
-                        <span class="sub-item">Employees</span>
+                         <span class="sub-item">🙍🏻‍♂️ Employee </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'add_brand' %}">
+                        <span class="sub-item">🏷️ Brand Management</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'office_section_list' %}">
+                        <span class="sub-item">💼 Office Section</span>
                       </a>
                     </li>
                   </ul>
                 </div>
               </li>
 
+               <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#disposalLayouts">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <p>Disposals</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="disposalLayouts">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{% url 'disposal_overview' %}">
+                        <span class="sub-item">🗑️ Disposed Overview</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'dashboard_view_chart' %}">
+                        <span class="sub-item">📊 Disposed Chart</span>
+                      </a>
+                    </li>
+                     
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#disposalLayouts">
+                  <i class="fas fa-wrench"></i>
+                  <p>Preventive Maintenance</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="disposalLayouts">
+                  <ul class="nav nav-collapse">
+                    
+                    <li>
+                      <a href="{% url 'pm_overview' %}" target="_blank">
+                        <span class="sub-item">PM Overview</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'section_schedule_list' %}" target="_blank">
+                        <span class="sub-item">PM Schedules</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'disposed_keyboards' %}" target="_blank">
+                        <span class="sub-item">4th Quarter</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+
+
+              
             </ul>
           </div>
         </div>
@@ -186,7 +263,7 @@
           <div class="main-header-logo">
             <!-- Logo Header -->
             <div class="logo-header" data-background-color="dark">
-              <a href="index.html" class="logo">
+              <a href="#" class="logo">
                 <img
                   
                   src= "{% static 'img/kaiadmin/logo_light.svg' %}"
@@ -259,6 +336,7 @@
                     </form>
                   </ul>
                 </li>
+                     
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
                     class="nav-link dropdown-toggle"
@@ -350,84 +428,69 @@
                     </li>
                   </ul>
                 </li>
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a
-                    class="nav-link dropdown-toggle"
-                    href="#"
-                    id="notifDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
+
+                {% comment %} notification area for PM {% endcomment %}
+               <li class="nav-item topbar-icon dropdown hidden-caret">
+                  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-bell"></i>
-                    <span class="notification">4</span>
+                    {% if pending_pm_count > 0 %}
+                      <span class="notification">{{ pending_pm_count }}</span>
+                    {% endif %}
                   </a>
-                  <ul
-                    class="dropdown-menu notif-box animated fadeIn"
-                    aria-labelledby="notifDropdown"
-                  >
+                  <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
                     <li>
                       <div class="dropdown-title">
-                        You have 4 new notification
+                        {% if pending_pm_count > 0 %}
+                          You have {{ pending_pm_count }} pending PM assignment{{ pending_pm_count|pluralize }}
+                        {% else %}
+                          No pending PM
+                        {% endif %}
                       </div>
                     </li>
                     <li>
                       <div class="notif-scroll scrollbar-outer">
                         <div class="notif-center">
-                          <a href="#">
-                            <div class="notif-icon notif-primary">
-                              <i class="fa fa-user-plus"></i>
-                            </div>
+                          {% for assignment in pending_pm_list %}
+                            <a href="{% url 'maintenance_history' assignment.desktop_package.id %}">
+                              <div class="notif-icon notif-warning">
+                                <i class="fa fa-exclamation-triangle"></i>
+                              </div>
+                              <div class="notif-content">
+                                <span class="block">
+                                  PM pending for 
+                                  {% if assignment.computer_name %}
+                                    {{ assignment.computer_name }}
+                                  {% else %}
+                                    Desktop #{{ assignment.desktop_package.id }}
+                                  {% endif %}
+                                </span>
+                                <span class="time">
+                                  {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
+                                  {% if assignment.is_overdue %}
+                                    <span class="badge bg-danger ms-1">Overdue</span>
+                                  {% else %}
+                                    <span class="badge bg-warning text-dark ms-1">Upcoming</span>
+                                  {% endif %}
+                                </span>
+                              </div>
+                            </a>
+                          {% empty %}
                             <div class="notif-content">
-                              <span class="block"> New user registered </span>
-                              <span class="time">5 minutes ago</span>
+                              <span class="block">No pending PM tasks.</span>
                             </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-icon notif-success">
-                              <i class="fa fa-comment"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">
-                                Rahmad commented on Admin
-                              </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="assets/img/profile2.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">
-                                Reza send messages to you
-                              </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-icon notif-danger">
-                              <i class="fa fa-heart"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block"> Farrah liked Admin </span>
-                              <span class="time">17 minutes ago</span>
-                            </div>
-                          </a>
+                          {% endfor %}
                         </div>
                       </div>
                     </li>
                     <li>
-                      <a class="see-all" href="javascript:void(0);"
-                        >See all notifications<i class="fa fa-angle-right"></i>
+                      <a class="see-all" href="{% url 'pm_overview' %}">
+                        See all PM Tasks <i class="fa fa-angle-right"></i>
                       </a>
                     </li>
                   </ul>
                 </li>
+{% comment %} end notification area for PM  {% endcomment %}
+
                 <li class="nav-item topbar-icon dropdown hidden-caret">
                   <a
                     class="nav-link"
@@ -445,25 +508,25 @@
                     <div class="quick-actions-scroll scrollbar-outer">
                       <div class="quick-actions-items">
                         <div class="row m-0">
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'section_schedule_list' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-danger rounded-circle">
                                 <i class="far fa-calendar-alt"></i>
                               </div>
-                              <span class="text">Calendar</span>
+                              <span class="text">PM Sched</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'add_desktop_package_with_details' %}">
                             <div class="quick-actions-item">
                               <div
-                                class="avatar-item bg-warning rounded-circle"
+                                class="avatar-item bg-success rounded-circle"
                               >
-                                <i class="fas fa-map"></i>
+                                <i class="fas fa-edit"></i>
                               </div>
-                              <span class="text">Maps</span>
+                              <span class="text">Add Item</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'export_desktop_excel' %}">
                             <div class="quick-actions-item">
                               <div class="avatar-item bg-info rounded-circle">
                                 <i class="fas fa-file-excel"></i>
@@ -471,34 +534,34 @@
                               <span class="text">Reports</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'dashboard_view_chart' %}">
                             <div class="quick-actions-item">
                               <div
-                                class="avatar-item bg-success rounded-circle"
+                                class="avatar-item bg-warning rounded-circle"
                               >
                                 <i class="fas fa-envelope"></i>
                               </div>
-                              <span class="text">Emails</span>
+                              <span class="text">Dashboard</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'disposal_overview' %}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-primary rounded-circle"
                               >
-                                <i class="fas fa-file-invoice-dollar"></i>
+                                <i class="far fa-trash-alt"></i>
                               </div>
-                              <span class="text">Invoice</span>
+                              <span class="text">Disposals</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="#">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'employee_list' %}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-secondary rounded-circle"
                               >
-                                <i class="fas fa-credit-card"></i>
+                                <i class="fas fa-user"></i>
                               </div>
-                              <span class="text">Payments</span>
+                              <span class="text">Employee</span>
                             </div>
                           </a>
                         </div>
@@ -516,14 +579,14 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile.jpg"
+                        src="{% static 'assets/img/profile.jpg' %}" 
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Hi,</span>
-                      <span class="fw-bold">Hizrian</span>
+                      <span class="fw-bold">Bobby</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -532,7 +595,7 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile.jpg"
+                              src="{% static 'assets/img/profile.jpg' %}"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
@@ -556,7 +619,12 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="#">Account Setting</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Logout</a>
+
+                         <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item">Logout</button>
+                      </form>
+                        
                       </li>
                     </div>
                   </ul>
@@ -577,49 +645,54 @@
             >
               <div>
                 <h3 class="fw-bold mb-3">Dashboard</h3>
-                <h6 class="op-7 mb-2">Free Bootstrap 5 Admin Dashboard</h6>
+                <h6 class="op-7 mb-2">ICT Inventory Management</h6>
               </div>
               <div class="ms-md-auto py-2 py-md-0">
                 <a href="#" class="btn btn-label-info btn-round me-2">Manage</a>
                 <a href="{% url 'add_desktop_package_with_details' %}" class="btn btn-primary btn-round">Add item</a>
               </div>
             </div>
-            <div class="row">
+              
+              
+             
+
+
+
+{% comment %} car stats {% endcomment %}
+
+
+              <div class="row">
               <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
+                <div class="card card-stats card-primary card-round">
                   <div class="card-body">
-                    <div class="row align-items-center">
-                      <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-primary bubble-shadow-small"
-                        >
-                          <i class="fas fa-users"></i>
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
+                          <i class="fas fa-boxes"></i>
                         </div>
                       </div>
-                      <div class="col col-stats ms-3 ms-sm-0">
+                      <div class="col-7 col-stats">
                         <div class="numbers">
-                          <p class="card-category">Total IT Equipment:</p>
-                          <h4 class="card-title">{{ desktop_count }}</h4>
-                        </div> 
+                          <p class="card-category">Desktop Packages</p>
+                          <h4 class="card-title">{{ total_count }}</h4>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
+                <div class="card card-stats card-info card-round">
                   <div class="card-body">
-                    <div class="row align-items-center">
-                      <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-info bubble-shadow-small"
-                        >
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
                           <i class="fas fa-user-check"></i>
                         </div>
                       </div>
-                      <div class="col col-stats ms-3 ms-sm-0">
+                      <div class="col-7 col-stats">
                         <div class="numbers">
-                          <p class="card-category">Total Desktops</p>
+                          <p class="card-category">Laptops</p>
                           <h4 class="card-title">1303</h4>
                         </div>
                       </div>
@@ -628,19 +701,17 @@
                 </div>
               </div>
               <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
+                <div class="card card-stats card-success card-round">
                   <div class="card-body">
-                    <div class="row align-items-center">
-                      <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-success bubble-shadow-small"
-                        >
-                          <i class="fas fa-luggage-cart"></i>
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
+                          <i class="fas fa-chart-pie"></i>
                         </div>
                       </div>
-                      <div class="col col-stats ms-3 ms-sm-0">
+                      <div class="col-7 col-stats">
                         <div class="numbers">
-                          <p class="card-category">Total Laptop</p>
+                          <p class="card-category">Printers</p>
                           <h4 class="card-title">$ 1,345</h4>
                         </div>
                       </div>
@@ -649,19 +720,17 @@
                 </div>
               </div>
               <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
+                <div class="card card-stats card-secondary card-round">
                   <div class="card-body">
-                    <div class="row align-items-center">
-                      <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-secondary bubble-shadow-small"
-                        >
+                    <div class="row">
+                      <div class="col-5">
+                        <div class="icon-big text-center">
                           <i class="far fa-check-circle"></i>
                         </div>
                       </div>
-                      <div class="col col-stats ms-3 ms-sm-0">
+                      <div class="col-7 col-stats">
                         <div class="numbers">
-                          <p class="card-category">Total Disposed</p>
+                          <p class="card-category">Other IT Equipments</p>
                           <h4 class="card-title">576</h4>
                         </div>
                       </div>
@@ -671,6 +740,52 @@
               </div>
             </div>
             
+{% comment %} statistics {% endcomment %}
+
+<div class="row">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body pb-0">
+                    <div class="h1 fw-bold float-end text-primary">+5%</div>
+                    <h2 class="mb-2">17</h2>
+                    <p class="text-muted">Users online</p>
+                    <div class="pull-in sparkline-fix">
+                      <div id="lineChart"><canvas width="552" height="70" style="display: inline-block; width: 552.109px; height: 70px; vertical-align: top;"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+             <div class="col-md-4">
+  <div class="card">
+    <div class="card-body pb-0">
+      <div class="h1 fw-bold float-end text-danger">-3%</div>
+      <h2 class="mb-2">{{ total_disposed }}</h2>
+      <p class="text-muted">Total Disposed</p>
+      <div class="pull-in sparkline-fix">
+        <div id="lineChart2">
+          <!-- Optional: Add a mini chart later -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body pb-0">
+                    <div class="h1 fw-bold float-end text-warning">+7%</div>
+                    <h2 class="mb-2">213</h2>
+                    <p class="text-muted">Transactions</p>
+                    <div class="pull-in sparkline-fix">
+                      <div id="lineChart3"><canvas width="552" height="70" style="display: inline-block; width: 552.109px; height: 70px; vertical-align: top;"></canvas></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            
+{% comment %} Recently Added IT Equipments {% endcomment %}
             <div class="row">
               <div class="col-md-12">
                 <div class="card">
@@ -737,12 +852,21 @@
 
     <!--   Core JS Files   -->
     {% block scripts %}
-    <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
-    <script src="{% static 'js/core/popper.min.js' %}"></script>
-    <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-   
+   <!-- Bootstrap 5.3 Bundle JS (includes Popper and modal functionality) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="{% static 'js/core/popper.min.js' %}"></script>
+  
+
+<script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
+<script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script> 
+
+
+
+<script src="{% static 'js/plugin/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'js/plugin/datatables/dataTables.bootstrap5.min.js' %}"></script>
+   
+<link rel="stylesheet" href="{% static 'css/plugin/datatables/dataTables.bootstrap5.min.css' %}">
 
     <!-- jQuery Scrollbar --> 
     <script src="{% static 'js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
@@ -811,8 +935,6 @@
     </script>
     
 
-
-
     <script>
       $(document).ready(function () {
         $("#basic-datatables").DataTable({});
@@ -872,8 +994,7 @@
     </script>
 
     {% endblock %}
-
-  </body>
+ </body>
 </html>
 
 

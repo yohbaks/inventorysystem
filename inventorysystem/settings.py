@@ -33,7 +33,7 @@ SECRET_KEY = 'django-insecure-+z29aucw_nry#97jvze05=t#h%3ega9am&mkt@a55efzqa8&ba
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'inventory.context_processors.pending_pm_notifications',  # Custom context processor template for pending PM notifications
             ],
         },
     },
@@ -147,3 +148,7 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'success'
 }
 
+# Authentication settings
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'

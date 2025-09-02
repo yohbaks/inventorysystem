@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Add Preventive Maintenance</h4>
+          </div>
+          <div class="card-body">
+            <form method="POST">
+              {% csrf_token %}
+              <div class="form-group">
+                <label>Maintenance Date</label>
+                <input type="date" name="maintenance_date" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label>Performed By</label>
+                <input type="text" name="performed_by" class="form-control" placeholder="Technician Name" required>
+              </div>
+              <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" rows="4" class="form-control" placeholder="Optional notes..."></textarea>
+              </div>
+              <div class="form-group text-end mt-4">
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a href="{% url 'maintenance_history' desktop.id %}" class="btn btn-secondary">Cancel</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card shadow-lg animate__animated animate__fadeIn">
+          <div class="card-header bg-primary text-white">
+            <div class="card-head-row">
+              <div class="card-title">🛠 Preventive Maintenance Checklist</div>
+              <div class="card-tools">
+                <a href="{% url 'maintenance_history' desktop.id %}" class="btn btn-label-light btn-round btn-sm">
+                  <span class="btn-label">
+                    <i class="fa fa-arrow-left"></i>
+                  </span>
+                  Back to History
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <form method="POST">
+            {% csrf_token %}
+            <div class="card-body">
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Select Quarter Schedule:</label>
+                  <select name="quarter_schedule_id" class="form-select" required id="quarter_schedule">
+                    <option value="" disabled selected>Select a quarter</option>
+                    {% for quarter in quarter_schedules %}
+                      <option value="{{ quarter.id }}">
+                        {{ quarter.get_quarter_display }} {{ quarter.year }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Date Accomplished:</label>
+                  <input type="date" name="date_accomplished" class="form-control" id="date_accomplished" required>
+                  <small class="text-muted" id="date-range-info"></small>
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Office:</label>
+                  <input type="text" name="office" class="form-control" value="{{ office }}" readonly>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">End User:</label>
+                  <input type="text" name="end_user" class="form-control" value="{{ end_user }}" readonly>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label fw-semibold">Performed By:</label>
+                <input type="text" name="performed_by" class="form-control" placeholder="Enter technician's name" required>
+              </div>
+
+              <hr>
+              <h5 class="text-primary fw-semibold mb-3">Checklist Items</h5>
+              <div class="row">
+                {% for i in range %}
+                  <div class="col-md-6 mb-4">
+                    <div class="d-flex align-items-start hover-shadow p-2 rounded border">
+                      <div class="form-check me-2 pt-1">
+                        <input class="form-check-input" type="checkbox" name="task_{{ i }}">
+                      </div>
+                      <div class="flex-grow-1">
+                        <label class="fw-bold">Task {{ i }}:</label>
+                        <p class="mb-1">{{ checklist_labels|get_item:i }}</p>
+                        <textarea name="note_{{ i }}" class="form-control" rows="3" placeholder="Notes or actions taken"></textarea>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <div class="d-flex justify-content-end mt-4">
+                <button type="submit" class="btn btn-success px-4">
+                  <i class="fa fa-save"></i> Save Checklist
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hover-shadow:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    transition: 0.3s ease-in-out;
+  }
+  textarea.form-control {
+    font-size: 0.95rem;
+    resize: vertical;
+    margin-top: 5px;
+  }
+  .form-check-input {
+    margin-top: 6px;
+  }
+</style>
+
+<script>
+  const quarterSelect = document.getElementById("quarter_schedule");
+  const dateInput = document.getElementById("date_accomplished");
+  const dateRangeInfo = document.getElementById("date-range-info");
+
+  quarterSelect.addEventListener("change", function () {
+    const quarterId = this.value;
+    fetch(`/maintenance/get_schedule_dates/${quarterId}/`)
+      .then(response => response.json())
+      .then(data => {
+        dateInput.min = data.start_date;
+        dateInput.max = data.end_date;
+        dateInput.value = "";
+        dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
+      })
+      .catch(() => {
+        dateInput.min = "";
+        dateInput.max = "";
+        dateRangeInfo.innerText = "Unable to load schedule date range.";
+      });
+  });
+</script>
+
+{% if messages %}
+  <script>
+    $(document).ready(function () {
+      {% for message in messages %}
+        $.notify({
+          message: "{{ message|escapejs }}",
+          title: "{% if message.tags == 'warning' %}Preventive Maintenance{% elif message.tags == 'success' %}Success{% else %}Notice{% endif %}",
+          icon: "{% if message.tags == 'warning' %}fa fa-bell{% elif message.tags == 'success' %}fa fa-check{% else %}fa fa-info-circle{% endif %}"
+        }, {
+          type: "{{ message.tags }}",
+          placement: { from: "bottom", align: "right" },
+          delay: 8000,
+          z_index: 9999
+        });
+      {% endfor %}
+    });
+  </script>
+{% endif %}
+{% endblock %}

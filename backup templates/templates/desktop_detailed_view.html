@@ -1,0 +1,884 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <!-- Left Column -->
+      <div class="col-md-8">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title"><h3>{{ desktops.desktop_Computer_name }}</h3></div>
+            <div class="card-tools">
+              <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#disposeModal">
+                <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Return to Supply
+              </button>
+              <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+                <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
+              </a>
+              <a href="#" class="btn btn-label-info btn-round btn-sm">
+                <span class="btn-label"><i class="fa fa-print"></i></span> Print
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Pills Navigation -->
+            <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-pills-icons justify-content-center" id="pills-tab-with-icon" role="tablist">
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link active" id="pills-desktop-tab" data-bs-toggle="pill" href="#pills-desktop" role="tab" aria-controls="pills-desktop" aria-selected="true">
+                  <i class="fas fa-desktop"></i> Desktop Details
+                </a>
+              </li>
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link" id="pills-monitor-tab" data-bs-toggle="pill" href="#pills-monitor" role="tab" aria-controls="pills-monitor" aria-selected="false">
+                  <i class="fas fa-tv"></i> Monitor Details
+                </a>
+              </li>
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link" id="pills-keyboard-tab" data-bs-toggle="pill" href="#pills-keyboard" role="tab" aria-controls="pills-keyboard" aria-selected="false">
+                  <i class="fas fa-keyboard"></i> Keyboard Details
+                </a>
+              </li>
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link" id="pills-mouse-tab" data-bs-toggle="pill" href="#pills-mouse" role="tab" aria-controls="pills-mouse" aria-selected="false">
+                  <i class="fas fa-mouse-pointer"></i> Mouse Details
+                </a>
+              </li>
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link" id="pills-ups-tab" data-bs-toggle="pill" href="#pills-ups" role="tab" aria-controls="pills-ups" aria-selected="false">
+                  <i class="fas fa-battery-full"></i> UPS Details
+                </a>
+              </li>
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link" id="pills-user-tab" data-bs-toggle="pill" href="#pills-user" role="tab" aria-controls="pills-user" aria-selected="false">
+                  <i class="fas fa-user"></i> User Details
+                </a>
+              </li>
+              <li class="nav-item submenu" role="presentation">
+                <a class="nav-link" id="pills-documents-tab" data-bs-toggle="pill" href="#pills-documents" role="tab" aria-controls="pills-documents" aria-selected="false">
+                  <i class="fas fa-file-alt"></i> Documents
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column for PM green -->
+      <div class="col-md-4">
+        <div class="card card-success bg-success2">
+          <div class="card-body pb-0">
+            <div class="h1 fw-bold float-end">+7%</div>
+            <h2 class="mb-2">Preventive Maintenance</h2>
+            <p>Transactions</p>
+            <div class="pull-in sparkline-fix chart-as-background">
+              <div id="lineChart6"><canvas width="507" height="70" style="display: inline-block; width: 507.984px; height: 70px; vertical-align: top;"></canvas></div>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+
+    </div>
+
+    
+    <!-- Tab Content -->
+     <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-desktop" role="tabpanel" aria-labelledby="pills-desktop-tab">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Desktop Details</div>
+      </div>
+      <div class="card-body">
+        <table class="table table-head-bg-success table-bordered table-hover">
+          <thead>
+            <tr>
+              <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+              <th scope="col">DETAILS</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
+             <td> {{ desktops.desktop_SerialNo }}</td>
+
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Brand Name:</strong></td>
+              <td>{{ desktops.desktop_BrandName }}</td>
+
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Model:</strong></td>
+              <td>{{ desktops.desktop_Model }}</td>
+
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Processor:</strong></td>
+              <td>{{ desktops.desktop_Processor}}</td>
+
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Memory:</strong></td>
+              <td>{{ desktops.desktop_Memory }}</td>
+
+            </tr>
+            <tr>
+              <td class="col-sm-6 col-md-3"><strong>Drive:</strong></td>
+              <td>{{ desktops.desktop_Drive }}</td>
+
+            </tr>
+          </tbody>
+        </table>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDesktopModal">Edit</button>
+      </div>
+
+    </div>
+  </div>
+
+      <!-- Monitor Details Tab -->
+      <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+          <div class="tab-pane fade" id="pills-monitor" role="tabpanel" aria-labelledby="pills-monitor-tab">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Monitor Details</div>
+        </div>
+        <div class="card-body">
+          <table class="table table-head-bg-success">
+            <thead>
+              <tr>
+                <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                <th scope="col">DETAILS</th>
+  
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+               <td><h6> {{ desktops.desktop_Monitor_SN }}</h6></td>
+  
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+                <td>{{ desktops.desktop_Monitor_Brand }}</td>
+  
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+                <td>{{ desktops.desktop_Monitor_Model }}</td>
+  
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Monitor Size:</h5></td>
+                <td>{{ desktops.desktop_Monitor_Size}}</td>
+  
+              </tr>
+    
+            </tbody>
+          </table>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMonitorModal">Edit</button>
+        </div>
+  
+      </div>
+    </div>
+
+     <!-- keyboard Details Tab -->
+    <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+      <div class="tab-pane fade" id="pills-keyboard" role="tabpanel" aria-labelledby="pills-keyboard-tab">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Keyboard Details</div>
+    </div>
+    <div class="card-body">
+      <table class="table table-head-bg-success">
+        <thead>
+          <tr>
+            <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+            <th scope="col">DETAILS</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+           <td><h6> {{ desktops.desktop_Keyboard_SN }}</h6></td>
+
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+            <td>{{ desktops.desktop_keyboard_Brand }}</td>
+
+          </tr>
+          <tr>
+            <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+            <td>{{ desktops.desktop_keyboard_Model }}</td>
+
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">Edit</button>
+      <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#disposeModal_keyboard">
+        <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Disposed Keyboard
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+        <!-- Mouse Details Tab -->
+
+        <div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+          <div class="tab-pane fade" id="pills-mouse" role="tabpanel" aria-labelledby="pills-mouse-tab">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Mouse Details</div>
+        </div>
+        <div class="card-body">
+          <table class="table table-head-bg-success">
+            <thead>
+              <tr>
+                <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+                <th scope="col">DETAILS</th>
+    
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+               <td><h6> {{ desktops.desktop_Mouse_SN }}</h6></td>
+    
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+                <td>{{ desktops.desktop_Mouse_Brand }}</td>
+    
+              </tr>
+              <tr>
+                <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+                <td>{{ desktops.desktop_Mouse_Model }}</td>
+    
+              </tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editMouseModal">Edit</button>
+        </div>
+    
+      </div>
+    </div>
+
+<!-- UPS Details Tab -->
+
+
+<div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+  <div class="tab-pane fade" id="pills-ups" role="tabpanel" aria-labelledby="pills-ups-tab">
+<div class="card">
+<div class="card-header">
+  <div class="card-title">UPS Details</div>
+</div>
+<div class="card-body">
+  <table class="table table-head-bg-success">
+    <thead>
+      <tr>
+        <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+        <th scope="col">DETAILS</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Serial Number:</h5></td>
+       <td><h6> {{ desktops.desktop_UPS_SN }}</h6></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Brand Name:</h5></td>
+        <td>{{ desktops.desktop_UPS_Brand }}</td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Model:</h5></td>
+        <td>{{ desktops.desktop_UPS_Model }}</td>
+
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUPSModal">Edit</button>
+</div>
+
+</div>
+</div>
+
+<!-- User Details Tab -->
+<div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+  <div class="tab-pane fade" id="pills-user" role="tabpanel" aria-labelledby="pills-user-tab">
+<div class="card">
+<div class="card-header">
+  <div class="card-title">User Details</div>
+</div>
+<div class="card-body">
+  <table class="table table-head-bg-success">
+    <thead>
+      <tr>
+        <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+        <th scope="col">DETAILS</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Asset Onwer:</h5></td>
+       <td><h5><strong> {{ desktops.desktop_Asset_owner }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Asset Designation:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Asset_designation }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Asset Section:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Asset_section }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>End User:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Enduser }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>End User Designation:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Enduser_designation }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>End User Section:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Enduser_section }}</strong></h5></td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button>
+</div>
+
+</div>
+</div>
+
+<!-- Documents Details Tab -->
+
+<div class="tab-content mt-2 mb-3" id="pills-tabContent">
+        
+  <div class="tab-pane fade" id="pills-documents" role="tabpanel" aria-labelledby="pills-documents-tab">
+<div class="card">
+<div class="card-header">
+  <div class="card-title">Documents Details</div>
+</div>
+<div class="card-body">
+  <table class="table table-head-bg-success">
+    <thead>
+      <tr>
+        <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+        <th scope="col">DETAILS</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>PAR:</h5></td>
+       <td><h5><strong> {{ desktops.desktop_PAR }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Property Number:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Propertyno }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Acquisition Type:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Acquisition_Type }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Value:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Value }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Date Received:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Datereceived }}</strong></h5></td>
+
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Date Inspected:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Dateinspected }}</strong></h5></td>
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Supplier:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Supplier }}</strong></h5></td>
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Status:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Status }}</strong></h5></td>
+      </tr>
+      <tr>
+        <td class="col-sm-6 col-md-3"><h5>Computer Name:</h5></td>
+        <td><h5><strong>{{ desktops.desktop_Computer_name }}</strong></h5></td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">Edit</button>
+</div>
+
+</div>
+</div>
+
+      <!-- Desktop Edit Modal -->
+      <div class="modal fade" id="editDesktopModal" tabindex="-1" aria-labelledby="editDesktopModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+              {% csrf_token %}
+              <div class="modal-header">
+                <h5 class="modal-title" id="editDesktopModalLabel">Edit Desktop Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <!-- Form for Editing Desktop Details -->
+                <div class="form-group">
+                  <label for="serialInput">Serial Number</label>
+                  <input type="text" class="form-control" id="serialInput" name="serial_input" value="{{ desktops.desktop_SerialNo }}">
+                </div>
+                <div class="form-group">
+                  <label for="brandInput">Brand Name</label>
+                  <input type="text" class="form-control" id="brandInput" name="brand_input" value="{{ desktops.desktop_BrandName }}">
+                </div>
+                <div class="form-group">
+                  <label for="modelInput">Model</label>
+                  <input type="text" class="form-control" id="modelInput" name="model_input" value="{{ desktops.desktop_Model }}">
+                </div>
+                <div class="form-group">
+                  <label for="processorInput">Processor</label>
+                  <input type="text" class="form-control" id="processorInput" name="processor_input" value="{{ desktops.desktop_Processor }}">
+                </div>
+                <div class="form-group">
+                  <label for="memoryInput">Memory</label>
+                  <input type="text" class="form-control" id="memoryInput" name="memory_input" value="{{ desktops.desktop_Memory }}">
+                </div>
+                <div class="form-group">
+                  <label for="driveInput">Drive</label>
+                  <input type="text" class="form-control" id="driveInput" name="drive_input" value="{{ desktops.desktop_Drive }}">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monitor Edit Modal -->
+      <div class="modal fade" id="editMonitorModal" tabindex="-1" aria-labelledby="editMonitorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+              {% csrf_token %}
+              <div class="modal-header">
+                <h5 class="modal-title" id="editMonitorModalLabel">Edit Monitor Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <!-- Form for Editing Monitor Details -->
+                <div class="form-group">
+                  <label for="monitorSerialInput">Monitor Serial Number</label>
+                  <input type="text" class="form-control" id="monitorSerialInput" name="monitor_sn_input" value="{{ desktops.desktop_Monitor_SN }}">
+                </div>
+                <div class="form-group">
+                  <label for="monitorBrandInput">Monitor Brand</label>
+                  <input type="text" class="form-control" id="monitorBrandInput" name="monitor_brand_input" value="{{ desktops.desktop_Monitor_Brand }}">
+                </div>
+                <div class="form-group">
+                  <label for="monitorModelInput">Monitor Model</label>
+                  <input type="text" class="form-control" id="monitorModelInput" name="monitor_model_input" value="{{ desktops.desktop_Monitor_Model }}">
+                </div>
+                <div class="form-group">
+                  <label for="monitorSizeInput">Monitor Size</label>
+                  <input type="text" class="form-control" id="monitorSizeInput" name="monitor_size_input" value="{{ desktops.desktop_Monitor_Size }}">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+<!-- Keyboard Edit Modal -->
+<div class="modal fade" id="editKeyboardModal" tabindex="-1" aria-labelledby="editKeyboardModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editKeyboardModalLabel">Edit Keyboard Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for Editing Keyboard Details -->
+          <div class="form-group">
+            <label for="keyboardSerialInput">Keyboard Serial Number</label>
+            <input type="text" class="form-control" id="keyboardSerialInput" name="keyboard_sn_input" value="{{ desktops.desktop_Keyboard_SN }}">
+          </div>
+          <div class="form-group">
+            <label for="keyboardBrandInput">Keyboard Brand</label>
+            <input type="text" class="form-control" id="keyboardBrandInput" name="keyboard_brand_input" value="{{ desktops.desktop_keyboard_Brand }}">
+          </div>
+          <div class="form-group">
+            <label for="keyboardModelInput">Keyboard Model</label>
+            <input type="text" class="form-control" id="keyboardModelInput" name="keyboard_model_input" value="{{ desktops.desktop_keyboard_Model }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+      <!-- Mouse Edit Modal -->
+<div class="modal fade" id="editMouseModal" tabindex="-1" aria-labelledby="editMouseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editMouseModalLabel">Edit Mouse Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for Editing Mouse Details -->
+          <div class="form-group">
+            <label for="mouseSerialInput">Mouse Serial Number</label>
+            <input type="text" class="form-control" id="mouseSerialInput" name="mouse_sn_input" value="{{ desktops.desktop_Mouse_SN }}">
+          </div>
+          <div class="form-group">
+            <label for="mouseBrandInput">Mouse Brand</label>
+            <input type="text" class="form-control" id="mouseBrandInput" name="mouse_brand_input" value="{{ desktops.desktop_Mouse_Brand }}">
+          </div>
+          <div class="form-group">
+            <label for="mouseModelInput">Mouse Model</label>
+            <input type="text" class="form-control" id="mouseModelInput" name="mouse_model_input" value="{{ desktops.desktop_Mouse_Model }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- UPS Edit Modal -->
+<div class="modal fade" id="editUPSModal" tabindex="-1" aria-labelledby="editUPSModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUPSModalLabel">Edit UPS Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for Editing UPS Details -->
+          <div class="form-group">
+            <label for="upsSerialInput">UPS Serial Number</label>
+            <input type="text" class="form-control" id="upsSerialInput" name="ups_sn_input" value="{{ desktops.desktop_UPS_SN }}">
+          </div>
+          <div class="form-group">
+            <label for="upsBrandInput">UPS Brand</label>
+            <input type="text" class="form-control" id="upsBrandInput" name="ups_brand_input" value="{{ desktops.desktop_UPS_Brand }}">
+          </div>
+          <div class="form-group">
+            <label for="upsModelInput">UPS Model</label>
+            <input type="text" class="form-control" id="upsModelInput" name="ups_model_input" value="{{ desktops.desktop_UPS_Model }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- User Edit Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUserModalLabel">Edit User Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for Editing User Details -->
+          <div class="form-group">
+            <label for="assetOwnerInput">Asset Owner</label>
+            <input type="text" class="form-control" id="assetOwnerInput" name="asset_owner_input" value="{{ desktops.desktop_Asset_owner }}">
+          </div>
+          <div class="form-group">
+            <label for="assetDesignationInput">Asset Designation</label>
+            <input type="text" class="form-control" id="assetDesignationInput" name="asset_designation_input" value="{{ desktops.desktop_Asset_designation }}">
+          </div>
+          <div class="form-group">
+            <label for="assetSectionInput">Asset Section</label>
+            <input type="text" class="form-control" id="assetSectionInput" name="asset_section_input" value="{{ desktops.desktop_Asset_section }}">
+          </div>
+          <div class="form-group">
+            <label for="endUserInput">End User</label>
+            <input type="text" class="form-control" id="endUserInput" name="enduser_input" value="{{ desktops.desktop_Enduser }}">
+          </div>
+          <div class="form-group">
+            <label for="endUserDesignationInput">End User Designation</label>
+            <input type="text" class="form-control" id="endUserDesignationInput" name="enduser_designation_input" value="{{ desktops.desktop_Enduser_designation }}">
+          </div>
+          <div class="form-group">
+            <label for="endUserSectionInput">End User Section</label>
+            <input type="text" class="form-control" id="endUserSectionInput" name="enduser_section_input" value="{{ desktops.desktop_Enduser_section }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editDocumentsModal" tabindex="-1" aria-labelledby="editDocumentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'desktop_detailed_view' desktops.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDocumentsModalLabel">Edit Documents Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Form fields for document details -->
+          <div class="form-group">
+            <label for="parNumberInput">PAR Number</label>
+            <input type="text" class="form-control" id="parNumberInput" name="par_number_input" value="{{ desktops.desktop_PAR }}">
+          </div>
+          <div class="form-group">
+            <label for="propertyNumberInput">Property Number</label>
+            <input type="text" class="form-control" id="propertyNumberInput" name="property_number_input" value="{{ desktops.desktop_Propertyno }}">
+          </div>
+          <div class="form-group">
+            <label for="acquisitionTypeInput">Acquisition Type</label>
+            <input type="text" class="form-control" id="acquisitionTypeInput" name="acquisition_type_input" value="{{ desktops.desktop_Acquisition_Type }}">
+          </div>
+          <div class="form-group">
+            <label for="valueInput">Value</label>
+            <input type="text" class="form-control" id="valueInput" name="value_desktop_input" value="{{ desktops.desktop_Value }}">
+          </div>
+          <div class="form-group">
+            <label for="dateReceivedInput">Date Received</label>
+            <input type="text" class="form-control" id="dateReceivedInput" name="date_received_input" value="{{ desktops.desktop_Datereceived }}">
+          </div>
+          <div class="form-group">
+            <label for="dateInspectedInput">Date Inspected</label>
+            <input type="text" class="form-control" id="dateInspectedInput" name="date_inspected_input" value="{{ desktops.desktop_Dateinspected }}">
+          </div>
+          <div class="form-group">
+            <label for="supplierInput">Supplier</label>
+            <input type="text" class="form-control" id="supplierInput" name="supplier_name_input" value="{{ desktops.desktop_Supplier }}">
+          </div>
+          <div class="form-group">
+            <label for="statusInput">Status</label>
+            <input type="text" class="form-control" id="statusInput" name="status_desktop_input" value="{{ desktops.desktop_Status }}">
+          </div>
+          <div class="form-group">
+            <label for="computerNameInput">Computer Name</label>
+            <input type="text" class="form-control" id="computerNameInput" name="computer_name_input" value="{{ desktops.desktop_Computer_name }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+      <!-- Repeat Modal structure for Keyboard, Mouse, UPS, User, and Documents -->
+
+    </div>
+
+    <!-- Modal for Disposal Confirmation ALL DESKTOP-->
+    <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="disposeModalLabel">Confirm Disposal</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to dispose of this Desktop Package?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveDisposeBtn" data-desktop-id="{{ desktops.id }}">Yes, Dispose</button>
+            
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Disposal Confirmation KEYBOARD-->
+    <div class="modal fade" id="disposeModal_keyboard" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="disposeModalLabel">Confirm Disposal</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to dispose of this keyboard?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveDisposeKeyboardBtn" data-desktop-id="{{ desktop_Keyboard_SN }}">Yes, Dispose</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+   <!-- Display Notify Message -->
+   {% if notify_message %}
+   <div class="modal fade" id="notifyModal" tabindex="-1" aria-labelledby="notifyModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header {% if notify_type == 'success' %}bg-success{% else %}bg-danger{% endif %}">
+                   <h5 class="modal-title" id="notifyModalLabel">
+                       {% if notify_type == 'success' %}
+                       Success
+                       {% else %}
+                       Error
+                       {% endif %}
+                   </h5>
+                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="modal-body">
+                   {{ notify_message }}
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               </div>
+           </div>
+       </div>
+   </div>
+   {% endif %}
+</div>
+
+<script>
+   // Automatically show the notify modal if there's a message
+   {% if notify_message %}
+   var notifyModal = new bootstrap.Modal(document.getElementById('notifyModal'), {});
+   notifyModal.show();
+   {% endif %}
+</script>
+
+<script>
+  // Script for handling disposal
+  document.getElementById('saveDisposeBtn').addEventListener('click', function () {
+    const desktopId = this.getAttribute('data-desktop-id');
+    fetch(`/dispose_desktop/${desktopId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')  // Make sure CSRF token is passed correctly
+      }
+    }).then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Desktop package has been marked as disposed.');
+        window.location.href = "/disposed_desktop_list/";  // Redirect to the disposed list
+      } else {
+        alert('Error disposing desktop.');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error disposing desktop.');
+    });
+  });
+
+  // Function to get the CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+</script>
+
+<script>
+// Script for handling keyboard disposal
+document.getElementById('saveDisposeKeyboardBtn').addEventListener('click', function () {
+  const keyboardId = this.getAttribute('data-keyboard-id');
+  fetch(`/dispose_keyboard/${keyboardId}/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken') // Make sure CSRF token is passed correctly
+      }
+  }).then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          alert('Keyboard has been marked as disposed.');
+          window.location.href = "/disposed_keyboard_list/";  // Redirect to the disposed keyboard list
+      } else {
+          alert('Error disposing keyboard.');
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      alert('Error disposing keyboard.');
+  });
+});
+
+
+</script>
+{% endblock %}

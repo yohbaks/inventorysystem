@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white d-flex justify-content-between">
+            <h4 class="mb-0">📅 Preventive Maintenance Section Schedules</h4>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Add New Schedule</button>
+          </div>
+
+          <!-- Add Schedule Modal -->
+          <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <form method="POST" action="{% url 'section_schedule_list' %}">
+                {% csrf_token %}
+                <div class="modal-content">
+                  <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Add New Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label class="form-label">Quarter</label>
+                      <select class="form-select" name="quarter_schedule_id" required>
+                        {% for quarter in quarters %}
+                        <option value="{{ quarter.id }}">{{ quarter.get_quarter_display }} {{ quarter.year }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Office Section</label>
+                      <select class="form-select" name="section_id" required>
+                        {% for section in sections %}
+                        <option value="{{ section.id }}">{{ section.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Start Date</label>
+                      <input type="date" class="form-control" name="start_date" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">End Date</label>
+                      <input type="date" class="form-control" name="end_date" required>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save Schedule</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+
+
+
+
+          <div class="card-body">
+            {% if schedules %}
+              <div class="table-responsive">
+                <table id="schedule-table" class="table table-bordered table-hover">
+                  <thead class="bg-light">
+                    <tr>
+                      <th>Quarter</th>
+                      <th>Year</th>
+                      <th>Section</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for schedule in schedules %}
+                    <tr>
+                      <td>
+                        <span class="badge 
+                          {% if schedule.quarter_schedule.get_quarter_display == "1st Quarter" %}bg-primary
+                          {% elif schedule.quarter_schedule.get_quarter_display == "2nd Quarter" %}bg-success
+                          {% elif schedule.quarter_schedule.get_quarter_display == "3rd Quarter" %}bg-warning text-dark
+                          {% elif schedule.quarter_schedule.get_quarter_display == "4th Quarter" %}bg-secondary
+                          {% else %}bg-secondary
+                          {% endif %}
+                        ">
+                          {{ schedule.quarter_schedule.get_quarter_display }} {{ schedule.quarter_schedule.year }}
+                        </span>
+
+
+
+                      </td>
+                      <td>{{ schedule.quarter_schedule.year }}</td>
+                      <td>{{ schedule.section.name }}</td>
+                      <td>{{ schedule.start_date }}</td>
+                      <td>{{ schedule.end_date }}</td>
+                      <td>{{ schedule.notes|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="alert alert-info">No schedules available.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    $('#schedule-table').DataTable({
+      pageLength: 10,
+      ordering: true
+    });
+  });
+</script>
+
+{% if messages %}
+<script>
+  $(document).ready(function () {
+    {% for message in messages %}
+      $.notify({
+        icon: '{% if message.tags == "success" %}fa fa-check{% elif message.tags == "warning" %}fa fa-exclamation{% else %}fa fa-info{% endif %}',
+        title: "<strong>{% if message.tags == 'success' %}Success{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}:</strong> ",
+        message: "{{ message|escapejs }}"
+      }, {
+        type: "{{ message.tags }}",
+        placement: {
+          from: "bottom",
+          align: "right"
+        },
+        delay: 4000,
+        timer: 500,
+        z_index: 9999
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}
+
+{% endblock %}

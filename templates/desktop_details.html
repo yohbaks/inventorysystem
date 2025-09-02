@@ -1,92 +1,85 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container">
   <div class="page-inner">
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-head-row">
-              <h4 class="card-title">Desktop Details</h4>
+        <div class="card shadow-sm rounded">
+          <div class="card-header bg-light">
+            <div class="card-head-row d-flex justify-content-between align-items-center">
+              <h4 class="card-title mb-0">🗄️ Desktop Details</h4>
               <div class="card-tools">
-                <a href="#" class="btn btn-label-danger btn-round btn-sm me-2">
-                  <span class="btn-label">
-                    <i class="fa fa-pencil"></i>
-                  </span>
-                  Return to Supply
+                <a href="#" class="btn btn-danger btn-sm me-2">
+                  <i class="fa fa-arrow-left me-1"></i> Return to Supply
                 </a>
-                <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
-                  <span class="btn-label">
-                    <i class="fa fa-pencil"></i>
-                  </span>
-                  Export
+                <a href="#" class="btn btn-success btn-sm me-2">
+                  <i class="fa fa-download me-1"></i> Export
                 </a>
-                <a href="#" class="btn btn-label-info btn-round btn-sm">
-                  <span class="btn-label">
-                    <i class="fa fa-print"></i>
-                  </span>
-                  Print
+                <a href="#" class="btn btn-info btn-sm">
+                  <i class="fa fa-print me-1"></i> Print
                 </a>
               </div>
             </div>
           </div>
+
           <div class="card-body">
             <div class="table-responsive">
-              <table id="multi-filter-select" class="display table table-striped table-hover">
-                <thead>
+              <table id="desktop-table" class="display table table-striped table-bordered">
+                <thead class="text-white">
                   <tr>
-                    
-                    <th>Computer Name</th>
-                    <th>Serial No.</th>
-                    <th>Brand Name</th>
-
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Enduser</th>
-                    <th>Asset Owner</th>
-                    <th>Actions</th>
+                    <th style="background-color: #6861ce; color: white;">Computer Name</th>
+                    <th style="background-color: #6861ce; color: white;">Serial Number</th>
+                    <th style="background-color: #6861ce; color: white;">Brand Name</th>
+                    <th style="background-color: #6861ce; color: white;">Processor</th>
+                    <th style="background-color: #6861ce; color: white;">Memory</th>
+                    <th style="background-color: #6861ce; color: white;">End User</th>
+                    <th style="background-color: #6861ce; color: white;">Asset Owner</th>
+                    <th style="background-color: #6861ce; color: white;">Status</th>
+                    <th style="background-color: #6861ce; color: white;">Actions</th>
+                  </tr>
+                  <tr class="bg-white text-dark">
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Name" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Serial" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Brand" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Processor" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Memory" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search User" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Owner" /></th>
+                    <th></th>
+                    <th></th>
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    
-                    <th>Computer Name</th>
-                    <th>Serial No.</th>
 
-                    <th>Model</th>
-                    <th>Processor</th>
-                    <th>Memory</th>
-                    <th>Enduser</th>
-                    <th>Asset Owner</th>
-                    <th>Actions</th>
-                  </tr>
-                </tfoot>
                 <tbody>
-                  
-                  <tr>{% for item in desktops_with_items %}
+                  {% for item in desktops_with_items %}
+                  <tr>
                     <td>{{ item.desktop.computer_name }}</td>
                     <td>{{ item.desktop.serial_no }}</td>
                     <td>{{ item.desktop.brand_name }}</td>
                     <td>{{ item.desktop.processor }}</td>
-
                     <td>{{ item.desktop.memory }}</td>
-
                     <td>
                       {% for userx in item.user %}
-                          {{ userx.user_Enduser }}<br> <!-- Show each keyboard's serial number -->
+                        {{ userx.user_Enduser }}<br>
                       {% endfor %}
-                  </td>
-                    
-                    
+                    </td>
                     <td>
                       {% for userx in item.user %}
-                          {{ userx.user_Asset_owner }}<br> <!-- Show each keyboard's serial number -->
+                        {{ userx.user_Assetowner  }}<br>
                       {% endfor %}
-                  </td>
+                    </td>
                     <td>
-                      <a href="{% url 'desktop_details_view' item.desktop.id %}" class="btn btn-primary btn-sm">
-                        View Details
+                      {% if item.desktop.is_disposed %}
+                        <span class="badge bg-danger">Disposed</span>
+                      {% else %}
+                        <span class="badge bg-success">Active</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <a href="{% url 'desktop_details_view' item.desktop.id %}" class="btn btn-sm btn-primary">
+                        <i class="fa fa-eye"></i> View
                       </a>
                     </td>
                   </tr>
@@ -100,4 +93,23 @@
     </div>
   </div>
 </div>
+
+<script>
+  $(document).ready(function () {
+    var table = $('#desktop-table').DataTable({
+      orderCellsTop: true,
+      fixedHeader: true,
+      pageLength: 10
+    });
+
+    // Setup column-specific search
+    $('#desktop-table thead tr:eq(1) th').each(function (i) {
+      $('input', this).on('keyup change', function () {
+        if (table.column(i).search() !== this.value) {
+          table.column(i).search(this.value).draw();
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}
