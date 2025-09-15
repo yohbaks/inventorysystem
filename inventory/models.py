@@ -243,6 +243,7 @@ class Employee(models.Model):
     employee_position = models.CharField(max_length=100, blank=True, null=True)   
 
     employee_office_section = models.ForeignKey('OfficeSection', on_delete=models.SET_NULL, null=True, blank=True)
+    employee_level = models.CharField(max_length=100, blank=True, null=True)
     employee_status = models.CharField(max_length=100, blank=True, null=True)
 
     @property

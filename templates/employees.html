@@ -4,7 +4,7 @@
 <div class="container">
   <div class="page-inner">
     <div class="page-header">
-      <h3 class="fw-bold mb-3">Employees Management</h3>
+      <h3 class="fw-bold mb-3">Employeessss Management</h3>
       <ul class="breadcrumbs mb-3">
         <li class="nav-home">
           <a href="#"><i class="icon-home"></i></a>
@@ -54,6 +54,14 @@
                     <option value="{{ section.id }}">{{ section.name }}</option>
                   {% endfor %}
                 </select>
+              </div>
+
+              <!-- <div class="mb-3">
+                <label class="form-label">Employee Level</label>
+                <select class="form-control" name="level" required>
+                  <option value="Permanent">Permanent</option>
+                  <option value="Job-Order">Job-Order</option>
+                </select> -->
               </div>
               <div class="mb-3">
                 <label class="form-label">Status</label>
@@ -191,13 +199,26 @@
                                 {% endfor %}
                               </select>
                             </div>
+                             <div class="mb-3">
+
+                            </div>     
+                            
                             <div class="mb-3">
-                              <label class="form-label">Status</label>
+                              <label class="form-label">Level</label>
+                              <select class="form-control" name="level" required>
+                                <option value="Permanent" {% if employee.employee_level == "Permanent" %}selected{% endif %}>Permanent</option>
+                                <option value="Job-Order" {% if employee.employee_level == "Job-Order" %}selected{% endif %}>Job-Order</option>
+                              </select>
+                            </div>                            
+
+                            <div class="mb-3">
+                              <label class="form-label">Statuss</label>
                               <select class="form-control" name="status" required>
                                 <option value="Active" {% if employee.employee_status == "Active" %}selected{% endif %}>Active</option>
                                 <option value="Inactive" {% if employee.employee_status == "Inactive" %}selected{% endif %}>Inactive</option>
                               </select>
                             </div>
+
                             <hr>
                             <button type="submit" class="btn btn-primary">Update</button>
                           </form>

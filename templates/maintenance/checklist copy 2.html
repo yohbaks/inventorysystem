@@ -114,19 +114,13 @@
 
   quarterSelect.addEventListener("change", function () {
     const quarterId = this.value;
-    const sectionId = "{{ section_id|default:0 }}";  // ✅ Use sectionId passed from view, default to 0 if not available
-
-    fetch(`/maintenance/get_schedule_dates/${quarterId}/${sectionId}/`)
+    fetch(`/maintenance/get_schedule_dates/${quarterId}/`)
       .then(response => response.json())
       .then(data => {
-        if (data.start_date && data.end_date) {
-          dateInput.min = data.start_date;
-          dateInput.max = data.end_date;
-          dateInput.value = "";
-          dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
-        } else {
-          dateRangeInfo.innerText = "No schedule found for this section and quarter.";
-        }
+        dateInput.min = data.start_date;
+        dateInput.max = data.end_date;
+        dateInput.value = "";
+        dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
       })
       .catch(() => {
         dateInput.min = "";

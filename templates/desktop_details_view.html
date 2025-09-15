@@ -35,7 +35,8 @@
           </div> 
 <!-- Trigger Button -->
 
-<!-- Modal Structure of QR CODDE -->
+<!-- Modal Structure of QR CODE -->
+<!-- Modal Structure of QR CODE -->
 <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -47,8 +48,13 @@
 
       <div class="modal-body text-center">
         {% if desktop_package.qr_code %}
-          <img src="{{ desktop_package.qr_code.url }}" alt="QR Code for Desktop Package {{ desktop_package.pk }}" width="200">
+          <img id="qrImage" src="{{ desktop_package.qr_code.url }}" alt="QR Code for Desktop Package {{ desktop_package.pk }}" width="200">
           <p class="mt-2">Scan to view this desktop package</p>
+
+          <!-- Print button -->
+          <button class="btn btn-primary mt-3" onclick="printQrCode()">
+            <i class="fa fa-print"></i> Print Wallet-Size QR
+          </button>
         {% else %}
           <p>No QR code available.</p>
         {% endif %}
@@ -57,6 +63,68 @@
     </div>
   </div>
 </div>
+
+<script>
+function printQrCode() {
+  const qrImage = document.getElementById("qrImage");
+  if (!qrImage) {
+    alert("No QR code to print.");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank", "width=400,height=250");
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print QR Code</title>
+        <style>
+          @page { size: 3.5in 2in; margin: 0; }  /* Wallet-size card */
+          body { 
+            width: 3.5in; 
+            height: 2in; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            margin: 0;
+            font-family: Arial, sans-serif; 
+          }
+          .card {
+            width: 1.8in;
+            height: 1.8in;
+            border: 2px solid black;
+            border-radius: 15px;   /* 👈 rounded rectangle edges */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+          }
+          img { width: 1.1in; height: 1.1in; }
+          .footer { 
+            margin-top: 6px; 
+            font-weight: bold; 
+            font-size: 14px; 
+            text-transform: uppercase;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <img src="${qrImage.src}" alt="QR Code">
+          <div class="footer">DPWH PROPERTY</div>
+        </div>
+        <script>
+          window.onload = function() { window.print(); window.close(); }
+        <\/script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+</script>
+
+
+
           <div class="card-body">
             <!-- Pills Navigation -->
             <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-pills-icons justify-content-center" id="pills-tab-with-icon" role="tablist">

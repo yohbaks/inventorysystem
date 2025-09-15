@@ -1406,14 +1406,29 @@ def maintenance_history_view(request, desktop_id):
         'current_pm_schedule': current_pm_schedule,  # New table data
     })
 
-def get_schedule_date_range(request, quarter_id):
-    schedule = PMSectionSchedule.objects.filter(quarter_schedule_id=quarter_id).first()
-    if schedule:
+# def get_schedule_date_range(request, quarter_id):
+#     schedule = PMSectionSchedule.objects.filter(quarter_schedule_id=quarter_id).first()
+#     if schedule:
+#         return JsonResponse({
+#             "start_date": schedule.start_date.strftime("%Y-%m-%d"),
+#             "end_date": schedule.end_date.strftime("%Y-%m-%d")
+#         })
+#     return JsonResponse({}, status=404)
+
+def get_schedule_date_range(request, quarter_id, section_id):
+    try:
+        schedule = PMSectionSchedule.objects.get(
+            quarter_schedule_id=quarter_id,
+            section_id=section_id
+        )
         return JsonResponse({
             "start_date": schedule.start_date.strftime("%Y-%m-%d"),
             "end_date": schedule.end_date.strftime("%Y-%m-%d")
         })
-    return JsonResponse({}, status=404)
+    except PMSectionSchedule.DoesNotExist:
+        return JsonResponse({"error": "Schedule not found"}, status=404)
+
+
 
 # This function handles the checklist for preventive maintenance of a desktop package.
 
@@ -1447,7 +1462,12 @@ def checklist(request, desktop_id):
     end_user = f"{user_details.user_Enduser.employee_fname} {user_details.user_Enduser.employee_lname}" if user_details and user_details.user_Enduser else ''
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop).first()
     
-
+    # ✅ NEW: extract the section_id safely
+    section_id = (
+        user_details.user_Enduser.employee_office_section.id
+        if user_details and user_details.user_Enduser and user_details.user_Enduser.employee_office_section
+        else None
+    )
     
 
     if request.method == "POST":
@@ -1536,6 +1556,7 @@ def checklist(request, desktop_id):
         'end_user': end_user,
         'range': range(1, 10),
         'quarter_schedules': quarter_schedules,
+        'section_id': section_id,  # ✅ pass section_id to template
     })
 
 

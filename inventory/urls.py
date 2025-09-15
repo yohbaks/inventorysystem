@@ -102,7 +102,10 @@ urlpatterns = [
     path('maintenance/checklist/<int:desktop_id>/', views.checklist, name='checklist'),
     path('maintenance/checklist/<int:desktop_id>/<int:schedule_id>/', views.checklist, name='checklist_scheduled'),
 
-    path('maintenance/get_schedule_dates/<int:quarter_id>/', views.get_schedule_date_range, name='get_schedule_dates'),
+    # path('maintenance/get_schedule_dates/<int:quarter_id>/', views.get_schedule_date_range, name='get_schedule_dates'),
+    path('maintenance/get_schedule_dates/<int:quarter_id>/<int:section_id>/', views.get_schedule_date_range, name='get_schedule_dates'),
+
+
 
     path('maintenance/pdf/<int:pm_id>/', views.generate_pm_excel_report, name='generate_pm_pdf'), #pdf prevenitve maintenance
     
