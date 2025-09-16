@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %} 
 {% block content %}
+
+
+
 <div class="container">
   <div class="page-inner">
     <div class="row">
@@ -399,9 +402,16 @@ function printQrCode() {
             <i class="fas fa-ellipsis-h"></i>
           </button>
           <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
+            {% if pm_assignments %}
+              <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
+            {% else %}
+              <a class="dropdown-item text-danger" href="{% url 'checklist' desktop_package.id %}">
+                Conduct PM
+              </a>
+            {% endif %}
+
             {% if desktop_detailsx %}
-              <a class="dropdown-item" href="{% url 'update_desktop' pk=desktop_detailsx.id %}">PM History</a>
+              <a class="dropdown-item" href="{% url 'pm_overview'  %}">Assign PM Schedule</a>
             {% endif %}
             <a class="dropdown-item" href="#">PM All View</a>
           </div>
@@ -542,6 +552,10 @@ function printQrCode() {
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title">Monitor Details</div>
+                 
+    {% include "photo/monitor_photo.html" %}        
+
+
             {% if not has_active_monitor and has_active_desktop %}
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMonitorModal">Add Monitor</button>
             {% endif %}
@@ -696,6 +710,7 @@ function printQrCode() {
             <th>Brand</th>
             <th>Model</th>
             <th>Disposal Date</th>
+            <th>Monitor Photo</th>
           </tr>
         </thead>
         <tbody>
@@ -705,6 +720,30 @@ function printQrCode() {
             <td>{{ disposed_monitor.monitor_disposed_db.monitor_brand_db }}</td>
             <td>{{ disposed_monitor.monitor_disposed_db.monitor_model_db }}</td>
             <td>{{ disposed_monitor.disposal_date }}</td>
+            <td>
+              {% if disposed_monitor.disposed_photo %}
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#disposedMonitorPhotoModal{{ disposed_monitor.id }}">
+                  View
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="disposedMonitorPhotoModal{{ disposed_monitor.id }}" tabindex="-1" aria-labelledby="disposedMonitorPhotoLabel{{ disposed_monitor.id }}" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="disposedMonitorPhotoLabel{{ disposed_monitor.id }}">Disposed Monitor Photo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body text-center">
+                        <img src="{{ disposed_monitor.disposed_photo.url }}" class="img-fluid rounded shadow" alt="Disposed Monitor Photo">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <span class="text-muted">No Photo</span>
+              {% endif %}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -767,6 +806,7 @@ function printQrCode() {
     </div>
   </div>
       </div>
+
 
       
 <!-- Keyboard Details Tab ORGIGNAL -->

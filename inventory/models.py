@@ -85,6 +85,7 @@ class MonitorDetails(models.Model):
     monitor_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     monitor_model_db = models.CharField(max_length=255)
     monitor_size_db = models.CharField(max_length=255, null=True)
+    monitor_photo = models.ImageField(upload_to="monitor_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the monitor is dispose
     created_at = models.DateTimeField(default=timezone.now)  # Date when the monitor was added
 
@@ -175,6 +176,8 @@ class DisposedMonitor(models.Model):
     monitor_size = models.CharField(max_length=255, blank=True, null=True)
     disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     reason = models.TextField(blank=True, null=True)
+
+    disposed_photo = models.ImageField(upload_to="disposed_monitor_photos/", null=True, blank=True)  # 👈 add this
 
     def __str__(self):
         return f"Disposed Monitor : - {self.monitor_disposed_db} "

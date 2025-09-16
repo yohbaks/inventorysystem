@@ -453,7 +453,8 @@ def monitor_disposed(request, monitor_id):
             monitor_disposed_db=monitor,
             desktop_package=monitor.desktop_package,
             monitor_sn=monitor.monitor_sn_db,
-            disposal_date=timezone.now()
+            disposal_date=timezone.now(),
+            disposed_photo=monitor.monitor_photo  # 👈 keep the photo
         )
         disposed_monitor.save()
 
@@ -590,138 +591,6 @@ def disposed_mice(request):
     # Render the list of disposed mice to the template
     return render(request, 'disposed_mice.html', {'disposed_mice': disposed_mice})
 
-
-# def add_desktop_package_with_details(request):
-#     employees = Employee.objects.all()
-#     desktop_brands = Brand.objects.filter(is_desktop=True)
-#     keyboard_brands = Brand.objects.filter(is_keyboard=True)
-#     mouse_brands = Brand.objects.filter(is_mouse=True)
-#     monitor_brands = Brand.objects.filter(is_monitor=True)
-#     ups_brands = Brand.objects.filter(is_ups=True)
-
-#     if request.method == 'POST':
-#         with transaction.atomic():
-#             desktop_package = Desktop_Package.objects.create(is_disposed=False)
-
-#             enduser_id = request.POST.get('enduser_input')
-#             enduser = get_object_or_404(Employee, id=enduser_id) if enduser_id else None  
-
-#             assetowner_id = request.POST.get('assetowner_input')
-#             assetowner = get_object_or_404(Employee, id=assetowner_id) if assetowner_id else None
-
-#             # Fetch brand instances using selected IDs
-#             desktop_brand_id = request.POST.get('desktop_brand_name')
-#             desktop_brand = get_object_or_404(Brand, id=desktop_brand_id)
-
-#             monitor_brand_id = request.POST.get('monitor_brand')
-#             monitor_brand = get_object_or_404(Brand, id=monitor_brand_id)
-
-#             keyboard_brand_id = request.POST.get('keyboard_brand')
-#             keyboard_brand = get_object_or_404(Brand, id=keyboard_brand_id)
-
-#             mouse_brand_id = request.POST.get('mouse_brand')
-#             mouse_brand = get_object_or_404(Brand, id=mouse_brand_id)
-
-#             ups_brand_id = request.POST.get('ups_brand')
-#             ups_brand = get_object_or_404(Brand, id=ups_brand_id)
-
-#             # Desktop
-#             DesktopDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 serial_no=request.POST.get('desktop_serial_no'),
-#                 computer_name=request.POST.get('computer_name_input'),
-#                 brand_name=desktop_brand,
-#                 model=request.POST.get('desktop_model'),
-#                 processor=request.POST.get('desktop_processor'),
-#                 memory=request.POST.get('desktop_memory'),
-#                 drive=request.POST.get('desktop_drive'),
-#                 desktop_Graphics=request.POST.get('desktop_Graphics'),
-#                 desktop_Graphics_Size=request.POST.get('desktop_Graphics_Size'),
-#                 desktop_OS=request.POST.get('desktop_OS'),
-#                 desktop_Office=request.POST.get('desktop_Office'),
-#                 desktop_OS_keys=request.POST.get('desktop_OS_keys'),
-#                 desktop_Office_keys=request.POST.get('desktop_Office_keys')
-#             )
-
-#             # Monitor
-#             MonitorDetails.objects.create(
-#                 desktop_package_db=desktop_package,
-#                 monitor_sn_db=request.POST.get('monitor_sn'),
-#                 monitor_brand_db=monitor_brand,
-#                 monitor_model_db=request.POST.get('monitor_model'),
-#                 monitor_size_db=request.POST.get('monitor_size')
-#             )
-
-#             # Keyboard
-#             KeyboardDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 keyboard_sn_db=request.POST.get('keyboard_sn'),
-#                 keyboard_brand_db=keyboard_brand,
-#                 keyboard_model_db=request.POST.get('keyboard_model')
-#             )
-
-#             # Mouse
-#             MouseDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 mouse_sn_db=request.POST.get('mouse_sn'),
-#                 mouse_brand_db=mouse_brand,
-#                 mouse_model_db=request.POST.get('mouse_model')
-#             )
-
-#             # UPS
-#             UPSDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 ups_sn_db=request.POST.get('ups_sn'),
-#                 ups_brand_db=ups_brand,
-#                 ups_model_db=request.POST.get('ups_model'),
-#                 ups_capacity_db=request.POST.get('ups_capacity')
-#             )
-
-#             # Documents
-#             DocumentsDetails.objects.create(
-#                 desktop_package=desktop_package,
-#                 docs_PAR=request.POST.get('par_number_input'),
-#                 docs_Propertyno=request.POST.get('property_number_input'),
-#                 docs_Acquisition_Type=request.POST.get('acquisition_type_input'),    
-#                 docs_Value=request.POST.get('value_desktop_input'),
-#                 docs_Datereceived=request.POST.get('date_received_input'),
-#                 docs_Dateinspected=request.POST.get('date_inspected_input'),
-#                 docs_Supplier=request.POST.get('supplier_name_input'),
-#                 docs_Status=request.POST.get('status_desktop_input')
-#             )
-
-#             # User Details
-#             UserDetails.objects.create(
-#                 desktop_package_db=desktop_package,
-#                 user_Enduser=enduser,
-#                 user_Assetowner=assetowner
-#             )
-
-#             # Automatically assign PM schedule if the end user's office section has one
-#             if enduser and enduser.employee_office_section:
-#                 office_section = enduser.employee_office_section
-
-#                 # Get the latest schedule for that section
-#                 schedules = PMSectionSchedule.objects.filter(section=office_section)
-
-#                 for schedule in schedules:
-#                     # Avoid duplicate assignment
-#                     if not PMScheduleAssignment.objects.filter(desktop_package=desktop_package, pm_section_schedule=schedule).exists():
-#                         PMScheduleAssignment.objects.create(
-#                             desktop_package=desktop_package,
-#                             pm_section_schedule=schedule
-#                         )
-
-#         return redirect('success_add_page')
-
-#     return render(request, 'add_desktop_package_with_details.html', {
-#         'desktop_brands': desktop_brands,
-#         'keyboard_brands': keyboard_brands,
-#         'monitor_brands': monitor_brands,
-#         'mouse_brands': mouse_brands,
-#         'ups_brands': ups_brands,
-#         'employees': employees
-#     })
 
 
 def add_desktop_package_with_details(request):
@@ -1443,6 +1312,12 @@ def checklist(request, desktop_id):
     if is_disposed:
         messages.error(request, "❌ Desktop was already disposed and cannot be PM anymore.")
         return redirect('desktop_details_view', package_id=desktop.id)  # Make sure this matches your URL name
+    
+     # ❌ Block if no schedule assigned
+    has_schedule = PMScheduleAssignment.objects.filter(desktop_package=desktop).exists()
+    if not has_schedule:
+        messages.error(request, "⚠ Please add a PM schedule first before conducting Preventive Maintenance.")
+        return redirect('desktop_details_view', package_id=desktop.id)
 
 
     checklist_labels = {
@@ -1610,30 +1485,6 @@ def generate_pm_excel_report(request, pm_id):
     return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
 
 
-# def pm_overview_view(request):
-#     pm_assignments = PMScheduleAssignment.objects.select_related(
-#         'desktop_package',
-#         'pm_section_schedule__quarter_schedule',
-#         'pm_section_schedule__section'
-#     ).all()
-
-#     # Attach computer_name to each assignment
-#     for assignment in pm_assignments:
-#         desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
-#         assignment.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
-
-#     quarters = QuarterSchedule.objects.all().order_by('-year', 'quarter')
-#     sections = OfficeSection.objects.all()
-#     desktops = Desktop_Package.objects.prefetch_related('desktop_details').all()
-#     schedules = PMSectionSchedule.objects.select_related('quarter_schedule', 'section').order_by('-start_date')
-
-#     return render(request, 'maintenance/overview.html', {
-#         'pm_assignments': pm_assignments,
-#         'quarters': quarters,
-#         'sections': sections,
-#         'desktops': desktops,
-#         'schedules': schedules,
-#     })
 
 def pm_overview_view(request):
     pm_assignments = PMScheduleAssignment.objects.select_related(
@@ -1885,4 +1736,14 @@ def dashboard_view_chart(request):
         })
 
     return render(request, 'dashboard_chart.html', {'chart_data': all_data})
+
+
+#photo upload for monitor
+@require_POST
+def upload_monitor_photo(request, monitor_id):
+    monitor = get_object_or_404(MonitorDetails, id=monitor_id)
+    if 'photo' in request.FILES:
+        monitor.monitor_photo = request.FILES['photo']
+        monitor.save()
+    return redirect(f'/desktop_details_view/{monitor.desktop_package.id}/#pills-monitor')
 

@@ -123,6 +123,9 @@ urlpatterns = [
     #dashboard chart
     path('dashboard/chart/', views.dashboard_view_chart, name='dashboard_view_chart'),
 
+    #photo upload for monitor
+    path('upload_monitor_photo/<int:monitor_id>/', views.upload_monitor_photo, name='upload_monitor_photo'),
+
 
 
 
