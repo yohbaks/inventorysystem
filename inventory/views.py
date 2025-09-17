@@ -41,6 +41,7 @@ from django.db.models import Prefetch # for optimizing queries, in PM scheduling
 
 from django.db.models.functions import TruncMonth, TruncDay # for grouping by month or day in PM overview
 from django.db.models import Count
+from django.templatetags.static import static
 
 
 ##############################################################################
@@ -1062,19 +1063,43 @@ def edit_brand(request):
     return redirect('add_brand')
 
 #print
+from django.templatetags.static import static
+
 def generate_desktop_pdf(request, desktop_id):
     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
     desktop_package = desktop_details.desktop_package
+
+    # Current (non-disposed) components
     keyboard_details = KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
     mouse_details = MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
     monitor_details = MonitorDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
     ups_details = UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
+
+    # Documents
+    documents_details = DocumentsDetails.objects.filter(desktop_package=desktop_package)
+
+    # Current user assignment
     user_details = UserDetails.objects.filter(desktop_package=desktop_package).first()
 
+    # ✅ History data
+    asset_owner_history = AssetOwnerChangeHistory.objects.filter(desktop_package=desktop_package).order_by("-changed_at")
+    enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_package).order_by("-changed_at")
+
+    disposed_desktops = DisposedDesktopDetail.objects.filter(desktop__desktop_package=desktop_package).order_by("-date_disposed")
+    disposed_monitors = DisposedMonitor.objects.filter(desktop_package=desktop_package).order_by("-disposal_date")
+    disposed_keyboards = DisposedKeyboard.objects.filter(desktop_package=desktop_package).order_by("-disposal_date")
+    disposed_mice = DisposedMouse.objects.filter(desktop_package=desktop_package).order_by("-disposal_date")
+    disposed_ups = DisposedUPS.objects.filter(desktop_package=desktop_package).order_by("-disposal_date")
+
+    # QR code
     qr_code_url = None
     if desktop_package.qr_code:
         qr_code_url = request.build_absolute_uri(desktop_package.qr_code.url)
 
+    # ✅ Logo fix – build absolute URL
+    logo_url = request.build_absolute_uri(static('img/logo.png'))
+
+    # Render PDF template
     html_string = render_to_string('pdf_template.html', {
         'desktop_detailsx': desktop_details,
         'desktop_package': desktop_package,
@@ -1083,8 +1108,19 @@ def generate_desktop_pdf(request, desktop_id):
         'monitor_detailse': monitor_details,
         'ups_detailse': ups_details,
         'user_details': user_details,
+        'documents_detailse': documents_details,
         'qr_code_url': qr_code_url,
-    })   
+        'logo_url': logo_url,  # ✅ pass logo to template
+
+        # ✅ Added history
+        'asset_owner_history': asset_owner_history,
+        'enduser_history': enduser_history,
+        'disposed_desktops': disposed_desktops,
+        'disposed_monitors': disposed_monitors,
+        'disposed_keyboards': disposed_keyboards,
+        'disposed_mice': disposed_mice,
+        'disposed_ups': disposed_ups,
+    })
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename=desktop_{desktop_id}_details.pdf'

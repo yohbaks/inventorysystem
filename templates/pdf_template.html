@@ -1,473 +1,363 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>IT Asset Portfolio | {{ desktop_detailsx.serial_no }}</title>
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --dark: #111827;
-            --darker: #0f172a;
-            --gray: #6b7280;
-            --light-gray: #f3f4f6;
-            --border: #e5e7eb;
-            --success: #10b981;
-        }
-        
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            color: var(--dark);
-            margin: 0;
-            padding: 0;
-            font-size: 13.5px;
-            line-height: 1.5;
-            background-color: #f9fafb;
-        }
+  <meta charset="UTF-8">
+  <title>IT Asset Portfolio | {{ desktop_detailsx.computer_name|default:"N/A" }}</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --success: #10b981;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --border: #e5e7eb;
+    }
 
-        .container {
-            max-width: 920px;
-            margin: 20px auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-            overflow: hidden;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      color: #111827;
+    }
 
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            padding: 28px 40px;
-            position: relative;
-        }
+    .container {
+      max-width: 900px;
+      margin: 10px auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+    }
 
-        .header::after {
-            content: "";
-            position: absolute;
-            bottom: -12px;
-            left: 0;
-            width: 100%;
-            height: 24px;
-            background: white;
-            border-radius: 24px 24px 0 0;
-        }
+    .header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px 10px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header img.logo {
+      height: 32px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .header small {
+      font-size: 11px;
+      opacity: .8;
+      display: block;
+    }
+    .badge {
+      background: #fff;
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: bold;
+    }
 
-        .report-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 5px 0;
-            letter-spacing: -0.3px;
-        }
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    .card {
+      flex: 1 1 45%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--light);
+      padding: 8px 12px;
+      font-weight: bold;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .card-body {
+      padding: 10px;
+      font-size: 12px;
+    }
+    .spec {
+      margin-bottom: 5px;
+    }
+    .spec span {
+      font-weight: bold;
+      color: var(--gray);
+      display: inline-block;
+      min-width: 110px;
+    }
 
-        .report-subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 400;
-            margin: 0;
-        }
+    .user-block {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 8px;
+      font-size: 12px;
+    }
+    .user-info {
+      font-size: 11px;
+    }
 
-        .report-id {
-            position: absolute;
-            top: 28px;
-            right: 40px;
-            background: rgba(255,255,255,0.15);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+    .qr-card {
+      width: 240px;
+      margin: 20px auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.05);
+      text-align: center;
+      padding: 12px;
+    }
+    .qr-card h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .qr-box {
+      background: var(--light);
+      border-radius: 6px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+    .qr-box img {
+      max-width: 130px;
+      max-height: 130px;
+    }
+    .footer {
+      margin-top: 15px;
+      font-size: 10px;
+      color: var(--gray);
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
 
-        .content {
-            padding: 30px 40px;
-        }
+    .history-section {
+      margin-top: 25px;
+    }
 
-        .grid-system {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .asset-card {
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: var(--light-gray);
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-        }
-
-        .card-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            font-size: 15px;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin: 0;
-            color: var(--darker);
-        }
-
-        .card-body {
-            padding: 18px;
-        }
-
-        .spec-row {
-            display: grid;
-            grid-template-columns: 110px 1fr;
-            margin-bottom: 10px;
-        }
-
-        .spec-label {
-            font-weight: 500;
-            color: var(--gray);
-            font-size: 12.5px;
-        }
-
-        .spec-value {
-            font-weight: 500;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px dashed var(--border);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--light-gray);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 600;
-            margin: 0 0 2px 0;
-        }
-
-        .user-meta {
-            font-size: 12px;
-            color: var(--gray);
-            margin: 0;
-        }
-
-        .qr-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: var(--light-gray);
-            border-radius: 10px;
-            margin-top: 24px;
-            text-align: center;
-        }
-
-        .qr-placeholder {
-            width: 120px;
-            height: 120px;
-            background: white;
-            border: 1px dashed var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            color: var(--gray);
-            font-size: 11px;
-        }
-
-        .footer {
-            margin-top: 30px;
-            padding-top: 18px;
-            border-top: 1px solid var(--border);
-            font-size: 11.5px;
-            color: var(--gray);
-            text-align: center;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            background: var(--success);
-            color: white;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        @media print {
-            body {
-                background: none;
-                font-size: 12px;
-            }
-            
-            .container {
-                box-shadow: none;
-                border-radius: 0;
-            }
-            
-            .header {
-                padding: 20px 30px;
-            }
-            
-            .content {
-                padding: 20px 30px;
-            }
-            
-            .spec-row {
-                grid-template-columns: 100px 1fr;
-            }
-        }
-    </style>
+    @page {
+      margin: 10mm;
+    }
+    @media print {
+      body { background: none; }
+      .container { border: none; box-shadow: none; }
+    }
+  </style>
 </head>
 <body>
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <img src="{{ logo_url }}" alt="Logo" class="logo">
+      <div>
+        <h1>IT Asset Portfolio</h1>
+        <small>Comprehensive equipment summary</small>
+      </div>
+    </div>
+    <div class="badge">ASSET-{{ documents_detailse.first.docs_PAR|default:"N/A" }}</div>
+  </div>
 
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1 class="report-title">IT Asset Portfolio</h1>
-                <p class="report-subtitle">Comprehensive equipment summary</p>
-            </div>
-            <div class="report-id">ASSET-{{ desktop_detailsx.serial_no|slice:":8" }}</div>
+  <div class="grid">
+    <!-- Desktop -->
+    <div class="card">
+      <div class="card-header">Desktop Workstation <span style="background:var(--success);color:#fff;padding:1px 4px;border-radius:3px;font-size:9px;">ACTIVE</span></div>
+      <div class="card-body">
+        <div class="spec"><span>Computer Name:</span>{{ desktop_detailsx.computer_name|default:"–" }}</div>
+        <div class="spec"><span>Serial Number:</span>{{ desktop_detailsx.serial_no|default:"–" }}</div>
+        <div class="spec"><span>Brand/Model:</span>{{ desktop_detailsx.brand_name|default:"–" }} {{ desktop_detailsx.model|default:"" }}</div>
+        <div class="spec"><span>Processor:</span>{{ desktop_detailsx.processor|default:"–" }}</div>
+        <div class="spec"><span>Memory:</span>{{ desktop_detailsx.memory|default:"–" }}</div>
+        <div class="spec"><span>Storage:</span>{{ desktop_detailsx.drive|default:"–" }}</div>
+        <div class="spec"><span>Graphics Card:</span>{{ desktop_detailsx.desktop_Graphics|default:"–" }} {{ desktop_detailsx.desktop_Graphics_Size|default:"" }}</div>
+      </div>
+    </div>
+
+    <!-- Monitor -->
+    {% if monitor_detailse %}
+    <div class="card">
+      <div class="card-header">Display Monitor</div>
+      <div class="card-body">
+        <div class="spec"><span>Serial Number:</span>{{ monitor_detailse.monitor_sn_db|default:"–" }}</div>
+        <div class="spec"><span>Brand/Model:</span>{{ monitor_detailse.monitor_brand_db|default:"–" }} {{ monitor_detailse.monitor_model_db|default:"" }}</div>
+        <div class="spec"><span>Screen Size:</span>{{ monitor_detailse.monitor_size_db|default:"–" }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Input Devices -->
+    {% if keyboard_detailse or mouse_detailse %}
+    <div class="card">
+      <div class="card-header">Input Devices</div>
+      <div class="card-body">
+        {% if keyboard_detailse %}
+        <div class="spec"><span>Keyboard SN:</span>{{ keyboard_detailse.keyboard_sn_db|default:"–" }}</div>
+        <div class="spec"><span>Brand/Model:</span>{{ keyboard_detailse.keyboard_brand_db|default:"–" }} {{ keyboard_detailse.keyboard_model_db|default:"" }}</div>
+        <hr>
+        {% endif %}
+        {% if mouse_detailse %}
+        <div class="spec"><span>Mouse SN:</span>{{ mouse_detailse.mouse_sn_db|default:"–" }}</div>
+        <div class="spec"><span>Brand/Model:</span>{{ mouse_detailse.mouse_brand_db|default:"–" }} {{ mouse_detailse.mouse_model_db|default:"" }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- UPS -->
+    {% if ups_detailse %}
+    <div class="card">
+      <div class="card-header">Power Backup</div>
+      <div class="card-body">
+        <div class="spec"><span>Serial Number:</span>{{ ups_detailse.ups_sn_db|default:"–" }}</div>
+        <div class="spec"><span>Brand/Model:</span>{{ ups_detailse.ups_brand_db|default:"–" }} {{ ups_detailse.ups_model_db|default:"" }}</div>
+        <div class="spec"><span>Capacity:</span>{{ ups_detailse.ups_capacity_db|default:"–" }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Assignment -->
+    {% if user_details %}
+    <div class="card" style="flex:1 1 100%;">
+      <div class="card-header">Assignment Details</div>
+      <div class="card-body">
+        <div class="user-block">
+          <div class="avatar">{{ user_details.user_Assetowner.employee_fname|first|upper }}{{ user_details.user_Assetowner.employee_lname|first|upper }}</div>
+          <div class="user-info">
+            <div><strong>{{ user_details.user_Assetowner.employee_fname|default:"–" }} {{ user_details.user_Assetowner.employee_lname|default:"" }}</strong></div>
+            <div>{{ user_details.user_Assetowner.employee_position|default:"–" }} • {{ user_details.user_Assetowner.employee_office|default:user_details.user_Assetowner.employee_office_section|default:"–" }}</div>
+          </div>
         </div>
+        <div class="user-block">
+          <div class="avatar">{{ user_details.user_Enduser.employee_fname|first|upper }}{{ user_details.user_Enduser.employee_lname|first|upper }}</div>
+          <div class="user-info">
+            <div><strong>{{ user_details.user_Enduser.employee_fname|default:"–" }} {{ user_details.user_Enduser.employee_lname|default:"" }}</strong></div>
+            <div>{{ user_details.user_Enduser.employee_position|default:"–" }} • {{ user_details.user_Enduser.employee_office|default:user_details.user_Enduser.employee_office_section|default:"–" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
 
-        <div class="content">
-            <div class="grid-system">
-                <!-- Desktop Section -->
-                <div class="asset-card">
-                    <div class="card-header">
-                        <div class="card-icon">🖥️</div>
-                        <h3 class="card-title">Desktop Workstation <span class="status-badge">ACTIVE</span></h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="spec-row">
-                            <div class="spec-label">Serial Number:</div>
-                            <div class="spec-value">{{ desktop_detailsx.serial_no }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Brand/Model:</div>
-                            <div class="spec-value">{{ desktop_detailsx.brand_name }} {{ desktop_detailsx.model }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Processor:</div>
-                            <div class="spec-value">{{ desktop_detailsx.processor }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Memory:</div>
-                            <div class="spec-value">{{ desktop_detailsx.memory }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Storage:</div>
-                            <div class="spec-value">{{ desktop_detailsx.drive }}</div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Documents -->
+    {% if documents_detailse %}
+    <div class="card" style="flex:1 1 100%;">
+      <div class="card-header">Documents</div>
+      <div class="card-body">
+        {% for doc in documents_detailse %}
+        <div class="spec"><span>PAR No:</span>{{ doc.docs_PAR|default:"–" }}</div>
+        <div class="spec"><span>Property No:</span>{{ doc.docs_Propertyno|default:"–" }}</div>
+        <div class="spec"><span>Acquisition Type:</span>{{ doc.docs_Acquisition_Type|default:"–" }}</div>
+        <div class="spec"><span>Value:</span>{{ doc.docs_Value|default:"–" }}</div>
+        <div class="spec"><span>Date Received:</span>{{ doc.docs_Datereceived|default:"–" }}</div>
+        <div class="spec"><span>Date Inspected:</span>{{ doc.docs_Dateinspected|default:"–" }}</div>
+        <div class="spec"><span>Supplier:</span>{{ doc.docs_Supplier|default:"–" }}</div>
+        <div class="spec"><span>Status:</span>{{ doc.docs_Status|default:"–" }}</div>
+        <hr>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
 
-                <!-- Monitor Section -->
-                {% if monitor_detailse %}
-                <div class="asset-card">
-                    <div class="card-header">
-                        <div class="card-icon">🖥️</div>
-                        <h3 class="card-title">Display Monitor</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="spec-row">
-                            <div class="spec-label">Serial Number:</div>
-                            <div class="spec-value">{{ monitor_detailse.monitor_sn_db }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Brand/Model:</div>
-                            <div class="spec-value">{{ monitor_detailse.monitor_brand_db }} {{ monitor_detailse.monitor_model_db }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Screen Size:</div>
-                            <div class="spec-value">{{ monitor_detailse.monitor_size_db }}</div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+  <!-- History Section -->
+  <div class="history-section">
+    <div class="card" style="flex:1 1 100%;">
+      <div class="card-header">IT Equipment Asset History</div>
+      <div class="card-body">
 
-                <!-- Peripherals Section -->
-                <div class="asset-card">
-                    <div class="card-header">
-                        <div class="card-icon">🖱️⌨️</div>
-                        <h3 class="card-title">Input Devices</h3>
-                    </div>
-                    <div class="card-body">
-                        {% if keyboard_detailse %}
-                        <div style="margin-bottom: 16px;">
-                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">Keyboard</div>
-                            <div class="spec-row">
-                                <div class="spec-label">Serial No:</div>
-                                <div class="spec-value">{{ keyboard_detailse.keyboard_sn_db }}</div>
-                            </div>
-                            <div class="spec-row">
-                                <div class="spec-label">Brand/Model:</div>
-                                <div class="spec-value">{{ keyboard_detailse.keyboard_brand_db }} {{ keyboard_detailse.keyboard_model_db }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        {% if mouse_detailse %}
-                        <div>
-                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">Mouse</div>
-                            <div class="spec-row">
-                                <div class="spec-label">Serial No:</div>
-                                <div class="spec-value">{{ mouse_detailse.mouse_sn_db }}</div>
-                            </div>
-                            <div class="spec-row">
-                                <div class="spec-label">Brand/Model:</div>
-                                <div class="spec-value">{{ mouse_detailse.mouse_brand_db }} {{ mouse_detailse.mouse_model_db }}</div>
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- UPS Section -->
-                {% if ups_detailse %}
-                <div class="asset-card">
-                    <div class="card-header">
-                        <div class="card-icon">🔋</div>
-                        <h3 class="card-title">Power Backup</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="spec-row">
-                            <div class="spec-label">Serial Number:</div>
-                            <div class="spec-value">{{ ups_detailse.ups_sn_db }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Brand/Model:</div>
-                            <div class="spec-value">{{ ups_detailse.ups_brand_db }} {{ ups_detailse.ups_model_db }}</div>
-                        </div>
-                        <div class="spec-row">
-                            <div class="spec-label">Capacity:</div>
-                            <div class="spec-value">{{ ups_detailse.ups_capacity_db }}</div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- User Section -->
-                {% if user_details %}
-                <div class="asset-card">
-                    <div class="card-header">
-                        <div class="card-icon">👤</div>
-                        <h3 class="card-title">Assignment Details</h3>
-                    </div>
-                    <div class="card-body">
-                        <div style="margin-bottom: 16px;">
-                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">Asset Owner</div>
-                            <div class="user-profile">
-                                <div class="user-avatar">{{ user_details.user_Assetowner.employee_fname|first|upper }}{{ user_details.user_Assetowner.employee_lname|first|upper }}</div>
-                                <div class="user-info">
-                                    <p class="user-name">{{ user_details.user_Assetowner.employee_fname }} {{ user_details.user_Assetowner.employee_lname }}</p>
-                                    <p class="user-meta">{{ user_details.user_Assetowner.employee_position }} • {{ user_details.user_Assetowner.employee_office }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style="font-size: 12.5px; color: var(--gray); margin-bottom: 6px; font-weight: 500;">End User</div>
-                            <div class="user-profile">
-                                <div class="user-avatar">{{ user_details.user_Enduser.employee_fname|first|upper }}{{ user_details.user_Enduser.employee_lname|first|upper }}</div>
-                                <div class="user-info">
-                                    <p class="user-name">{{ user_details.user_Enduser.employee_fname }} {{ user_details.user_Enduser.employee_lname }}</p>
-                                    <p class="user-meta">{{ user_details.user_Enduser.employee_position }} • {{ user_details.user_Enduser.employee_office }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
- <!-- QR Code Section -->
-<!-- QR Code Section --><br>
-<div class="qr-section" style="text-align: center; margin-top: 20px;">
-    <div class="qr-placeholder" style="
-        border: 1px dashed #ccc;
-        padding: 12px;
-        border-radius: 6px;
-        display: inline-block;
-        width: 200px; /* Fixed width for the placeholder */
-        height: 200px; /* Fixed height for the placeholder */
-        position: relative;
-        text-align: center;
-        overflow: hidden;
-    ">
-        {% if qr_code_url %}
-            <div style="
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100%;
-                width: 100%;
-            ">
-                <img src="{{ qr_code_url }}" alt="QR Code" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            <p style="margin-top: 8px; font-size: 12px;">QR Code for Desktop Package {{ desktop_package.pk }}</p>
-        {% else %}
-            <div style="
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #aaa;
-                font-size: 12px;
-            ">
-                QR CODE PLACEHOLDER
-            </div>
-            <p style="color: #888; font-size: 12px;">No QR code available.</p>
+        {% if asset_owner_history %}
+        <h6>Asset Owner Transfers</h6>
+        {% for change in asset_owner_history %}
+          <div class="spec">
+            <span>{{ change.changed_at|date:"F j, Y" }}</span>
+            Owner changed from <strong>{{ change.old_assetowner.full_name|default:"–" }}</strong>
+            to <strong>{{ change.new_assetowner.full_name|default:"–" }}</strong>
+            (by {{ change.changed_by|default:"System" }})
+          </div>
+        {% endfor %}
+        <hr>
         {% endif %}
 
-        <p style="margin-top: 8px; font-size: 11px; color: #666;">
-            Scan to view digital asset record
-        </p>
-        <p style="margin-top: 4px; font-size: 10px; color: #999;">
-            Asset ID: {{ desktop_detailsx.serial_no }}
-        </p>
-    </div>
-     <div class="section">
-                <div class="qr-code">
-                   <p style="margin-top: 8px; font-size: 11px; color: #666;">SCAN FOR DIGITAL INVENTORY</p>
-                </div>
-            </div>
-</div>
-            <div class="footer">
-                <p>This document contains confidential information • Generated on {% now "F j, Y" %} at {% now "g:i A" %}</p>
-                <p>© {% now "Y" %} IT Asset Management System • Valid without signature</p>
-            </div>
-        </div>
-    </div>
+        {% if enduser_history %}
+        <h6>End User Changes</h6>
+        {% for change in enduser_history %}
+          <div class="spec">
+            <span>{{ change.changed_at|date:"F j, Y" }}</span>
+            End user changed from <strong>{{ change.old_enduser.full_name|default:"–" }}</strong>
+            to <strong>{{ change.new_enduser.full_name|default:"–" }}</strong>
+            (by {{ change.changed_by|default:"System" }})
+          </div>
+        {% endfor %}
+        <hr>
+        {% endif %}
 
+        {% if disposed_desktops or disposed_monitors or disposed_keyboards or disposed_mice or disposed_ups %}
+        <h6>Disposed Components</h6>
+        {% for d in disposed_desktops %}
+          <div class="spec">Desktop disposed ({{ d.date_disposed|date:"F j, Y" }}) – {{ d.reason|default:"N/A" }}</div>
+        {% endfor %}
+        {% for m in disposed_monitors %}
+          <div class="spec">Monitor {{ m.monitor_sn|default:"–" }} disposed ({{ m.disposal_date|date:"F j, Y" }})</div>
+        {% endfor %}
+        {% for k in disposed_keyboards %}
+          <div class="spec">Keyboard disposed ({{ k.disposal_date|date:"F j, Y" }})</div>
+        {% endfor %}
+        {% for mm in disposed_mice %}
+          <div class="spec">Mouse disposed ({{ mm.disposal_date|date:"F j, Y" }})</div>
+        {% endfor %}
+        {% for u in disposed_ups %}
+          <div class="spec">UPS disposed ({{ u.disposal_date|date:"F j, Y" }})</div>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Wallet Card -->
+  <div class="qr-card">
+    <h4>DPWH PROPERTY</h4>
+    <div class="qr-box">
+      {% if qr_code_url %}
+      <img src="{{ qr_code_url }}" alt="QR Code">
+      {% else %}
+      <span class="text-muted">QR CODE PLACEHOLDER</span>
+      {% endif %}
+    </div>
+    <div class="small">Scan to view digital asset record</div>
+    <div class="small">Asset ID: {{ documents_detailse.first.docs_PAR|default:"N/A" }}</div>
+  </div>
+
+  <div class="footer">
+    <p>This document contains confidential information • Generated on {% now "F j, Y" %} at {% now "g:i A" %}</p>
+    <p>© {% now "Y" %} IT Asset Management System • Valid without signature</p>
+  </div>
+</div>
 </body>
 </html>
