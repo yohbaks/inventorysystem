@@ -171,7 +171,7 @@ class DisposedMonitor(models.Model):
     desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
     monitor_sn = models.CharField(max_length=255, blank=True, null=True)
-    monitor_brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
+    monitor_brand = models.CharField(max_length=255, blank=True, null=True)
     monitor_model = models.CharField(max_length=255, blank=True, null=True)
     monitor_size = models.CharField(max_length=255, blank=True, null=True)
     disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -219,6 +219,87 @@ class DisposedUPS(models.Model):
     def __str__(self):
         return f"Disposed: {self.desktop_package} | Brand: {self.ups_db.ups_brand_db} | SN: {self.ups_db.ups_sn_db}  "
     
+
+
+
+# =============================
+# SALVAGED PERIPHERALS (Traceable)
+# =============================
+
+class SalvagedMonitor(models.Model):
+    monitor = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_monitors', on_delete=models.CASCADE, null=True)
+
+    computer_name = models.CharField(max_length=255, blank=True, null=True)
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)
+    monitor_sn = models.CharField(max_length=255, blank=True, null=True)
+    monitor_brand = models.CharField(max_length=255, blank=True, null=True)
+    monitor_model = models.CharField(max_length=255, blank=True, null=True)
+    monitor_size = models.CharField(max_length=255, blank=True, null=True)
+
+    salvage_date = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+
+    # New fields
+    is_reassigned = models.BooleanField(default=False)
+    reassigned_to = models.ForeignKey(
+        Desktop_Package,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="reassigned_monitors"
+    )
+
+    def __str__(self):
+        return f"Salvaged Monitor: {self.monitor_sn or ''} {self.monitor_brand}"
+
+
+class SalvagedKeyboard(models.Model):
+    keyboard = models.ForeignKey("KeyboardDetails", on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_keyboards', on_delete=models.CASCADE, null=True)
+    computer_name = models.CharField(max_length=255, blank=True, null=True)   # snapshot
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)     # snapshot
+    keyboard_sn = models.CharField(max_length=255, blank=True, null=True)
+    keyboard_brand = models.CharField(max_length=255, blank=True, null=True)
+    keyboard_model = models.CharField(max_length=255, blank=True, null=True)
+    salvage_date = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Salvaged Keyboard: {self.keyboard_sn or ''} {self.keyboard_brand}"
+
+
+class SalvagedMouse(models.Model):
+    mouse = models.ForeignKey("MouseDetails", on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_mice', on_delete=models.CASCADE, null=True)
+    computer_name = models.CharField(max_length=255, blank=True, null=True)   # snapshot
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)     # snapshot
+    mouse_sn = models.CharField(max_length=255, blank=True, null=True)
+    mouse_brand = models.CharField(max_length=255, blank=True, null=True)
+    mouse_model = models.CharField(max_length=255, blank=True, null=True)
+    salvage_date = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Salvaged Mouse: {self.mouse_sn or ''} {self.mouse_brand}"
+
+
+class SalvagedUPS(models.Model):
+    ups = models.ForeignKey("UPSDetails", on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_ups', on_delete=models.CASCADE, null=True)
+    computer_name = models.CharField(max_length=255, blank=True, null=True)   # snapshot
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)     # snapshot
+    ups_sn = models.CharField(max_length=255, blank=True, null=True)
+    ups_brand = models.CharField(max_length=255, blank=True, null=True)
+    ups_model = models.CharField(max_length=255, blank=True, null=True)
+    ups_capacity = models.CharField(max_length=255, blank=True, null=True)
+    salvage_date = models.DateTimeField(auto_now_add=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Salvaged UPS: {self.ups_sn or ''} {self.ups_brand}"
+
+
+
 
 class DocumentsDetails(models.Model):
     

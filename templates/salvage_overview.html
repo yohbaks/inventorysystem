@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card shadow-sm rounded">
+          <div class="card-header bg-light">
+            <div class="card-head-row d-flex justify-content-between align-items-center">
+              <h4 class="card-title mb-0">🛠 Salvage Overview</h4>
+              <div class="card-tools">
+                <a href="#" class="btn btn-success btn-sm me-2">
+                  <i class="fa fa-download me-1"></i> Export
+                </a>
+                <a href="#" class="btn btn-info btn-sm">
+                  <i class="fa fa-print me-1"></i> Print
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- Nav Pills -->
+            <ul class="nav nav-pills nav-secondary mb-3" id="salvage-tabs" role="tablist">
+              <li class="nav-item submenu"><a class="nav-link active" data-bs-toggle="pill" href="#monitors">Monitors</a></li>
+              <li class="nav-item submenu"><a class="nav-link" data-bs-toggle="pill" href="#keyboards">Keyboards</a></li>
+              <li class="nav-item submenu"><a class="nav-link" data-bs-toggle="pill" href="#mice">Mice</a></li>
+              <li class="nav-item submenu"><a class="nav-link" data-bs-toggle="pill" href="#ups">UPS</a></li>
+            </ul>
+
+            <div class="tab-content mt-2" id="salvage-tabContent">
+
+              <!-- Monitors -->
+              <div class="tab-pane fade show active" id="monitors">
+                <table class="table table-bordered table-striped table-hover" id="monitor-table">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>SN</th><th>Brand</th><th>Model</th><th>Size</th>
+                      <th>Computer Name</th><th>Asset Owner</th>
+                      <th>Date Salvaged</th><th>Notes</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in salvaged_monitors %}
+                    <tr>
+                      <td><a href="{% url 'salvaged_monitor_detail' item.id %}">{{ item.monitor_sn }}</a></td>
+                      <td>{{ item.monitor_brand }}</td>
+                      <td>{{ item.monitor_model }}</td>
+                      <td>{{ item.monitor_size }}</td>
+                      <td>{{ item.computer_name }}</td>
+                      <td>{{ item.asset_owner }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
+                      <td>{{ item.notes|default:"—" }}</td>
+                      <td>
+                        {% if item.is_reassigned %}
+                          <span class="badge bg-secondary">
+                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                          </span>
+                        {% else %}
+                          <span class="badge bg-success">Available</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center text-muted">No salvaged monitors</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Keyboards -->
+              <div class="tab-pane fade" id="keyboards">
+                <table class="table table-bordered table-striped table-hover" id="keyboard-table">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>SN</th><th>Brand</th><th>Model</th>
+                      <th>Computer Name</th><th>Asset Owner</th>
+                      <th>Date Salvaged</th><th>Notes</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in salvaged_keyboards %}
+                    <tr>
+                      <td><a href="{% url 'salvaged_keyboard_detail' item.id %}">{{ item.keyboard_sn }}</a></td>
+                      <td>{{ item.keyboard_brand }}</td>
+                      <td>{{ item.keyboard_model }}</td>
+                      <td>{{ item.computer_name }}</td>
+                      <td>{{ item.asset_owner }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d" }}</td>
+                      <td>{{ item.notes|default:"—" }}</td>
+                      <td>
+                        {% if item.is_reassigned %}
+                          <span class="badge bg-secondary">
+                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                          </span>
+                        {% else %}
+                          <span class="badge bg-success">Available</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center">No salvaged keyboards</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mice -->
+              <div class="tab-pane fade" id="mice">
+                <table class="table table-bordered table-striped table-hover" id="mouse-table">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>SN</th><th>Brand</th><th>Model</th>
+                      <th>Computer Name</th><th>Asset Owner</th>
+                      <th>Date Salvaged</th><th>Notes</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in salvaged_mice %}
+                    <tr>
+                      <td><a href="{% url 'salvaged_mouse_detail' item.id %}">{{ item.mouse_sn }}</a></td>
+                      <td>{{ item.mouse_brand }}</td>
+                      <td>{{ item.mouse_model }}</td>
+                      <td>{{ item.computer_name }}</td>
+                      <td>{{ item.asset_owner }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d" }}</td>
+                      <td>{{ item.notes|default:"—" }}</td>
+                      <td>
+                        {% if item.is_reassigned %}
+                          <span class="badge bg-secondary">
+                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                          </span>
+                        {% else %}
+                          <span class="badge bg-success">Available</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center">No salvaged mice</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- UPS -->
+              <div class="tab-pane fade" id="ups">
+                <table class="table table-bordered table-striped table-hover" id="ups-table">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>SN</th><th>Brand</th><th>Model</th><th>Capacity</th>
+                      <th>Computer Name</th><th>Asset Owner</th>
+                      <th>Date Salvaged</th><th>Notes</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in salvaged_ups %}
+                    <tr>
+                      <td><a href="{% url 'salvaged_ups_detail' item.id %}">{{ item.ups_sn }}</a></td>
+                      <td>{{ item.ups_brand }}</td>
+                      <td>{{ item.ups_model }}</td>
+                      <td>{{ item.ups_capacity }}</td>
+                      <td>{{ item.computer_name }}</td>
+                      <td>{{ item.asset_owner }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d" }}</td>
+                      <td>{{ item.notes|default:"—" }}</td>
+                      <td>
+                        {% if item.is_reassigned %}
+                          <span class="badge bg-secondary">
+                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                          </span>
+                        {% else %}
+                          <span class="badge bg-success">Available</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center">No salvaged UPS</td></tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    $('#monitor-table, #keyboard-table, #mouse-table, #ups-table').DataTable();
+  });
+</script>
+{% endblock %}

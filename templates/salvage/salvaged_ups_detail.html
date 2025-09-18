@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <div class="card shadow-sm rounded">
+          <div class="card-header" style="background-color:#6861ce;">
+            <div class="card-head-row d-flex justify-content-between align-items-center">
+              <h4 class="card-title mb-0 text-white">🔋 Salvaged UPS Detail</h4>
+              <div class="card-tools">
+                <a href="{% url 'salvage_overview' %}" class="btn btn-light btn-sm me-2">
+                  <i class="fa fa-arrow-left me-1"></i> Back
+                </a>
+                <a href="#" class="btn btn-success btn-sm me-2">
+                  <i class="fa fa-download me-1"></i> Export
+                </a>
+                <a href="#" class="btn btn-info btn-sm">
+                  <i class="fa fa-print me-1"></i> Print
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <tbody>
+                  <tr><th class="bg-light text-end" style="width: 30%;">Serial Number</th><td>{{ ups.ups_sn }}</td></tr>
+                  <tr><th class="bg-light text-end">Brand</th><td>{{ ups.ups_brand }}</td></tr>
+                  <tr><th class="bg-light text-end">Model</th><td>{{ ups.ups_model }}</td></tr>
+                  <tr><th class="bg-light text-end">Capacity</th><td>{{ ups.ups_capacity }}</td></tr>
+                  <tr><th class="bg-light text-end">Computer Name</th><td>{{ ups.computer_name }}</td></tr>
+                  <tr><th class="bg-light text-end">Asset Owner</th><td>{{ ups.asset_owner }}</td></tr>
+                  <tr><th class="bg-light text-end">Date Salvaged</th><td>{{ ups.salvage_date|date:"Y-m-d H:i" }}</td></tr>
+                  <tr><th class="bg-light text-end">Notes</th><td>{{ ups.notes|default:"—" }}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer text-end">
+            <a href="{% url 'salvage_overview' %}" class="btn btn-outline-secondary">
+              <i class="fa fa-arrow-left"></i> Back to Salvage Overview
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

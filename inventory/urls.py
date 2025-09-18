@@ -120,6 +120,13 @@ urlpatterns = [
     path('disposal/', views.disposal_overview, name='disposal_overview'), #overview of disposal
     path('dispose/<str:category>/<int:id>/', views.dispose_component, name='dispose_component'), #logic for disposing components
 
+    #salvage area
+    path("salvage_overview/", views.salvage_overview, name="salvage_overview"),
+    path("salvaged/monitor/<int:pk>/", views.salvaged_monitor_detail, name="salvaged_monitor_detail"),
+    path("salvaged/keyboard/<int:pk>/", views.salvaged_keyboard_detail, name="salvaged_keyboard_detail"),
+    path("salvaged/mouse/<int:pk>/", views.salvaged_mouse_detail, name="salvaged_mouse_detail"),
+    path("salvaged/ups/<int:pk>/", views.salvaged_ups_detail, name="salvaged_ups_detail"),
+
     #dashboard chart
     path('dashboard/chart/', views.dashboard_view_chart, name='dashboard_view_chart'),
 

@@ -755,56 +755,89 @@ function printQrCode() {
         </div>
 
          <!-- Add Monitor Modal -->
-  <div class="modal fade" id="addMonitorModal" tabindex="-1" aria-labelledby="addMonitorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addMonitorModalLabel">Add New Monitor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        {% if desktop_package and desktop_package.id %}
-        <form method="POST" action="{% url 'add_monitor_to_package' desktop_package.id %}">
-          {% csrf_token %}
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="monitor_sn" class="form-label">Serial Number</label>
-              <input type="text" class="form-control" id="monitor_sn" name="monitor_sn" required>
-            </div>
-            <div class="mb-3">
-              <label for="monitor_brand" class="form-label">Brandd</label>
-              <input type="text" class="form-control" id="monitor_brand" name="monitor_brand" required>
-            </div>
+  <!-- Add Monitor Modal -->
+<div class="modal fade" id="addMonitorModal" tabindex="-1" aria-labelledby="addMonitorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addMonitorModalLabel">Add New Monitor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      {% if desktop_package and desktop_package.id %}
+      <form method="POST" action="{% url 'add_monitor_to_package' desktop_package.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          
+          <!-- Tabs for Manual or Salvage -->
+          <ul class="nav nav-pills mb-3" id="monitorAddTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="manual-tab" data-bs-toggle="pill" href="#manual-input" role="tab">Manual Input</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="salvage-tab" data-bs-toggle="pill" href="#salvage-select" role="tab">From Salvage</a>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="monitorAddTabsContent">
             
-            <div class="mb-3">
-              <label for="monitor_brand" class="form-label">Brand</label>
-              <select class="form-select form-control" id="editBrand" name="monitor_brand_db" required>
-                <option value="" disabled selected>Select Brand</option>
-                {% for brandMonitor in monitor_brands %}
-                  <option value="{{ brandMonitor.id }}">{{ brandMonitor.name }}</option>
-                {% endfor %}
-              </select>
+            <!-- Manual Input -->
+            <div class="tab-pane fade show active" id="manual-input" role="tabpanel">
+              <div class="mb-3">
+                <label for="monitor_sn" class="form-label">Serial Number</label>
+                <input type="text" class="form-control" id="monitor_sn" name="monitor_sn">
+              </div>
+              <div class="mb-3">
+                <label for="monitor_brand" class="form-label">Brand</label>
+                <select class="form-select form-control" id="monitor_brand" name="monitor_brand_db">
+                  <option value="" disabled selected>Select Brand</option>
+                  {% for brandMonitor in monitor_brands %}
+                    <option value="{{ brandMonitor.id }}">{{ brandMonitor.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="monitor_model" class="form-label">Model</label>
+                <input type="text" class="form-control" id="monitor_model" name="monitor_model">
+              </div>
+              <div class="mb-3">
+                <label for="monitor_size" class="form-label">Size</label>
+                <input type="text" class="form-control" id="monitor_size" name="monitor_size">
+              </div>
             </div>
 
-            <div class="mb-3">
-              <label for="monitor_model" class="form-label">Model</label>
-              <input type="text" class="form-control" id="monitor_model" name="monitor_model" required>
+            <!-- Salvaged Monitors -->
+            <div class="tab-pane fade" id="salvage-select" role="tabpanel">
+              <div class="mb-3">
+                <label for="salvaged_monitor" class="form-label">Choose Salvaged Monitor</label>
+                <select class="form-select" id="salvaged_monitor" name="salvaged_monitor_id">
+                  <option value="" disabled selected>Select Salvaged Monitor</option>
+                  {% for salvaged in salvaged_monitors %}
+                    <option value="{{ salvaged.id }}">
+                      {{ salvaged.monitor_sn }} - {{ salvaged.monitor_brand }} ({{ salvaged.monitor_model }})
+                    </option>
+                  {% empty %}
+                    <option disabled>No salvaged monitors available</option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="monitor_size" class="form-label">Size</label>
-              <input type="text" class="form-control" id="monitor_size" name="monitor_size" required>
-            </div>
+
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Add Monitor</button>
-          </div>
-        </form>
-        {% else %}
-        <p class="text-danger">Desktop package not available. Please create it first.</p>
-        {% endif %}
-      </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add Monitor</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="text-danger">Desktop package not available. Please create it first.</p>
+      {% endif %}
     </div>
   </div>
+</div>
+
       </div>
 
 
@@ -1453,7 +1486,106 @@ function printQrCode() {
       </div>
 
 <!-- Dispose Modal  for desktop, I put it in here so that tanan pills maka click sa button -->
-  
+<div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    {% if desktop_detailsx and desktop_detailsx.id %}
+    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Dispose Desktop Package: {{ desktop_detailsx.computer_name }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="reason" class="form-label">Reason for disposal</label>
+            <textarea name="reason" class="form-control" required></textarea>
+          </div>
+          <p class="text-warning">
+            Please <strong>do not dispose of peripherals</strong> such as keyboards, monitors, and other devices if they are still functioning. Keeping equipment that works helps to reduce waste and saves costs!
+          </p>
+
+          <!-- Monitor -->
+          <div class="mb-3">
+            <label for="monitor" class="form-label">Monitor</label>
+            <select class="form-select" name="monitor" id="monitor">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose Monitor(s)</option>
+              <option value="salvage">Salvage Monitor(s)</option>
+            </select>
+          </div>
+
+          <!-- Keyboard -->
+          <div class="mb-3">
+            <label for="keyboard" class="form-label">Keyboard</label>
+            <select class="form-select" name="keyboard" id="keyboard">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose Keyboard(s)</option>
+              <option value="salvage">Salvage Keyboard(s)</option>
+            </select>
+          </div>
+
+          <!-- Mouse -->
+          <div class="mb-3">
+            <label for="mouse" class="form-label">Mouse</label>
+            <select class="form-select" name="mouse" id="mouse">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose Mouse(s)</option>
+              <option value="salvage">Salvage Mouse(s)</option>
+            </select>
+          </div>
+
+          <!-- UPS -->
+          <div class="mb-3">
+            <label for="ups" class="form-label">UPS</label>
+            <select class="form-select" name="ups" id="ups">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose UPS(s)</option>
+              <option value="salvage">Salvage UPS(s)</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Dispose</button>
+        </div>
+      </div>
+    </form>
+    {% else %}
+    <div class="alert alert-warning">
+      Cannot dispose: Desktop details are missing.
+    </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+  {% if messages %}
+    {% for message in messages %}
+      $.notify({
+        // Message content
+        message: "{{ message|escapejs }}"
+      },{
+        // Bootstrap Notify settings
+        type: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+        allow_dismiss: true,
+        placement: {
+          from: "top",
+          align: "right"
+        },
+        delay: 4000, // auto-hide after 4s
+        animate: {
+          enter: 'animate__animated animate__fadeInDown',
+          exit: 'animate__animated animate__fadeOutUp'
+        }
+      });
+    {% endfor %}
+  {% endif %}
+</script>
+
+<!-- end disposed all -->
+<!-- 
+
  <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     {% if desktop_detailsx and desktop_detailsx.id %}
@@ -1504,7 +1636,7 @@ function printQrCode() {
   </div>
 {% endif %}
   </div>
-</div>
+</div> -->
 
 
 <!-- User Details Tab -->
