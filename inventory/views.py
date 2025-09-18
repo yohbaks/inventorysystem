@@ -144,7 +144,7 @@ def desktop_details_view(request, package_id):
     employees = Employee.objects.all()
 
      # ✅ Salvaged monitors for re-adding
-    salvaged_monitors = SalvagedMonitor.objects.all()
+    salvaged_monitors = SalvagedMonitor.objects.filter(is_reassigned=False).order_by("-salvage_date")
     
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
