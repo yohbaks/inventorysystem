@@ -5,7 +5,7 @@ from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
                               EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance,
                               PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule, OfficeSection,
-                              SalvagedMonitor, SalvagedKeyboard, SalvagedMouse, SalvagedUPS, SalvagedMonitorHistory)
+                              SalvagedMonitor, SalvagedKeyboard, SalvagedMouse, SalvagedUPS, SalvagedMonitorHistory, SalvagedKeyboardHistory)
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -138,8 +138,9 @@ def desktop_details_view(request, package_id):
     # Employees for dropdowns
     employees = Employee.objects.all()
 
-     # ✅ Salvaged monitors for re-adding
+     # ✅ Salvaged monitors and keyboards for re-adding
     salvaged_monitors = SalvagedMonitor.objects.filter(is_reassigned=False).order_by("-salvage_date")
+    salvaged_keyboards = SalvagedKeyboard.objects.filter(is_reassigned=False).order_by("-salvage_date")
     
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
@@ -172,6 +173,7 @@ def desktop_details_view(request, package_id):
         'assetowner_history': assetowner_history,
         'pm_assignments': pm_assignments,
         'salvaged_monitors': salvaged_monitors,
+        'salvaged_keyboards': salvaged_keyboards,
     })
 
 
@@ -408,6 +410,20 @@ def monitor_details(request):
 
     return render(request, 'monitor_details.html', {'monitors': monitors})
 
+
+def keyboard_details(request):
+    keyboards = KeyboardDetails.objects.filter(is_disposed=False).select_related(
+        'desktop_package', 'keyboard_brand_db'
+    ).prefetch_related(
+        Prefetch(
+            'desktop_package__user_details',
+            queryset=UserDetails.objects.select_related('user_Enduser')
+        )
+    ).order_by('-created_at')
+
+    return render(request, 'keyboard_details.html', {'keyboards': keyboards})
+
+
 def mouse_details(request):
     # Get all mouse equipment
     mouse_details = MouseDetails.objects.select_related(
@@ -419,14 +435,6 @@ def mouse_details(request):
     return render(request, 'mouse_details.html', {'mouse_details': mouse_details})
 
 
-def keyboard_details(request):
-    keyboard_details = KeyboardDetails.objects.select_related(
-        'desktop_package', 'keyboard_brand_db'
-    ).prefetch_related(
-        'desktop_package__user_details'
-    ).order_by('-created_at')
-
-    return render(request, 'keyboard_details.html', {'keyboard_details': keyboard_details})
 
 def ups_details(request):
     # Get all UPS equipment
@@ -548,66 +556,71 @@ def add_monitor_to_package(request, package_id):
     return redirect("desktop_details_view", package_id=desktop_package.id)
 
 
-# def add_monitor_to_package(request, package_id):
-#     if request.method == 'POST':
-#         # Retrieve the desktop package by its ID
-#         desktop_package = get_object_or_404(Desktop_Package, id=package_id)
-        
-#         # Get form data
-#         monitor_sn = request.POST.get('monitor_sn') 
-
-#         monitor_brand_id = request.POST.get('monitor_brand_db')
-#         monitor_brand_instance = get_object_or_404(Brand, id=monitor_brand_id)
-
-
-
-#         monitor_model = request.POST.get('monitor_model')
-#         monitor_size = request.POST.get('monitor_size')
-        
-#         # Create a new keyboard associated with the desktop package
-#         MonitorDetails.objects.create(
-#             desktop_package=desktop_package,
-#             monitor_sn_db=monitor_sn,
-#             monitor_brand_db=monitor_brand_instance,
-#             monitor_model_db=monitor_model,
-#             monitor_size_db=monitor_size
-#         )
-        
-#         # Redirect back to the desktop details view, focusing on the Keyboard tab
-#         return redirect(f'/desktop_details_view/{package_id}/#pills-monitor')
-    
-#     return redirect('desktop_details_view', package_id=package_id)
-
-
-
-#This function allows adding a new keyboard to a specific desktop package, then redirects back to the "Keyboard" tab of the desktop details view.
 
 def add_keyboard_to_package(request, package_id):
-    if request.method == 'POST':
-        # Retrieve the desktop package by its ID
-        desktop_package = get_object_or_404(Desktop_Package, id=package_id)
-        
-        # Get form data
-        keyboard_sn = request.POST.get('keyboard_sn')
-        
-        keyboard_brand_id = request.POST.get('keyboard_brand_db')
-        keyboard_brand_instance = get_object_or_404(Brand, id=keyboard_brand_id)
-        
+    desktop_package = get_object_or_404(Desktop_Package, id=package_id)
 
-        keyboard_model = request.POST.get('keyboard_model')
-        
-        # Create a new keyboard associated with the desktop package
-        KeyboardDetails.objects.create(
-            desktop_package=desktop_package,
-            keyboard_sn_db=keyboard_sn,
-            keyboard_brand_db=keyboard_brand_instance,
-            keyboard_model_db=keyboard_model
-        )
-        
-        # Redirect back to the desktop details view, focusing on the Keyboard tab
-        return redirect(f'/desktop_details_view/{package_id}/#pills-keyboard')
-    
-    return redirect('desktop_details_view', package_id=package_id)
+    if request.method == "POST":
+        salvaged_keyboard_id = request.POST.get("salvaged_keyboard_id")
+
+        if salvaged_keyboard_id:
+            # Case 1: Reassign salvaged keyboard
+            salvaged_keyboard = get_object_or_404(SalvagedKeyboard, id=salvaged_keyboard_id)
+
+            if salvaged_keyboard.is_reassigned:
+                messages.error(request, "❌ This salvaged keyboard has already been reassigned.")
+                return redirect("desktop_details_view", package_id=desktop_package.id)
+
+            # ✅ Create active keyboard record
+            KeyboardDetails.objects.create(
+                desktop_package=desktop_package,
+                keyboard_sn_db=salvaged_keyboard.keyboard_sn,
+                keyboard_brand_db=Brand.objects.filter(name=salvaged_keyboard.keyboard_brand).first(),
+                keyboard_model_db=salvaged_keyboard.keyboard_model,
+                is_disposed=False,
+            )
+
+            # ✅ Update salvaged record
+            salvaged_keyboard.is_reassigned = True
+            salvaged_keyboard.reassigned_to = desktop_package
+            salvaged_keyboard.save()
+
+            # ✅ Log history
+            SalvagedKeyboardHistory.objects.create(
+                salvaged_keyboard=salvaged_keyboard,
+                reassigned_to=desktop_package,
+            )
+
+            messages.success(request, "✅ Salvaged keyboard reassigned and logged.")
+            return redirect("desktop_details_view", package_id=desktop_package.id)
+
+        else:
+            # Case 2: Manual Input
+            keyboard_sn = request.POST.get("keyboard_sn")
+            keyboard_brand_id = request.POST.get("keyboard_brand_db")
+            keyboard_model = request.POST.get("keyboard_model")
+
+            if not keyboard_sn or not keyboard_model:
+                messages.error(request, "❌ Please fill in all required fields.")
+                return redirect("desktop_details_view", package_id=desktop_package.id)
+
+            # ✅ Convert brand ID into Brand instance
+            brand_instance = Brand.objects.filter(id=keyboard_brand_id).first() if keyboard_brand_id else None
+
+            KeyboardDetails.objects.create(
+                desktop_package=desktop_package,
+                keyboard_sn_db=keyboard_sn,
+                keyboard_brand_db=brand_instance,
+                keyboard_model_db=keyboard_model,
+                is_disposed=False,
+            )
+
+            messages.success(request, "✅ New keyboard added successfully.")
+            return redirect("desktop_details_view", package_id=desktop_package.id)
+
+    messages.error(request, "❌ Invalid request.")
+    return redirect("desktop_details_view", package_id=package_id)
+
 
 
 #This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.
@@ -1178,7 +1191,6 @@ def salvage_monitor(request, monitor_id):
 def salvage_overview(request):
     salvaged_monitors = SalvagedMonitor.objects.select_related("reassigned_to").order_by("-salvage_date")
 
-    # Attach computer_name if reassigned
     for sm in salvaged_monitors:
         if sm.reassigned_to:
             desktop_details = DesktopDetails.objects.filter(desktop_package=sm.reassigned_to).first()
@@ -1186,15 +1198,19 @@ def salvage_overview(request):
         else:
             sm.reassigned_computer_name = None
 
-    salvaged_keyboards = SalvagedKeyboard.objects.all().order_by("-salvage_date")
-    salvaged_mice = SalvagedMouse.objects.all().order_by("-salvage_date")
-    salvaged_ups = SalvagedUPS.objects.all().order_by("-salvage_date")
+    salvaged_keyboards = SalvagedKeyboard.objects.select_related("reassigned_to").order_by("-salvage_date")
+
+    for sk in salvaged_keyboards:
+        if sk.reassigned_to:
+            desktop_details = DesktopDetails.objects.filter(desktop_package=sk.reassigned_to).first()
+            sk.reassigned_computer_name = desktop_details.computer_name if desktop_details else "Unknown"
+        else:
+            sk.reassigned_computer_name = None
 
     context = {
         "salvaged_monitors": salvaged_monitors,
         "salvaged_keyboards": salvaged_keyboards,
-        "salvaged_mice": salvaged_mice,
-        "salvaged_ups": salvaged_ups,
+        # leave mice/ups out until you patch them later
     }
     return render(request, "salvage_overview.html", context)
 
@@ -1207,7 +1223,8 @@ def salvaged_monitor_detail(request, pk):
 
 def salvaged_keyboard_detail(request, pk):
     keyboard = get_object_or_404(SalvagedKeyboard, pk=pk)
-    return render(request, "salvage/salvaged_keyboard_detail.html", {"keyboard": keyboard})
+    history = keyboard.history.all().order_by("-reassigned_at")
+    return render(request, "salvage/salvaged_keyboard_detail.html", {"keyboard": keyboard,"history": history})
 
 def salvaged_mouse_detail(request, pk):
     mouse = get_object_or_404(SalvagedMouse, pk=pk)

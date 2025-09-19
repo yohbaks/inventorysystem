@@ -88,13 +88,13 @@
                       <td>{{ item.keyboard_model }}</td>
                       <td>{{ item.computer_name }}</td>
                       <td>{{ item.asset_owner }}</td>
-                      <td>{{ item.salvage_date|date:"Y-m-d" }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
                         {% if item.is_reassigned %}
-                          <span class="badge bg-secondary">
+                          <a href="{% url 'salvaged_keyboard_detail' item.id %}" class="badge bg-secondary text-decoration-none">
                             Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                          </span>
+                          </a>
                         {% else %}
                           <span class="badge bg-success">Available</span>
                         {% endif %}
@@ -118,7 +118,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for item in salvaged_mice %}
+                    <!-- {% for item in salvaged_mice %}
                     <tr>
                       <td><a href="{% url 'salvaged_mouse_detail' item.id %}">{{ item.mouse_sn }}</a></td>
                       <td>{{ item.mouse_brand }}</td>
@@ -139,7 +139,7 @@
                     </tr>
                     {% empty %}
                     <tr><td colspan="8" class="text-center">No salvaged mice</td></tr>
-                    {% endfor %}
+                    {% endfor %} -->
                   </tbody>
                 </table>
               </div>
@@ -155,7 +155,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for item in salvaged_ups %}
+                    <!-- {% for item in salvaged_ups %}
                     <tr>
                       <td><a href="{% url 'salvaged_ups_detail' item.id %}">{{ item.ups_sn }}</a></td>
                       <td>{{ item.ups_brand }}</td>
@@ -177,7 +177,7 @@
                     </tr>
                     {% empty %}
                     <tr><td colspan="9" class="text-center">No salvaged UPS</td></tr>
-                    {% endfor %}
+                    {% endfor %} -->
                   </tbody>
                 </table>
               </div>

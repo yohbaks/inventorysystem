@@ -4,7 +4,7 @@
   <div class="page-inner">
     <div class="row">
       <div class="col-md-8 offset-md-2">
-        <div class="card">
+        <div class="card shadow-sm rounded">
           <!-- Purple Header -->
           <div class="card-header" style="background-color:#6861ce;">
             <div class="card-head-row d-flex justify-content-between align-items-center">
@@ -23,38 +23,18 @@
             </div>
           </div>
 
+          <!-- Keyboard Details -->
           <div class="card-body">
             <div class="table-responsive">
               <table class="table table-bordered table-striped">
                 <tbody>
-                  <tr>
-                    <th class="bg-light text-end" style="width: 30%;">Serial Number</th>
-                    <td>{{ keyboard.keyboard_sn }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-light text-end">Brand</th>
-                    <td>{{ keyboard.keyboard_brand }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-light text-end">Model</th>
-                    <td>{{ keyboard.keyboard_model }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-light text-end">Computer Name</th>
-                    <td>{{ keyboard.computer_name }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-light text-end">Asset Owner</th>
-                    <td>{{ keyboard.asset_owner }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-light text-end">Date Salvaged</th>
-                    <td>{{ keyboard.salvage_date|date:"Y-m-d H:i" }}</td>
-                  </tr>
-                  <tr>
-                    <th class="bg-light text-end">Notes</th>
-                    <td>{{ keyboard.notes|default:"—" }}</td>
-                  </tr>
+                  <tr><th class="bg-light text-end" style="width: 30%;">Serial Number</th><td>{{ keyboard.keyboard_sn }}</td></tr>
+                  <tr><th class="bg-light text-end">Brand</th><td>{{ keyboard.keyboard_brand }}</td></tr>
+                  <tr><th class="bg-light text-end">Model</th><td>{{ keyboard.keyboard_model }}</td></tr>
+                  <tr><th class="bg-light text-end">Computer Name</th><td>{{ keyboard.computer_name }}</td></tr>
+                  <tr><th class="bg-light text-end">Asset Owner</th><td>{{ keyboard.asset_owner }}</td></tr>
+                  <tr><th class="bg-light text-end">Date Salvaged</th><td>{{ keyboard.salvage_date|date:"Y-m-d H:i" }}</td></tr>
+                  <tr><th class="bg-light text-end">Notes</th><td>{{ keyboard.notes|default:"—" }}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -68,7 +48,41 @@
         </div>
       </div>
     </div>
+
+    <!-- Reassignment History -->
+    <div class="card mt-3">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">🔄 Reassignment History</h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-sm table-bordered">
+          <thead class="table-dark">
+            <tr>
+              <th>Reassigned To</th>
+              <th>Computer Name</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in history %}
+            <tr>
+              <td>{{ record.reassigned_to }}</td>
+              <td>
+                {% if record.reassigned_to and record.reassigned_to.desktop_details.first %}
+                  {{ record.reassigned_to.desktop_details.first.computer_name }}
+                {% else %}
+                  {{ keyboard.computer_name|default:"Unknown" }}
+                {% endif %}
+              </td>
+              <td>{{ record.reassigned_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center text-muted">No reassignment history</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
-
 {% endblock %}

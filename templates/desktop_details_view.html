@@ -1013,54 +1013,86 @@ function printQrCode() {
   </div>
 
   <!-- Add Keyboard Modal -->
-  <div class="modal fade" id="addKeyboardModal" tabindex="-1" aria-labelledby="addKeyboardModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addKeyboardModalLabel">Add New Keyboard</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal fade" id="addKeyboardModal" tabindex="-1" aria-labelledby="addKeyboardModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addKeyboardModalLabel">Add New Keyboard</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      {% if desktop_package and desktop_package.id %}
+      <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+
+          <!-- Tabs for Manual or Salvage -->
+          <ul class="nav nav-pills mb-3" id="keyboardAddTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="keyboard-manual-tab" data-bs-toggle="pill" href="#keyboard-manual-input" role="tab">Manual Input</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="keyboard-salvage-tab" data-bs-toggle="pill" href="#keyboard-salvage-select" role="tab">From Salvage</a>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="keyboardAddTabsContent">
+            
+            <!-- Manual Input -->
+            <div class="tab-pane fade show active" id="keyboard-manual-input" role="tabpanel">
+              <div class="mb-3">
+                <label for="keyboard_sn" class="form-label">Serial Number</label>
+                <input type="text" class="form-control" id="keyboard_sn" name="keyboard_sn">
+              </div>
+              <div class="mb-3">
+                <label for="keyboard_brand" class="form-label">Brand</label>
+                <select class="form-select form-control" id="keyboard_brand" name="keyboard_brand_db">
+                  <option value="" disabled selected>Select Brand</option>
+                  {% for brandKeyboard in keyboard_brands %}
+                    <option value="{{ brandKeyboard.id }}">{{ brandKeyboard.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="keyboard_model" class="form-label">Model</label>
+                <input type="text" class="form-control" id="keyboard_model" name="keyboard_model">
+              </div>
+            </div>
+
+            <!-- Salvaged Keyboards -->
+            <div class="tab-pane fade" id="keyboard-salvage-select" role="tabpanel">
+              <div class="mb-3">
+                <label for="salvaged_keyboard" class="form-label">Choose Salvaged Keyboard</label>
+                <select class="form-select" id="salvaged_keyboard" name="salvaged_keyboard_id">
+                  <option value="" disabled selected>Select Salvaged Keyboard</option>
+                  {% for salvaged in salvaged_keyboards %}
+                    <option value="{{ salvaged.id }}">
+                      {{ salvaged.keyboard_sn }} - {{ salvaged.keyboard_brand }} ({{ salvaged.keyboard_model }})
+                    </option>
+                  {% empty %}
+                    <option disabled>No salvaged keyboards available</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+          </div>
         </div>
-        {% if desktop_package and desktop_package.id %}
-        <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
-          {% csrf_token %}
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="keyboard_sn" class="form-label">Serial Number</label>
-              <input type="text" class="form-control" id="keyboard_sn" name="keyboard_sn" required>
-            </div>
-
-
-            <div class="mb-3">
-              <label for="keyboard_brand" class="form-label">Brand</label>
-              <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
-                <option value="" disabled selected>Select Brand</option>
-                {% for brandKeyboard in keyboard_brands %}
-                  <option value="{{ brandKeyboard.id }}">{{ brandKeyboard.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-
-            <div class="mb-3">
-              <label for="keyboard_model" class="form-label">Model</label>
-              <input type="text" class="form-control" id="keyboard_model" name="keyboard_model" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Add Keyboard</button>
-          </div>
-        </form>
-
-         {% else %}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add Keyboard</button>
+        </div>
+      </form>
+      {% else %}
       <div class="alert alert-danger m-3">
-        Cannot edit keyboard: data not available.
+        Cannot add keyboard: desktop package not available.
       </div>
-    {% endif %}
-      </div>
-    </div>
-  </div>
+      {% endif %}
+    </div> 
+  </div>   
+</div>     
 </div>
+
 
 
 <!-- Keyboard Details Tab END -->

@@ -65,12 +65,12 @@
         <tr>
           <td>{{ record.reassigned_to }}</td>
           <td>
-  {% if record.reassigned_to and record.reassigned_to.desktop_details.first %}
-    {{ record.reassigned_to.desktop_details.first.computer_name }}
-  {% else %}
-    {{ monitor.computer_name|default:"Unknown" }}
-  {% endif %}
-</td>
+            {% if record.reassigned_to and record.reassigned_to.desktop_details.first %}
+              {{ record.reassigned_to.desktop_details.first.computer_name }}
+            {% else %}
+              {{ monitor.computer_name|default:"Unknown" }}
+            {% endif %}
+          </td>
           <td>{{ record.reassigned_at|date:"Y-m-d H:i" }}</td>
         </tr>
         {% empty %}

@@ -262,19 +262,37 @@ class SalvagedMonitorHistory(models.Model):
 
 
 
+# Salvaged Keyboard
 class SalvagedKeyboard(models.Model):
     keyboard = models.ForeignKey("KeyboardDetails", on_delete=models.CASCADE)
     desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_keyboards', on_delete=models.CASCADE, null=True)
-    computer_name = models.CharField(max_length=255, blank=True, null=True)   # snapshot
-    asset_owner = models.CharField(max_length=255, blank=True, null=True)     # snapshot
+
+    computer_name = models.CharField(max_length=255, blank=True, null=True)
+    asset_owner = models.CharField(max_length=255, blank=True, null=True)
     keyboard_sn = models.CharField(max_length=255, blank=True, null=True)
     keyboard_brand = models.CharField(max_length=255, blank=True, null=True)
     keyboard_model = models.CharField(max_length=255, blank=True, null=True)
+
     salvage_date = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True, null=True)
 
+    is_reassigned = models.BooleanField(default=False)
+    reassigned_to = models.ForeignKey(
+        Desktop_Package, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="reassigned_keyboards"
+    )
+
     def __str__(self):
         return f"Salvaged Keyboard: {self.keyboard_sn or ''} {self.keyboard_brand}"
+
+
+class SalvagedKeyboardHistory(models.Model):
+    salvaged_keyboard = models.ForeignKey("SalvagedKeyboard", on_delete=models.CASCADE, related_name="history")
+    reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
+    reassigned_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.salvaged_keyboard.keyboard_sn} → {self.reassigned_to} ({self.reassigned_at})"
 
 
 class SalvagedMouse(models.Model):
