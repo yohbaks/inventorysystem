@@ -55,9 +55,9 @@
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
                         {% if item.is_reassigned %}
-                          <span class="badge bg-secondary">
+                          <a href="{% url 'salvaged_monitor_detail' item.id %}" class="badge bg-secondary text-decoration-none">
                             Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                          </span>
+                          </a>
                         {% else %}
                           <span class="badge bg-success">Available</span>
                         {% endif %}

@@ -4,13 +4,8 @@ from django.contrib import messages
 from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
                               UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
                               EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance,
-                              PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule, OfficeSection)
-
-from .models import (
-    DesktopDetails, Desktop_Package, MonitorDetails, KeyboardDetails, MouseDetails, UPSDetails,
-    DisposedDesktopDetail, DisposedMonitor, DisposedKeyboard, DisposedMouse, DisposedUPS,
-    SalvagedMonitor, SalvagedKeyboard, SalvagedMouse, SalvagedUPS, UserDetails
-)
+                              PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule, OfficeSection,
+                              SalvagedMonitor, SalvagedKeyboard, SalvagedMouse, SalvagedUPS, SalvagedMonitorHistory)
 
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse # sa disposing ni sya sa desktop
@@ -402,10 +397,15 @@ def disposed_keyboards(request):
 #This function retrieves all mouse records and renders them in a similar way as mouse_details.
 
 def monitor_details(request):
-    monitors = MonitorDetails.objects.select_related('desktop_package').prefetch_related(
-        Prefetch('desktop_package__user_details', queryset=UserDetails.objects.select_related('user_Enduser'))
+    monitors = MonitorDetails.objects.filter(is_disposed=False).select_related(
+        'desktop_package'
+    ).prefetch_related(
+        Prefetch(
+            'desktop_package__user_details',
+            queryset=UserDetails.objects.select_related('user_Enduser')
+        )
     ).order_by('-created_at')
-    
+
     return render(request, 'monitor_details.html', {'monitors': monitors})
 
 def mouse_details(request):
@@ -487,31 +487,36 @@ def add_monitor_to_package(request, package_id):
         salvaged_monitor_id = request.POST.get("salvaged_monitor_id")
 
         if salvaged_monitor_id:
-            # Case 1: Reassign salvaged monitor
             salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
 
-            # Lookup Brand instance (since MonitorDetails expects FK)
-            brand_instance = None
-            if salvaged_monitor.monitor_brand:
-                brand_instance = Brand.objects.filter(name=salvaged_monitor.monitor_brand).first()
+            if salvaged_monitor.is_reassigned:
+                messages.error(request, "❌ This salvaged monitor has already been reassigned.")
+                return redirect("desktop_details_view", package_id=desktop_package.id)
 
-            # Create new active monitor
+            # ✅ Create active monitor record
             MonitorDetails.objects.create(
                 desktop_package=desktop_package,
                 monitor_sn_db=salvaged_monitor.monitor_sn,
-                monitor_brand_db=brand_instance,
+                monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
                 monitor_model_db=salvaged_monitor.monitor_model,
                 monitor_size_db=salvaged_monitor.monitor_size,
                 is_disposed=False,
             )
 
-            # ✅ Update salvage record
+            # ✅ Update salvaged record
             salvaged_monitor.is_reassigned = True
             salvaged_monitor.reassigned_to = desktop_package
             salvaged_monitor.save()
 
-            messages.success(request, "✅ Salvaged monitor reassigned to this package.")
+            # ✅ Log history
+            SalvagedMonitorHistory.objects.create(
+                salvaged_monitor=salvaged_monitor,
+                reassigned_to=desktop_package,
+            )
+
+            messages.success(request, "✅ Salvaged monitor reassigned and logged.")
             return redirect("desktop_details_view", package_id=desktop_package.id)
+
 
         else:
             # Case 2: Manual Input
@@ -1197,7 +1202,8 @@ def salvage_overview(request):
 
 def salvaged_monitor_detail(request, pk):
     monitor = get_object_or_404(SalvagedMonitor, pk=pk)
-    return render(request, "salvage/salvaged_monitor_detail.html", {"monitor": monitor})
+    history = monitor.history.all().order_by("-reassigned_at")
+    return render(request, "salvage/salvaged_monitor_detail.html", {"monitor": monitor, "history": history})
 
 def salvaged_keyboard_detail(request, pk):
     keyboard = get_object_or_404(SalvagedKeyboard, pk=pk)

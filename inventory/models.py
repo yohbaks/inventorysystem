@@ -251,6 +251,15 @@ class SalvagedMonitor(models.Model):
 
     def __str__(self):
         return f"Salvaged Monitor: {self.monitor_sn or ''} {self.monitor_brand}"
+    
+class SalvagedMonitorHistory(models.Model):
+    salvaged_monitor = models.ForeignKey("SalvagedMonitor", on_delete=models.CASCADE, related_name="history")
+    reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
+    reassigned_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.salvaged_monitor.monitor_sn} → {self.reassigned_to} ({self.reassigned_at})"
+
 
 
 class SalvagedKeyboard(models.Model):

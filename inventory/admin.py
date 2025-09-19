@@ -4,7 +4,7 @@ from .models import (
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
     UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
     PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment, MaintenanceChecklistItem, SalvagedMonitor,
-    SalvagedKeyboard, SalvagedMouse, SalvagedUPS
+    SalvagedMonitorHistory, SalvagedKeyboard, SalvagedMouse, SalvagedUPS
 )
 
 # Register your models here.
@@ -33,6 +33,7 @@ admin.site.register(PMSectionSchedule)
 admin.site.register(PMScheduleAssignment)
 admin.site.register(MaintenanceChecklistItem)
 admin.site.register(SalvagedMonitor)
+admin.site.register(SalvagedMonitorHistory)
 admin.site.register(SalvagedKeyboard)
 admin.site.register(SalvagedMouse)
 admin.site.register(SalvagedUPS)
