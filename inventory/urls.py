@@ -127,6 +127,7 @@ urlpatterns = [
     path("salvaged/mouse/<int:pk>/", views.salvaged_mouse_detail, name="salvaged_mouse_detail"),
     path("salvaged/ups/<int:pk>/", views.salvaged_ups_detail, name="salvaged_ups_detail"),
 
+
     #dashboard chart
     path('dashboard/chart/', views.dashboard_view_chart, name='dashboard_view_chart'),
 

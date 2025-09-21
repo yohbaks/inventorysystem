@@ -118,28 +118,27 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <!-- {% for item in salvaged_mice %}
+                    {% for item in salvaged_mice %}
                     <tr>
                       <td><a href="{% url 'salvaged_mouse_detail' item.id %}">{{ item.mouse_sn }}</a></td>
                       <td>{{ item.mouse_brand }}</td>
                       <td>{{ item.mouse_model }}</td>
                       <td>{{ item.computer_name }}</td>
                       <td>{{ item.asset_owner }}</td>
-                      <td>{{ item.salvage_date|date:"Y-m-d" }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
-                        {% if item.is_reassigned %}
+                        {% if item.reassigned_to %}
                           <span class="badge bg-secondary">
-                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                            Reassigned → {{ item.reassigned_computer_name }}
                           </span>
                         {% else %}
                           <span class="badge bg-success">Available</span>
                         {% endif %}
                       </td>
                     </tr>
-                    {% empty %}
-                    <tr><td colspan="8" class="text-center">No salvaged mice</td></tr>
-                    {% endfor %} -->
+                    {% endfor %}
+
                   </tbody>
                 </table>
               </div>
@@ -155,7 +154,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <!-- {% for item in salvaged_ups %}
+                    {% for item in salvaged_ups %}
                     <tr>
                       <td><a href="{% url 'salvaged_ups_detail' item.id %}">{{ item.ups_sn }}</a></td>
                       <td>{{ item.ups_brand }}</td>
@@ -163,21 +162,22 @@
                       <td>{{ item.ups_capacity }}</td>
                       <td>{{ item.computer_name }}</td>
                       <td>{{ item.asset_owner }}</td>
-                      <td>{{ item.salvage_date|date:"Y-m-d" }}</td>
+                      <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
-                        {% if item.is_reassigned %}
-                          <span class="badge bg-secondary">
-                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                          </span>
-                        {% else %}
-                          <span class="badge bg-success">Available</span>
-                        {% endif %}
-                      </td>
+  {% if item.reassigned_to %}
+    <span class="badge bg-secondary">
+      Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+    </span>
+  {% else %}
+    <span class="badge bg-success">Available</span>
+  {% endif %}
+</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="9" class="text-center">No salvaged UPS</td></tr>
-                    {% endfor %} -->
+                    <tr><td colspan="9" class="text-center text-muted">No salvaged UPS</td></tr>
+                    {% endfor %}
+
                   </tbody>
                 </table>
               </div>

@@ -46,6 +46,43 @@
         </div>
       </div>
     </div>
+
+ <div class="card mt-3">
+  <div class="card-header bg-light">
+    <h5 class="mb-0">🔄 Reassignment History</h5>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Reassigned To</th>
+          <th>Computer Name</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for record in monitor.history.all %}
+        <tr>
+          <td>{{ record.reassigned_to }}</td>
+          <td>
+            {% if record.reassigned_to and record.reassigned_to.desktop_details.first %}
+              {{ record.reassigned_to.desktop_details.first.computer_name }}
+            {% else %}
+              {{ monitor.computer_name|default:"Unknown" }}
+            {% endif %}
+          </td>
+          <td>{{ record.reassigned_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center text-muted">No reassignment history</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
   </div>
 </div>
 {% endblock %}
