@@ -7,7 +7,7 @@
         <div class="card shadow-sm rounded">
           <div class="card-header" style="background-color:#6861ce;">
             <div class="card-head-row d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0 text-white">🔋 Salvaged UPS Detail</h4>
+              <h4 class="card-title mb-0 text-white">🔌 Salvaged UPS Detail</h4>
               <div class="card-tools">
                 <a href="{% url 'salvage_overview' %}" class="btn btn-light btn-sm me-2">
                   <i class="fa fa-arrow-left me-1"></i> Back
@@ -30,10 +30,17 @@
                   <tr><th class="bg-light text-end">Brand</th><td>{{ ups.ups_brand }}</td></tr>
                   <tr><th class="bg-light text-end">Model</th><td>{{ ups.ups_model }}</td></tr>
                   <tr><th class="bg-light text-end">Capacity</th><td>{{ ups.ups_capacity }}</td></tr>
-                  <tr><th class="bg-light text-end">Computer Name</th><td>{{ ups.computer_name }}</td></tr>
-                  <tr><th class="bg-light text-end">Asset Owner</th><td>{{ ups.asset_owner }}</td></tr>
+                  <tr><th class="bg-light text-end">Computer Name</th><td>{{ ups.computer_name|default:"—" }}</td></tr>
+                  <tr><th class="bg-light text-end">Asset Owner</th><td>{{ ups.asset_owner|default:"—" }}</td></tr>
                   <tr><th class="bg-light text-end">Date Salvaged</th><td>{{ ups.salvage_date|date:"Y-m-d H:i" }}</td></tr>
                   <tr><th class="bg-light text-end">Notes</th><td>{{ ups.notes|default:"—" }}</td></tr>
+                  <!-- ✅ Status row -->
+                  <tr>
+                    <th class="bg-light text-end">Status</th>
+                    <td>
+                      <span class="badge bg-{{ status_class }}">{{ status_label }}</span>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -48,7 +55,7 @@
       </div>
     </div>
 
-    <!-- Reassignment History -->
+    <!-- Timeline / History Section -->
     <div class="card mt-3">
       <div class="card-header bg-light">
         <h5 class="mb-0">🔄 Reassignment History</h5>
@@ -63,21 +70,19 @@
             </tr>
           </thead>
           <tbody>
-            {% for record in history %}
-            <tr>
-              <td>{{ record.reassigned_to }}</td>
-              <td>
-              {% if record.reassigned_to and record.reassigned_to.desktop_details.first %}
-  {{ record.reassigned_to.desktop_details.first.computer_name }}
-{% else %}
-  {{ ups.computer_name|default:"Unknown" }}
-{% endif %}
-              </td>
-              <td>{{ record.reassigned_at|date:"Y-m-d H:i" }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="3" class="text-center text-muted">No reassignment history</td></tr>
-            {% endfor %}
+            {% if history %}
+              {% for entry in history %}
+                <tr>
+                  <td>{{ entry.reassigned_to }}</td>
+                  <td>{{ entry.reassigned_computer_name }}</td>
+                  <td>{{ entry.reassigned_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="3" class="text-center text-muted">No reassignment history</td>
+              </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>

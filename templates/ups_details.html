@@ -8,81 +8,71 @@
       <div class="col-md-12">
         <div class="card shadow-sm rounded">
           <div class="card-header bg-light">
-            <div class="card-head-row d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">🔋 UPS Details</h4>
-              <div class="card-tools">
-                <a href="#" class="btn btn-danger btn-sm me-2">
-                  <i class="fa fa-arrow-left me-1"></i> Return to Supply
-                </a>
-                <a href="#" class="btn btn-success btn-sm me-2">
-                  <i class="fa fa-download me-1"></i> Export
-                </a>
-                <a href="#" class="btn btn-info btn-sm">
-                  <i class="fa fa-print me-1"></i> Print
-                </a>
-              </div>
-            </div>
+            <h4 class="card-title mb-0">🔋 UPS Details</h4>
           </div>
-
           <div class="card-body">
             <div class="table-responsive">
               <table id="ups-table" class="display table table-striped table-bordered">
                 <thead class="text-white">
                   <tr>
-                    <th style="background-color: #6861ce;">Serial Number</th>
-                    <th style="background-color: #6861ce;">Brand</th>
-                    <th style="background-color: #6861ce;">Model</th>
-                    <th style="background-color: #6861ce;">Capacity</th>
-                    <th style="background-color: #6861ce;">End User</th>
-                    <th style="background-color: #6861ce;">Status</th>
-                    <th style="background-color: #6861ce;">Actions</th>
+                    <th style="background-color:#6861ce;">Serial Number</th>
+                    <th style="background-color:#6861ce;">Brand</th>
+                    <th style="background-color:#6861ce;">Model</th>
+                    <th style="background-color:#6861ce;">End User</th>
+                    <th style="background-color:#6861ce;">Status</th>
+                    <th style="background-color:#6861ce;">Actions</th>
                   </tr>
                   <tr class="bg-white text-dark">
                     <th><input type="text" placeholder="Search Serial" class="form-control form-control-sm" /></th>
                     <th><input type="text" placeholder="Search Brand" class="form-control form-control-sm" /></th>
                     <th><input type="text" placeholder="Search Model" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Capacity" class="form-control form-control-sm" /></th>
                     <th><input type="text" placeholder="Search End User" class="form-control form-control-sm" /></th>
                     <th>
                       <select class="form-select form-select-sm">
                         <option value="">All</option>
                         <option value="Active">Active</option>
-                        <option value="Disposed">Disposed</option>
+                        <option value="Reassigned">Reassigned</option>
                       </select>
                     </th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for ups in ups_details %}
-                  <tr {% if ups.is_disposed %}style="background-color: #fff3f3;"{% endif %}>
+                  {% for ups in ups_list %}
+                  <tr>
                     <td>{{ ups.ups_sn_db }}</td>
                     <td>{{ ups.ups_brand_db }}</td>
                     <td>{{ ups.ups_model_db }}</td>
-                    <td>{{ ups.ups_capacity_db }}</td>
                     <td>
-                      {% with user_detail=ups.desktop_package.user_details.first %}
-                      {{ user_detail.user_Enduser }}
-                      {% endwith %}
+                      {% if ups.desktop_package and ups.desktop_package.user_details.first %}
+                        {% with u=ups.desktop_package.user_details.first %}
+                          {{ u.user_Enduser.employee_fname }} {{ u.user_Enduser.employee_lname }}
+                        {% endwith %}
+                      {% else %}N/A{% endif %}
                     </td>
                     <td>
-                      {% if ups.is_disposed %}
-                     <span class="badge bg-danger">Disposed</span>
-                      {% else %}
-                     <span class="badge bg-success">Active</span>
+                      {% if ups.status == "active" %}
+                        <span class="badge bg-success">Active</span>
+                      {% elif ups.status == "reassigned" %}
+                        <span class="badge bg-secondary">Reassigned</span>
                       {% endif %}
                     </td>
                     <td>
-                      <!-- Actions can be added here -->
-                    
-                      <a href="{% url 'desktop_details_view' ups.desktop_package.id %}#pills-ups" class="btn btn-sm btn-primary">
-                        <i class="fa fa-eye"></i> View
-                      </a>
+                      {% if ups.status == "active" and ups.desktop_package %}
+                        <a href="{% url 'desktop_details_view' ups.desktop_package.id %}#pills-ups"
+                           class="btn btn-sm btn-primary">View</a>
+                      {% elif ups.status == "reassigned" and ups.salvaged_id %}
+                        <a href="{% url 'salvaged_ups_detail' ups.salvaged_id %}"
+                           class="btn btn-sm btn-secondary">History</a>
+                      {% else %}
+                        —
+                      {% endif %}
                     </td>
                   </tr>
                   {% empty %}
-                  <tr><td colspan="7">No UPS records found.</td></tr>
+                  <tr><td colspan="6" class="text-center">No UPS records</td></tr>
                   {% endfor %}
+                </tbody>
               </table>
             </div>
           </div>

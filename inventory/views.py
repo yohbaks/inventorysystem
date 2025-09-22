@@ -44,6 +44,7 @@ from django.db.models import Prefetch # for optimizing queries, in PM scheduling
 from django.db.models.functions import TruncMonth, TruncDay # for grouping by month or day in PM overview
 from django.db.models import Count
 from django.templatetags.static import static
+from django.db.models import Max
 
 
 ##############################################################################
@@ -92,6 +93,137 @@ def salvage_monitor_logic(monitor, new_package=None, notes=None):
         salvaged_monitor.save()
 
     return salvaged_monitor
+
+def salvage_keyboard_logic(keyboard, new_package=None, notes=None):
+    salvaged_keyboard, created = SalvagedKeyboard.objects.get_or_create(
+        keyboard_sn=keyboard.keyboard_sn_db,
+        defaults={
+            'keyboard': keyboard,
+            'desktop_package': keyboard.desktop_package,
+            'keyboard_brand': str(keyboard.keyboard_brand_db) if keyboard.keyboard_brand_db else None,
+            'keyboard_model': keyboard.keyboard_model_db,
+            'computer_name': keyboard.desktop_package.computer_name,
+            'asset_owner': getattr(keyboard.desktop_package.desktop_details.first(), "asset_owner", None),
+            'notes': notes or "Salvaged instead of disposed",
+        }
+    )
+
+    if not created:
+        salvaged_keyboard.keyboard = keyboard
+        salvaged_keyboard.desktop_package = keyboard.desktop_package
+        salvaged_keyboard.keyboard_brand = str(keyboard.keyboard_brand_db) if keyboard.keyboard_brand_db else None
+        salvaged_keyboard.keyboard_model = keyboard.keyboard_model_db
+        salvaged_keyboard.computer_name = keyboard.desktop_package.computer_name
+        salvaged_keyboard.asset_owner = getattr(keyboard.desktop_package.desktop_details.first(), "asset_owner", None)
+        if notes:
+            salvaged_keyboard.notes = notes
+
+    if new_package:
+        salvaged_keyboard.is_reassigned = True
+        salvaged_keyboard.reassigned_to = new_package
+        salvaged_keyboard.computer_name = new_package.computer_name
+        salvaged_keyboard.asset_owner = getattr(new_package.desktop_details.first(), "asset_owner", None)
+        salvaged_keyboard.save()
+
+        SalvagedKeyboardHistory.objects.create(
+            salvaged_keyboard=salvaged_keyboard,
+            reassigned_to=new_package
+        )
+    else:
+        salvaged_keyboard.is_reassigned = False
+        salvaged_keyboard.reassigned_to = None
+        salvaged_keyboard.save()
+
+    return salvaged_keyboard
+
+
+def salvage_mouse_logic(mouse, new_package=None, notes=None):
+    salvaged_mouse, created = SalvagedMouse.objects.get_or_create(
+        mouse_sn=mouse.mouse_sn_db,
+        defaults={
+            'mouse': mouse,
+            'desktop_package': mouse.desktop_package,
+            'mouse_brand': str(mouse.mouse_brand_db) if mouse.mouse_brand_db else None,
+            'mouse_model': mouse.mouse_model_db,
+            'computer_name': mouse.desktop_package.computer_name,
+            'asset_owner': getattr(mouse.desktop_package.desktop_details.first(), "asset_owner", None),
+            'notes': notes or "Salvaged instead of disposed",
+        }
+    )
+
+    if not created:
+        salvaged_mouse.mouse = mouse
+        salvaged_mouse.desktop_package = mouse.desktop_package
+        salvaged_mouse.mouse_brand = str(mouse.mouse_brand_db) if mouse.mouse_brand_db else None
+        salvaged_mouse.mouse_model = mouse.mouse_model_db
+        salvaged_mouse.computer_name = mouse.desktop_package.computer_name
+        salvaged_mouse.asset_owner = getattr(mouse.desktop_package.desktop_details.first(), "asset_owner", None)
+        if notes:
+            salvaged_mouse.notes = notes
+
+    if new_package:
+        salvaged_mouse.is_reassigned = True
+        salvaged_mouse.reassigned_to = new_package
+        salvaged_mouse.computer_name = new_package.computer_name
+        salvaged_mouse.asset_owner = getattr(new_package.desktop_details.first(), "asset_owner", None)
+        salvaged_mouse.save()
+
+        SalvagedMouseHistory.objects.create(
+            salvaged_mouse=salvaged_mouse,
+            reassigned_to=new_package
+        )
+    else:
+        salvaged_mouse.is_reassigned = False
+        salvaged_mouse.reassigned_to = None
+        salvaged_mouse.save()
+
+    return salvaged_mouse
+
+
+def salvage_ups_logic(ups, new_package=None, notes=None):
+    salvaged_ups, created = SalvagedUPS.objects.get_or_create(
+        ups_sn=ups.ups_sn_db,
+        defaults={
+            'ups': ups,
+            'desktop_package': ups.desktop_package,
+            'ups_brand': str(ups.ups_brand_db) if ups.ups_brand_db else None,
+            'ups_model': ups.ups_model_db,
+            'ups_capacity': ups.ups_capacity_db,
+            'computer_name': ups.desktop_package.computer_name,
+            'asset_owner': getattr(ups.desktop_package.desktop_details.first(), "asset_owner", None),
+            'notes': notes or "Salvaged instead of disposed",
+        }
+    )
+
+    if not created:
+        salvaged_ups.ups = ups
+        salvaged_ups.desktop_package = ups.desktop_package
+        salvaged_ups.ups_brand = str(ups.ups_brand_db) if ups.ups_brand_db else None
+        salvaged_ups.ups_model = ups.ups_model_db
+        salvaged_ups.ups_capacity = ups.ups_capacity_db
+        salvaged_ups.computer_name = ups.desktop_package.computer_name
+        salvaged_ups.asset_owner = getattr(ups.desktop_package.desktop_details.first(), "asset_owner", None)
+        if notes:
+            salvaged_ups.notes = notes
+
+    if new_package:
+        salvaged_ups.is_reassigned = True
+        salvaged_ups.reassigned_to = new_package
+        salvaged_ups.computer_name = new_package.computer_name
+        salvaged_ups.asset_owner = getattr(new_package.desktop_details.first(), "asset_owner", None)
+        salvaged_ups.save()
+
+        SalvagedUPSHistory.objects.create(
+            salvaged_ups=salvaged_ups,
+            reassigned_to=new_package
+        )
+    else:
+        salvaged_ups.is_reassigned = False
+        salvaged_ups.reassigned_to = None
+        salvaged_ups.save()
+
+    return salvaged_ups
+
 
 @login_required  
 def success_page(request, desktop_id):
@@ -344,87 +476,82 @@ def update_documents(request, pk):
 
 
 
-
-#keyboard disposal under keyboard pill page
+# Keyboard disposal under Keyboard pill page
 def keyboard_disposed(request, keyboard_id):
     if request.method == 'POST':
-        # Retrieve the keyboard by its ID
         keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
-        
-        # Set the keyboard as disposed and save
         keyboard.is_disposed = True
         keyboard.save()
-        
-        # Create a new DisposedKeyboard entry
-        disposed_keyboard = DisposedKeyboard(
+
+        # Create a DisposedKeyboard record
+        DisposedKeyboard.objects.create(
             keyboard_dispose_db=keyboard,
             desktop_package=keyboard.desktop_package,
+            disposed_under=None,  # optional if linked to a desktop disposal
             disposal_date=timezone.now()
         )
-        disposed_keyboard.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = keyboard.desktop_package.id
-        
-        # Redirect back to the desktop details view with the Keyboard tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-keyboard')
+        # ➕ If salvaged before, tag as disposed
+        SalvagedKeyboard.objects.filter(keyboard_sn=keyboard.keyboard_sn_db).update(
+            is_disposed=True,
+            disposed_date=timezone.now()
+        )
 
-    # Fallback in case the request method is not POST
+        return redirect(f'/desktop_details_view/{keyboard.desktop_package.id}/#pills-keyboard')
+
     return redirect('desktop_details_view', package_id=keyboard.desktop_package.id)
 
-#mouse disposal under mouse pill page
+
+# Mouse disposal under Mouse pill page
 def mouse_disposed(request, mouse_id):
-    # Only proceed if the request is POST
     if request.method == 'POST':
-        # Retrieve the mouse by its ID
         mouse = get_object_or_404(MouseDetails, id=mouse_id)
-        
-        # Set the mouse as disposed and save
         mouse.is_disposed = True
         mouse.save()
-        
-        # Create a new DisposedMouse entry
-        disposed_mouse = DisposedMouse(
+
+        # Create a DisposedMouse record
+        DisposedMouse.objects.create(
             mouse_db=mouse,
+            desktop_package=mouse.desktop_package,
+            disposed_under=None,  # optional if tied to a full desktop disposal
             disposal_date=timezone.now()
         )
-        disposed_mouse.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = mouse.desktop_package.id
+        # ➕ If salvaged before, tag as disposed
+        SalvagedMouse.objects.filter(mouse_sn=mouse.mouse_sn_db).update(
+            is_disposed=True,
+            disposed_date=timezone.now()
+        )
 
-        # Redirect back to the desktop details view with the Mouse tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-mouse')
+        return redirect(f'/desktop_details_view/{mouse.desktop_package.id}/#pills-mouse')
 
-    # Fallback for non-POST requests: redirect to an appropriate page or show an error
-    return redirect('desktop_details_view', package_id=mouse_id)
+    return redirect('desktop_details_view', package_id=mouse.desktop_package.id)
 
-# ups disposal under ups pill page
+
+# UPS disposal under UPS pill page
 def ups_disposed(request, ups_id):
     if request.method == 'POST':
-        # Retrieve the UPS by its ID
         ups = get_object_or_404(UPSDetails, id=ups_id)
-        
-        # Set the UPS as disposed and save
         ups.is_disposed = True
         ups.save()
-        
-        # Create a new DisposedUPS entry
-        disposed_ups = DisposedUPS(
+
+        # Create a DisposedUPS record
+        DisposedUPS.objects.create(
             ups_db=ups,
             desktop_package=ups.desktop_package,
+            disposed_under=None,  # optional if tied to a full desktop disposal
             disposal_date=timezone.now()
         )
-        disposed_ups.save()
 
-        # Get the package ID to redirect to the same page
-        desktop_package_id = ups.desktop_package.id
-        
-        # Redirect back to the desktop details view with the UPS tab active
-        return redirect(f'/desktop_details_view/{desktop_package_id}/#pills-ups')
+        # ➕ If salvaged before, tag as disposed
+        SalvagedUPS.objects.filter(ups_sn=ups.ups_sn_db).update(
+            is_disposed=True,
+            disposed_date=timezone.now()
+        )
 
-    # Fallback in case the request method is not POST
-    return redirect('desktop_details_view', package_id=ups_id)
+        return redirect(f'/desktop_details_view/{ups.desktop_package.id}/#pills-ups')
+
+    return redirect('desktop_details_view', package_id=ups.desktop_package.id)
 
                                             ######## SINGLE END TAB ###########
 
@@ -448,11 +575,39 @@ def disposed_keyboards(request):
 #This function retrieves all mouse records and renders them in a similar way as mouse_details.
 
 def monitor_details(request):
-    # Active monitors (not disposed)
-    active_monitors = MonitorDetails.objects.filter(is_disposed=False).select_related("desktop_package", "monitor_brand_db")
+    """
+    Show only current state per monitor serial:
+    - Active: MonitorDetails (is_disposed=False) whose serial is NOT in current salvaged-reassigned list
+    - Reassigned: SalvagedMonitor (is_reassigned=True, is_disposed=False)
+    Disposed units never appear here.
+    """
+    # 1) Current reassigned (salvaged) monitors
+    reassigned_qs = (
+        SalvagedMonitor.objects
+        .filter(is_reassigned=True, is_disposed=False)
+        .select_related("reassigned_to")
+    )
+
+    # Normalize serials to avoid duplicates from case/whitespace mismatches
+    reassigned_serials = {
+        (s.monitor_sn or "").strip().lower()
+        for s in reassigned_qs
+    }
+
+    # 2) Active monitors EXCLUDING any serial that’s currently reassigned
+    active_qs = (
+        MonitorDetails.objects
+        .filter(is_disposed=False)
+        .select_related("desktop_package", "monitor_brand_db")
+    )
 
     active_data = []
-    for m in active_monitors:
+    for m in active_qs:
+        sn_norm = (m.monitor_sn_db or "").strip().lower()
+        if sn_norm in reassigned_serials:
+            # Skip: there is a more up-to-date reassigned record for this serial
+            continue
+
         active_data.append({
             "id": m.id,
             "monitor_sn_db": m.monitor_sn_db,
@@ -464,24 +619,21 @@ def monitor_details(request):
             "salvaged_id": None,
         })
 
-    # Reassigned salvaged monitors
-    reassigned_monitors = SalvagedMonitor.objects.filter(is_reassigned=True).select_related("reassigned_to")
-
+    # 3) Format reassigned rows
     reassigned_data = []
-    for s in reassigned_monitors:
+    for s in reassigned_qs:
         reassigned_data.append({
             "id": s.id,
             "monitor_sn_db": s.monitor_sn,
             "monitor_brand_db": s.monitor_brand,
             "monitor_model_db": s.monitor_model,
             "monitor_size_db": s.monitor_size,
-            "desktop_package": s.reassigned_to,   # last reassigned package
+            "desktop_package": s.reassigned_to,   # last package assigned (can be None)
             "status": "reassigned",
             "salvaged_id": s.id,
         })
 
     monitors = active_data + reassigned_data
-
     return render(request, "monitor_details.html", {"monitors": monitors})
 
 def monitor_timeline_detail(request, salvaged_id):
@@ -493,43 +645,157 @@ def monitor_timeline_detail(request, salvaged_id):
     })
 
 
-
 def keyboard_details(request):
-    keyboards = KeyboardDetails.objects.filter(is_disposed=False).select_related(
-        'desktop_package', 'keyboard_brand_db'
-    ).prefetch_related(
-        Prefetch(
-            'desktop_package__user_details',
-            queryset=UserDetails.objects.select_related('user_Enduser')
-        )
-    ).order_by('-created_at')
+    # 1) Current reassigned keyboards
+    reassigned_qs = (
+        SalvagedKeyboard.objects
+        .filter(is_reassigned=True, is_disposed=False)
+        .select_related("reassigned_to")
+    )
+    reassigned_serials = {(s.keyboard_sn or "").strip().lower() for s in reassigned_qs}
 
-    return render(request, 'keyboard_details.html', {'keyboards': keyboards})
+    # 2) Active keyboards excluding reassigned
+    active_qs = KeyboardDetails.objects.filter(is_disposed=False).select_related("desktop_package")
+    active_data = []
+    for k in active_qs:
+        sn_norm = (k.keyboard_sn_db or "").strip().lower()
+        if sn_norm in reassigned_serials:
+            continue
+        active_data.append({
+            "id": k.id,
+            "keyboard_sn_db": k.keyboard_sn_db,
+            "keyboard_brand_db": k.keyboard_brand_db,
+            "keyboard_model_db": k.keyboard_model_db,
+            "desktop_package": k.desktop_package,
+            "status": "active",
+            "salvaged_id": None,
+        })
 
+    # 3) Reassigned keyboards
+    reassigned_data = []
+    for s in reassigned_qs:
+        reassigned_data.append({
+            "id": s.id,
+            "keyboard_sn_db": s.keyboard_sn,
+            "keyboard_brand_db": s.keyboard_brand,
+            "keyboard_model_db": s.keyboard_model,
+            "desktop_package": s.reassigned_to,
+            "status": "reassigned",
+            "salvaged_id": s.id,
+        })
+
+    keyboards = active_data + reassigned_data
+    return render(request, "keyboard_details.html", {"keyboards": keyboards})
+
+
+
+def keyboard_timeline_detail(request, salvaged_id):
+    salvaged_keyboard = get_object_or_404(SalvagedKeyboard, pk=salvaged_id)
+    history = salvaged_keyboard.history.order_by('-reassigned_at')
+    return render(request, 'salvage/keyboard_timeline_detail.html', {
+        "keyboard": salvaged_keyboard,
+        "history": history
+    })
 
 def mouse_details(request):
-    mice = MouseDetails.objects.filter(is_disposed=False).select_related(
-        'desktop_package', 'mouse_brand_db'
-    ).prefetch_related(
-        Prefetch(
-            'desktop_package__user_details',
-            queryset=UserDetails.objects.select_related('user_Enduser')
-        )
-    ).order_by('-created_at')
+    reassigned_qs = (
+        SalvagedMouse.objects
+        .filter(is_reassigned=True, is_disposed=False)
+        .select_related("reassigned_to")
+    )
+    reassigned_serials = {(s.mouse_sn or "").strip().lower() for s in reassigned_qs}
 
-    return render(request, 'mouse_details.html', {'mouse_details': mice})
+    active_qs = MouseDetails.objects.filter(is_disposed=False).select_related("desktop_package")
+    active_data = []
+    for m in active_qs:
+        sn_norm = (m.mouse_sn_db or "").strip().lower()
+        if sn_norm in reassigned_serials:
+            continue
+        active_data.append({
+            "id": m.id,
+            "mouse_sn_db": m.mouse_sn_db,
+            "mouse_brand_db": m.mouse_brand_db,
+            "mouse_model_db": m.mouse_model_db,
+            "desktop_package": m.desktop_package,
+            "status": "active",
+            "salvaged_id": None,
+        })
+
+    reassigned_data = []
+    for s in reassigned_qs:
+        reassigned_data.append({
+            "id": s.id,
+            "mouse_sn_db": s.mouse_sn,
+            "mouse_brand_db": s.mouse_brand,
+            "mouse_model_db": s.mouse_model,
+            "desktop_package": s.reassigned_to,
+            "status": "reassigned",
+            "salvaged_id": s.id,
+        })
+
+    mice = active_data + reassigned_data
+    return render(request, "mouse_details.html", {"mice": mice})
+
+
+
+def mouse_timeline_detail(request, salvaged_id):
+    salvaged_mouse = get_object_or_404(SalvagedMouse, pk=salvaged_id)
+    history = salvaged_mouse.history.order_by('-reassigned_at')
+    return render(request, 'salvage/mouse_timeline_detail.html', {
+        "mouse": salvaged_mouse,
+        "history": history
+    })
 
 
 
 def ups_details(request):
-    # Get all UPS equipment
-    ups_details = UPSDetails.objects.select_related(
-        'desktop_package', 'ups_brand_db'
-    ).prefetch_related(
-        'desktop_package__user_details'
-    ).order_by('-created_at')
+    reassigned_qs = (
+        SalvagedUPS.objects
+        .filter(is_reassigned=True, is_disposed=False)
+        .select_related("reassigned_to")
+    )
+    reassigned_serials = {(s.ups_sn or "").strip().lower() for s in reassigned_qs}
 
-    return render(request, 'ups_details.html', {'ups_details': ups_details})
+    active_qs = UPSDetails.objects.filter(is_disposed=False).select_related("desktop_package")
+    active_data = []
+    for u in active_qs:
+        sn_norm = (u.ups_sn_db or "").strip().lower()
+        if sn_norm in reassigned_serials:
+            continue
+        active_data.append({
+            "id": u.id,
+            "ups_sn_db": u.ups_sn_db,
+            "ups_brand_db": u.ups_brand_db,
+            "ups_model_db": u.ups_model_db,
+            "desktop_package": u.desktop_package,
+            "status": "active",
+            "salvaged_id": None,
+        })
+
+    reassigned_data = []
+    for s in reassigned_qs:
+        reassigned_data.append({
+            "id": s.id,
+            "ups_sn_db": s.ups_sn,
+            "ups_brand_db": s.ups_brand,
+            "ups_model_db": s.ups_model,
+            "desktop_package": s.reassigned_to,
+            "status": "reassigned",
+            "salvaged_id": s.id,
+        })
+
+    ups_list = active_data + reassigned_data
+    return render(request, "ups_details.html", {"ups_list": ups_list})
+
+
+
+def ups_timeline_detail(request, salvaged_id):
+    salvaged_ups = get_object_or_404(SalvagedUPS, pk=salvaged_id)
+    history = salvaged_ups.history.order_by('-reassigned_at')
+    return render(request, 'salvage/ups_timeline_detail.html', {
+        "ups": salvaged_ups,
+        "history": history
+    })
 
 
 #This function retrieves the details of a specific mouse by its ID.
@@ -541,7 +807,7 @@ def mouse_detailed_view(request, mouse_id):
 
 
 
-#This function allows the disposal of a specific mouse by its ID.
+
 #monitor disposal under keyboard pill page
 def monitor_disposed(request, monitor_id):
     if request.method == 'POST':
@@ -1195,14 +1461,12 @@ def dispose_desktop(request, desktop_id):
                 monitor_model=monitor.monitor_model_db,
                 monitor_size=monitor.monitor_size_db,
                 reason=reason,
-                disposed_photo=monitor.monitor_photo
             )
             monitor.is_disposed = True
             monitor.save()
         messages.success(request, "Monitor(s) disposed.")
     elif monitor_action == "salvage":
         for monitor in MonitorDetails.objects.filter(desktop_package=desktop_package, is_disposed=False):
-            # Use helper instead of .create() → avoids duplicates
             salvage_monitor_logic(monitor, notes="Salvaged instead of disposed")
             monitor.is_disposed = True
             monitor.save()
@@ -1222,17 +1486,8 @@ def dispose_desktop(request, desktop_id):
         messages.success(request, "Keyboard(s) disposed.")
     elif keyboard_action == "salvage":
         for kb in KeyboardDetails.objects.filter(desktop_package=desktop_package, is_disposed=False):
-            SalvagedKeyboard.objects.create(
-                keyboard=kb,
-                desktop_package=desktop_package,
-                computer_name=desktop_details.computer_name,
-                asset_owner=user_details.user_Assetowner.full_name if user_details and user_details.user_Assetowner else None,
-                keyboard_sn=kb.keyboard_sn_db,
-                keyboard_brand=str(kb.keyboard_brand_db) if kb.keyboard_brand_db else None,
-                keyboard_model=kb.keyboard_model_db,
-                notes="Salvaged instead of disposed"
-            )
-            kb.is_disposed = True   # ✅ mark as inactive
+            salvage_keyboard_logic(kb, notes="Salvaged instead of disposed")
+            kb.is_disposed = True
             kb.save()
         messages.success(request, "Keyboard(s) moved to Salvage Area.")
 
@@ -1250,17 +1505,8 @@ def dispose_desktop(request, desktop_id):
         messages.success(request, "Mouse(s) disposed.")
     elif mouse_action == "salvage":
         for mouse in MouseDetails.objects.filter(desktop_package=desktop_package, is_disposed=False):
-            SalvagedMouse.objects.create(
-                mouse=mouse,
-                desktop_package=desktop_package,
-                computer_name=desktop_details.computer_name,
-                asset_owner=user_details.user_Assetowner.full_name if user_details and user_details.user_Assetowner else None,
-                mouse_sn=mouse.mouse_sn_db,
-                mouse_brand=str(mouse.mouse_brand_db) if mouse.mouse_brand_db else None,
-                mouse_model=mouse.mouse_model_db,
-                notes="Salvaged instead of disposed"
-            )
-            mouse.is_disposed = True   # ✅ mark as inactive
+            salvage_mouse_logic(mouse, notes="Salvaged instead of disposed")
+            mouse.is_disposed = True
             mouse.save()
         messages.success(request, "Mouse(s) moved to Salvage Area.")
 
@@ -1278,18 +1524,8 @@ def dispose_desktop(request, desktop_id):
         messages.success(request, "UPS disposed.")
     elif ups_action == "salvage":
         for ups in UPSDetails.objects.filter(desktop_package=desktop_package, is_disposed=False):
-            SalvagedUPS.objects.create(
-                ups=ups,
-                desktop_package=desktop_package,
-                computer_name=desktop_details.computer_name,
-                asset_owner=user_details.user_Assetowner.full_name if user_details and user_details.user_Assetowner else None,
-                ups_sn=ups.ups_sn_db,
-                ups_brand=str(ups.ups_brand_db) if ups.ups_brand_db else None,
-                ups_model=ups.ups_model_db,
-                ups_capacity=ups.ups_capacity_db,
-                notes="Salvaged instead of disposed"
-            )
-            ups.is_disposed = True   # ✅ mark as inactive
+            salvage_ups_logic(ups, notes="Salvaged instead of disposed")
+            ups.is_disposed = True
             ups.save()
         messages.success(request, "UPS moved to Salvage Area.")
 
@@ -1304,54 +1540,17 @@ def dispose_desktop(request, desktop_id):
     return redirect("desktop_details_view", package_id=desktop_package.id)
 
 
-#salvaged for monitor
-def salvage_monitor(monitor, new_package=None, notes=None):
-    salvaged_monitor, created = SalvagedMonitor.objects.get_or_create(
-        monitor=monitor,
-        defaults={
-            'desktop_package': monitor.desktop_package,
-            'monitor_sn': monitor.monitor_sn_db,
-            'monitor_brand': str(monitor.monitor_brand_db),
-            'monitor_model': monitor.monitor_model_db,
-            'monitor_size': monitor.monitor_size_db,
-            'computer_name': monitor.desktop_package.computer_name,
-            'asset_owner': getattr(monitor.desktop_package.desktop_details.first(), "asset_owner", None),
-            'notes': notes or "Salvaged instead of disposed",
-        }
-    )
-
-    if new_package:  # reassigned
-        salvaged_monitor.is_reassigned = True
-        salvaged_monitor.reassigned_to = new_package
-        salvaged_monitor.computer_name = new_package.computer_name
-        salvaged_monitor.asset_owner = getattr(new_package.desktop_details.first(), "asset_owner", None)
-        salvaged_monitor.save()
-
-        SalvagedMonitorHistory.objects.create(
-            salvaged_monitor=salvaged_monitor,
-            reassigned_to=new_package
-        )
-    else:  # available salvage stock
-        salvaged_monitor.is_reassigned = False
-        salvaged_monitor.reassigned_to = None
-        salvaged_monitor.save()
-
-    return salvaged_monitor
-
-
-
 
 #salvaged area overview
 def salvage_overview(request):
-    # Get all salvaged monitors ordered newest first
+    # --- Monitors ---
     all_monitors = SalvagedMonitor.objects.select_related("reassigned_to").order_by("-salvage_date", "-id")
-
-    seen = set()
+    seen_monitors = set()
     deduped_monitors = []
     for sm in all_monitors:
-        if sm.monitor_sn in seen:
+        if sm.monitor_sn in seen_monitors:
             continue
-        seen.add(sm.monitor_sn)
+        seen_monitors.add(sm.monitor_sn)
 
         if sm.reassigned_to:
             dd = DesktopDetails.objects.filter(desktop_package=sm.reassigned_to).first()
@@ -1361,15 +1560,63 @@ def salvage_overview(request):
 
         deduped_monitors.append(sm)
 
-    salvaged_keyboards = SalvagedKeyboard.objects.select_related("reassigned_to").order_by("-salvage_date")
-    salvaged_mice = SalvagedMouse.objects.select_related("reassigned_to").order_by("-salvage_date")
-    salvaged_ups = SalvagedUPS.objects.select_related("reassigned_to").order_by("-salvage_date")
+    # --- Keyboards ---
+    all_keyboards = SalvagedKeyboard.objects.select_related("reassigned_to").order_by("-salvage_date", "-id")
+    seen_keyboards = set()
+    deduped_keyboards = []
+    for kb in all_keyboards:
+        if kb.keyboard_sn in seen_keyboards:
+            continue
+        seen_keyboards.add(kb.keyboard_sn)
 
+        if kb.reassigned_to:
+            dd = DesktopDetails.objects.filter(desktop_package=kb.reassigned_to).first()
+            kb.reassigned_computer_name = dd.computer_name if dd else "Unknown"
+        else:
+            kb.reassigned_computer_name = None
+
+        deduped_keyboards.append(kb)
+
+    # --- Mice ---
+    all_mice = SalvagedMouse.objects.select_related("reassigned_to").order_by("-salvage_date", "-id")
+    seen_mice = set()
+    deduped_mice = []
+    for m in all_mice:
+        if m.mouse_sn in seen_mice:
+            continue
+        seen_mice.add(m.mouse_sn)
+
+        if m.reassigned_to:
+            dd = DesktopDetails.objects.filter(desktop_package=m.reassigned_to).first()
+            m.reassigned_computer_name = dd.computer_name if dd else "Unknown"
+        else:
+            m.reassigned_computer_name = None
+
+        deduped_mice.append(m)
+
+    # --- UPS ---
+    all_ups = SalvagedUPS.objects.select_related("reassigned_to").order_by("-salvage_date", "-id")
+    seen_ups = set()
+    deduped_ups = []
+    for u in all_ups:
+        if u.ups_sn in seen_ups:
+            continue
+        seen_ups.add(u.ups_sn)
+
+        if u.reassigned_to:
+            dd = DesktopDetails.objects.filter(desktop_package=u.reassigned_to).first()
+            u.reassigned_computer_name = dd.computer_name if dd else "Unknown"
+        else:
+            u.reassigned_computer_name = None
+
+        deduped_ups.append(u)
+
+    # --- Context ---
     context = {
         "salvaged_monitors": deduped_monitors,
-        "salvaged_keyboards": salvaged_keyboards,
-        "salvaged_mice": salvaged_mice,
-        "salvaged_ups": salvaged_ups,
+        "salvaged_keyboards": deduped_keyboards,
+        "salvaged_mice": deduped_mice,
+        "salvaged_ups": deduped_ups,
     }
     return render(request, "salvage_overview.html", context)
 
@@ -1410,21 +1657,98 @@ def salvaged_monitor_detail(request, pk):
 
 def salvaged_keyboard_detail(request, pk):
     keyboard = get_object_or_404(SalvagedKeyboard, pk=pk)
-    history = keyboard.history.all().order_by("-reassigned_at")
-    return render(request, "salvage/salvaged_keyboard_detail.html", {"keyboard": keyboard,"history": history})
+
+    history = (
+        SalvagedKeyboardHistory.objects
+        .filter(salvaged_keyboard=keyboard)
+        .select_related("reassigned_to")
+        .order_by("-reassigned_at")
+    )
+    for entry in history:
+        dd = DesktopDetails.objects.filter(desktop_package=entry.reassigned_to).only("computer_name").first()
+        entry.reassigned_computer_name = dd.computer_name if dd else "Unknown"
+
+    if keyboard.is_disposed:
+        status_label = f"Disposed on {keyboard.disposed_date.strftime('%Y-%m-%d %H:%M') if keyboard.disposed_date else ''}"
+        status_class = "danger"
+    elif keyboard.is_reassigned:
+        status_label = f"Reassigned → {keyboard.reassigned_to}"
+        status_class = "secondary"
+    else:
+        status_label = "Available"
+        status_class = "success"
+
+    return render(request, "salvage/salvaged_keyboard_detail.html", {
+        "keyboard": keyboard,
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
+    })
+
 
 def salvaged_mouse_detail(request, pk):
     mouse = get_object_or_404(SalvagedMouse, pk=pk)
-    history = mouse.history.all().order_by("-reassigned_at")
-    return render(request, "salvage/salvaged_mouse_detail.html", {"mouse": mouse, "history": history})
 
+    history = (
+        SalvagedMouseHistory.objects
+        .filter(salvaged_mouse=mouse)
+        .select_related("reassigned_to")
+        .order_by("-reassigned_at")
+    )
+    for entry in history:
+        dd = DesktopDetails.objects.filter(desktop_package=entry.reassigned_to).only("computer_name").first()
+        entry.reassigned_computer_name = dd.computer_name if dd else "Unknown"
+
+    if mouse.is_disposed:
+        status_label = f"Disposed on {mouse.disposed_date.strftime('%Y-%m-%d %H:%M') if mouse.disposed_date else ''}"
+        status_class = "danger"
+    elif mouse.is_reassigned:
+        status_label = f"Reassigned → {mouse.reassigned_to}"
+        status_class = "secondary"
+    else:
+        status_label = "Available"
+        status_class = "success"
+
+    return render(request, "salvage/salvaged_mouse_detail.html", {
+        "mouse": mouse,
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
+    })
 
 
 def salvaged_ups_detail(request, pk):
     ups = get_object_or_404(SalvagedUPS, pk=pk)
-    history = SalvagedUPSHistory.objects.filter(salvaged_ups=ups).order_by("-reassigned_at")
-    return render(request, "salvage/salvaged_ups_detail.html", {"ups": ups, "history": history})
 
+    history = (
+        SalvagedUPSHistory.objects
+        .filter(salvaged_ups=ups)
+        .select_related("reassigned_to")
+        .order_by("-reassigned_at")
+    )
+    for entry in history:
+        dd = DesktopDetails.objects.filter(desktop_package=entry.reassigned_to).only("computer_name").first()
+        entry.reassigned_computer_name = dd.computer_name if dd else "Unknown"
+
+    if ups.is_disposed:
+        status_label = f"Disposed on {ups.disposed_date.strftime('%Y-%m-%d %H:%M') if ups.disposed_date else ''}"
+        status_class = "danger"
+    elif ups.is_reassigned:
+        status_label = f"Reassigned → {ups.reassigned_to}"
+        status_class = "secondary"
+    else:
+        status_label = "Available"
+        status_class = "success"
+
+    return render(request, "salvage/salvaged_ups_detail.html", {
+        "ups": ups,
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
+    })
+
+
+#brands
 def add_brand(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -2036,78 +2360,73 @@ def office_section_list(request):
 #disposal overview page
 
 def disposal_overview(request):
-    desktops = DesktopDetails.objects.filter(is_disposed=True)
-    monitors = MonitorDetails.objects.filter(is_disposed=True)
-    keyboards = KeyboardDetails.objects.filter(is_disposed=True)
-    mice = MouseDetails.objects.filter(is_disposed=True)
-    ups_list = UPSDetails.objects.filter(is_disposed=True)
+    # Desktops
+    latest_desktops = (
+        DisposedDesktopDetail.objects
+        .values("serial_no")
+        .annotate(latest_id=Max("id"))
+    )
+    desktops = DisposedDesktopDetail.objects.filter(id__in=[row["latest_id"] for row in latest_desktops])
+
+    # Monitors
+    latest_monitors = (
+        DisposedMonitor.objects
+        .values("monitor_sn")
+        .annotate(latest_id=Max("id"))
+    )
+    monitors = DisposedMonitor.objects.filter(id__in=[row["latest_id"] for row in latest_monitors])
+
+    # Keyboards
+    latest_keyboards = (
+        DisposedKeyboard.objects
+        .values("keyboard_dispose_db__keyboard_sn_db")
+        .annotate(latest_id=Max("id"))
+    )
+    keyboards = DisposedKeyboard.objects.filter(id__in=[row["latest_id"] for row in latest_keyboards])
+
+    # Mice
+    latest_mice = (
+        DisposedMouse.objects
+        .values("mouse_db__mouse_sn_db")
+        .annotate(latest_id=Max("id"))
+    )
+    mice = DisposedMouse.objects.filter(id__in=[row["latest_id"] for row in latest_mice])
+
+    # UPS
+    latest_ups = (
+        DisposedUPS.objects
+        .values("ups_db__ups_sn_db")
+        .annotate(latest_id=Max("id"))
+    )
+    ups_list = DisposedUPS.objects.filter(id__in=[row["latest_id"] for row in latest_ups])
 
     categories = [
-        {'label': 'Desktops', 'items': desktops, 'category': 'desktop'},
-        {'label': 'Monitors', 'items': monitors, 'category': 'monitor'},
-        {'label': 'Keyboards', 'items': keyboards, 'category': 'keyboard'},
-        {'label': 'Mice', 'items': mice, 'category': 'mouse'},
-        {'label': 'UPS', 'items': ups_list, 'category': 'ups'},
+        {"label": "Disposed Desktops", "items": desktops, "category": "desktop"},
+        {"label": "Disposed Monitors", "items": monitors, "category": "monitor"},
+        {"label": "Disposed Keyboards", "items": keyboards, "category": "keyboard"},
+        {"label": "Disposed Mice", "items": mice, "category": "mouse"},
+        {"label": "Disposed UPS", "items": ups_list, "category": "ups"},
     ]
 
-    return render(request, 'disposal/disposal_overview.html', {'categories': categories})
+    return render(request, "disposal/disposal_overview.html", {"categories": categories})
 
-def dispose_component(request, category, id):
-    if request.method != 'POST':
-        return HttpResponseNotAllowed(['POST'])
+def disposal_history(request):
+    desktops = DisposedDesktopDetail.objects.all().order_by("-date_disposed")
+    monitors = DisposedMonitor.objects.all().order_by("-disposal_date")
+    keyboards = DisposedKeyboard.objects.all().order_by("-disposal_date")
+    mice = DisposedMouse.objects.all().order_by("-disposal_date")
+    ups_list = DisposedUPS.objects.all().order_by("-disposal_date")
 
-    model_map = {
-        'desktop': DesktopDetails,
-        'monitor': MonitorDetails,
-        'keyboard': KeyboardDetails,
-        'mouse': MouseDetails,
-        'ups': UPSDetails,
-    }
+    categories = [
+        {"label": "Desktop Disposal History", "items": desktops, "category": "desktop"},
+        {"label": "Monitor Disposal History", "items": monitors, "category": "monitor"},
+        {"label": "Keyboard Disposal History", "items": keyboards, "category": "keyboard"},
+        {"label": "Mouse Disposal History", "items": mice, "category": "mouse"},
+        {"label": "UPS Disposal History", "items": ups_list, "category": "ups"},
+    ]
 
-    model = model_map.get(category)
-    if not model:
-        return redirect('disposal_overview')
+    return render(request, "disposal/disposal_history.html", {"categories": categories})
 
-    item = get_object_or_404(model, id=id)
-    item.is_disposed = True
-    item.save()
-
-    # Log to Disposed model (simplified)
-    if category == 'DesktopDetails':
-        DisposedDesktopDetail.objects.create(
-            desktop=item,
-            serial_no=item.serial_no,
-            brand_name=str(item.brand_name),
-            model=item.model,
-            asset_owner=item.asset_owner,
-            reason="Disposed via system"
-        )
-    elif category == 'MonitorDetails':
-        DisposedMonitor.objects.create(
-            monitor_disposed_db=item,
-            desktop_package=item.desktop_package,
-            monitor_sn=item.monitor_sn_db,
-            monitor_brand=str(item.monitor_brand_db),
-            monitor_model=item.monitor_model_db,
-            monitor_size=item.monitor_size_db
-        )
-    elif category == 'KeyboardDetails':
-        DisposedKeyboard.objects.create(
-            keyboard_dispose_db=item,
-            desktop_package=item.desktop_package
-        )
-    elif category == 'MouseDetails':
-        DisposedMouse.objects.create(
-            mouse_db=item,
-            desktop_package=item.desktop_package
-        )
-    elif category == 'UPSDetails':
-        DisposedUPS.objects.create(
-            ups_db=item,
-            desktop_package=item.desktop_package
-        )
-
-    return redirect('disposal_overview')
 
 
 

@@ -54,7 +54,9 @@
                       <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
-                        {% if item.is_reassigned %}
+                        {% if item.is_disposed %}
+                          <span class="badge bg-danger">Disposed</span>
+                        {% elif item.is_reassigned %}
                           <a href="{% url 'salvaged_monitor_detail' item.id %}" class="badge bg-secondary text-decoration-none">
                             Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
                           </a>
@@ -91,7 +93,9 @@
                       <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
-                        {% if item.is_reassigned %}
+                        {% if item.is_disposed %}
+                          <span class="badge bg-danger">Disposed</span>
+                        {% elif item.is_reassigned %}
                           <a href="{% url 'salvaged_keyboard_detail' item.id %}" class="badge bg-secondary text-decoration-none">
                             Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
                           </a>
@@ -101,7 +105,7 @@
                       </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="8" class="text-center">No salvaged keyboards</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted">No salvaged keyboards</td></tr>
                     {% endfor %}
                   </tbody>
                 </table>
@@ -128,17 +132,20 @@
                       <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
-                        {% if item.reassigned_to %}
-                          <span class="badge bg-secondary">
-                            Reassigned → {{ item.reassigned_computer_name }}
-                          </span>
+                        {% if item.is_disposed %}
+                          <span class="badge bg-danger">Disposed</span>
+                        {% elif item.is_reassigned %}
+                          <a href="{% url 'salvaged_mouse_detail' item.id %}" class="badge bg-secondary text-decoration-none">
+                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                          </a>
                         {% else %}
                           <span class="badge bg-success">Available</span>
                         {% endif %}
                       </td>
                     </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted">No salvaged mice</td></tr>
                     {% endfor %}
-
                   </tbody>
                 </table>
               </div>
@@ -165,19 +172,20 @@
                       <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
                       <td>{{ item.notes|default:"—" }}</td>
                       <td>
-  {% if item.reassigned_to %}
-    <span class="badge bg-secondary">
-      Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-    </span>
-  {% else %}
-    <span class="badge bg-success">Available</span>
-  {% endif %}
-</td>
+                        {% if item.is_disposed %}
+                          <span class="badge bg-danger">Disposed</span>
+                        {% elif item.is_reassigned %}
+                          <a href="{% url 'salvaged_ups_detail' item.id %}" class="badge bg-secondary text-decoration-none">
+                            Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                          </a>
+                        {% else %}
+                          <span class="badge bg-success">Available</span>
+                        {% endif %}
+                      </td>
                     </tr>
                     {% empty %}
                     <tr><td colspan="9" class="text-center text-muted">No salvaged UPS</td></tr>
                     {% endfor %}
-
                   </tbody>
                 </table>
               </div>

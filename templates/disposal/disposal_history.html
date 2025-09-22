@@ -3,16 +3,16 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
-    <h3 class="fw-bold mb-4">🗑️ Disposal Overview</h3>
+    <h3 class="fw-bold mb-4">📜 Disposal History</h3>
 
     <!-- Pills Navigation -->
-    <ul class="nav nav-pills nav-secondary" id="disposal-tabs" role="tablist">
+    <ul class="nav nav-pills nav-secondary" id="disposal-history-tabs" role="tablist">
       {% for group in categories %}
       <li class="nav-item" role="presentation">
-        <button class="nav-link {% if forloop.first %}active{% endif %}" 
-                id="tab-{{ group.category }}" 
-                data-bs-toggle="pill" 
-                data-bs-target="#content-{{ group.category }}" 
+        <button class="nav-link {% if forloop.first %}active{% endif %}"
+                id="tab-{{ group.category }}"
+                data-bs-toggle="pill"
+                data-bs-target="#content-{{ group.category }}"
                 type="button" role="tab">
           {{ group.label }}
         </button>
@@ -21,9 +21,9 @@
     </ul>
 
     <!-- Pills Content -->
-    <div class="tab-content" id="disposal-tabs-content">
+    <div class="tab-content" id="disposal-history-content">
       {% for group in categories %}
-      <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+      <div class="tab-pane fade {% if forloop.first %}show active{% endif %}"
            id="content-{{ group.category }}" role="tabpanel">
         <div class="card shadow-sm rounded mb-4">
           <div class="card-header bg-light">
@@ -43,16 +43,7 @@
                     <th style="background-color: #d33f49;">Brand</th>
                     <th style="background-color: #d33f49;">Disposed Date</th>
                     <th style="background-color: #d33f49;">Reason</th>
-                  </tr>
-                  <!-- Filter row -->
-                  <tr class="bg-white text-dark">
-                    <th><input type="text" placeholder="Search Package" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Computer" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Serial" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Model" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Brand" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Date" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Reason" class="form-control form-control-sm" /></th>
+                    <th style="background-color: #d33f49;">Disposed By</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -129,11 +120,13 @@
 
                     <!-- Disposed Date -->
                     <td>
-                      {% if group.category == "desktop" %}
-                        {{ item.date_disposed|date:"Y-m-d" }}
-                      {% else %}
+                    {% if group.category == "desktop" %}
+                        {{ item.date_disposed|date:"Y-m-d H:i" }}
+                    {% elif group.category == "monitor" %}
+                        {{ item.disposal_date|date:"Y-m-d H:i" }}
+                    {% else %}
                         {{ item.disposal_date|date:"Y-m-d" }}
-                      {% endif %}
+                    {% endif %}
                     </td>
 
                     <!-- Reason -->
@@ -144,10 +137,19 @@
                         {{ item.notes|default:"N/A" }}
                       {% endif %}
                     </td>
+
+                    <!-- Disposed By -->
+                    <td>
+                      {% if item.disposed_by %}
+                        {{ item.disposed_by }}
+                      {% else %}
+                        System
+                      {% endif %}
+                    </td>
                   </tr>
                   {% empty %}
                   <tr>
-                    <td colspan="7" class="text-center text-muted">No disposed items</td>
+                    <td colspan="8" class="text-center text-muted">No disposal history</td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -165,19 +167,10 @@
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     {% for group in categories %}
-    var table = $('#table-{{ group.category }}').DataTable({
+    $('#table-{{ group.category }}').DataTable({
       pageLength: 10,
       orderCellsTop: true,
       fixedHeader: true
-    });
-
-    // Enable column-specific search
-    $('#table-{{ group.category }} thead tr:eq(1) th').each(function (i) {
-      $('input', this).on('keyup change', function () {
-        if (table.column(i).search() !== this.value) {
-          table.column(i).search(this.value).draw();
-        }
-      });
     });
     {% endfor %}
   });

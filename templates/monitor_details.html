@@ -74,6 +74,7 @@
                       {% endif %}
                     </td>
 
+                    <!-- Status -->
                     <td>
                       {% if monitor.status == "active" %}
                         <span class="badge bg-success">Active</span>
@@ -82,6 +83,7 @@
                       {% endif %}
                     </td>
 
+                    <!-- Actions -->
                     <td>
                       {% if monitor.status == "active" and monitor.desktop_package %}
                         <a href="{% url 'desktop_details_view' monitor.desktop_package.id %}#pills-monitor"

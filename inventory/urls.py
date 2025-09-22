@@ -118,7 +118,8 @@ urlpatterns = [
 
     #disposal
     path('disposal/', views.disposal_overview, name='disposal_overview'), #overview of disposal
-    path('dispose/<str:category>/<int:id>/', views.dispose_component, name='dispose_component'), #logic for disposing components
+    # path('dispose/<str:category>/<int:id>/', views.dispose_component, name='dispose_component'), #logic for disposing components
+    path("disposal_history/", views.disposal_history, name="disposal_history"),
 
     #salvage area
     path("salvage_overview/", views.salvage_overview, name="salvage_overview"),

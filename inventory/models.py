@@ -269,7 +269,10 @@ class SalvagedMonitorHistory(models.Model):
 # Salvaged Keyboard
 class SalvagedKeyboard(models.Model):
     keyboard = models.ForeignKey("KeyboardDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_keyboards', on_delete=models.CASCADE, null=True)
+    desktop_package = models.ForeignKey(
+        Desktop_Package, related_name='salvaged_keyboards',
+        on_delete=models.CASCADE, null=True
+    )
 
     computer_name = models.CharField(max_length=255, blank=True, null=True)
     asset_owner = models.CharField(max_length=255, blank=True, null=True)
@@ -282,16 +285,22 @@ class SalvagedKeyboard(models.Model):
 
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="reassigned_keyboards"
+        Desktop_Package, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="reassigned_keyboards"
     )
+
+    # ➕ same as SalvagedMonitor
+    is_disposed = models.BooleanField(default=False)
+    disposed_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Salvaged Keyboard: {self.keyboard_sn or ''} {self.keyboard_brand}"
 
 
 class SalvagedKeyboardHistory(models.Model):
-    salvaged_keyboard = models.ForeignKey("SalvagedKeyboard", on_delete=models.CASCADE, related_name="history")
+    salvaged_keyboard = models.ForeignKey(
+        "SalvagedKeyboard", on_delete=models.CASCADE, related_name="history"
+    )
     reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
@@ -299,9 +308,13 @@ class SalvagedKeyboardHistory(models.Model):
         return f"{self.salvaged_keyboard.keyboard_sn} → {self.reassigned_to} ({self.reassigned_at})"
 
 
+# Salvaged Mouse
 class SalvagedMouse(models.Model):
     mouse = models.ForeignKey("MouseDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_mice', on_delete=models.CASCADE, null=True)
+    desktop_package = models.ForeignKey(
+        Desktop_Package, related_name='salvaged_mice',
+        on_delete=models.CASCADE, null=True
+    )
 
     computer_name = models.CharField(max_length=255, blank=True, null=True)
     asset_owner = models.CharField(max_length=255, blank=True, null=True)
@@ -312,21 +325,24 @@ class SalvagedMouse(models.Model):
     salvage_date = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True, null=True)
 
-    # New fields
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name="reassigned_mice"
+        Desktop_Package, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="reassigned_mice"
     )
+
+    # ➕ same as SalvagedMonitor
+    is_disposed = models.BooleanField(default=False)
+    disposed_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Salvaged Mouse: {self.mouse_sn or ''} {self.mouse_brand}"
 
 
 class SalvagedMouseHistory(models.Model):
-    salvaged_mouse = models.ForeignKey("SalvagedMouse", on_delete=models.CASCADE, related_name="history")
+    salvaged_mouse = models.ForeignKey(
+        "SalvagedMouse", on_delete=models.CASCADE, related_name="history"
+    )
     reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
@@ -334,10 +350,13 @@ class SalvagedMouseHistory(models.Model):
         return f"{self.salvaged_mouse.mouse_sn} → {self.reassigned_to} ({self.reassigned_at})"
 
 
-
+# Salvaged UPS
 class SalvagedUPS(models.Model):
     ups = models.ForeignKey("UPSDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='salvaged_ups', on_delete=models.CASCADE, null=True)
+    desktop_package = models.ForeignKey(
+        Desktop_Package, related_name='salvaged_ups',
+        on_delete=models.CASCADE, null=True
+    )
 
     computer_name = models.CharField(max_length=255, blank=True, null=True)
     asset_owner = models.CharField(max_length=255, blank=True, null=True)
@@ -351,18 +370,22 @@ class SalvagedUPS(models.Model):
 
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package,
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name="reassigned_ups"
+        Desktop_Package, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="reassigned_ups"
     )
+
+    # ➕ same as SalvagedMonitor
+    is_disposed = models.BooleanField(default=False)
+    disposed_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Salvaged UPS: {self.ups_sn or ''} {self.ups_brand}"
 
 
 class SalvagedUPSHistory(models.Model):
-    salvaged_ups = models.ForeignKey("SalvagedUPS", on_delete=models.CASCADE, related_name="history")
+    salvaged_ups = models.ForeignKey(
+        "SalvagedUPS", on_delete=models.CASCADE, related_name="history"
+    )
     reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
