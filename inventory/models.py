@@ -7,10 +7,17 @@ import qrcode
 from django.core.files import File # Import File to save the QR code image
 from django.urls import reverse # Import reverse to generate URLs for the QR code image
 from io import BytesIO  # Import BytesIO to handle the image in memory
-
+from django.dispatch import receiver    
+from django.db.models.signals import post_save
+import uuid
 
 
 # Create your models here.
+
+
+
+
+
 
 #################
 class Desktop_Package(models.Model):
@@ -539,3 +546,44 @@ class PMScheduleAssignment(models.Model):
     def __str__(self):
         return f"{self.desktop_package} -> {self.pm_section_schedule}"
 #END - Preventivemaintenance REAL - END
+
+
+#profile model to extend the User model
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    # Optional linkage to your business entity
+    employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True)
+
+    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    position = models.CharField(max_length=100, blank=True, null=True)
+    office_section = models.ForeignKey(OfficeSection, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # NEW: QR
+    qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, null=True, blank=True)
+    qr_code = models.ImageField(upload_to="qr/users/", null=True, blank=True)
+
+    # Preferences
+    theme = models.CharField(max_length=16, choices=[("light","Light"), ("dark","Dark")], default="light")
+    timezone_str = models.CharField(max_length=64, default="Asia/Manila")
+    notify_pm_due = models.BooleanField(default=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.get_full_name() or self.user.username} Profile"
+
+    @property
+    def avatar_url(self):
+        if self.avatar and hasattr(self.avatar, "url"):
+            return self.avatar.url
+        # fallback image under your static files
+        return "/static/img/default-avatar.png"
+
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    else:
+        instance.profile.save()

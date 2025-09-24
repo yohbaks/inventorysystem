@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body d-flex align-items-center gap-3">
+        <img src="{{ profile_owner.avatar_url }}" alt="" class="rounded-circle" width="64" height="64" style="object-fit:cover;">
+        <div>
+          <h5 class="mb-0">{{ profile_owner.user.get_full_name|default:profile_owner.user.username }}</h5>
+          {% if employee %}
+            <div class="text-muted small">Employee: {{ employee.full_name }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><h5 class="mb-0">Assigned Packages</h5></div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead><tr><th>Package</th><th>Computer Name</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for dp in packages %}
+            {% with dd=dp.desktop_details.first %}
+              <tr>
+                <td>#{{ dp.id }}</td>
+                <td>{% if dd %}{{ dd.computer_name }}{% else %}—{% endif %}</td>
+                <td>
+                  {% if dd and not dd.is_disposed %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-danger">Disposed</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endwith %}
+            {% empty %}
+              <tr><td colspan="3" class="text-muted">No assigned equipment.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header"><h6 class="mb-0">Change History (End User / Asset Owner)</h6></div>
+          <div class="card-body table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead><tr><th>When</th><th>Type</th><th>From</th><th>To</th></tr></thead>
+              <tbody>
+                {% for h in enduser_history %}
+                  <tr><td>{{ h.changed_at|date:"Y-m-d H:i" }}</td><td>End User</td><td>{{ h.old_enduser }}</td><td>{{ h.new_enduser }}</td></tr>
+                {% empty %}
+                {% endfor %}
+                {% for h in assetowner_history %}
+                  <tr><td>{{ h.changed_at|date:"Y-m-d H:i" }}</td><td>Asset Owner</td><td>{{ h.old_assetowner }}</td><td>{{ h.new_assetowner }}</td></tr>
+                {% empty %}
+                  {% if not enduser_history %}
+                    <tr><td colspan="4" class="text-muted">No history.</td></tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header"><h6 class="mb-0">Disposal Logs</h6></div>
+          <div class="card-body table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead><tr><th>Category</th><th>Details</th><th>When</th></tr></thead>
+              <tbody>
+                {% for d in disposed_desktops %}
+                  <tr><td>Desktop</td><td>{{ d.serial_no }} {{ d.model }}</td><td>{{ d.date_disposed|date:"Y-m-d" }}</td></tr>
+                {% endfor %}
+                {% for d in disposed_monitors %}
+                  <tr><td>Monitor</td><td>{{ d.monitor_sn }} {{ d.monitor_model }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
+                {% endfor %}
+                {% for d in disposed_keyboards %}
+                  <tr><td>Keyboard</td><td>{{ d.keyboard_dispose_db.keyboard_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
+                {% endfor %}
+                {% for d in disposed_mice %}
+                  <tr><td>Mouse</td><td>{{ d.mouse_db.mouse_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
+                {% endfor %}
+                {% for d in disposed_ups %}
+                  <tr><td>UPS</td><td>{{ d.ups_db.ups_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
+                {% empty %}
+                  <tr><td colspan="3" class="text-muted">No disposals.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

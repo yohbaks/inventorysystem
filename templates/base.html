@@ -503,15 +503,21 @@
                     aria-expanded="false"
                   >
                     <div class="avatar-sm">
-                      <img
-                        src="{% static '/img/profile.jpg' %}" 
-                        alt="..."
-                        class="avatar-img rounded-circle"
-                      />
+                       <img
+                          src="{% if request.user.is_authenticated and request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'img/profile.jpg' %}{% endif %}" 
+                          alt="avatar"
+                          class="avatar-img rounded-circle"
+                        />
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Hi,</span>
-                      <span class="fw-bold">Bobby</span>
+                      <span class="fw-bold">
+                        {% if request.user.is_authenticated %}
+                          {{ request.user.first_name|default:request.user.username }}
+                        {% else %}
+                          Guest
+                        {% endif %}
+                      </span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -519,20 +525,13 @@
                       <li>
                         <div class="user-box">
                           <div class="avatar-lg">
-                            <img
-                              src="{% static '/img/profile.jpg' %}"
-                              alt="image profile"
-                              class="avatar-img rounded"
-                            />
+                            <img src="{{ request.user.profile.avatar_url }}" class="avatar-img rounded" width="32" height="32" style="object-fit:cover;">
+
                           </div>
                           <div class="u-text">
                             <h4>Yohbaks</h4>
-                            <p class="text-muted">hello@example.com</p>
-                            <a
-                              href="profile.html"
-                              class="btn btn-xs btn-secondary btn-sm"
-                              >View Profile</a
-                            >
+                            <p class="text-muted">IT Officer</p>
+                            <a href="{% url 'profile' %}" class="btn btn-primary btn-sm">View Profile</a>
                           </div>
                         </div>
                       </li>

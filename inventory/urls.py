@@ -138,6 +138,12 @@ urlpatterns = [
     #photo upload for monitor
     path('upload_monitor_photo/<int:monitor_id>/', views.upload_monitor_photo, name='upload_monitor_photo'),
 
+    #profile
+    path("account/profile/", views.profile_view, name="profile"),
+    path("account/profile/update/", views.update_profile, name="update_profile"),
+    path("account/profile/change-password/", views.change_password, name="change_password"),
+    path("account/profile/regenerate-qr/", views.regenerate_user_qr, name="regenerate_user_qr"),
+    path("u/<uuid:token>/", views.user_assets_public, name="user_assets_public"),
 
 
 

@@ -14,9 +14,11 @@ from django.db.models import Count, Prefetch, Max
 from django.db.models.functions import TruncMonth, TruncDay
 from django.conf import settings
 from django.templatetags.static import static
-
+from django.core.files.base import ContentFile
+import qrcode
 # Python standard library
 import io
+from io import BytesIO
 import os
 import traceback
 from datetime import datetime, timedelta
@@ -42,10 +44,14 @@ from inventory.models import (
     SalvagedMonitorHistory, SalvagedKeyboardHistory, SalvagedMouseHistory, SalvagedUPSHistory,
     EndUserChangeHistory, AssetOwnerChangeHistory,
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
-    QuarterSchedule, PMSectionSchedule, OfficeSection,
+    QuarterSchedule, PMSectionSchedule, OfficeSection, Profile 
 )
 
-
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 ##############################################################################
 def salvage_monitor_logic(monitor, new_package=None, notes=None):
@@ -2798,3 +2804,178 @@ def dashboard_pro(request):
         "pm_upcoming": pm_upcoming,
     }
     return render(request, "dashboard.html", context)
+
+
+
+#QR code for Profile
+@login_required
+def _ensure_user_qr(profile, request):
+    """Generate and persist a QR PNG for this profile if missing."""
+    if profile.qr_code:
+        return
+    url = request.build_absolute_uri(reverse('user_assets_public', args=[str(profile.qr_token)]))
+    img = qrcode.make(url)
+    buf = BytesIO()
+    img.save(buf, format='PNG')
+    file_name = f"user_qr_{profile.user_id}.png"
+    profile.qr_code.save(file_name, ContentFile(buf.getvalue()), save=True)
+
+#profile view
+@login_required
+def profile_view(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    _ensure_user_qr(profile, request)  # auto-generate on first view
+
+    sections = OfficeSection.objects.all().order_by("name")
+    employees = Employee.objects.all().order_by("employee_lname", "employee_fname")
+
+    assigned_packages = []
+    if profile.employee:
+        assigned_packages = (
+            Desktop_Package.objects
+            .filter(user_details__user_Enduser=profile.employee)
+            .distinct()
+            .prefetch_related("desktop_details")
+        )
+
+    return render(request, "account/profile.html", {
+        "profile": profile,
+        "sections": sections,
+        "employees": employees,
+        "assigned_packages": assigned_packages,
+    })
+
+
+@login_required
+def update_profile(request):
+    if request.method != "POST":
+        return redirect("profile")
+
+    user = request.user
+    profile = user.profile
+
+    # Basic user fields
+    user.first_name = request.POST.get("first_name", "").strip()
+    user.last_name = request.POST.get("last_name", "").strip()
+    # Optional: protect email change behind password check if you want
+    email = request.POST.get("email", "").strip()
+    if email:
+        user.email = email
+    user.save()
+
+    # Profile fields
+    profile.phone = request.POST.get("phone", "").strip()
+    profile.position = request.POST.get("position", "").strip()
+    profile.theme = request.POST.get("theme", "light")
+    profile.timezone_str = request.POST.get("timezone_str", "Asia/Manila")
+    profile.notify_pm_due = True if request.POST.get("notify_pm_due") == "on" else False
+
+    # Optional FK links
+    section_id = request.POST.get("office_section_id")
+    if section_id:
+        try:
+            profile.office_section = OfficeSection.objects.get(id=section_id)
+        except OfficeSection.DoesNotExist:
+            profile.office_section = None
+
+    employee_id = request.POST.get("employee_id")
+    if employee_id:
+        try:
+            profile.employee = Employee.objects.get(id=employee_id)
+        except Employee.DoesNotExist:
+            profile.employee = None
+
+    # Avatar upload
+    if "avatar" in request.FILES:
+        avatar = request.FILES["avatar"]
+        # Basic validation (size/type) can be added if you like
+        profile.avatar = avatar
+
+    profile.save()
+    messages.success(request, "Profile updated.")
+    return redirect("profile")
+
+
+@login_required
+def change_password(request):
+    if request.method != "POST":
+        return redirect("profile")
+
+    current = request.POST.get("current_password")
+    new1 = request.POST.get("new_password1")
+    new2 = request.POST.get("new_password2")
+
+    if not request.user.check_password(current):
+        messages.error(request, "Current password is incorrect.")
+        return redirect("profile")
+
+    if new1 != new2:
+        messages.error(request, "New passwords do not match.")
+        return redirect("profile")
+
+    try:
+        validate_password(new1, user=request.user)
+    except ValidationError as e:
+        messages.error(request, " ".join(e.messages))
+        return redirect("profile")
+
+    request.user.set_password(new1)
+    request.user.save()
+    update_session_auth_hash(request, request.user)  # keep user logged in
+    messages.success(request, "Password changed successfully.")
+    return redirect("profile")
+
+@login_required
+def regenerate_user_qr(request):
+    """Rotate token (revokes old QR) and re-generate image."""
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    import uuid, os
+    # Optional: delete old image file
+    if profile.qr_code and hasattr(profile.qr_code, 'path') and os.path.exists(profile.qr_code.path):
+        os.remove(profile.qr_code.path)
+        profile.qr_code = None
+    profile.qr_token = uuid.uuid4()
+    profile.save()
+    _ensure_user_qr(profile, request)
+    messages.success(request, "Your QR code has been regenerated.")
+    return redirect('profile')
+
+def user_assets_public(request, token):
+    """
+    Public (or internal) page: by QR token. No login required.
+    Shows packages assigned to this user + history.
+    """
+    profile = get_object_or_404(Profile, qr_token=token)
+    employee = profile.employee
+
+    packages = Desktop_Package.objects.none()
+    desktops = DesktopDetails.objects.none()
+    if employee:
+        packages = (Desktop_Package.objects
+                    .filter(user_details__user_Enduser=employee)
+                    .distinct())
+        desktops = DesktopDetails.objects.filter(desktop_package__in=packages)
+
+    # History & disposals across those packages
+    disposed_desktops = DisposedDesktopDetail.objects.filter(desktop__desktop_package__in=packages)
+    disposed_monitors = DisposedMonitor.objects.filter(monitor_disposed_db__desktop_package__in=packages)
+    disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__desktop_package__in=packages)
+    disposed_mice = DisposedMouse.objects.filter(mouse_db__desktop_package__in=packages)
+    disposed_ups = DisposedUPS.objects.filter(ups_db__desktop_package__in=packages)
+
+    enduser_history = EndUserChangeHistory.objects.filter(desktop_package__in=packages).order_by('-changed_at')
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(desktop_package__in=packages).order_by('-changed_at')
+
+    return render(request, "account/user_assets_public.html", {
+        "profile_owner": profile,
+        "employee": employee,
+        "packages": packages,
+        "desktops": desktops,
+        "disposed_desktops": disposed_desktops,
+        "disposed_monitors": disposed_monitors,
+        "disposed_keyboards": disposed_keyboards,
+        "disposed_mice": disposed_mice,
+        "disposed_ups": disposed_ups,
+        "enduser_history": enduser_history,
+        "assetowner_history": assetowner_history,
+    })
