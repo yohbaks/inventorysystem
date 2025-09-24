@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Salvage Overview Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    h2 { text-align: center; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { border: 1px solid #333; padding: 6px; font-size: 12px; }
+    th { background: #eee; }
+    .section-title { margin-top: 40px; font-size: 14px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>DPWH Salvage Overview Report</h2>
+
+  <div class="section-title">🖥️ Salvaged Monitors</div>
+  <table>
+    <thead>
+      <tr><th>SN</th><th>Brand</th><th>Model</th><th>Size</th><th>Disposed Date</th></tr>
+    </thead>
+    <tbody>
+      {% for m in salvaged_monitors %}
+      <tr>
+        <td>{{ m.monitor_sn }}</td><td>{{ m.monitor_brand }}</td>
+        <td>{{ m.monitor_model }}</td><td>{{ m.monitor_size }}</td>
+        <td>{{ m.disposal_date|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="5">No salvaged monitors</td></tr>{% endfor %}
+    </tbody>
+  </table>
+
+  <div class="section-title">⌨️ Salvaged Keyboards</div>
+  <table>
+    <thead>
+      <tr><th>SN</th><th>Brand</th><th>Model</th><th>Disposed Date</th></tr>
+    </thead>
+    <tbody>
+      {% for k in salvaged_keyboards %}
+      <tr>
+        <td>{{ k.keyboard_dispose_db.keyboard_sn_db }}</td>
+        <td>{{ k.keyboard_dispose_db.keyboard_brand_db }}</td>
+        <td>{{ k.keyboard_dispose_db.keyboard_model_db }}</td>
+        <td>{{ k.disposal_date|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="4">No salvaged keyboards</td></tr>{% endfor %}
+    </tbody>
+  </table>
+
+  <div class="section-title">🖱️ Salvaged Mice</div>
+  <table>
+    <thead>
+      <tr><th>SN</th><th>Brand</th><th>Model</th><th>Disposed Date</th></tr>
+    </thead>
+    <tbody>
+      {% for mo in salvaged_mice %}
+      <tr>
+        <td>{{ mo.mouse_db.mouse_sn_db }}</td>
+        <td>{{ mo.mouse_db.mouse_brand_db }}</td>
+        <td>{{ mo.mouse_db.mouse_model_db }}</td>
+        <td>{{ mo.disposal_date|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="4">No salvaged mice</td></tr>{% endfor %}
+    </tbody>
+  </table>
+
+  <div class="section-title">🔋 Salvaged UPS</div>
+  <table>
+    <thead>
+      <tr><th>SN</th><th>Brand</th><th>Model</th><th>Capacity</th><th>Disposed Date</th></tr>
+    </thead>
+    <tbody>
+      {% for u in salvaged_ups %}
+      <tr>
+        <td>{{ u.ups_db.ups_sn_db }}</td>
+        <td>{{ u.ups_db.ups_brand_db }}</td>
+        <td>{{ u.ups_db.ups_model_db }}</td>
+        <td>{{ u.ups_db.ups_capacity_db }}</td>
+        <td>{{ u.disposal_date|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="5">No salvaged UPS</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

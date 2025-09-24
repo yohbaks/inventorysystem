@@ -688,13 +688,13 @@ function printQrCode() {
 
 
 
-                {% if not has_active_monitor and not has_active_desktop %}
+                {% if not has_active_monitor and not has_active_desktop and not salvaged_monitors_view%}
                 <p class="text-danger">This Monitor was completely disposed under the whole package.</p>
                 {% endif %}
 
                 
                   
-                {% if not has_active_monitor and has_active_desktop %}
+                {% if not has_active_monitor and has_active_desktop and not salvaged_monitors_view %}
                 <p class="text-danger">No available Monitors for this desktop package. You can still add a monitor under this packge.</p>
                    {% endif %}
                 
@@ -750,6 +750,41 @@ function printQrCode() {
       </table>
 
       {% endif %}
+
+      <!-- Salvaged Monitor Table -->
+      {% if salvaged_monitors_view %}
+  <h5 class="mt-4 text-success">♻️ Salvaged Monitors</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>SN</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Size</th>
+          <th>Computer Name</th>
+          <th>Asset Owner</th>
+          <th>Date Salvaged</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sm in salvaged_monitors_view %}
+          <tr class="table-success">
+            <td>{{ sm.monitor_sn }}</td>
+            <td>{{ sm.monitor_brand }}</td>
+            <td>{{ sm.monitor_model }}</td>
+            <td>{{ sm.monitor_size }}</td>
+            <td>{{ sm.computer_name|default:"—" }}</td>
+            <td>{{ sm.asset_owner|default:"—" }}</td>
+            <td>{{ sm.salvage_date|date:"Y-m-d H:i" }}</td>
+            <td><span class="badge bg-success">Salvaged</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
 
           </div>
         </div>
@@ -971,12 +1006,12 @@ function printQrCode() {
 
 
 
-                {% if not has_active_keyboards and not has_active_desktop %}
+                {% if not has_active_keyboards and not has_active_desktop and not salvaged_keyboards_view %}
                 <p class="text-danger">This Keyboard was completely disposed under the whole package.</p>
                 {% endif %}
 
                             
-                {% if not has_active_keyboards and has_active_desktop %}
+                {% if not has_active_keyboards and has_active_desktop and not salvaged_keyboards_view %}
                 <p class="text-danger">No available Keyboard for this desktop package. You can still add a monitor under this packge.</p>
                 {% endif %}
 
@@ -1006,11 +1041,45 @@ function printQrCode() {
           {% endfor %}
         </tbody>
       </table>
-      {% else %}
-        <p>No disposed keyboards for this desktop package.</p>
+      
       {% endif %}
-    </div>
+
+
+
+      <!-- Salvaged Keyboard Table -->
+      {% if salvaged_keyboards_view %}
+  <h5 class="mt-4 text-success">♻️ Salvaged Keyboard</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>SN</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Date Salvaged</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sk in salvaged_keyboards_view %}
+          <tr class="table-success">
+            <td>{{ sk.keyboard_sn }}</td>
+            <td>{{ sk.keyboard_brand }}</td>
+            <td>{{ sk.keyboard_model }}</td>
+            <td>{{ sk.salvage_date|date:"Y-m-d H:i" }}</td>
+            <td><span class="badge bg-success">Salvaged</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+  {% endif %}
+    </div>
+    
+  </div>
+
+
+
 
   <!-- Add Keyboard Modal -->
 <div class="modal fade" id="addKeyboardModal" tabindex="-1" aria-labelledby="addKeyboardModalLabel" aria-hidden="true">
@@ -1213,12 +1282,12 @@ function printQrCode() {
           </div>
         </div>
       {% endif %}
-                {% if not has_active_mouse and not has_active_desktop %}
-                <p class="text-danger">This Mouse was completely disposed under the whole package.</p>
-                {% endif %}
 
+                {% if not has_active_mouse and has_active_desktop and not salvaged_mice_view.exists %}
+                  <p class="text-danger">No available Mouse for this desktop package. You can still add a mouse under this package.</p>
+                {% endif %}
                             
-                {% if not has_active_mouse and has_active_desktop %}
+                {% if not has_active_mouse and has_active_desktop and not salvage_mice_view %}
                 <p class="text-danger">No available Mouse for this desktop package. You can still add a monitor under this packge.</p>
                 {% endif %}
 
@@ -1247,6 +1316,40 @@ function printQrCode() {
         </tbody>
       </table>   
       {% endif %}
+
+
+
+      <!-- Salvaged Mouse Table -->
+      {% if salvaged_mice_view %}
+  <h5 class="mt-4 text-success">♻️ Salvaged Mice</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>SN</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Date Salvaged</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sm in salvaged_mice_view %}
+          <tr class="table-success">
+            <td>{{ sm.mouse_sn }}</td>
+            <td>{{ sm.mouse_brand }}</td>
+            <td>{{ sm.mouse_model }}</td>
+            <td>{{ sm.salvage_date|date:"Y-m-d H:i" }}</td>
+            <td><span class="badge bg-success">Salvaged</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+
+
     </div>
   </div>
 
@@ -1443,12 +1546,12 @@ function printQrCode() {
               </div>
             {% endif %}
 
-                {% if not has_active_ups and not has_active_desktop %}
+                {% if not has_active_ups and not has_active_desktop and not salvaged_ups_view%}
                 <p class="text-danger">This UPS was completely disposed under the whole package.</p>
                 {% endif %}
 
                             
-                {% if not has_active_ups and has_active_desktop %}
+                {% if not has_active_ups and has_active_desktop and not salvaged_ups_view %}
                 <p class="text-danger">No available UPS for this desktop package. You can still add a monitor under this packge.</p>
                 {% endif %}
 
@@ -1479,6 +1582,39 @@ function printQrCode() {
             </table>
             
             {% endif %}
+
+
+
+            <!-- Salvaged UPS Table -->
+            {% if salvaged_ups_view %}
+  <h5 class="mt-4 text-success">♻️ Salvaged UPS</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>SN</th>
+          <th>Brand</th>
+          <th>Model</th>
+          <th>Capacity</th>
+          <th>Date Salvaged</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for su in salvaged_ups_view %}
+          <tr class="table-success">
+            <td>{{ su.ups_sn }}</td>
+            <td>{{ su.ups_brand }}</td>
+            <td>{{ su.ups_model }}</td>
+            <td>{{ su.ups_capacity }}</td>
+            <td>{{ su.salvage_date|date:"Y-m-d H:i" }}</td>
+            <td><span class="badge bg-success">Salvaged</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
           </div>
         </div>
       

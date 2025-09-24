@@ -10,7 +10,8 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     #recent and conting in the base (combined) view
-    path('', views.recent_it_equipment_and_count_base, name='recent_it_equipment'),
+    path("", views.dashboard_pro, name="dashboard"),
+    # path('', views.recent_it_equipment_and_count_base, name='recent_it_equipment'),
     path('success_add/<int:desktop_id>/', views.success_page, name='success_add_page'),
     
     
@@ -128,6 +129,8 @@ urlpatterns = [
     path("salvaged/mouse/<int:pk>/", views.salvaged_mouse_detail, name="salvaged_mouse_detail"),
     path("salvaged/ups/<int:pk>/", views.salvaged_ups_detail, name="salvaged_ups_detail"),
 
+    path('export_salvage_excel/', views.export_salvage_excel, name='export_salvage_excel'),
+    path('print_salvage_overview/', views.print_salvage_overview, name='print_salvage_overview'),
 
     #dashboard chart
     path('dashboard/chart/', views.dashboard_view_chart, name='dashboard_view_chart'),

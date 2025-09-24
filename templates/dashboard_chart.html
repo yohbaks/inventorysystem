@@ -7,7 +7,6 @@
     <h3 class="fw-bold mb-3">Disposal Charts</h3>
     <div class="page-category mb-4">
       Visual overview of disposed IT equipment per category.
-      <a href="https://www.chartjs.org/docs/" target="_blank">View Docs</a>
     </div>
 
     <div class="row">
@@ -18,8 +17,8 @@
             <div class="card-title">{{ item.label }} Disposal Trend</div>
           </div>
           <div class="card-body">
-            <div class="chart-container">
-              <canvas id="chart-{{ item.label }}" width="804" height="300" style="display: block; width: 100%; height: 300px;" class="chartjs-render-monitor"></canvas>
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="chart-{{ item.label }}"></canvas>
             </div>
           </div>
         </div>
@@ -31,56 +30,64 @@
 
 <!-- JS dependencies -->
 <script src="{% static 'js/plugin/chart.js/chart.min.js' %}"></script>
-<script src="{% static 'assets/js/plugin/chart.js/chartjs-adapter-date-fns.bundle.min.js' %}"></script>
 
 <script>
   const chartData = {{ chart_data|safe }};
 
+  // Match exact labels from your Python/Django chart_data
+  const colors = {
+    "Monitor": "#1d7af3",   // Blue
+    "Keyboard": "#59d05d", // Green
+    "Mouse": "#f3545d",    // Red
+    "UPS": "#fdaf4b"       // Orange
+  };
+
   chartData.forEach(item => {
+    const color = colors[item.label] || "#1d7af3"; // fallback blue
     const ctx = document.getElementById(`chart-${item.label}`).getContext('2d');
+
     new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
         labels: item.labels,
         datasets: [{
           label: `${item.label} Disposed`,
-          data: item.data,
-          borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderWidth: 2,
+          borderColor: color,
+          pointBorderColor: "#FFF",
+          pointBackgroundColor: color,
+          pointBorderWidth: 2,
+          pointHoverRadius: 4,
+          pointHoverBorderWidth: 1,
+          pointRadius: 4,
+          backgroundColor: "transparent",
           fill: true,
-          tension: 0.4
+          borderWidth: 2,
+          data: item.data,
         }]
       },
       options: {
         responsive: true,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
+        maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: true,
-            position: 'bottom'
-          },
+          legend: { position: "bottom" },
           tooltip: {
-            mode: 'index',
-            intersect: false
+            mode: "nearest",
+            intersect: false,
+            padding: 10,
           }
+        },
+        layout: {
+          padding: { left: 15, right: 15, top: 15, bottom: 15 },
         },
         scales: {
           x: {
-            type: 'time',
-            time: {
-              unit: 'day',
-              tooltipFormat: 'MMM dd, yyyy',
-              displayFormats: { day: 'MMM dd' }
-            },
-            title: { display: true, text: 'Date' }
+            ticks: { color: "rgba(0,0,0,0.5)" },
+            grid: { zeroLineColor: "transparent" },
           },
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Disposal Count' }
+            ticks: { color: "rgba(0,0,0,0.5)" },
+            grid: { drawTicks: false },
           }
         }
       }

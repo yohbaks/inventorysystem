@@ -3,10 +3,16 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
-    <h3 class="fw-bold mb-4">🗑️ Disposal Overview</h3>
+    
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold text-primary mb-0">
+        <i class="fas fa-trash-alt me-2"></i> Disposal Overview
+      </h3>
+    </div>
 
     <!-- Pills Navigation -->
-    <ul class="nav nav-pills nav-secondary" id="disposal-tabs" role="tablist">
+    <ul class="nav nav-pills nav-line nav-color-secondary mb-4" id="disposal-tabs" role="tablist">
       {% for group in categories %}
       <li class="nav-item" role="presentation">
         <button class="nav-link {% if forloop.first %}active{% endif %}" 
@@ -14,6 +20,11 @@
                 data-bs-toggle="pill" 
                 data-bs-target="#content-{{ group.category }}" 
                 type="button" role="tab">
+          {% if group.category == "desktop" %}<i class="fas fa-desktop me-1"></i>{% endif %}
+          {% if group.category == "monitor" %}<i class="fas fa-tv me-1"></i>{% endif %}
+          {% if group.category == "keyboard" %}<i class="fas fa-keyboard me-1"></i>{% endif %}
+          {% if group.category == "mouse" %}<i class="fas fa-mouse me-1"></i>{% endif %}
+          {% if group.category == "ups" %}<i class="fas fa-plug me-1"></i>{% endif %}
           {{ group.label }}
         </button>
       </li>
@@ -25,118 +36,90 @@
       {% for group in categories %}
       <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
            id="content-{{ group.category }}" role="tabpanel">
-        <div class="card shadow-sm rounded mb-4">
-          <div class="card-header bg-light">
-            <h4 class="card-title text-uppercase fw-bold text-danger mb-0">
-              {{ group.label }}
+        <div class="card shadow-sm border-0 mb-4">
+          <!-- 🔴 Red Header with White Text -->
+          <div class="card-header rounded-top" style="background-color:#e74c3c;">
+            <h4 class="card-title fw-bold mb-0 text-white">
+              <i class="fas fa-database me-2 text-white"></i> {{ group.label }} Disposal Records
             </h4>
           </div>
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-bordered table-striped" id="table-{{ group.category }}">
-                <thead class="text-white">
-                  <tr>
-                    <th style="background-color: #d33f49;">Package #</th>
-                    <th style="background-color: #d33f49;">Computer Name</th>
-                    <th style="background-color: #d33f49;">Serial No</th>
-                    <th style="background-color: #d33f49;">Model</th>
-                    <th style="background-color: #d33f49;">Brand</th>
-                    <th style="background-color: #d33f49;">Disposed Date</th>
-                    <th style="background-color: #d33f49;">Reason</th>
+              <table class="table table-striped table-hover align-middle w-100 exportable" 
+                     id="table-{{ group.category }}"
+                     data-report-title="Disposal Report - {{ group.label }}">
+                <thead>
+                  <tr style="background-color:#e74c3c; color:white;">
+                    <th>Package #</th>
+                    <th>Computer Name</th>
+                    <th>Serial No</th>
+                    <th>Model</th>
+                    <th>Brand</th>
+                    <th>Disposed Date</th>
+                    <th>Reason</th>
                   </tr>
                   <!-- Filter row -->
-                  <tr class="bg-white text-dark">
-                    <th><input type="text" placeholder="Search Package" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Computer" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Serial" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Model" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Brand" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Date" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Reason" class="form-control form-control-sm" /></th>
+                  <tr class="bg-light text-dark filter-row">
+                    <th><input type="text" placeholder="🔍 Package" class="form-control form-control-sm" /></th>
+                    <th><input type="text" placeholder="🔍 Computer" class="form-control form-control-sm" /></th>
+                    <th><input type="text" placeholder="🔍 Serial" class="form-control form-control-sm" /></th>
+                    <th><input type="text" placeholder="🔍 Model" class="form-control form-control-sm" /></th>
+                    <th><input type="text" placeholder="🔍 Brand" class="form-control form-control-sm" /></th>
+                    <th><input type="text" placeholder="🔍 Date" class="form-control form-control-sm" /></th>
+                    <th><input type="text" placeholder="🔍 Reason" class="form-control form-control-sm" /></th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for item in group.items %}
-                  <tr class="table-danger">
-                    <!-- Package # -->
+                  <tr>
+                    <td>{% if group.category == "desktop" %}{{ item.desktop.desktop_package.id }}{% else %}{{ item.desktop_package.id|default:"N/A" }}{% endif %}</td>
+                    <td>{% if group.category == "desktop" %}{{ item.desktop.computer_name }}{% else %}{{ item.desktop_package.computer_name|default:"N/A" }}{% endif %}</td>
                     <td>
                       {% if group.category == "desktop" %}
-                        {{ item.desktop.desktop_package.id }}
-                      {% else %}
-                        {{ item.desktop_package.id|default:"N/A" }}
-                      {% endif %}
-                    </td>
-
-                    <!-- Computer Name -->
-                    <td>
-                      {% if group.category == "desktop" %}
-                        {{ item.desktop.computer_name }}
-                      {% else %}
-                        {{ item.desktop_package.computer_name|default:"N/A" }}
-                      {% endif %}
-                    </td>
-
-                    <!-- Serial Number -->
-                    <td>
-                      {% if group.category == "desktop" %}
-                        {{ item.serial_no }}
+                        {{ item.serial_no|default:"N/A" }}
                       {% elif group.category == "monitor" %}
-                        {{ item.monitor_sn }}
+                        {{ item.monitor_sn|default:"N/A" }}
                       {% elif group.category == "keyboard" %}
-                        {{ item.keyboard_dispose_db.keyboard_sn_db }}
+                        {{ item.keyboard_sn_db|default:"N/A" }}
                       {% elif group.category == "mouse" %}
-                        {{ item.mouse_db.mouse_sn_db }}
+                        {{ item.mouse_sn_db|default:"N/A" }}
                       {% elif group.category == "ups" %}
-                        {{ item.ups_db.ups_sn_db }}
-                      {% else %}
-                        N/A
+                        {{ item.ups_sn_db|default:"N/A" }}
                       {% endif %}
                     </td>
-
-                    <!-- Model -->
                     <td>
                       {% if group.category == "desktop" %}
-                        {{ item.model }}
+                        {{ item.model|default:"N/A" }}
                       {% elif group.category == "monitor" %}
-                        {{ item.monitor_model }}
+                        {{ item.monitor_model|default:"N/A" }}
                       {% elif group.category == "keyboard" %}
-                        {{ item.keyboard_dispose_db.keyboard_model_db }}
+                        {{ item.keyboard_model_db|default:"N/A" }}
                       {% elif group.category == "mouse" %}
-                        {{ item.mouse_db.mouse_model_db }}
+                        {{ item.mouse_model_db|default:"N/A" }}
                       {% elif group.category == "ups" %}
-                        {{ item.ups_db.ups_model_db }}
-                      {% else %}
-                        N/A
+                        {{ item.ups_model_db|default:"N/A" }}
                       {% endif %}
                     </td>
-
-                    <!-- Brand -->
                     <td>
                       {% if group.category == "desktop" %}
-                        {{ item.brand_name }}
+                        {{ item.brand_name|default:"N/A" }}
                       {% elif group.category == "monitor" %}
-                        {{ item.monitor_brand }}
+                        {{ item.monitor_brand|default:"N/A" }}
                       {% elif group.category == "keyboard" %}
-                        {{ item.keyboard_dispose_db.keyboard_brand_db }}
+                        {{ item.keyboard_brand_db|default:"N/A" }}
                       {% elif group.category == "mouse" %}
-                        {{ item.mouse_db.mouse_brand_db }}
+                        {{ item.mouse_brand_db|default:"N/A" }}
                       {% elif group.category == "ups" %}
-                        {{ item.ups_db.ups_brand_db }}
-                      {% else %}
-                        N/A
+                        {{ item.ups_brand_db|default:"N/A" }}
                       {% endif %}
                     </td>
-
-                    <!-- Disposed Date -->
                     <td>
                       {% if group.category == "desktop" %}
-                        {{ item.date_disposed|date:"Y-m-d" }}
+                        {{ item.date_disposed|date:"Y-m-d"|default:"N/A" }}
                       {% else %}
-                        {{ item.disposal_date|date:"Y-m-d" }}
+                        {{ item.disposal_date|date:"Y-m-d"|default:"N/A" }}
                       {% endif %}
                     </td>
-
-                    <!-- Reason -->
                     <td>
                       {% if group.category == "desktop" %}
                         {{ item.reason|default:"N/A" }}
@@ -161,25 +144,61 @@
   </div>
 </div>
 
-<!-- DataTables -->
+<!-- ✅ Force load DataTables Buttons from CDN only on this page -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css"/>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+<!-- DataTables + Export Buttons Script -->
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    {% for group in categories %}
-    var table = $('#table-{{ group.category }}').DataTable({
+$(function () {
+  $('table.exportable').each(function () {
+    var $table = $(this);
+    var title = $table.data('report-title') || 'Disposal Report';
+
+    var dt = $table.DataTable({
       pageLength: 10,
+      responsive: true,
+      fixedHeader: true,
       orderCellsTop: true,
-      fixedHeader: true
+      dom: "<'row mb-3'<'col-md-6'l><'col-md-6 text-end'B>>" +
+           "<'row'<'col-12'tr>>" +
+           "<'row mt-3'<'col-md-5'i><'col-md-7'p>>",
+      buttons: [
+        { extend: 'excel', className: 'btn btn-success btn-sm me-1', title: title },
+        { extend: 'pdf',   className: 'btn btn-danger btn-sm me-1',  title: title },
+        { extend: 'csv',   className: 'btn btn-info btn-sm me-1',    title: title },
+        { extend: 'print', className: 'btn btn-primary btn-sm',      title: title }
+      ]
     });
 
-    // Enable column-specific search
-    $('#table-{{ group.category }} thead tr:eq(1) th').each(function (i) {
+    // Column filters (second header row)
+    $table.find('thead tr:eq(1) th').each(function (i) {
       $('input', this).on('keyup change', function () {
-        if (table.column(i).search() !== this.value) {
-          table.column(i).search(this.value).draw();
+        if (dt.column(i).search() !== this.value) {
+          dt.column(i).search(this.value).draw();
         }
       });
     });
-    {% endfor %}
   });
+
+  $('[data-bs-toggle="tab"],[data-bs-toggle="pill"]').on('shown.bs.tab', function () {
+    $($.fn.dataTable.tables(true)).DataTable().columns.adjust().responsive.recalc();
+  });
+});
 </script>
+
+<!-- Hide filter row in print -->
+<style>
+  @media print {
+    .filter-row { display: none !important; }
+    .dt-buttons { display: none !important; }
+  }
+</style>
 {% endblock %}

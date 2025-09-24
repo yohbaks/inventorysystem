@@ -1,50 +1,50 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-
-from inventory.models import (Desktop_Package, DesktopDetails, KeyboardDetails, DisposedKeyboard, MouseDetails, MonitorDetails, 
-                              UPSDetails, DisposedMouse, DisposedMonitor, UserDetails, DisposedUPS, Employee, DocumentsDetails, 
-                              EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand, PreventiveMaintenance,
-                              PMScheduleAssignment, MaintenanceChecklistItem, QuarterSchedule, PMSectionSchedule, OfficeSection,
-                              SalvagedMonitor, SalvagedKeyboard, SalvagedMouse, SalvagedUPS, SalvagedMonitorHistory, SalvagedKeyboardHistory,
-                              SalvagedMouseHistory, SalvagedUPSHistory)
-
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse # sa disposing ni sya sa desktop
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.timezone import now
-from django.utils import timezone
-from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.urls import reverse
-#prints
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.template.loader import render_to_string
-from weasyprint import HTML
+from django.utils import timezone
+from django.utils.timezone import now
+from django.utils.dateformat import DateFormat
+from django.db import transaction
+from django.db.models import Count, Prefetch, Max
+from django.db.models.functions import TruncMonth, TruncDay
+from django.conf import settings
+from django.templatetags.static import static
 
-#to export to excel
+# Python standard library
 import io
 import os
 import traceback
-
 from datetime import datetime, timedelta
-from openpyxl import load_workbook
+from calendar import month_abbr
+from collections import defaultdict
+
+# Third-party libraries
+from weasyprint import HTML
+from openpyxl import load_workbook, Workbook
 from openpyxl.styles import PatternFill
-from django.contrib.auth.decorators import login_required
+from fpdf import FPDF
+from docx import Document
+from docx2pdf import convert
+import pythoncom  # for Windows COM support (docx2pdf)
+from win32com.client import Dispatch  # Windows COM (docx2pdf)
 
-from collections import defaultdict # for grouping items by desktop package PM Schedule
-from fpdf import FPDF # for PDF generation preventive maintenance
-from django.conf import settings # for accessing media files
-from docx import Document #docs on pdf on maintenance
-from docx2pdf import convert # for converting docx to pdf use in preventive maintenance
-import pythoncom # for Windows COM support, needed for docx2pdf on Windows
-from django.http import FileResponse #  for serving files in Django use in preventivemaintenace pdf
-from win32com.client import Dispatch # for Windows COM support, needed for docx2pdf on Windows preventive maintenance
-from django.db.models import Prefetch # for optimizing queries, in PM scheduling or assigning PM schedule in workstation (overview template PM)
+# Local models
+from inventory.models import (
+    Desktop_Package, DesktopDetails, KeyboardDetails, MouseDetails, MonitorDetails,
+    UPSDetails, UserDetails, DocumentsDetails, Employee, Brand,
+    DisposedDesktopDetail, DisposedKeyboard, DisposedMouse, DisposedMonitor, DisposedUPS,
+    SalvagedMonitor, SalvagedKeyboard, SalvagedMouse, SalvagedUPS,
+    SalvagedMonitorHistory, SalvagedKeyboardHistory, SalvagedMouseHistory, SalvagedUPSHistory,
+    EndUserChangeHistory, AssetOwnerChangeHistory,
+    PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
+    QuarterSchedule, PMSectionSchedule, OfficeSection,
+)
 
-from django.db.models.functions import TruncMonth, TruncDay # for grouping by month or day in PM overview
-from django.db.models import Count
-from django.templatetags.static import static
-from django.db.models import Max
 
 
 ##############################################################################
@@ -256,10 +256,6 @@ def desktop_package_base(request):
 
 
 @login_required
-# def desktop_details_view(request, desktop_id):
-#     desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
-#     desktop_package = desktop_details.desktop_package
-
 def desktop_details_view(request, package_id):
     desktop_package = get_object_or_404(Desktop_Package, id=package_id)
     desktop_details = DesktopDetails.objects.filter(desktop_package=desktop_package, is_disposed=False).first()
@@ -320,6 +316,31 @@ def desktop_details_view(request, package_id):
     salvaged_keyboards = SalvagedKeyboard.objects.filter(is_reassigned=False).order_by("-salvage_date")
     salvaged_mice = SalvagedMouse.objects.filter(is_reassigned=False).order_by("-salvage_date")
     salvaged_ups = SalvagedUPS.objects.filter(is_reassigned=False).order_by("-salvage_date")
+    
+    # ✅ Salvaged components in view details
+    salvaged_monitors_view = SalvagedMonitor.objects.filter(
+        desktop_package=desktop_package,
+        is_reassigned=False,
+        is_disposed=False
+    ).order_by("-salvage_date")
+
+    salvaged_keyboards_view = SalvagedKeyboard.objects.filter(
+        desktop_package=desktop_package,
+        is_reassigned=False,
+        is_disposed=False
+    ).order_by("-salvage_date")
+
+    salvaged_mice_view = SalvagedMouse.objects.filter(
+        desktop_package=desktop_package,
+        is_reassigned=False,
+        is_disposed=False
+    ).order_by("-salvage_date")
+
+    salvaged_ups_view = SalvagedUPS.objects.filter(
+        desktop_package=desktop_package,
+        is_reassigned=False,
+        is_disposed=False
+    ).order_by("-salvage_date")
 
     return render(request, 'desktop_details_view.html', {
         'desktop_detailsx': desktop_details,
@@ -355,6 +376,10 @@ def desktop_details_view(request, package_id):
         'salvaged_keyboards': salvaged_keyboards,
         'salvaged_mice': salvaged_mice,
         'salvaged_ups': salvaged_ups,
+        'salvaged_monitors_view': salvaged_monitors_view,
+        'salvaged_keyboards_view': salvaged_keyboards_view,
+        'salvaged_mice_view': salvaged_mice_view,
+        'salvaged_ups_view': salvaged_ups_view,
     })
 
 
@@ -2501,3 +2526,275 @@ def upload_monitor_photo(request, monitor_id):
         monitor.save()
     return redirect(f'/desktop_details_view/{monitor.desktop_package.id}/#pills-monitor')
 
+
+def export_salvage_excel(request):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Salvaged Equipment"
+
+    headers = [
+        "Category", "SN", "Brand", "Model", "Size/Capacity",
+        "Computer Name", "Asset Owner", "Date Salvaged", "Notes", "Status"
+    ]
+    ws.append(headers)
+
+    def get_asset_owner(desktop_package):
+        if not desktop_package:
+            return ""
+        user = UserDetails.objects.filter(desktop_package=desktop_package).first()
+        if user and user.user_Assetowner:
+            return user.user_Assetowner.full_name
+        return ""
+
+    def fmt_date(dt):
+        if not dt:
+            return ""
+        try:
+            return dt.strftime("%Y-%m-%d %H:%M")  # works if datetime
+        except Exception:
+            return dt.strftime("%Y-%m-%d")        # fallback for date
+
+    # Monitors
+    for m in DisposedMonitor.objects.all():
+        computer_name = m.desktop_package.computer_name if m.desktop_package else ""
+        asset_owner = get_asset_owner(m.desktop_package)
+        ws.append([
+            "Monitor", m.monitor_sn, m.monitor_brand, m.monitor_model, m.monitor_size,
+            computer_name, asset_owner,
+            fmt_date(m.disposal_date),
+            m.reason or "", "Disposed"
+        ])
+
+    # Keyboards
+    for k in DisposedKeyboard.objects.all():
+        computer_name = k.desktop_package.computer_name if k.desktop_package else ""
+        asset_owner = get_asset_owner(k.desktop_package)
+        ws.append([
+            "Keyboard",
+            k.keyboard_dispose_db.keyboard_sn_db,
+            str(k.keyboard_dispose_db.keyboard_brand_db),
+            k.keyboard_dispose_db.keyboard_model_db,
+            "",
+            computer_name, asset_owner,
+            fmt_date(k.disposal_date),
+            "", "Disposed"
+        ])
+
+    # Mice
+    for mo in DisposedMouse.objects.all():
+        computer_name = mo.desktop_package.computer_name if mo.desktop_package else ""
+        asset_owner = get_asset_owner(mo.desktop_package)
+        ws.append([
+            "Mouse",
+            mo.mouse_db.mouse_sn_db,
+            str(mo.mouse_db.mouse_brand_db),
+            mo.mouse_db.mouse_model_db,
+            "",
+            computer_name, asset_owner,
+            fmt_date(mo.disposal_date),
+            "", "Disposed"
+        ])
+
+    # UPS
+    for u in DisposedUPS.objects.all():
+        computer_name = u.desktop_package.computer_name if u.desktop_package else ""
+        asset_owner = get_asset_owner(u.desktop_package)
+        ws.append([
+            "UPS",
+            u.ups_db.ups_sn_db,
+            str(u.ups_db.ups_brand_db),
+            u.ups_db.ups_model_db,
+            u.ups_db.ups_capacity_db,
+            computer_name, asset_owner,
+            fmt_date(u.disposal_date),
+            "", "Disposed"
+        ])
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    response = HttpResponse(
+        output,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response['Content-Disposition'] = 'attachment; filename=salvaged_equipment.xlsx'
+    return response
+
+
+
+def print_salvage_overview(request):
+    salvaged_monitors = DisposedMonitor.objects.all()
+    salvaged_keyboards = DisposedKeyboard.objects.all()
+    salvaged_mice = DisposedMouse.objects.all()
+    salvaged_ups = DisposedUPS.objects.all()
+
+    html_string = render_to_string("salvage/print_salvage.html", {
+        "salvaged_monitors": salvaged_monitors,
+        "salvaged_keyboards": salvaged_keyboards,
+        "salvaged_mice": salvaged_mice,
+        "salvaged_ups": salvaged_ups,
+    })
+
+    response = HttpResponse(content_type="application/pdf")
+    response['Content-Disposition'] = 'inline; filename=salvage_overview.pdf'
+    HTML(string=html_string).write_pdf(response)
+    return response
+
+
+
+#the dashboard
+
+# views_dashboard_snippet.py — paste this into your views.py
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.db.models.functions import TruncMonth
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
+from calendar import month_abbr
+
+# Import your models below — adjust names if your app uses different model class names
+from .models import (
+    Desktop_Package, DesktopDetails, MonitorDetails, KeyboardDetails, MouseDetails, UPSDetails,
+    DisposedDesktopDetail, DisposedMonitor, DisposedKeyboard, DisposedMouse, DisposedUPS,
+    PMSectionSchedule, PMScheduleAssignment, EndUserChangeHistory, AssetOwnerChangeHistory
+)
+
+def _months_back_labels(n=6):
+    today = timezone.now().date()
+    year = today.year
+    month = today.month
+    labels = []
+    for _ in range(n):
+        labels.append(f"{month_abbr[month]} {year}")
+        month -= 1
+        if month == 0:
+            month = 12
+            year -= 1
+    labels.reverse()
+    return labels
+
+def _monthly_counts_qs(qs, date_field, months=6):
+    data = (qs.annotate(m=TruncMonth(date_field))
+              .values('m')
+              .annotate(c=Count('id'))
+              .order_by('m'))
+    # Map to 'Mon YYYY' -> count
+    map_counts = {f"{month_abbr[row['m'].month]} {row['m'].year}": row['c'] for row in data if row['m']}
+    labels = _months_back_labels(months)
+    return labels, [map_counts.get(lbl, 0) for lbl in labels]
+
+@login_required
+def dashboard_pro(request):
+    # KPIs
+    total_packages = Desktop_Package.objects.count()
+    active_packages = Desktop_Package.objects.filter(is_disposed=False).count()
+    disposed_all = (
+        DisposedDesktopDetail.objects.count() +
+        DisposedMonitor.objects.count() +
+        DisposedKeyboard.objects.count() +
+        DisposedMouse.objects.count() +
+        DisposedUPS.objects.count()
+    )
+    pm_pending = PMScheduleAssignment.objects.filter(is_completed=False).count()
+
+    # Trend (last 3 months)
+    months = 3
+    lbls, desktop_series = _monthly_counts_qs(DisposedDesktopDetail.objects.all(), 'date_disposed', months)
+    _, mouse_series = _monthly_counts_qs(DisposedMouse.objects.all(), 'disposal_date', months)
+    _, keyboard_series = _monthly_counts_qs(DisposedKeyboard.objects.all(), 'disposal_date', months)
+    _, ups_series = _monthly_counts_qs(DisposedUPS.objects.all(), 'disposal_date', months)  
+
+    # Disposed by category (all-time)
+    disposed_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS"]
+    disposed_data = [
+        DisposedDesktopDetail.objects.count(),
+        DisposedMonitor.objects.count(),
+        DisposedKeyboard.objects.count(),
+        DisposedMouse.objects.count(),
+        DisposedUPS.objects.count(),
+    ]
+
+    # Active vs Disposed by category
+    stack_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS"]
+    active_counts = [
+        DesktopDetails.objects.filter(is_disposed=False).count(),
+        MonitorDetails.objects.filter(is_disposed=False).count(),
+        KeyboardDetails.objects.filter(is_disposed=False).count(),
+        MouseDetails.objects.filter(is_disposed=False).count(),
+        UPSDetails.objects.filter(is_disposed=False).count(),
+    ]
+    disposed_counts = [
+        DesktopDetails.objects.filter(is_disposed=True).count(),
+        MonitorDetails.objects.filter(is_disposed=True).count(),
+        KeyboardDetails.objects.filter(is_disposed=True).count(),
+        MouseDetails.objects.filter(is_disposed=True).count(),
+        UPSDetails.objects.filter(is_disposed=True).count(),
+    ]
+
+    # Recent items
+    recent = DesktopDetails.objects.filter(is_disposed=False).order_by('-created_at')[:10]
+
+    # Upcoming PM (next 7 days)
+    today = timezone.now().date()
+    next_week = today + timedelta(days=7)
+    upcoming = (PMSectionSchedule.objects
+                .filter(start_date__lte=next_week, end_date__gte=today)
+                .select_related('section'))
+    pm_upcoming = []
+    for s in upcoming:
+        assignment = PMScheduleAssignment.objects.filter(pm_section_schedule=s).select_related('desktop_package').first()
+        comp = "—"
+        if assignment and assignment.desktop_package_id:
+            dd = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
+            comp = dd.computer_name if dd else "—"
+        pm_upcoming.append({
+            "section": s.section.name if getattr(s, 'section', None) else "—",
+            "range": f"{s.start_date} – {s.end_date}",
+            "computer_name": comp,
+        })
+
+    # Audit trail (10 latest changes)
+    enduser = EndUserChangeHistory.objects.select_related('desktop_package','new_enduser','old_enduser').order_by('-changed_at')[:5]
+    assetown = AssetOwnerChangeHistory.objects.select_related('desktop_package','new_assetowner','old_assetowner').order_by('-changed_at')[:5]
+    audit = []
+    for e in enduser:
+        audit.append({
+            "type": "End User",
+            "when": e.changed_at.strftime("%Y-%m-%d %H:%M"),
+            "text": f"Desktop Package #{e.desktop_package_id}: <strong>{e.old_enduser or 'None'}</strong> → <strong>{e.new_enduser}</strong>",
+        })
+    for a in assetown:
+        audit.append({
+            "type": "Asset Owner",
+            "when": a.changed_at.strftime("%Y-%m-%d %H:%M"),
+            "text": f"Desktop Package #{a.desktop_package_id}: <strong>{a.old_assetowner or 'None'}</strong> → <strong>{a.new_assetowner}</strong>",
+        })
+    audit = sorted(audit, key=lambda x: x["when"], reverse=True)[:10]
+
+    context = {
+        "kpis": {
+            "total_packages": total_packages,
+            "active_packages": active_packages,
+            "disposed_all": disposed_all,
+            "pm_pending": pm_pending,
+        },
+        "charts": {
+            "months": months,
+            "labels": lbls,
+            "desktop": desktop_series,
+            "mouse": mouse_series,
+            "keyboard": keyboard_series,
+            "ups": ups_series,
+            "disposed_by_cat_labels": disposed_labels,
+            "disposed_by_cat_data": disposed_data,
+            "stack_labels": stack_labels,
+            "stack_active": active_counts,
+            "stack_disposed": disposed_counts,
+        },
+        "recent": recent,
+        "audit": audit,
+        "pm_upcoming": pm_upcoming,
+    }
+    return render(request, "dashboard.html", context)
