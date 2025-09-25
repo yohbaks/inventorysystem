@@ -78,7 +78,33 @@
               <div class="col-md-4">
                 <div class="form-group">
                   <label for="desktopProcessor">Processor</label>
-                  <input type="text" name="desktop_processor" id="desktop_processor" class="form-control">
+        
+                   <select class="form-select form-control" id="desktop_processor" name="desktop_processor" required>
+                    <option value="">-- Select Processor --</option>
+                    <optgroup label="Core i9 (Desktop)">
+                    
+                    <option value="i9-14900K" {% if desktop_detailsx.processor == 'i9-14900K' %}selected{% endif %}>Core i9-14900K (14th Gen Raptor Lake)</option>
+                    <option value="i9-13900K" {% if desktop_detailsx.processor == 'i9-13900K' %}selected{% endif %}>Core i9-13900K (13th Gen Raptor Lake)</option>
+                    <option value="i9-12900K" {% if desktop_detailsx.processor == 'i9-12900K' %}selected{% endif %}>Core i9-12900K (12th Gen Alder Lake)</option>
+                    <option value="i9-11900K" {% if desktop_detailsx.processor == 'i9-11900K' %}selected{% endif %}>Core i9-11900K (11th Gen Rocket Lake)</option>
+                    <option value="i9-10900K" {% if desktop_detailsx.processor == 'i9-10900K' %}selected{% endif %}>Core i9-10900K (10th Gen Comet Lake)</option>
+                  </optgroup>
+
+                  <optgroup label="Core i7 (Desktop)">
+                    <option value="i7-14700K" {% if desktop_detailsx.processor == 'i7-14700K' %}selected{% endif %}>Core i7-14700K (14th Gen)</option>
+                    <option value="i7-13700K" {% if desktop_detailsx.processor == 'i7-13700K' %}selected{% endif %}>Core i7-13700K (13th Gen)</option>
+                    <option value="i7-12700K" {% if desktop_detailsx.processor == 'i7-12700K' %}selected{% endif %}>Core i7-12700K (12th Gen)</option>
+                    <option value="i7-11700K" {% if desktop_detailsx.processor == 'i7-11700K' %}selected{% endif %}>Core i7-11700K (11th Gen)</option>
+                  </optgroup>
+
+                  <optgroup label="Core i5 (Desktop)">
+                    <option value="i5-14600K" {% if desktop_detailsx.processor == 'i5-14600K' %}selected{% endif %}>Core i5-14600K (14th Gen)</option>
+                    <option value="i5-13600K" {% if desktop_detailsx.processor == 'i5-13600K' %}selected{% endif %}>Core i5-13600K (13th Gen)</option>
+                    <option value="i5-12600K" {% if desktop_detailsx.processor == 'i5-12600K' %}selected{% endif %}>Core i5-12600K (12th Gen)</option>
+                    <option value="i5-11600K" {% if desktop_detailsx.processor == 'i5-11600K' %}selected{% endif %}>Core i5-11600K (11th Gen)</option>
+                  </optgroup>
+
+                    </select>
                 </div>
               </div>
               <div class="col-md-4">
@@ -552,6 +578,77 @@
   });
 </script> 
 
+<script>
+$(function () {
+  // Helper: attach a duplicate checker to an input
+  function attachDuplicateChecker(selector, category) {
+    var $input = $(selector);
+    if (!$input.length) return; // skip if field isn't on this page
+
+    var $form = $input.closest('form');
+
+    function notify(msg, type) {
+      if (window.$ && $.notify) {
+        $.notify({ message: msg }, { type: type || 'danger' });
+      } else {
+        alert(msg);
+      }
+    }
+
+    function normalize(v) {
+      return (v || '').trim();
+    }
+
+    // Check once (returns a Promise<boolean>)
+    function checkOnce() {
+      var val = normalize($input.val());
+      if (!val) {
+        $input.removeClass('is-invalid is-valid');
+        return Promise.resolve(false);
+      }
+      return $.get("{% url 'check_serial_no' %}", { serial: val, category: category })
+        .then(function (data) {
+          var dup = !!(data && data.exists);
+          if (dup) {
+            $input.addClass('is-invalid').removeClass('is-valid');
+            notify("❌ " + category + " SN '" + val + "' already exists.", 'danger');
+          } else {
+            $input.addClass('is-valid').removeClass('is-invalid');
+          }
+          return dup;
+        })
+        .catch(function () { return false; });
+    }
+
+    // Run on blur
+    $input.on('blur', function () { checkOnce(); });
+
+    // Hard block on submit if duplicate
+    $form.on('submit', function (e) {
+      // only gate if the input is visible/enabled on this form
+      if (!$input.is(':visible') || $input.is(':disabled')) return;
+
+      e.preventDefault();
+      checkOnce().then(function (isDup) {
+        if (isDup) {
+          $input.focus();
+        } else {
+          // allow form to continue after async check passes
+          $form.off('submit'); 
+          $form.trigger('submit');
+        }
+      });
+    });
+  }
+
+  // Attach to your known IDs (adjust if your inputs use different IDs)
+  attachDuplicateChecker('#desktop_serial_no', 'Desktop');
+  attachDuplicateChecker('#monitor_sn', 'Monitor');
+  attachDuplicateChecker('#keyboard_sn', 'Keyboard');
+  attachDuplicateChecker('#mouse_sn', 'Mouse'); // optional; runs only if not empty
+  attachDuplicateChecker('#ups_sn', 'UPS');
+});
+</script>
 
 {% endblock %}
 

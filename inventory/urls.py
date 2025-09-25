@@ -145,6 +145,8 @@ urlpatterns = [
     path("account/profile/regenerate-qr/", views.regenerate_user_qr, name="regenerate_user_qr"),
     path("u/<uuid:token>/", views.user_assets_public, name="user_assets_public"),
 
+    path('check_serial_no/', views.check_serial_no, name='check_serial_no'),
+
 
 
 

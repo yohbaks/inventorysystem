@@ -52,8 +52,46 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
+
+
+from django.db.models.functions import Upper, Trim
+from django.db.models import F
+from django.urls import NoReverseMatch
+
 
 ##############################################################################
+def check_serial_no(request):
+    serial = (request.GET.get('serial') or '').strip()
+    category = (request.GET.get('category') or '').strip()
+
+    # quick exit if missing
+    if not serial or not category:
+        return JsonResponse({'exists': False})
+
+    serial_norm = serial.upper()
+
+    # Map model + field by category
+    model_map = {
+        "Desktop": (DesktopDetails, "serial_no"),
+        "Monitor": (MonitorDetails, "monitor_sn_db"),
+        "Keyboard": (KeyboardDetails, "keyboard_sn_db"),
+        "Mouse": (MouseDetails, "mouse_sn_db"),
+        "UPS": (UPSDetails, "ups_sn_db"),
+    }
+    Model, field_name = model_map.get(category, (None, None))
+    if not Model:
+        return JsonResponse({'exists': False})
+
+    # Case/whitespace-insensitive existence check
+    exists = Model.objects.annotate(
+        sn_norm=Upper(Trim(F(field_name)))
+    ).filter(sn_norm=serial_norm).exists()
+
+    return JsonResponse({'exists': exists})
+
+
+
 def salvage_monitor_logic(monitor, new_package=None, notes=None):
     # Ensure uniqueness by monitor_sn
     salvaged_monitor, created = SalvagedMonitor.objects.get_or_create(
@@ -1151,42 +1189,85 @@ def add_desktop_package_with_details(request):
         'employees': employees
     }
 
-    if request.method == 'POST':
-        print("=== FORM DATA ===")
-        for key, value in request.POST.items():
-            print(f"{key}: {value}")
+    # small helper for normalization (case + whitespace)
+    def normalize_sn(value):
+        v = (value or "").strip()
+        return v.upper() if v else ""
 
+    # dynamic duplicate checker that does not require *_sn_norm fields
+    def sn_exists(model, field_name, serial_value):
+        norm = normalize_sn(serial_value)
+        if not norm:
+            return False
+        return model.objects.annotate(
+            sn_norm=Upper(Trim(F(field_name)))
+        ).filter(sn_norm=norm).exists()
+
+    # brand helper: returns None if empty, instead of raising
+    def get_brand_or_none(field_name):
+        brand_id = request.POST.get(field_name)
+        if brand_id and brand_id.isdigit():
+            return Brand.objects.filter(id=brand_id).first()
+        return None
+
+    if request.method == 'POST':
+        # keep what the user typed so we can re-render if needed
         context['post_data'] = request.POST
+
+        # collect all raw inputs once
+        desktop_sn   = request.POST.get('desktop_serial_no')
+        computer_name = request.POST.get('computer_name_input')
+
+        monitor_sn   = request.POST.get('monitor_sn')
+        keyboard_sn  = request.POST.get('keyboard_sn')
+        mouse_sn     = request.POST.get('mouse_sn')     # optional
+        ups_sn       = request.POST.get('ups_sn')
+
+        # Early validation (so the user gets fast feedback)
+        errors = []
+        if not desktop_sn:
+            errors.append("Desktop serial number is required.")
+        if not computer_name:
+            errors.append("Computer name is required.")
+        if not request.POST.get('desktop_brand_name'):
+            errors.append("Please select a desktop brand.")
+
+        # Duplicate checks (case + whitespace insensitive)
+        if desktop_sn and sn_exists(DesktopDetails, 'serial_no', desktop_sn):
+            errors.append(f"Desktop SN '{desktop_sn}' already exists.")
+        if monitor_sn and sn_exists(MonitorDetails, 'monitor_sn_db', monitor_sn):
+            errors.append(f"Monitor SN '{monitor_sn}' already exists.")
+        if keyboard_sn and sn_exists(KeyboardDetails, 'keyboard_sn_db', keyboard_sn):
+            errors.append(f"Keyboard SN '{keyboard_sn}' already exists.")
+        # mouse serial is optional; only check if provided
+        if mouse_sn and sn_exists(MouseDetails, 'mouse_sn_db', mouse_sn):
+            errors.append(f"Mouse SN '{mouse_sn}' already exists.")
+        if ups_sn and sn_exists(UPSDetails, 'ups_sn_db', ups_sn):
+            errors.append(f"UPS SN '{ups_sn}' already exists.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, f"❌ {e}")
+            # re-render the form with previous data + messages
+            return render(request, 'add_desktop_package_with_details.html', context)
+
         try:
             with transaction.atomic():
-                def safe_get_brand(field_name):
-                    brand_id = request.POST.get(field_name)
-                    if not brand_id or not brand_id.isdigit():
-                        raise ValueError(f"Missing or invalid brand ID for {field_name}")
-                    return get_object_or_404(Brand, id=brand_id)
+                # optional brands (won’t explode if blank)
+                desktop_brand = get_brand_or_none('desktop_brand_name')
+                monitor_brand = get_brand_or_none('monitor_brand')
+                keyboard_brand = get_brand_or_none('keyboard_brand')
+                mouse_brand = get_brand_or_none('mouse_brand')
+                ups_brand = get_brand_or_none('ups_brand')
 
-                def safe_get_employee(field_name):
-                    emp_id = request.POST.get(field_name)
-                    if emp_id and emp_id.isdigit():
-                        return get_object_or_404(Employee, id=emp_id)
-                    return None
-
+                # create the container first
                 desktop_package = Desktop_Package.objects.create(is_disposed=False)
 
-                # Foreign Keys
-                enduser = safe_get_employee('enduser_input')
-                assetowner = safe_get_employee('assetowner_input')
-                desktop_brand = safe_get_brand('desktop_brand_name')
-                monitor_brand = safe_get_brand('monitor_brand')
-                keyboard_brand = safe_get_brand('keyboard_brand')
-                mouse_brand = safe_get_brand('mouse_brand')
-                ups_brand = safe_get_brand('ups_brand')
-
-                # Desktop
-                desktop_details = DesktopDetails.objects.create(
+                # DESKTOP
+                DesktopDetails.objects.create(
                     desktop_package=desktop_package,
-                    serial_no=request.POST.get('desktop_serial_no'),
-                    computer_name=request.POST.get('computer_name_input'),
+                    serial_no=desktop_sn,
+                    computer_name=computer_name,
                     brand_name=desktop_brand,
                     model=request.POST.get('desktop_model'),
                     processor=request.POST.get('desktop_processor'),
@@ -1197,30 +1278,30 @@ def add_desktop_package_with_details(request):
                     desktop_OS=request.POST.get('desktop_OS'),
                     desktop_Office=request.POST.get('desktop_Office'),
                     desktop_OS_keys=request.POST.get('desktop_OS_keys'),
-                    desktop_Office_keys=request.POST.get('desktop_Office_keys')
+                    desktop_Office_keys=request.POST.get('desktop_Office_keys'),
                 )
 
-                # Monitor
+                # MONITOR
                 MonitorDetails.objects.create(
                     desktop_package=desktop_package,
-                    monitor_sn_db=request.POST.get('monitor_sn'),
+                    monitor_sn_db=monitor_sn,
                     monitor_brand_db=monitor_brand,
                     monitor_model_db=request.POST.get('monitor_model'),
                     monitor_size_db=request.POST.get('monitor_size')
                 )
 
-                # Keyboard
+                # KEYBOARD
                 KeyboardDetails.objects.create(
                     desktop_package=desktop_package,
-                    keyboard_sn_db=request.POST.get('keyboard_sn'),
+                    keyboard_sn_db=keyboard_sn,
                     keyboard_brand_db=keyboard_brand,
                     keyboard_model_db=request.POST.get('keyboard_model')
                 )
 
-                # Mouse
+                # MOUSE (serial can be empty)
                 MouseDetails.objects.create(
                     desktop_package=desktop_package,
-                    mouse_sn_db=request.POST.get('mouse_sn'),
+                    mouse_sn_db=mouse_sn,
                     mouse_brand_db=mouse_brand,
                     mouse_model_db=request.POST.get('mouse_model')
                 )
@@ -1228,13 +1309,13 @@ def add_desktop_package_with_details(request):
                 # UPS
                 UPSDetails.objects.create(
                     desktop_package=desktop_package,
-                    ups_sn_db=request.POST.get('ups_sn'),
+                    ups_sn_db=ups_sn,
                     ups_brand_db=ups_brand,
                     ups_model_db=request.POST.get('ups_model'),
                     ups_capacity_db=request.POST.get('ups_capacity')
                 )
 
-                # Documents
+                # DOCUMENTS
                 DocumentsDetails.objects.create(
                     desktop_package=desktop_package,
                     docs_PAR=request.POST.get('par_number_input'),
@@ -1247,14 +1328,21 @@ def add_desktop_package_with_details(request):
                     docs_Status=request.POST.get('status_desktop_input')
                 )
 
-                # User
+                # USER LINKS
+                def get_employee_or_none(field_name):
+                    emp_id = request.POST.get(field_name)
+                    return Employee.objects.filter(id=emp_id).first() if (emp_id and emp_id.isdigit()) else None
+
+                enduser = get_employee_or_none('enduser_input')
+                assetowner = get_employee_or_none('assetowner_input')
+
                 UserDetails.objects.create(
                     desktop_package=desktop_package,
                     user_Enduser=enduser,
                     user_Assetowner=assetowner
                 )
 
-                # PM Schedule
+                # PM SCHEDULE (optional)
                 if enduser and enduser.employee_office_section:
                     for schedule in PMSectionSchedule.objects.filter(section=enduser.employee_office_section):
                         PMScheduleAssignment.objects.get_or_create(
@@ -1262,25 +1350,24 @@ def add_desktop_package_with_details(request):
                             pm_section_schedule=schedule
                         )
 
-                print("✅ SUCCESS: Equipment saved successfully.")
-                return redirect('success_add_page', desktop_id=desktop_package.id)
-                # return redirect('desktop_details_view', package_id=desktop_package.id)
-                
-                
+                messages.success(request, "✅ Desktop Package added successfully.")
 
+                # robust success redirect (supports differing route names)
+                try:
+                    return redirect('success_add_page', desktop_id=desktop_package.id)
+                except NoReverseMatch:
+                    try:
+                        return redirect('success_page')
+                    except NoReverseMatch:
+                        return redirect('desktop_details_view', package_id=desktop_package.id)
+
+        except IntegrityError as ie:
+            # if your DB has unique constraints, catch here and report nicely
+            messages.error(request, f"❌ Could not save: duplicate detected. Details: {ie}")
+            return render(request, 'add_desktop_package_with_details.html', context)
         except Exception as e:
-            print("❌ Exception occurred:")
-            traceback.print_exc()
-            return render(request, 'add_desktop_package_with_details.html', {
-                'error_message': str(e),
-                'desktop_brands': desktop_brands,
-                'keyboard_brands': keyboard_brands,
-                'mouse_brands': mouse_brands,
-                'monitor_brands': monitor_brands,
-                'ups_brands': ups_brands,
-                'employees': employees,
-                'post_data': request.POST
-            })
+            messages.error(request, f"❌ Exception: {str(e)}")
+            return render(request, 'add_desktop_package_with_details.html', context)
 
     return render(request, 'add_desktop_package_with_details.html', context)
 

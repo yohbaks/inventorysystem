@@ -14,7 +14,9 @@ import uuid
 
 # Create your models here.
 
-
+def normalize_sn(value: str | None) -> str | None:
+    v = (value or "").strip()
+    return v.upper() if v else None
 
 
 
@@ -63,6 +65,15 @@ class DesktopDetails(models.Model):
     
     
     serial_no = models.CharField(max_length=255)
+    serial_no_norm = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        from .utils_serials import normalize_sn
+        self.serial_no_norm = normalize_sn(self.serial_no)
+        super().save(*args, **kwargs)
+
     computer_name = models.CharField(max_length=255, unique=True, null=True)
     brand_name = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True) 
     model = models.CharField(max_length=255, null=True)
@@ -88,6 +99,15 @@ class DesktopDetails(models.Model):
 class MonitorDetails(models.Model):
     
     desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
+    monitor_sn_norm = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        from .utils_serials import normalize_sn
+        self.monitor_sn_norm = normalize_sn(self.monitor_sn_db)
+        super().save(*args, **kwargs)
+
     monitor_sn_db = models.CharField(max_length=255)
     monitor_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     monitor_model_db = models.CharField(max_length=255)
@@ -103,6 +123,16 @@ class MonitorDetails(models.Model):
 class KeyboardDetails(models.Model):
     
     desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
+    keyboard_sn_norm = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        from .utils_serials import normalize_sn
+        self.keyboard_sn_norm = normalize_sn(self.keyboard_sn_db)
+        super().save(*args, **kwargs)
+
+
     keyboard_sn_db = models.CharField(max_length=255)
     keyboard_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     keyboard_model_db = models.CharField(max_length=255)
@@ -117,6 +147,16 @@ class MouseDetails(models.Model):
     
     desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_db', on_delete=models.CASCADE)
     mouse_sn_db = models.CharField(max_length=255, null=True)
+    mouse_sn_norm = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        from .utils_serials import normalize_sn
+        self.mouse_sn_norm = normalize_sn(self.mouse_sn_db)
+        super().save(*args, **kwargs)
+
+
     mouse_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
     is_disposed = models.BooleanField(default=False)  # To indicate if the mouse is disposed
@@ -131,6 +171,15 @@ class UPSDetails(models.Model):
     
     desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
     ups_sn_db = models.CharField(max_length=255)
+    ups_sn_norm = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        from .utils_serials import normalize_sn
+        self.ups_sn_norm = normalize_sn(self.ups_sn_db)
+        super().save(*args, **kwargs)
+
     ups_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     ups_model_db = models.CharField(max_length=255)
     ups_capacity_db = models.CharField(max_length=255, null=True)
