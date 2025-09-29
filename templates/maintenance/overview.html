@@ -78,7 +78,9 @@
                       <select id="scheduleSelect" class="form-select" name="schedule_id" required>
                         <option value="">-- Select Schedule --</option>
                         {% for s in schedules %}
-                          <option value="{{ s.id }}" data-section="{{ s.section.name }}">
+                          <option value="{{ s.id }}" 
+                                  data-section="{{ s.section.name }}" 
+                                  data-quarter="{{ s.quarter_schedule.id }}">
                             {{ s.section.name }} — {{ s.quarter_schedule.get_quarter_display }} {{ s.quarter_schedule.year }} - (PM Schedule)
                           </option>
                         {% endfor %}
@@ -151,7 +153,7 @@
                       </span>
                     </td>
                     <td>{{ assignment.pm_section_schedule.section.name }}</td>
-                    <td>{{ assignment.computer_name }}</td>
+                    <td>{{ assignment.computer_name_display }}</td>
                     <td>{{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}</td>
                     <td>{{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}</td>
                     <td>
@@ -182,7 +184,6 @@
     </div>
   </div>
 </div>
-
 <script>
   $(document).ready(function () {
     // DataTables with per-column search
@@ -202,11 +203,16 @@
 
     $('#deviceTypeSelect').on('change', function () {
       $('.device-select').hide().find('select').prop('required', false);
+
       if (this.value === 'desktop') {
         $('#desktopWrapper').show().find('select').prop('required', true);
       } else if (this.value === 'laptop') {
         $('#laptopWrapper').show().find('select').prop('required', true);
       }
+
+      // reset schedules visibility
+      $('#scheduleSelect').val('');
+      $('#scheduleSelect option').show();
     });
 
     $('.clickable-row').on('click', function () {
@@ -214,17 +220,47 @@
       if (href) window.location.href = href;
     });
 
-    // Dynamic filtering for schedules based on selected desktop or laptop
+    // ---- Assigned quarters dict from backend (JSON) ----
+    var assignedQuarters = {};
+    try {
+      assignedQuarters = JSON.parse('{{ assigned_quarters_by_device_json|escapejs }}');
+    } catch (e) {
+      console.error("Failed to parse assigned_quarters_by_device_json:", e);
+      assignedQuarters = {};
+    }
+
+    // Filter schedules based on selected device + section + quarter
     $('#desktopSelect, #laptopSelect').on('change', function () {
-      var selectedSection = $(this).find(':selected').data('section');
+      var deviceType = (this.id === 'desktopSelect') ? 'desktop' : 'laptop';
+      var deviceId = $(this).val();
+      var selectedSection = $(this).find(':selected').data('section') || '';
+      var key = deviceType + '-' + deviceId;
+
+      // coerce assigned quarter IDs to strings for safe comparison
+      var assignedForDevice = (assignedQuarters[key] || []).map(String);
+
       $('#scheduleSelect option').each(function () {
-        var scheduleSection = $(this).data('section');
-        if (!scheduleSection || scheduleSection === selectedSection || $(this).val() === '') {
-          $(this).show();
-        } else {
-          $(this).hide();
+        var $opt = $(this);
+        if ($opt.val() === '') { $opt.show(); return; }
+
+        var scheduleSection = $opt.data('section') || '';
+        var quarterId = String($opt.data('quarter') || '');
+
+        var hide = false;
+
+        // hide if wrong section
+        if (selectedSection && scheduleSection && scheduleSection !== selectedSection) {
+          hide = true;
         }
+
+        // hide if already assigned for that quarter
+        if (deviceId && quarterId && assignedForDevice.includes(quarterId)) {
+          hide = true;
+        }
+
+        $opt.toggle(!hide);
       });
+
       $('#scheduleSelect').val('');
     });
   });

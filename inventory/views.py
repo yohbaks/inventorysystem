@@ -34,7 +34,7 @@ from docx import Document
 from docx2pdf import convert
 import pythoncom  # for Windows COM support (docx2pdf)
 from win32com.client import Dispatch  # Windows COM (docx2pdf)
-
+import json
 # Local models
 from inventory.models import (
     Desktop_Package, DesktopDetails, KeyboardDetails, MouseDetails, MonitorDetails,
@@ -2275,12 +2275,9 @@ def maintenance_history_view(request, desktop_id):
         'current_pm_schedule': current_pm_schedule,  # New table data
     })
 
-
 def maintenance_history_laptop(request, package_id):
-    # Get the laptop package
     laptop_package = get_object_or_404(LaptopPackage, pk=package_id)
 
-    # Completed maintenance history (linked by laptop_package)
     maintenance_history = (
         PreventiveMaintenance.objects
         .filter(laptop_package=laptop_package)
@@ -2288,10 +2285,8 @@ def maintenance_history_laptop(request, package_id):
         .order_by('date_accomplished')
     )
 
-    # Get the latest completed PM (if any)
     latest_pm = maintenance_history.last()
 
-    # Current (pending) PM assignments
     current_pm_schedule = PMScheduleAssignment.objects.filter(
         laptop_package=laptop_package
     ).select_related(
@@ -2307,7 +2302,7 @@ def maintenance_history_laptop(request, package_id):
         'maintenance_history': maintenance_history,
         'maintenance_records': maintenance_history,
         'pm': latest_pm,
-        'current_pm_schedule': current_pm_schedule,  # New table data
+        'current_pm_schedule': current_pm_schedule,
     })
 
 
@@ -2511,11 +2506,6 @@ def generate_pm_excel_report(request, pm_id):
     # Return the PDF file as download
     return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
 
-from django.db.models import Prefetch
-from .models import (
-    PMScheduleAssignment, Desktop_Package, DesktopDetails, LaptopDetails,
-    PMSectionSchedule, QuarterSchedule, OfficeSection, UserDetails
-)
 def pm_overview_view(request):
     pm_assignments = PMScheduleAssignment.objects.select_related(
         'desktop_package',
@@ -2524,15 +2514,27 @@ def pm_overview_view(request):
         'pm_section_schedule__section'
     ).all()
 
-    # Attach computer_name for each assignment (Desktop or Laptop)
+    # Attach display name for each assignment (Desktop or Laptop)
     for assignment in pm_assignments:
         if assignment.desktop_package:
             desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
-            assignment.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
+            assignment.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
         elif assignment.laptop_package:
-            assignment.computer_name = assignment.laptop_package.computer_name or "N/A"
+            ld = assignment.laptop_package.laptop_details.first()
+            assignment.computer_name_display = ld.computer_name if ld else "N/A"
         else:
-            assignment.computer_name = "N/A"
+            assignment.computer_name_display = "N/A"
+
+    # ✅ Build lookup for quarters already assigned
+    assigned_quarters_by_device = {}
+    for a in pm_assignments:
+        if a.is_completed:   # 👈 skip completed schedules
+            continue
+        qid = a.pm_section_schedule.quarter_schedule_id
+        if a.desktop_package_id:
+            assigned_quarters_by_device.setdefault(f"desktop-{a.desktop_package_id}", set()).add(qid)
+        if a.laptop_package_id:
+            assigned_quarters_by_device.setdefault(f"laptop-{a.laptop_package_id}", set()).add(qid)
 
     # ✅ Desktops list with user + section
     desktops = list(
@@ -2544,8 +2546,18 @@ def pm_overview_view(request):
         )
     )
     for desktop in desktops:
+        # attach computer name
         desktop_detail = DesktopDetails.objects.filter(desktop_package=desktop).first()
         desktop.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
+
+        # attach enduser and section
+        u = desktop.user_details.first()
+        desktop.section_name = (
+            u.user_Enduser.employee_office_section.name
+            if u and u.user_Enduser and u.user_Enduser.employee_office_section
+            else None
+        )
+        desktop.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
 
     # ✅ Laptops list with user + section
     laptops = list(
@@ -2557,13 +2569,16 @@ def pm_overview_view(request):
             'laptop_details'  # also grab specs
         )
     )
-
     for package in laptops:
-        laptop_detail = package.laptop_details.first()
-        package.computer_name_display = laptop_detail.computer_name if laptop_detail else "N/A"
+        ld = package.laptop_details.first()
+        package.computer_name_display = ld.computer_name if ld else "N/A"
 
         u = package.user_details.first()
-        package.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
+        package.section_name = (
+            u.user_Enduser.employee_office_section.name
+            if u and u.user_Enduser and u.user_Enduser.employee_office_section
+            else None
+        )
         package.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
 
     # Schedules
@@ -2579,11 +2594,14 @@ def pm_overview_view(request):
     return render(request, 'maintenance/overview.html', {
         'pm_assignments': pm_assignments,
         'desktops': desktops,
-        'laptops': laptops,   # ✅ now with section + enduser
+        'laptops': laptops,
         'schedules': schedules,
         'schedules_by_section': schedules_by_section,
         'quarters': quarters,
         'sections': sections,
+        'assigned_quarters_by_device': {
+            k: list(v) for k, v in assigned_quarters_by_device.items()
+        },  # make JSON safe for JS
     })
 
 
@@ -3300,35 +3318,50 @@ def laptop_list(request):
 
 @login_required
 def laptop_details_view(request, package_id):
-    # Fetch LaptopPackage
-    laptop_package = get_object_or_404(LaptopPackage, id=package_id)
+    # Get the laptop package
+    laptop_package = get_object_or_404(LaptopPackage, pk=package_id)
 
-    # Current laptop details
-    laptop_details = LaptopDetails.objects.filter(
-        laptop_package=laptop_package, is_disposed=False
-    ).first()
-
-    # Documents
+    # Related details
+    laptop_details = LaptopDetails.objects.filter(laptop_package=laptop_package, is_disposed=False).first()
+    user_details = UserDetails.objects.filter(laptop_package=laptop_package).first()
     documents_details = DocumentsDetails.objects.filter(laptop_package=laptop_package).first()
+    disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package=laptop_package).order_by('-date_disposed')
 
-    # User details
-    user_details = UserDetails.objects.filter(laptop_package=laptop_package).select_related(
-        "user_Enduser__employee_office_section",
-        "user_Assetowner"
-    ).first()
 
-    # Disposal history
-    disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package=laptop_package)
+    # PM assignments for this laptop
+    pm_assignments = PMScheduleAssignment.objects.filter(laptop_package=laptop_package).select_related(
+        'pm_section_schedule__quarter_schedule',
+        'pm_section_schedule__section'
+    )
 
-    employees = Employee.objects.all()
+    # ✅ Preventive Maintenance history
+    maintenance_history = (
+        PreventiveMaintenance.objects
+        .filter(laptop_package=laptop_package)
+        .select_related('pm_schedule_assignment__pm_section_schedule__quarter_schedule')
+        .order_by('date_accomplished')
+    )
 
-    return render(request, "laptop/laptop_details_view.html", {
-        "laptop_package": laptop_package,
-        "laptop_details": laptop_details,
-        "documents_details": documents_details,
-        "user_details": user_details,
-        "disposed_laptops": disposed_laptops,
-        "employees": employees,
+    # ✅ Current (pending) PM assignments
+    current_pm_schedule = PMScheduleAssignment.objects.filter(
+        laptop_package=laptop_package
+    ).select_related(
+        'pm_section_schedule__quarter_schedule',
+        'pm_section_schedule__section'
+    ).order_by(
+        'pm_section_schedule__quarter_schedule__year',
+        'pm_section_schedule__quarter_schedule__quarter'
+    )
+
+    return render(request, 'laptop/laptop_details_view.html', {
+        'laptop_package': laptop_package,
+        'laptop_details': laptop_details,
+        'user_details': user_details,
+        'documents_details': documents_details,
+        'disposed_laptops': disposed_laptops,
+        'pm_assignments': pm_assignments,
+        'current_pm_schedule': current_pm_schedule,
+        'maintenance_records': maintenance_history,   # ✅ now available in template
     })
 
 @login_required
