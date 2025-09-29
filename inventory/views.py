@@ -2514,18 +2514,19 @@ def pm_overview_view(request):
         'pm_section_schedule__section'
     ).all()
 
-    # Attach a display computer name (do NOT mutate model properties)
-    for a in pm_assignments:
-        if a.desktop_package_id:
-            d = DesktopDetails.objects.filter(desktop_package=a.desktop_package_id).first()
-            a.computer_name_display = d.computer_name if d else "N/A"
-        elif a.laptop_package_id:
-            # LaptopPackage has a @property computer_name; read-only, so just read it
-            a.computer_name_display = a.laptop_package.computer_name or "N/A"
+    # Attach computer_name_display for assignments
+    for assignment in pm_assignments:
+        if assignment.desktop_package:
+            desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
+            assignment.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
+        elif assignment.laptop_package:
+            # laptop_details may have multiple rows; take first
+            laptop_detail = assignment.laptop_package.laptop_details.first()
+            assignment.computer_name_display = laptop_detail.computer_name if laptop_detail else "N/A"
         else:
-            a.computer_name_display = "N/A"
+            assignment.computer_name_display = "N/A"
 
-    # Build: which quarters are already assigned per device
+    # ✅ Build lookup for quarters already assigned (desktop + laptop)
     assigned_quarters_by_device = {}
     for a in pm_assignments:
         qid = a.pm_section_schedule.quarter_schedule_id
@@ -2536,12 +2537,7 @@ def pm_overview_view(request):
             key = f"laptop-{a.laptop_package_id}"
             assigned_quarters_by_device.setdefault(key, set()).add(qid)
 
-    # JSON (convert sets to lists)
-    assigned_quarters_by_device_json = json.dumps(
-        {k: sorted(list(v)) for k, v in assigned_quarters_by_device.items()}
-    )
-
-    # Desktops with end-user & section
+    # ✅ Desktops list with user + section
     desktops = list(
         Desktop_Package.objects.prefetch_related(
             Prefetch(
@@ -2550,17 +2546,14 @@ def pm_overview_view(request):
             )
         )
     )
-    for d in desktops:
-        dd = DesktopDetails.objects.filter(desktop_package=d.id).first()
-        d.computer_name_display = dd.computer_name if dd else "N/A"
-        u = d.user_details.first()
-        d.section_name = (
-            u.user_Enduser.employee_office_section.name
-            if u and u.user_Enduser and u.user_Enduser.employee_office_section else None
-        )
-        d.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
+    for desktop in desktops:
+        desktop_detail = DesktopDetails.objects.filter(desktop_package=desktop).first()
+        desktop.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
+        u = desktop.user_details.first()
+        desktop.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser and u.user_Enduser.employee_office_section else None
+        desktop.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
 
-    # Laptops with end-user & section
+    # ✅ Laptops list with user + section
     laptops = list(
         LaptopPackage.objects.prefetch_related(
             Prefetch(
@@ -2570,17 +2563,19 @@ def pm_overview_view(request):
             'laptop_details'
         )
     )
-    for lp in laptops:
-        ld = lp.laptop_details.first()
-        lp.computer_name_display = ld.computer_name if ld else "N/A"
-        u = lp.user_details.first()
-        lp.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
-        lp.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
+    for package in laptops:
+        laptop_detail = package.laptop_details.first()
+        package.computer_name_display = laptop_detail.computer_name if laptop_detail else "N/A"
+        u = package.user_details.first()
+        package.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
+        package.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
 
+    # Schedules
     schedules = PMSectionSchedule.objects.select_related('section', 'quarter_schedule')
     schedules_by_section = {}
     for s in schedules:
-        schedules_by_section.setdefault(s.section.name if s.section else 'Other', []).append(s)
+        section_name = s.section.name if s.section else 'Other'
+        schedules_by_section.setdefault(section_name, []).append(s)
 
     quarters = QuarterSchedule.objects.all().order_by('-year', 'quarter')
     sections = OfficeSection.objects.all()
@@ -2593,7 +2588,9 @@ def pm_overview_view(request):
         'schedules_by_section': schedules_by_section,
         'quarters': quarters,
         'sections': sections,
-        'assigned_quarters_by_device_json': assigned_quarters_by_device_json,  # ← send JSON
+        'assigned_quarters_by_device_json': json.dumps(
+            {k: sorted(list(v)) for k, v in assigned_quarters_by_device.items()}
+        ),
     })
 
 

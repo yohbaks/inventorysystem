@@ -61,11 +61,11 @@
                         {% for l in laptops %}
                           {% if l.enduser_name and l.section_name %}
                             <option value="{{ l.id }}" data-section="{{ l.section_name }}">
-                              {{ l.computer_name }} — {{ l.enduser_name }} — {{ l.section_name }}
+                              {{ l.computer_name_display }} — {{ l.enduser_name }} — {{ l.section_name }}
                             </option>
                           {% else %}
                             <option value="{{ l.id }}">
-                              {{ l.computer_name }} — {{ l.brand }} {{ l.model }}
+                              {{ l.computer_name_display|default:"[No Computer Name]" }}
                             </option>
                           {% endif %}
                         {% endfor %}
