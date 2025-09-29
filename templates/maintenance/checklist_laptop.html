@@ -10,13 +10,13 @@
         <div class="card shadow-lg animate__animated animate__fadeIn">
           <div class="card-header bg-primary text-white">
             <div class="card-head-row">
-              <div class="card-title">🛠 Preventive Maintenance Checklist</div>
+              <div class="card-title">💻 Laptop Preventive Maintenance Checklist</div>
               <div class="card-tools">
-                <a href="{% url 'maintenance_history' desktop.id %}" class="btn btn-label-light btn-round btn-sm">
+                <a href="{% url 'maintenance_history_laptop' laptop.id %}" class="btn btn-label-light btn-round btn-sm">
                   <span class="btn-label">
                     <i class="fa fa-arrow-left"></i>
                   </span>
-                  Back to History
+                  Back to Laptop History
                 </a>
               </div>
             </div>
@@ -114,13 +114,19 @@
 
   quarterSelect.addEventListener("change", function () {
     const quarterId = this.value;
-    fetch(`/maintenance/get_schedule_dates/${quarterId}/`)
+    const sectionId = "{{ section_id|default:0 }}";
+
+    fetch(`/maintenance/get_schedule_dates/${quarterId}/${sectionId}/`)
       .then(response => response.json())
       .then(data => {
-        dateInput.min = data.start_date;
-        dateInput.max = data.end_date;
-        dateInput.value = "";
-        dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
+        if (data.start_date && data.end_date) {
+          dateInput.min = data.start_date;
+          dateInput.max = data.end_date;
+          dateInput.value = "";
+          dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
+        } else {
+          dateRangeInfo.innerText = "No schedule found for this section and quarter.";
+        }
       })
       .catch(() => {
         dateInput.min = "";

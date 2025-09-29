@@ -9,7 +9,7 @@
         <div class="card shadow-sm rounded">
           <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Preventive Maintenance Overview Summary</h4>
-            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Assign Desktop to Schedule</button>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Assign Device to Schedule</button>
           </div>
 
           <!-- Add Schedule Modal -->
@@ -19,29 +19,60 @@
                 {% csrf_token %}
                 <div class="modal-content">
                   <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Assign Desktop to Schedule</h5>
+                    <h5 class="modal-title">Assign Device to Schedule</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
+                    
+                    <!-- Device Type -->
                     <div class="mb-3">
+                      <label class="form-label">Device Type</label>
+                      <select id="deviceTypeSelect" class="form-select" name="device_type" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="desktop">Desktop</option>
+                        <option value="laptop">Laptop</option>
+                      </select>
+                    </div>
+
+                    <!-- Desktop Dropdown -->
+                    <div class="mb-3 device-select" id="desktopWrapper" style="display:none;">
                       <label class="form-label">Desktop Package</label>
-                      <select id="desktopSelect" class="form-select" name="desktop_package_id" required>
+                      <select id="desktopSelect" class="form-select" name="desktop_package_id">
                         <option value="">-- Select Desktop --</option>
                         {% for d in desktops %}
-                          {% with d.user_details.first as u %}
-                            {% if u and u.user_Enduser %}
-                              <option value="{{ d.id }}" data-section="{{ u.user_Enduser.employee_office_section.name }}">
-                                {{ d.computer_name_display }} — {{ u.user_Enduser.full_name }} — {{ u.user_Enduser.employee_office_section.name }}
-                              </option>
-                            {% else %}
-                              <option value="{{ d.id }}">
-                                {{ d.computer_name_display|default:"[No Computer Name]" }}
-                              </option>
-                            {% endif %}
-                          {% endwith %}
+                          {% if d.enduser_name and d.section_name %}
+                            <option value="{{ d.id }}" data-section="{{ d.section_name }}">
+                              {{ d.computer_name_display }} — {{ d.enduser_name }} — {{ d.section_name }}
+                            </option>
+                          {% else %}
+                            <option value="{{ d.id }}">
+                              {{ d.computer_name_display|default:"[No Computer Name]" }}
+                            </option>
+                          {% endif %}
                         {% endfor %}
                       </select>
                     </div>
+
+                    <!-- Laptop Dropdown -->
+                    <div class="mb-3 device-select" id="laptopWrapper" style="display:none;">
+                      <label class="form-label">Laptop</label>
+                      <select id="laptopSelect" class="form-select" name="laptop_id">
+                        <option value="">-- Select Laptop --</option>
+                        {% for l in laptops %}
+                          {% if l.enduser_name and l.section_name %}
+                            <option value="{{ l.id }}" data-section="{{ l.section_name }}">
+                              {{ l.computer_name }} — {{ l.enduser_name }} — {{ l.section_name }}
+                            </option>
+                          {% else %}
+                            <option value="{{ l.id }}">
+                              {{ l.computer_name }} — {{ l.brand }} {{ l.model }}
+                            </option>
+                          {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+
+                    <!-- Schedule -->
                     <div class="mb-3">
                       <label class="form-label">Schedule</label>
                       <select id="scheduleSelect" class="form-select" name="schedule_id" required>
@@ -54,6 +85,7 @@
                       </select>
                     </div>
                   </div>
+
                   <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Assign</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -107,11 +139,16 @@
                 </thead>
                 <tbody>
                   {% for assignment in pm_assignments %}
-                  <tr class="clickable-row" data-href="{% url 'maintenance_history' assignment.desktop_package.id %}">
+                  <tr class="clickable-row"
+                      {% if assignment.desktop_package %}
+                        data-href="{% url 'maintenance_history' assignment.desktop_package.id %}"
+                      {% elif assignment.laptop_package %}
+                        data-href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}"
+                      {% endif %}>
                     <td>
                       <span class="badge bg-info">
-                          {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                        </span>
+                        {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                      </span>
                     </td>
                     <td>{{ assignment.pm_section_schedule.section.name }}</td>
                     <td>{{ assignment.computer_name }}</td>
@@ -119,13 +156,19 @@
                     <td>{{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}</td>
                     <td>
                       {% if assignment.is_completed %}
-                      <span class="badge bg-success">Completed</span>
+                        <span class="badge bg-success">Completed</span>
                       {% else %}
-                      <span class="badge bg-warning text-dark">Pending</span>
+                        <span class="badge bg-warning text-dark">Pending</span>
                       {% endif %}
                     </td>
                     <td class="text-center">
-                      <a href="{% url 'maintenance_history' assignment.desktop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                      {% if assignment.desktop_package %}
+                        <a href="{% url 'maintenance_history' assignment.desktop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                      {% elif assignment.laptop_package %}
+                        <a href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                      {% else %}
+                        <span class="text-muted">N/A</span>
+                      {% endif %}
                     </td>
                   </tr>
                   {% endfor %}
@@ -157,13 +200,22 @@
       });
     });
 
+    $('#deviceTypeSelect').on('change', function () {
+      $('.device-select').hide().find('select').prop('required', false);
+      if (this.value === 'desktop') {
+        $('#desktopWrapper').show().find('select').prop('required', true);
+      } else if (this.value === 'laptop') {
+        $('#laptopWrapper').show().find('select').prop('required', true);
+      }
+    });
+
     $('.clickable-row').on('click', function () {
       const href = $(this).data('href');
       if (href) window.location.href = href;
     });
 
-    // Dynamic filtering for schedules based on selected desktop
-    $('#desktopSelect').on('change', function () {
+    // Dynamic filtering for schedules based on selected desktop or laptop
+    $('#desktopSelect, #laptopSelect').on('change', function () {
       var selectedSection = $(this).find(':selected').data('section');
       $('#scheduleSelect option').each(function () {
         var scheduleSection = $(this).data('section');

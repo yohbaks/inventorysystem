@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header d-flex justify-content-between align-items-center">
+      <h3 class="fw-bold mb-0 text-danger">
+        <i class="fas fa-trash-alt me-2"></i> Disposed Laptops
+      </h3>
+      <a href="{% url 'add_desktop_package_with_details' %}?type=laptop" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i> Add Laptop
+      </a>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table id="disposedLaptopsTable" class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>Computer Name</th>
+                <th>Serial No</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Asset Owner</th>
+                <th>Reason</th>
+                <th>Date Disposed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for laptop in disposed_laptops %}
+                <tr class="table-danger">
+                  <td>
+                    {% if laptop.laptop and laptop.laptop.laptop_package %}
+                      {{ laptop.laptop.laptop_package.computer_name }}
+                    {% else %}
+                      N/A
+                    {% endif %}
+                  </td>
+                  <td>{{ laptop.serial_no|default:"N/A" }}</td>
+                  <td>{{ laptop.brand_name|default:"N/A" }}</td>
+                  <td>{{ laptop.model|default:"N/A" }}</td>
+                  <td>{{ laptop.asset_owner|default:"N/A" }}</td>
+                  <td>{{ laptop.reason|default:"N/A" }}</td>
+                  <td>{{ laptop.date_disposed|date:"Y-m-d H:i" }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center text-muted">No disposed laptops found.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    $('#disposedLaptopsTable').DataTable({
+      pageLength: 10,
+      responsive: true,
+      order: [[6, "desc"]],
+      language: {
+        search: "_INPUT_",
+        searchPlaceholder: "Search disposed laptops..."
+      }
+    });
+  });
+</script>
+{% endblock %}

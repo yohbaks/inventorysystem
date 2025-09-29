@@ -44,7 +44,7 @@ from inventory.models import (
     SalvagedMonitorHistory, SalvagedKeyboardHistory, SalvagedMouseHistory, SalvagedUPSHistory,
     EndUserChangeHistory, AssetOwnerChangeHistory,
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
-    QuarterSchedule, PMSectionSchedule, OfficeSection, Profile 
+    QuarterSchedule, PMSectionSchedule, OfficeSection, Profile, LaptopPackage, LaptopDetails, DisposedLaptop, 
 )
 
 from django.contrib.auth.decorators import login_required
@@ -78,6 +78,7 @@ def check_serial_no(request):
         "Keyboard": (KeyboardDetails, "keyboard_sn_db"),
         "Mouse": (MouseDetails, "mouse_sn_db"),
         "UPS": (UPSDetails, "ups_sn_db"),
+        "Laptop": (LaptopDetails, "laptop_sn_db"),
     }
     Model, field_name = model_map.get(category, (None, None))
     if not Model:
@@ -270,9 +271,13 @@ def salvage_ups_logic(ups, new_package=None, notes=None):
 
 
 @login_required  
-def success_page(request, desktop_id):
-    return render(request, 'success_add.html', {'desktop_id': desktop_id})  # Render the success page template
-    
+
+def success_page(request, package_id):
+    equipment_type = request.GET.get("type", "Unknown")
+    return render(request, "success_add.html", {
+        "package_id": package_id,
+        "equipment_type": equipment_type,
+    })
     
 
 
@@ -1171,7 +1176,6 @@ def disposed_mice(request):
     return render(request, 'disposed_mice.html', {'disposed_mice': disposed_mice})
 
 
-
 def add_desktop_package_with_details(request):
     employees = Employee.objects.all()
     desktop_brands = Brand.objects.filter(is_desktop=True)
@@ -1179,6 +1183,7 @@ def add_desktop_package_with_details(request):
     mouse_brands = Brand.objects.filter(is_mouse=True)
     monitor_brands = Brand.objects.filter(is_monitor=True)
     ups_brands = Brand.objects.filter(is_ups=True)
+    laptop_brands = Brand.objects.filter(is_desktop=True)  # ⚠️ adjust if you have is_laptop flag
 
     context = {
         'desktop_brands': desktop_brands,
@@ -1186,15 +1191,14 @@ def add_desktop_package_with_details(request):
         'mouse_brands': mouse_brands,
         'monitor_brands': monitor_brands,
         'ups_brands': ups_brands,
-        'employees': employees
+        'laptop_brands': laptop_brands,
+        'employees': employees,
     }
 
-    # small helper for normalization (case + whitespace)
     def normalize_sn(value):
         v = (value or "").strip()
         return v.upper() if v else ""
 
-    # dynamic duplicate checker that does not require *_sn_norm fields
     def sn_exists(model, field_name, serial_value):
         norm = normalize_sn(serial_value)
         if not norm:
@@ -1203,173 +1207,292 @@ def add_desktop_package_with_details(request):
             sn_norm=Upper(Trim(F(field_name)))
         ).filter(sn_norm=norm).exists()
 
-    # brand helper: returns None if empty, instead of raising
     def get_brand_or_none(field_name):
         brand_id = request.POST.get(field_name)
         if brand_id and brand_id.isdigit():
             return Brand.objects.filter(id=brand_id).first()
         return None
 
+    def get_employee_or_none(field_name):
+        emp_id = request.POST.get(field_name)
+        return Employee.objects.filter(id=emp_id).first() if (emp_id and emp_id.isdigit()) else None
+
     if request.method == 'POST':
-        # keep what the user typed so we can re-render if needed
         context['post_data'] = request.POST
-
-        # collect all raw inputs once
-        desktop_sn   = request.POST.get('desktop_serial_no')
-        computer_name = request.POST.get('computer_name_input')
-
-        monitor_sn   = request.POST.get('monitor_sn')
-        keyboard_sn  = request.POST.get('keyboard_sn')
-        mouse_sn     = request.POST.get('mouse_sn')     # optional
-        ups_sn       = request.POST.get('ups_sn')
-
-        # Early validation (so the user gets fast feedback)
+        equipment_type = request.POST.get("name_input")
         errors = []
-        if not desktop_sn:
-            errors.append("Desktop serial number is required.")
-        if not computer_name:
-            errors.append("Computer name is required.")
-        if not request.POST.get('desktop_brand_name'):
-            errors.append("Please select a desktop brand.")
 
-        # Duplicate checks (case + whitespace insensitive)
-        if desktop_sn and sn_exists(DesktopDetails, 'serial_no', desktop_sn):
-            errors.append(f"Desktop SN '{desktop_sn}' already exists.")
-        if monitor_sn and sn_exists(MonitorDetails, 'monitor_sn_db', monitor_sn):
-            errors.append(f"Monitor SN '{monitor_sn}' already exists.")
-        if keyboard_sn and sn_exists(KeyboardDetails, 'keyboard_sn_db', keyboard_sn):
-            errors.append(f"Keyboard SN '{keyboard_sn}' already exists.")
-        # mouse serial is optional; only check if provided
-        if mouse_sn and sn_exists(MouseDetails, 'mouse_sn_db', mouse_sn):
-            errors.append(f"Mouse SN '{mouse_sn}' already exists.")
-        if ups_sn and sn_exists(UPSDetails, 'ups_sn_db', ups_sn):
-            errors.append(f"UPS SN '{ups_sn}' already exists.")
+        # ---------------- DESKTOP ----------------
+        if equipment_type == "Desktop":
+            desktop_sn = request.POST.get('desktop_serial_no')
+            computer_name = request.POST.get('computer_name_input')
+            desktop_processor = (request.POST.get('desktop_processor') or "").strip()
+            monitor_sn = request.POST.get('monitor_sn_db')
+            keyboard_sn = request.POST.get('keyboard_sn_db')
+            mouse_sn = request.POST.get('mouse_sn_db')
+            ups_sn = request.POST.get('ups_sn_db')
 
-        if errors:
-            for e in errors:
-                messages.error(request, f"❌ {e}")
-            # re-render the form with previous data + messages
-            return render(request, 'add_desktop_package_with_details.html', context)
+            # validations (unchanged from your original)
+            if not desktop_sn: errors.append("Desktop serial number is required.")
+            if not computer_name: errors.append("Computer name is required.")
+            if not request.POST.get('desktop_brand_name'): errors.append("Desktop brand is required.")
+            if not request.POST.get('desktop_model'): errors.append("Desktop model is required.")
+            if not desktop_processor or desktop_processor in ["---", "0", "None", "N/A"]:
+                errors.append("Processor is required.")
+            if not request.POST.get('desktop_memory'): errors.append("Desktop memory is required.")
+            if not request.POST.get('desktop_drive'): errors.append("Desktop drive is required.")
 
-        try:
-            with transaction.atomic():
-                # optional brands (won’t explode if blank)
-                desktop_brand = get_brand_or_none('desktop_brand_name')
-                monitor_brand = get_brand_or_none('monitor_brand')
-                keyboard_brand = get_brand_or_none('keyboard_brand')
-                mouse_brand = get_brand_or_none('mouse_brand')
-                ups_brand = get_brand_or_none('ups_brand')
+            # Monitor
+            if not monitor_sn: errors.append("Monitor serial number is required.")
+            if not request.POST.get('monitor_brand'): errors.append("Monitor brand is required.")
+            if not request.POST.get('monitor_model'): errors.append("Monitor model is required.")
+            if not request.POST.get('monitor_size'): errors.append("Monitor size is required.")
 
-                # create the container first
-                desktop_package = Desktop_Package.objects.create(is_disposed=False)
+            # Keyboard
+            if not keyboard_sn: errors.append("Keyboard serial number is required.")
+            if not request.POST.get('keyboard_brand'): errors.append("Keyboard brand is required.")
+            if not request.POST.get('keyboard_model'): errors.append("Keyboard model is required.")
 
-                # DESKTOP
-                DesktopDetails.objects.create(
-                    desktop_package=desktop_package,
-                    serial_no=desktop_sn,
-                    computer_name=computer_name,
-                    brand_name=desktop_brand,
-                    model=request.POST.get('desktop_model'),
-                    processor=request.POST.get('desktop_processor'),
-                    memory=request.POST.get('desktop_memory'),
-                    drive=request.POST.get('desktop_drive'),
-                    desktop_Graphics=request.POST.get('desktop_Graphics'),
-                    desktop_Graphics_Size=request.POST.get('desktop_Graphics_Size'),
-                    desktop_OS=request.POST.get('desktop_OS'),
-                    desktop_Office=request.POST.get('desktop_Office'),
-                    desktop_OS_keys=request.POST.get('desktop_OS_keys'),
-                    desktop_Office_keys=request.POST.get('desktop_Office_keys'),
-                )
+            # Mouse
+            if not mouse_sn: errors.append("Mouse serial number is required.")
+            if not request.POST.get('mouse_brand'): errors.append("Mouse brand is required.")
+            if not request.POST.get('mouse_model'): errors.append("Mouse model is required.")
 
-                # MONITOR
-                MonitorDetails.objects.create(
-                    desktop_package=desktop_package,
-                    monitor_sn_db=monitor_sn,
-                    monitor_brand_db=monitor_brand,
-                    monitor_model_db=request.POST.get('monitor_model'),
-                    monitor_size_db=request.POST.get('monitor_size')
-                )
+            # UPS
+            if not ups_sn: errors.append("UPS serial number is required.")
+            if not request.POST.get('ups_brand'): errors.append("UPS brand is required.")
+            if not request.POST.get('ups_model'): errors.append("UPS model is required.")
+            if not request.POST.get('ups_capacity'): errors.append("UPS capacity is required.")
 
-                # KEYBOARD
-                KeyboardDetails.objects.create(
-                    desktop_package=desktop_package,
-                    keyboard_sn_db=keyboard_sn,
-                    keyboard_brand_db=keyboard_brand,
-                    keyboard_model_db=request.POST.get('keyboard_model')
-                )
+            # Documents
+            if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
+            if not request.POST.get('property_number_input'): errors.append("Property Number is required.")
+            if not request.POST.get('acquisition_type_input'): errors.append("Acquisition type is required.")
+            if not request.POST.get('value_desktop_input'): errors.append("Value is required.")
+            if not request.POST.get('date_received_input'): errors.append("Date received is required.")
+            if not request.POST.get('date_inspected_input'): errors.append("Date inspected is required.")
+            if not request.POST.get('supplier_name_input'): errors.append("Supplier name is required.")
+            if not request.POST.get('status_desktop_input'): errors.append("Status is required.")
 
-                # MOUSE (serial can be empty)
-                MouseDetails.objects.create(
-                    desktop_package=desktop_package,
-                    mouse_sn_db=mouse_sn,
-                    mouse_brand_db=mouse_brand,
-                    mouse_model_db=request.POST.get('mouse_model')
-                )
+            # UserDetails
+            if not request.POST.get('enduser_input'): errors.append("End user is required.")
+            if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
 
-                # UPS
-                UPSDetails.objects.create(
-                    desktop_package=desktop_package,
-                    ups_sn_db=ups_sn,
-                    ups_brand_db=ups_brand,
-                    ups_model_db=request.POST.get('ups_model'),
-                    ups_capacity_db=request.POST.get('ups_capacity')
-                )
+            # Duplicate checks
+            if desktop_sn and sn_exists(DesktopDetails, 'serial_no', desktop_sn):
+                errors.append(f"Desktop SN '{desktop_sn}' already exists.")
+            if monitor_sn and sn_exists(MonitorDetails, 'monitor_sn_db', monitor_sn):
+                errors.append(f"Monitor SN '{monitor_sn}' already exists.")
+            if keyboard_sn and sn_exists(KeyboardDetails, 'keyboard_sn_db', keyboard_sn):
+                errors.append(f"Keyboard SN '{keyboard_sn}' already exists.")
+            if mouse_sn and sn_exists(MouseDetails, 'mouse_sn_db', mouse_sn):
+                errors.append(f"Mouse SN '{mouse_sn}' already exists.")
+            if ups_sn and sn_exists(UPSDetails, 'ups_sn_db', ups_sn):
+                errors.append(f"UPS SN '{ups_sn}' already exists.")
 
-                # DOCUMENTS
-                DocumentsDetails.objects.create(
-                    desktop_package=desktop_package,
-                    docs_PAR=request.POST.get('par_number_input'),
-                    docs_Propertyno=request.POST.get('property_number_input'),
-                    docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
-                    docs_Value=request.POST.get('value_desktop_input'),
-                    docs_Datereceived=request.POST.get('date_received_input'),
-                    docs_Dateinspected=request.POST.get('date_inspected_input'),
-                    docs_Supplier=request.POST.get('supplier_name_input'),
-                    docs_Status=request.POST.get('status_desktop_input')
-                )
+            if errors:
+                for e in errors: messages.error(request, f"❌ {e}")
+                return render(request, 'add_desktop_package_with_details.html', context)
 
-                # USER LINKS
-                def get_employee_or_none(field_name):
-                    emp_id = request.POST.get(field_name)
-                    return Employee.objects.filter(id=emp_id).first() if (emp_id and emp_id.isdigit()) else None
+            # save Desktop
+            try:
+                with transaction.atomic():
+                    desktop_brand = get_brand_or_none('desktop_brand_name')
+                    monitor_brand = get_brand_or_none('monitor_brand')
+                    keyboard_brand = get_brand_or_none('keyboard_brand')
+                    mouse_brand = get_brand_or_none('mouse_brand')
+                    ups_brand = get_brand_or_none('ups_brand')
 
-                enduser = get_employee_or_none('enduser_input')
-                assetowner = get_employee_or_none('assetowner_input')
+                    desktop_package = Desktop_Package.objects.create(is_disposed=False)
 
-                UserDetails.objects.create(
-                    desktop_package=desktop_package,
-                    user_Enduser=enduser,
-                    user_Assetowner=assetowner
-                )
+                    DesktopDetails.objects.create(
+                        desktop_package=desktop_package,
+                        serial_no=desktop_sn,
+                        computer_name=computer_name,
+                        brand_name=desktop_brand,
+                        model=request.POST.get('desktop_model'),
+                        processor=desktop_processor,
+                        memory=request.POST.get('desktop_memory'),
+                        drive=request.POST.get('desktop_drive'),
+                        desktop_Graphics=request.POST.get('desktop_Graphics'),
+                        desktop_Graphics_Size=request.POST.get('desktop_Graphics_Size'),
+                        desktop_OS=request.POST.get('desktop_OS'),
+                        desktop_Office=request.POST.get('desktop_Office'),
+                        desktop_OS_keys=request.POST.get('desktop_OS_keys'),
+                        desktop_Office_keys=request.POST.get('desktop_Office_keys'),
+                    )
 
-                # PM SCHEDULE (optional)
-                if enduser and enduser.employee_office_section:
-                    for schedule in PMSectionSchedule.objects.filter(section=enduser.employee_office_section):
-                        PMScheduleAssignment.objects.get_or_create(
-                            desktop_package=desktop_package,
-                            pm_section_schedule=schedule
-                        )
+                    MonitorDetails.objects.create(
+                        desktop_package=desktop_package,
+                        monitor_sn_db=monitor_sn,
+                        monitor_brand_db=monitor_brand,
+                        monitor_model_db=request.POST.get('monitor_model'),
+                        monitor_size_db=request.POST.get('monitor_size')
+                    )
 
-                messages.success(request, "✅ Desktop Package added successfully.")
+                    KeyboardDetails.objects.create(
+                        desktop_package=desktop_package,
+                        keyboard_sn_db=keyboard_sn,
+                        keyboard_brand_db=keyboard_brand,
+                        keyboard_model_db=request.POST.get('keyboard_model')
+                    )
 
-                # robust success redirect (supports differing route names)
-                try:
-                    return redirect('success_add_page', desktop_id=desktop_package.id)
-                except NoReverseMatch:
-                    try:
-                        return redirect('success_page')
-                    except NoReverseMatch:
-                        return redirect('desktop_details_view', package_id=desktop_package.id)
+                    MouseDetails.objects.create(
+                        desktop_package=desktop_package,
+                        mouse_sn_db=mouse_sn,
+                        mouse_brand_db=mouse_brand,
+                        mouse_model_db=request.POST.get('mouse_model')
+                    )
 
-        except IntegrityError as ie:
-            # if your DB has unique constraints, catch here and report nicely
-            messages.error(request, f"❌ Could not save: duplicate detected. Details: {ie}")
-            return render(request, 'add_desktop_package_with_details.html', context)
-        except Exception as e:
-            messages.error(request, f"❌ Exception: {str(e)}")
-            return render(request, 'add_desktop_package_with_details.html', context)
+                    UPSDetails.objects.create(
+                        desktop_package=desktop_package,
+                        ups_sn_db=ups_sn,
+                        ups_brand_db=ups_brand,
+                        ups_model_db=request.POST.get('ups_model'),
+                        ups_capacity_db=request.POST.get('ups_capacity')
+                    )
+
+                    DocumentsDetails.objects.create(
+                        desktop_package=desktop_package,
+                        docs_PAR=request.POST.get('par_number_input'),
+                        docs_Propertyno=request.POST.get('property_number_input'),
+                        docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
+                        docs_Value=request.POST.get('value_desktop_input'),
+                        docs_Datereceived=request.POST.get('date_received_input'),
+                        docs_Dateinspected=request.POST.get('date_inspected_input'),
+                        docs_Supplier=request.POST.get('supplier_name_input'),
+                        docs_Status=request.POST.get('status_desktop_input')
+                    )
+
+                    enduser = get_employee_or_none('enduser_input')
+                    assetowner = get_employee_or_none('assetowner_input')
+
+                    UserDetails.objects.create(
+                        desktop_package=desktop_package,
+                        user_Enduser=enduser,
+                        user_Assetowner=assetowner
+                    )
+
+                    if enduser and enduser.employee_office_section:
+                        for schedule in PMSectionSchedule.objects.filter(section=enduser.employee_office_section):
+                            PMScheduleAssignment.objects.get_or_create(
+                                desktop_package=desktop_package,
+                                pm_section_schedule=schedule
+                            )
+
+                    messages.success(request, "✅ Desktop Package added successfully.")
+                    return redirect(f'/success_add/{desktop_package.id}/?type=Desktop')
+
+            except IntegrityError as ie:
+                messages.error(request, f"❌ Could not save: duplicate detected. Details: {ie}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+            except Exception as e:
+                messages.error(request, f"❌ Exception: {str(e)}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+
+        ## ---------------- LAPTOP ----------------
+        elif equipment_type == "Laptop":
+            laptop_sn = request.POST.get('laptop_sn_db')
+            laptop_name = request.POST.get('laptop_computer_name')
+            laptop_brand = get_brand_or_none('laptop_brand_name')
+
+            # validations
+            if not laptop_sn:
+                errors.append("Laptop serial number is required.")
+            if not laptop_brand:
+                errors.append("Laptop brand is required.")
+            if not request.POST.get('laptop_model'):
+                errors.append("Laptop model is required.")
+            if not laptop_name:
+                errors.append("Laptop computer name is required.")
+
+            # Documents
+            if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
+            if not request.POST.get('property_number_input'): errors.append("Property Number is required.")
+            if not request.POST.get('acquisition_type_input'): errors.append("Acquisition type is required.")
+            if not request.POST.get('value_laptop_input'): errors.append("Value is required.")
+            if not request.POST.get('date_received_input'): errors.append("Date received is required.")
+            if not request.POST.get('date_inspected_input'): errors.append("Date inspected is required.")
+            if not request.POST.get('supplier_name_input'): errors.append("Supplier name is required.")
+            if not request.POST.get('status_laptop_input'): errors.append("Status is required.")
+
+            # User
+            if not request.POST.get('enduser_input'): errors.append("End user is required.")
+            if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
+
+            if laptop_sn and sn_exists(LaptopDetails, 'laptop_sn_db', laptop_sn):
+                errors.append(f"Laptop SN '{laptop_sn}' already exists.")
+
+            if errors:
+                for e in errors:
+                    messages.error(request, f"❌ {e}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+
+            try:
+                with transaction.atomic():
+                    # ✅ create laptop package
+                    laptop_package = LaptopPackage.objects.create(is_disposed=False)
+
+                    # ✅ laptop details
+                    LaptopDetails.objects.create(
+                        laptop_package=laptop_package,
+                        laptop_sn_db=laptop_sn,
+                        computer_name=laptop_name,
+                        brand_name=laptop_brand,
+                        model=request.POST.get('laptop_model'),
+                        processor=request.POST.get('laptop_processor'),   # ✅ added
+                        memory=request.POST.get('laptop_memory'),         # ✅ added
+                        drive=request.POST.get('laptop_drive'),           # ✅ added
+                        laptop_OS=request.POST.get('laptop_OS'),
+                        laptop_Office=request.POST.get('laptop_Office'),
+                        laptop_OS_keys=request.POST.get('laptop_OS_keys'),
+                        laptop_Office_keys=request.POST.get('laptop_Office_keys'),
+                    )
+
+                    # ✅ documents
+                    DocumentsDetails.objects.create(
+                        laptop_package=laptop_package,
+                        docs_PAR=request.POST.get('par_number_input'),
+                        docs_Propertyno=request.POST.get('property_number_input'),
+                        docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
+                        docs_Value=request.POST.get('value_laptop_input'),
+                        docs_Datereceived=request.POST.get('date_received_input'),
+                        docs_Dateinspected=request.POST.get('date_inspected_input'),
+                        docs_Supplier=request.POST.get('supplier_name_input'),
+                        docs_Status=request.POST.get('status_laptop_input')
+                    )
+
+                    # ✅ user details
+                    enduser = get_employee_or_none('enduser_input')
+                    assetowner = get_employee_or_none('assetowner_input')
+
+                    UserDetails.objects.create(
+                        laptop_package=laptop_package,
+                        user_Enduser=enduser,
+                        user_Assetowner=assetowner
+                    )
+
+                    # ✅ PM schedule
+                    if enduser and enduser.employee_office_section:
+                        for schedule in PMSectionSchedule.objects.filter(section=enduser.employee_office_section):
+                            PMScheduleAssignment.objects.get_or_create(
+                                laptop_package=laptop_package,
+                                pm_section_schedule=schedule
+                            )
+
+                    messages.success(request, "✅ Laptop Package added successfully.")
+                    return redirect(f'/success_add/{laptop_package.id}/?type=Laptop')
+
+            except IntegrityError as ie:
+                messages.error(request, f"❌ Could not save: duplicate detected. Details: {ie}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+            except Exception as e:
+                messages.error(request, f"❌ Exception: {str(e)}")
+                return render(request, 'add_desktop_package_with_details.html', context)
 
     return render(request, 'add_desktop_package_with_details.html', context)
+
+
 
 #sa pag add ni sa desktop details, check if the computer name already exists in the database.
 def check_computer_name(request):
@@ -2056,21 +2179,21 @@ def export_desktop_packages_excel(request):
 
                 # Component-specific fields
                 if label == "Monitor":
-                    ws[f'K{row}'] = item.monitor_sn_db
-                    ws[f'M{row}'] = item.monitor_model_db
-                    ws[f'N{row}'] = item.monitor_brand_db.name if item.monitor_brand_db else ''
+                    ws[f'K{row}'] = item.monitor_sn
+                    ws[f'M{row}'] = item.monitor_model
+                    ws[f'N{row}'] = item.monitor_brand.name if item.monitor_brand else ''
                 elif label == "Keyboard":
-                    ws[f'K{row}'] = item.keyboard_sn_db
-                    ws[f'M{row}'] = item.keyboard_model_db
-                    ws[f'N{row}'] = item.keyboard_brand_db.name if item.keyboard_brand_db else ''
+                    ws[f'K{row}'] = item.keyboard_sn
+                    ws[f'M{row}'] = item.keyboard_model
+                    ws[f'N{row}'] = item.keyboard_brand.name if item.keyboard_brand else ''
                 elif label == "Mouse":
-                    ws[f'K{row}'] = item.mouse_sn_db
-                    ws[f'M{row}'] = item.mouse_model_db
-                    ws[f'N{row}'] = item.mouse_brand_db.name if item.mouse_brand_db else ''
+                    ws[f'K{row}'] = item.mouse_sn
+                    ws[f'M{row}'] = item.mouse_model
+                    ws[f'N{row}'] = item.mouse_brand.name if item.mouse_brand else ''
                 elif label == "UPS":
-                    ws[f'K{row}'] = item.ups_sn_db
-                    ws[f'M{row}'] = item.ups_model_db
-                    ws[f'N{row}'] = item.ups_brand_db.name if item.ups_brand_db else ''
+                    ws[f'K{row}'] = item.ups_sn
+                    ws[f'M{row}'] = item.ups_model
+                    ws[f'N{row}'] = item.ups_brand.name if item.ups_brand else ''
 
                 if status == "Disposed":
                     for col in range(1, 27):
@@ -2113,7 +2236,7 @@ def add_maintenance(request, desktop_id):
 
     return render(request, 'maintenance/add_maintenance.html', {'desktop': desktop})
 
-
+#maintenance History for desktop
 def maintenance_history_view(request, desktop_id):
     # Get the desktop package and related details
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
@@ -2151,6 +2274,41 @@ def maintenance_history_view(request, desktop_id):
         'pm': latest_pm,
         'current_pm_schedule': current_pm_schedule,  # New table data
     })
+
+def maintenance_history_laptop(request, laptop_id):
+    # Get the laptop and related details
+    laptop = get_object_or_404(LaptopDetails, pk=laptop_id)
+
+    # Completed maintenance history
+    maintenance_history = (
+        PreventiveMaintenance.objects
+        .filter(laptop_package=laptop)
+        .select_related('pm_schedule_assignment__pm_section_schedule__quarter_schedule')
+        .order_by('date_accomplished')
+    )
+
+    # Get the latest completed PM (if any)
+    latest_pm = maintenance_history.last()
+
+    # Current (pending) PM assignments
+    current_pm_schedule = PMScheduleAssignment.objects.filter(
+        laptop_package=laptop
+    ).select_related(
+        'pm_section_schedule__quarter_schedule',
+        'pm_section_schedule__section'
+    ).order_by(
+        'pm_section_schedule__quarter_schedule__year',
+        'pm_section_schedule__quarter_schedule__quarter'
+    )
+
+    return render(request, 'maintenance/laptop_history.html', {
+        'laptop': laptop,
+        'maintenance_history': maintenance_history,
+        'maintenance_records': maintenance_history,
+        'pm': latest_pm,
+        'current_pm_schedule': current_pm_schedule,  # New table data
+    })
+
 
 # def get_schedule_date_range(request, quarter_id):
 #     schedule = PMSectionSchedule.objects.filter(quarter_schedule_id=quarter_id).first()
@@ -2361,29 +2519,57 @@ def generate_pm_excel_report(request, pm_id):
     # Return the PDF file as download
     return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
 
-
-
+from django.db.models import Prefetch
+from .models import (
+    PMScheduleAssignment, Desktop_Package, DesktopDetails, LaptopDetails,
+    PMSectionSchedule, QuarterSchedule, OfficeSection, UserDetails
+)
 def pm_overview_view(request):
     pm_assignments = PMScheduleAssignment.objects.select_related(
         'desktop_package',
+        'laptop_package',
         'pm_section_schedule__quarter_schedule',
         'pm_section_schedule__section'
     ).all()
 
-    # Attach computer_name for each assignment
+    # Attach computer_name for each assignment (Desktop or Laptop)
     for assignment in pm_assignments:
-        desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
-        assignment.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
+        if assignment.desktop_package:
+            desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
+            assignment.computer_name = desktop_detail.computer_name if desktop_detail else "N/A"
+        elif assignment.laptop_package:
+            assignment.computer_name = assignment.laptop_package.computer_name or "N/A"
+        else:
+            assignment.computer_name = "N/A"
 
-    # Annotate computer_name for desktops (for dropdown)
-    desktops = list(Desktop_Package.objects.prefetch_related(
-        Prefetch('user_details', queryset=UserDetails.objects.select_related('user_Enduser__employee_office_section'))
-    ))
-
+    # ✅ Desktops list with user + section
+    desktops = list(
+        Desktop_Package.objects.prefetch_related(
+            Prefetch(
+                'user_details',
+                queryset=UserDetails.objects.select_related('user_Enduser__employee_office_section')
+            )
+        )
+    )
     for desktop in desktops:
         desktop_detail = DesktopDetails.objects.filter(desktop_package=desktop).first()
         desktop.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
 
+    # ✅ Laptops list with user + section (fixed related_name)
+    laptops = list(
+        LaptopDetails.objects.prefetch_related(
+            Prefetch(
+                'user_details',   # 👈 correct related_name
+                queryset=UserDetails.objects.select_related('user_Enduser__employee_office_section')
+            )
+        )
+    )
+    for laptop in laptops:
+        u = laptop.user_details.first()  # 👈 correct reverse accessor
+        laptop.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
+        laptop.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
+
+    # Schedules
     schedules = PMSectionSchedule.objects.select_related('section', 'quarter_schedule')
     schedules_by_section = {}
     for s in schedules:
@@ -2396,29 +2582,47 @@ def pm_overview_view(request):
     return render(request, 'maintenance/overview.html', {
         'pm_assignments': pm_assignments,
         'desktops': desktops,
+        'laptops': laptops,   # ✅ now with section + enduser
         'schedules': schedules,
         'schedules_by_section': schedules_by_section,
         'quarters': quarters,
         'sections': sections,
     })
 
-  
-
 
 def assign_pm_schedule(request):
     if request.method == 'POST':
-        desktop_id = request.POST.get('desktop_package_id')
+        device_type = request.POST.get('device_type')
         schedule_id = request.POST.get('schedule_id')
 
-        desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
         schedule = get_object_or_404(PMSectionSchedule, pk=schedule_id)
 
-        if PMScheduleAssignment.objects.filter(desktop_package=desktop, pm_section_schedule=schedule).exists():
-            messages.warning(request, "This desktop is already assigned to this schedule.")
+        if device_type == "desktop":
+            desktop_id = request.POST.get('desktop_package_id')
+            desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
+
+            if PMScheduleAssignment.objects.filter(desktop_package=desktop, pm_section_schedule=schedule).exists():
+                messages.warning(request, "This desktop is already assigned to this schedule.")
+                return redirect('pm_overview')
+
+            PMScheduleAssignment.objects.create(desktop_package=desktop, pm_section_schedule=schedule)
+            messages.success(request, "Desktop successfully assigned to schedule.")
+
+        elif device_type == "laptop":
+            laptop_id = request.POST.get('laptop_id')
+            laptop = get_object_or_404(LaptopDetails, pk=laptop_id)
+
+            if PMScheduleAssignment.objects.filter(laptop_package=laptop, pm_section_schedule=schedule).exists():
+                messages.warning(request, "This laptop is already assigned to this schedule.")
+                return redirect('pm_overview')
+
+            PMScheduleAssignment.objects.create(laptop_package=laptop, pm_section_schedule=schedule)
+            messages.success(request, "Laptop successfully assigned to schedule.")
+
+        else:
+            messages.error(request, "Invalid device type selected.")
             return redirect('pm_overview')
 
-        PMScheduleAssignment.objects.create(desktop_package=desktop, pm_section_schedule=schedule)
-        messages.success(request, "Schedule successfully assigned.")
         return redirect('pm_overview')
 
 
@@ -2907,7 +3111,7 @@ def _ensure_user_qr(profile, request):
     file_name = f"user_qr_{profile.user_id}.png"
     profile.qr_code.save(file_name, ContentFile(buf.getvalue()), save=True)
 
-#profile view
+# views.py
 @login_required
 def profile_view(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
@@ -2917,12 +3121,22 @@ def profile_view(request):
     employees = Employee.objects.all().order_by("employee_lname", "employee_fname")
 
     assigned_packages = []
+    assigned_laptops = []
     if profile.employee:
+        # ✅ Filter by Asset Owner instead of Enduser
         assigned_packages = (
             Desktop_Package.objects
-            .filter(user_details__user_Enduser=profile.employee)
+            .filter(user_details__user_Assetowner=profile.employee)
             .distinct()
             .prefetch_related("desktop_details")
+        )
+
+        # ✅ Include laptops where this employee is Asset Owner
+        from inventory.models import LaptopPackage  # import if not already
+        assigned_laptops = (
+            LaptopPackage.objects
+            .filter(user_details__user_Assetowner=profile.employee)
+            .distinct()
         )
 
     return render(request, "account/profile.html", {
@@ -2930,8 +3144,8 @@ def profile_view(request):
         "sections": sections,
         "employees": employees,
         "assigned_packages": assigned_packages,
+        "assigned_laptops": assigned_laptops,
     })
-
 
 @login_required
 def update_profile(request):
@@ -3065,4 +3279,211 @@ def user_assets_public(request, token):
         "disposed_ups": disposed_ups,
         "enduser_history": enduser_history,
         "assetowner_history": assetowner_history,
+    })
+@login_required
+def laptop_list(request):
+    # Grab all LaptopPackages
+    packages = LaptopPackage.objects.all().select_related()
+
+    laptops = []
+    for pkg in packages:
+        # Current active details (if any)
+        details = LaptopDetails.objects.filter(laptop_package=pkg, is_disposed=False).first()
+
+        # User assignment
+        user = UserDetails.objects.filter(laptop_package=pkg).select_related("user_Enduser").first()
+
+        laptops.append({
+            "package": pkg,              # ✅ for item.package.id
+            "details": details,          # ✅ for item.details.*
+            "end_user": user.user_Enduser.full_name if user and user.user_Enduser else None,
+        })
+
+    return render(request, "laptop/laptop_list.html", {"laptops": laptops})
+
+
+@login_required
+def laptop_details_view(request, package_id):
+    # Fetch LaptopPackage
+    laptop_package = get_object_or_404(LaptopPackage, id=package_id)
+
+    # Current laptop details
+    laptop_details = LaptopDetails.objects.filter(
+        laptop_package=laptop_package, is_disposed=False
+    ).first()
+
+    # Documents
+    documents_details = DocumentsDetails.objects.filter(laptop_package=laptop_package).first()
+
+    # User details
+    user_details = UserDetails.objects.filter(laptop_package=laptop_package).select_related(
+        "user_Enduser__employee_office_section",
+        "user_Assetowner"
+    ).first()
+
+    # Disposal history
+    disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package=laptop_package)
+
+    employees = Employee.objects.all()
+
+    return render(request, "laptop/laptop_details_view.html", {
+        "laptop_package": laptop_package,
+        "laptop_details": laptop_details,
+        "documents_details": documents_details,
+        "user_details": user_details,
+        "disposed_laptops": disposed_laptops,
+        "employees": employees,
+    })
+
+@login_required
+def dispose_laptop(request, package_id):
+    laptop_package = get_object_or_404(LaptopPackage, id=package_id)
+    laptop = LaptopDetails.objects.filter(laptop_package=laptop_package, is_disposed=False).first()
+
+    user_details = UserDetails.objects.filter(laptop_package=laptop_package).first()
+
+    if request.method == "POST" and laptop:
+        reason = request.POST.get("reason", "")
+
+        DisposedLaptop.objects.create(
+            laptop=laptop,
+            serial_no=laptop.laptop_sn_db,
+            brand_name=str(laptop.brand_name) if laptop.brand_name else None,
+            model=laptop.model,
+            asset_owner=user_details.user_Assetowner.full_name if user_details and user_details.user_Assetowner else None,
+            reason=reason,
+        )
+
+        laptop.is_disposed = True
+        laptop.save()
+
+        laptop_package.is_disposed = True
+        laptop_package.disposal_date = timezone.now()
+        laptop_package.save()
+
+        messages.success(request, "✅ Laptop disposed successfully.")
+        return redirect("laptop_details_view", package_id=laptop_package.id)
+
+    return redirect("laptop_details_view", package_id=laptop_package.id)
+
+
+@login_required
+def disposed_laptops(request):
+    disposed_laptops = DisposedLaptop.objects.all().order_by("-date_disposed")
+    return render(request, "laptop/disposed_laptops.html", {"disposed_laptops": disposed_laptops})
+
+
+@login_required
+def checklist_laptop(request, package_id):
+    laptop_package = get_object_or_404(LaptopPackage, pk=package_id)
+    laptop = LaptopDetails.objects.filter(laptop_package=laptop_package, is_disposed=False).first()
+
+    quarter_schedules = QuarterSchedule.objects.all().order_by("-year", "quarter")
+
+    if laptop and laptop.is_disposed:
+        messages.error(request, "❌ Laptop was already disposed and cannot be PM anymore.")
+        return redirect("maintenance_history_laptop", package_id=laptop_package.id)
+
+    has_schedule = PMScheduleAssignment.objects.filter(laptop_package=laptop_package).exists()
+    if not has_schedule:
+        messages.error(request, "⚠ Please add a PM schedule first before conducting Preventive Maintenance.")
+        return redirect("maintenance_history_laptop", package_id=laptop_package.id)
+
+    checklist_labels = {
+        1: "Check if configured and connected to the DPWH domain",
+        2: "Check if able to access the intranet services",
+        3: "Check if installed with anti-virus software authorized by IMS",
+        4: "Check if anti-virus definition files are up-to-date",
+        5: "Perform full virus scan using updated virus removal tool",
+        6: "Remove all un-authorized software installations",
+        7: "Remove all un-authorized files (e.g. movies)",
+        8: "Check working condition of hardware devices/components",
+        9: "Clean hardware and components, and organize cables",
+    }
+
+    user_details = UserDetails.objects.filter(laptop_package=laptop_package).select_related("user_Enduser__employee_office_section").first()
+    office = user_details.user_Enduser.employee_office_section if user_details and user_details.user_Enduser else ""
+    end_user = f"{user_details.user_Enduser.employee_fname} {user_details.user_Enduser.employee_lname}" if user_details and user_details.user_Enduser else ""
+
+    section_id = office.id if office else None
+
+    if request.method == "POST":
+        quarter_id = request.POST.get("quarter_schedule_id")
+        date_accomplished = request.POST.get("date_accomplished")
+        quarter = QuarterSchedule.objects.get(id=quarter_id) if quarter_id else None
+
+        already_done = PreventiveMaintenance.objects.filter(
+            laptop_package=laptop_package,
+            pm_schedule_assignment__pm_section_schedule__quarter_schedule=quarter
+        ).exists()
+        if already_done:
+            messages.warning(request, f"❌ for {quarter.get_quarter_display()} {quarter.year} is already conducted.")
+            return redirect("checklist_laptop", package_id=laptop_package.id)
+
+        matched_schedule = PMScheduleAssignment.objects.filter(
+            laptop_package=laptop_package,
+            pm_section_schedule__quarter_schedule=quarter,
+            pm_section_schedule__start_date__lte=date_accomplished,
+            pm_section_schedule__end_date__gte=date_accomplished
+        ).first()
+
+        if not matched_schedule and quarter:
+            pm_section_schedule = PMSectionSchedule.objects.filter(
+                quarter_schedule=quarter,
+                section=office if office else None
+            ).first()
+
+            if not pm_section_schedule and office:
+                pm_section_schedule = PMSectionSchedule.objects.create(
+                    quarter_schedule=quarter,
+                    section=office,
+                    start_date=date_accomplished,
+                    end_date=date_accomplished,
+                    notes="Auto-created from laptop checklist"
+                )
+
+            if pm_section_schedule:
+                matched_schedule = PMScheduleAssignment.objects.create(
+                    laptop_package=laptop_package,
+                    pm_section_schedule=pm_section_schedule,
+                    is_completed=True,
+                    remarks="Auto-assigned via laptop checklist"
+                )
+
+        pm = PreventiveMaintenance.objects.create(
+            laptop_package=laptop_package,
+            pm_schedule_assignment=matched_schedule,
+            office=office,
+            end_user=end_user,
+            maintenance_date=timezone.now().date(),
+            date_accomplished=date_accomplished,
+            performed_by=request.user.get_full_name() if request.user.is_authenticated else "Technician",
+            is_completed=True,
+            **{f"task_{i}": request.POST.get(f"task_{i}") == "on" for i in range(1, 10)},
+            **{f"note_{i}": request.POST.get(f"note_{i}", "") for i in range(1, 10)},
+        )
+
+        for i, label in checklist_labels.items():
+            MaintenanceChecklistItem.objects.create(
+                maintenance=pm,
+                item_text=label,
+                is_checked=request.POST.get(f"task_{i}") == "on"
+            )
+
+        if matched_schedule:
+            matched_schedule.is_completed = True
+            matched_schedule.remarks = "Checklist completed (Laptop)"
+            matched_schedule.save()
+
+        return redirect("maintenance_history_laptop", package_id=laptop_package.id)
+
+    return render(request, "maintenance/checklist_laptop.html", {
+        "laptop_package": laptop_package,
+        "laptop": laptop,
+        "checklist_labels": checklist_labels,
+        "office": office,
+        "end_user": end_user,
+        "range": range(1, 10),
+        "quarter_schedules": quarter_schedules,
+        "section_id": section_id,
     })

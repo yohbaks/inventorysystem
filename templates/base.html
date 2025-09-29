@@ -106,6 +106,9 @@
                   <li class="{% if request.resolver_match.url_name == 'ups_details' %}active{% endif %}">
                     <a href="{% url 'ups_details' %}"><span class="sub-item">⚡ UPS</span></a>
                   </li>
+                  <li class="{% if request.resolver_match.url_name == 'laptop_list' %}active{% endif %}">
+                    <a href="{% url 'laptop_list' %}"><span class="sub-item">💻 Laptop</span></a>
+                  </li>
                 </ul>
               </div>
             </li>

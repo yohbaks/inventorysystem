@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row justify-content-center">
+      <div class="col-lg-12">
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+            <div class="card-title">💻 Laptop Detailed Preventive Maintenance Info </div>
+            <a href="{% url 'checklist_laptop' laptop.id %}" class="btn btn-primary btn-sm ms-auto">+ Conduct Maintenance</a>
+          </div>
+
+          <div class="card-body">
+
+            <!-- Laptop Information -->
+            <div class="mb-4">
+              <h3 class="fw-bold text-dark">
+                <i class="fas fa-laptop me-2 text-primary"></i>{{ laptop.computer_name }}
+              </h3>
+              <div class="row g-3">
+                <div class="col-md-4"><span class="fw-semibold">Brand:</span> {{ laptop.brand.name }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Model:</span> {{ laptop.model }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Serial No:</span> {{ laptop.serial_number }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Processor:</span> {{ laptop.processor }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Memory:</span> {{ laptop.memory }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Drive:</span> {{ laptop.drive }}</div>
+              </div>
+            </div>
+
+            <!-- Current PM Schedule -->
+            {% if current_pm_schedule %}
+            <div class="mb-4">
+              <h6 class="text-primary fw-semibold"><i class="fas fa-calendar-check me-2"></i>Current PM Schedule</h6>
+              <div class="table-responsive">
+                <table class="table table-striped table-bordered table-head-bg-info">
+                  <thead class="bg-info text-white">
+                    <tr>
+                      <th>Quarter</th>
+                      <th>Section</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for schedule in current_pm_schedule %}
+                    <tr>
+                      <td>{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</td>
+                      <td>{{ schedule.pm_section_schedule.section.name }}</td>
+                      <td>{{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}</td>
+                      <td>{{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}</td>
+                      <td>
+                        {% if schedule.is_completed %}
+                          <span class="badge bg-success">Completed</span>
+                        {% else %}
+                          <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Maintenance History -->
+            {% if maintenance_records %}
+            <div class="table-responsive mt-4">
+              <table class="table table-bordered table-head-bg-info table-bordered-bd-info mt-4">
+                <thead class="bg-primary text-white">
+                  <tr>
+                    <th>Date Accomplished</th>
+                    <th>Office</th>
+                    <th>Quarter</th>
+                    <th>Maintenance Tasks</th>
+                    <th class="text-center">PDF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for record in maintenance_records %}
+                  <tr>
+                    <td>{{ record.date_accomplished|date:"M d, Y" }}</td>
+                    <td>{{ record.office }}</td>
+                    <td>
+                      {% if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule %}
+                        {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
+                        {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.year }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                    <td>
+                      <ul class="list-unstyled mb-0 ps-2">
+                        {% for i in "123456789"|make_list %}
+                          {% with task_field="task_"|add:i note_field="note_"|add:i %}
+                          <li>
+                            {% if record|get_attr:task_field %}
+                              <span class="badge bg-success mb-1">✅ Task {{ i }} - Done</span>
+                            {% else %}
+                              <span class="badge bg-secondary mb-1">❌ Task {{ i }} - Not Done</span>
+                            {% endif %}
+                            {% with note=record|get_attr:note_field %}
+                              {% if note %}
+                                <br><small class="text-muted ps-2">📝 {{ note }}</small>
+                              {% endif %}
+                            {% endwith %}
+                          </li>
+                          {% endwith %}
+                        {% endfor %}
+                      </ul>
+                    </td>
+                    <td class="text-center">
+                      <a href="{% url 'generate_pm_pdf' record.id %}" class="btn btn-sm btn-outline-danger" title="Download PDF">
+                        <i class="fas fa-file-pdf"></i>
+                      </a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning mt-4">No preventive maintenance history records found for this laptop.</div>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

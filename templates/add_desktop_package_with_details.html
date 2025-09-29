@@ -3,8 +3,6 @@
 {% load static %}
 {% block content %}
 
-
-<!-- Forms begins here -->
 <div class="container">
   <div class="page-inner">
     <div class="page-header">
@@ -18,637 +16,544 @@
       </ul>
     </div>
 
-    <!-- Success and Error Messages -->
-   
+    <!-- Main Form -->
+    <form method="post" action="{% url 'add_desktop_package_with_details' %}" id="addEquipmentForm">
 
-    <!-- Main Form Container -->  
-    <div class="container">
-      <div class="card col">
-        <div class="card-header">
-          <div class="card-title">ADD ICT EQUIPMENT</div>
-        </div>
-        
-      <form method="post" action="{% url 'add_desktop_package_with_details' %}" id="addEquipmentForm">
-          {% csrf_token %}
+      {% csrf_token %}
 
-          <!-- Equipment Selection Dropdown -->
-          <div class="card-body">
-            <div class="form-group">
-              <label for="equipmentSelect"><h5>Equipment Type</h5></label>
-              <select class="form-select form-control" id="equipmentSelect" name="name_input"  required>
-                <option value="" selected disabled>Select Equipment Type</option>
-                <option value="Desktop" {% if equipment_type == 'Desktop' %}selected{% endif %}>Desktop</option>
-                <option value="Laptop" {% if equipment_type == 'Laptop' %}selected{% endif %}>Laptop</option>
-                <option value="UPS" {% if equipment_type == 'UPS' %}selected{% endif %}>UPS</option>
-              </select>
-            </div>
-          </div>
-        
-          <!-- Desktop Details Card -->
-          <div id="desktopForm" class="equipment-form card-body" style="display: {% if equipment_type == 'Desktop' %}block{% else %}none{% endif %};">
-            <hr>
-            <h3><i class="fas fa-window-maximize"> &nbsp;</i>Desktop Details</h3>
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopSerial">Serial Number</label>
-                  <input type="text" name="desktop_serial_no" id="desktop_serial_no" class="form-control" placeholder="Serial Number" required>
-                </div>
-              </div>
-              <div class="col-md-4">
-                    <div class="form-group">
-                      <label for="desktopBrand">Brand Name</label>
-                      <select name="desktop_brand_name" id="desktop_brand_name" class="form-select" required>
-                        <option value="">-- Select Brand --</option>
-                        {% for brand in desktop_brands %}
-                           <option value="{{ brand.id }}" style="color: black;">{{ brand.name }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopModel">Model</label>
-                  <input type="text" name="desktop_model" id="desktop_model" class="form-control">
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopProcessor">Processor</label>
-        
-                   <select class="form-select form-control" id="desktop_processor" name="desktop_processor" required>
-                    <option value="">-- Select Processor --</option>
-                    <optgroup label="Core i9 (Desktop)">
-                    
-                    <option value="i9-14900K" {% if desktop_detailsx.processor == 'i9-14900K' %}selected{% endif %}>Core i9-14900K (14th Gen Raptor Lake)</option>
-                    <option value="i9-13900K" {% if desktop_detailsx.processor == 'i9-13900K' %}selected{% endif %}>Core i9-13900K (13th Gen Raptor Lake)</option>
-                    <option value="i9-12900K" {% if desktop_detailsx.processor == 'i9-12900K' %}selected{% endif %}>Core i9-12900K (12th Gen Alder Lake)</option>
-                    <option value="i9-11900K" {% if desktop_detailsx.processor == 'i9-11900K' %}selected{% endif %}>Core i9-11900K (11th Gen Rocket Lake)</option>
-                    <option value="i9-10900K" {% if desktop_detailsx.processor == 'i9-10900K' %}selected{% endif %}>Core i9-10900K (10th Gen Comet Lake)</option>
-                  </optgroup>
-
-                  <optgroup label="Core i7 (Desktop)">
-                    <option value="i7-14700K" {% if desktop_detailsx.processor == 'i7-14700K' %}selected{% endif %}>Core i7-14700K (14th Gen)</option>
-                    <option value="i7-13700K" {% if desktop_detailsx.processor == 'i7-13700K' %}selected{% endif %}>Core i7-13700K (13th Gen)</option>
-                    <option value="i7-12700K" {% if desktop_detailsx.processor == 'i7-12700K' %}selected{% endif %}>Core i7-12700K (12th Gen)</option>
-                    <option value="i7-11700K" {% if desktop_detailsx.processor == 'i7-11700K' %}selected{% endif %}>Core i7-11700K (11th Gen)</option>
-                  </optgroup>
-
-                  <optgroup label="Core i5 (Desktop)">
-                    <option value="i5-14600K" {% if desktop_detailsx.processor == 'i5-14600K' %}selected{% endif %}>Core i5-14600K (14th Gen)</option>
-                    <option value="i5-13600K" {% if desktop_detailsx.processor == 'i5-13600K' %}selected{% endif %}>Core i5-13600K (13th Gen)</option>
-                    <option value="i5-12600K" {% if desktop_detailsx.processor == 'i5-12600K' %}selected{% endif %}>Core i5-12600K (12th Gen)</option>
-                    <option value="i5-11600K" {% if desktop_detailsx.processor == 'i5-11600K' %}selected{% endif %}>Core i5-11600K (11th Gen)</option>
-                  </optgroup>
-
-                    </select>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopMemory">Memory</label>
-                  <input type="text" name="desktop_memory" id="desktop_memory" class="form-control">
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopDrive">Computer Drive</label>
-                  <input type="text" name="desktop_drive" id="desktop_drive" class="form-control">
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopGPU">Graphics Name</label>
-                  <input type="text" name="desktop_Graphics" id="desktop_Graphics" class="form-control">
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopGPUSIZE">Graphics Size</label>
-                  <input type="text" name="desktop_Graphics_Size" id="desktop_Graphics_Size" class="form-control">
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopOS">Operating System</label>
-                  <input type="text" name="desktop_OS" id="desktop_OS" class="form-control">
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopOffice">Office Version</label>
-                  <input type="text" name="desktop_Office" id="desktop_Office" class="form-control">
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopOSkeys">OS License Keys</label>
-                  <input type="text" name="desktop_OS_keys" id="desktop_OS_keys" class="form-control">
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="desktopOfficekeys">Office License Keys</label>
-                  <input type="text" name="desktop_Office_keys" id="desktop_Office_keys" class="form-control">
-                </div>
-              </div>
-
-         
-        
-      </div>
-    </div>
-    
-  </div>
-</div>
-
-
-
-
-<!-- Monitor Separate Container for Additional Details Monitor --> 
-      
-<div id="MonitorContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-desktop"> &nbsp;</i>Monitor Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Monitor.</p>
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="MonitorSerial">Monitor Serial Number</label>
-            <input type="text" name="monitor_sn" id="monitor_sn" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          
-            <div class="form-group">
-            <label for="MonitorBrand">Monitor Brand</label>
-           <select name="monitor_brand" class="form-select" required>
-              <option value="">-- Select Brand --</option>
-              {% for brand in monitor_brands %}
-                <option value="{{ brand.id }}">{{ brand.name }}</option>
-              {% endfor %}
-            </select>
-            </div>
-          </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="MonitorModel">Monitor Model</label>
-            <input type="text" name="monitor_model" id="monitor_model" class="form-control" required>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="MonitorSize">Monitor Size</label>
-            <input type="text" name="monitor_size" id="monitor_size" class="form-control" required>
-          </div>
-        </div>
-
-      </div>
-      
-    </div>
 
     
-  </div>
-</div>
-<!-- Keyboard Separate Container for Additional Details -->
-<div id="KeyboardContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-desktop"> &nbsp;</i>Keyboard Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Keyboard.</p>
 
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardSerial">Keyboard Serial Number</label>
-            <input type="text" name="keyboard_sn" id="keyboard_sn" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardBrand">Keyboard Brand</label>
-            <select name="keyboard_brand" id="keyboard_brand" class="form-select" required>
-              <option value="">-- Select Keyboard Brand --</option>
-              {% for brand in keyboard_brands %}
-                <option value="{{ brand.id }}">{{ brand.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">Keyboard Model</label>
-            <input type="text" name="keyboard_model" id="keyboard_model" class="form-control">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
- <!-- Mouse Separate Container for Additional Details -->
-<div id="MouseContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-mouse-pointer"> &nbsp;</i>Mouse Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Mouse.</p>
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="MouseSerial">Mouse Serial Number</label>
-            <input type="text" name="mouse_sn" id="mouse_sn" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="MouseBrand">Mouse Brand</label>
-            <select name="mouse_brand" id="mouse_brand" class="form-select" required>
-              <option value="">-- Select Mouse Brand --</option>
-              {% for brand in mouse_brands %}
-                <option value="{{ brand.id }}">{{ brand.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="keyboardModel">Mouse Model</label>
-            <input type="text" name="mouse_model" id="mouse_model" class="form-control">
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-</div>
-
- <!-- UPS Separate Container for Additional Details -->
-<div id="UPSContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-plug"> &nbsp;</i>UPS Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected UPS.</p>
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="UPSSerial">UPS Serial Number</label>
-            <input type="text" name="ups_sn" id="ups_sn" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="UPSBrand">UPS Brand</label>
-            <select name="ups_brand" id="ups_brand" class="form-select" required>
-                <option value="">-- Select UPS Brand --</option>
-                {% for brand in ups_brands %}
-                  <option value="{{ brand.id }}">{{ brand.name }}</option>
-                {% endfor %}
-              </select>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="UPSModel">UPS Model</label>
-            <input type="text" name="ups_model" id="ups_model" class="form-control">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="UPSCapacity">UPS Capacity</label>
-            <input type="text" name="ups_capacity" id="ups_capacity" class="form-control">
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<div id="DocumentsContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-money-check"> &nbsp;</i>Documents Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected Documents.</p>
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="parnumber">PAR Number</label>
-            <input type="text" class="form-control" id="parnumber" name="par_number_input">
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="propertynumber">Property Number</label>
-            <input type="text" class="form-control" id="propertynumber" name="property_number_input" >
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="Acquisition">Acquisition Type</label>
-            <input type="text" class="form-control" id="acquisition" name="acquisition_type_input">
-          </div>
-        </div>
-      </div>    
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="value">Package Value</label>
-            <input type="text" class="form-control" id="value" name="value_desktop_input" value="{{ value_desktop_input_any }}" >
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="dateReceived">Date Received</label>
-            <input type="text" class="form-control" id="dateReceived" name="date_received_input" value="{{ date_received_input_any }}" >
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="dateInspected">Date Inspected</label>
-            <input type="text" class="form-control" id="dateInspected" name="date_inspected_input" value="{{ date_inspected_input_any }}" >
-          </div>
-        </div>
-      </div>    
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="supplier">Supplier</label>
-            <input type="text" class="form-control" id="supplier" name="supplier_name_input" value="{{ supplier_name_input_any }}" >
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="status">Status</label>
-            <input type="text" class="form-control" id="status" name="status_desktop_input" value="{{ status_desktop_input_any }}" >
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="computername">Computer Name</label>
-            
-            <input type="text" class="form-control" id="computername" name="computer_name_input" value="{{ computer_name_input_any }}">
-          </div>
-        </div>
-      
-  </div>
-</div>
-</div>
-{% comment %} sdf {% endcomment %}
-
-<div id="UserContainer" class="container" style="display: none;">
-  <div class="card col">
-    <div class="card-header">
-      <h3><i class="fas fa-user-alt"> &nbsp;</i>User Details</h3>
-    </div>
-    <div class="card-body">
-      <p>Here you can add extra details specifically related to the selected User.</p>
-
-
-      <div class="row">
-        <div class="col-md-4">
-            <div class="form-group">
-              <label for="largeSelect">End User</label>
-
-
-              <select class="form-select form-control" id="enduser_input" name="enduser_input" required>
-                <option value="">Select End User</option>
-                {% for employee in employees %}
-                    <option value="{{ employee.id }}">
-                        {{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}
-                    </option>
-                {% endfor %}
-            </select>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="propertynumber">Asset Owner</label>
-            <select class="form-select form-control" id="assetowner_input" name="assetowner_input" required>
-              <option value="">Select Asset User</option>
-              {% for employee in employees %}
-                  <option value="{{ employee.id }}">
-                      {{ employee.employee_fname }} {{ employee.employee_lname }} - {{ employee.employee_position }}
-                  </option>
-              {% endfor %}
+      <!-- Equipment Selection -->
+      <div class="card mb-3">
+        <div class="card-header"><h5>Select Equipment Type</h5></div>
+        <div class="card-body">
+          <select class="form-select" id="equipmentSelect" name="name_input" required>
+            <option value="" disabled {% if not equipment_type %}selected{% endif %}>Select Equipment Type</option>
+            <option value="Desktop" {% if equipment_type == "Desktop" %}selected{% endif %}>🖥 Desktop</option>
+            <option value="Laptop" {% if equipment_type == "Laptop" %}selected{% endif %}>💻 Laptop</option>
+            <option value="UPS" {% if equipment_type == "UPS" %}selected{% endif %}>🔌 UPS</option>
+            <!-- Later, if you rename UPS to Printer, just change this line: -->
+            <!-- <option value="Printer" {% if equipment_type == "Printer" %}selected{% endif %}>🖨 Printer</option> -->
           </select>
-             </div> <!-- close col-md-4 (Asset Owner) -->
-      </div> <!-- close row -->
-    </div> <!-- close card-body -->
-  </div> <!-- close card.col -->
-</div> <!-- close #UserContainer -->
-
-<!-- Submit/Reset Buttons (inside form) -->
-<div class="card-action">
-  <button type="submit" class="btn btn-success mt-3">Submit</button>
-  <button type="reset" class="btn btn-danger mt-3">Cancel</button>
-</div>
-</form> <!-- ✅ End of form -->
-
-<!-- Scripts and Modals -->
-
-<!-- jQuery -->
-<script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
-<!-- Bootstrap Bundle -->
-<script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script>
-
-<!-- Modal for Duplicate Computer Name -->
-<div class="modal fade" id="duplicateComputerModal" tabindex="-1" aria-labelledby="duplicateComputerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content border-danger">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="duplicateComputerModalLabel">🚫 Duplicate Computer Name</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
       </div>
-      <div class="modal-body text-center">
-        <p>The computer name you entered already exists. Please enter a unique name.</p>
+
+
+     <!-- =================== DESKTOP =================== -->
+<div id="desktopForm" class="equipment-form" style="display:none;">
+
+  <!-- Desktop Info -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>🖥 Desktop Info</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <label>Serial Number</label>
+          <input type="text" name="desktop_serial_no" id="desktop_serial_no" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label>Brand</label>
+          <select name="desktop_brand_name" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in desktop_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label>Model</label>
+          <input type="text" name="desktop_model" class="form-control" required>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Okay</button>
+    </div>
+  </div>
+
+  <!-- Processor & Specs -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>⚡ Processor & Specs</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <label>Processor</label>
+          <select class="form-select" id="desktop_processor" name="desktop_processor" required>
+             <option value="" disabled selected>-- Select Processor --</option>
+            <optgroup label="Core i9">
+              <option value="i9-14900K">Core i9-14900K (14th Gen)</option>
+              <option value="i9-13900K">Core i9-13900K (13th Gen)</option>
+              <option value="i9-12900K">Core i9-12900K (12th Gen)</option>
+            </optgroup>
+            <optgroup label="Core i7">
+              <option value="i7-14700K">Core i7-14700K (14th Gen)</option>
+              <option value="i7-13700K">Core i7-13700K (13th Gen)</option>
+            </optgroup>
+            <optgroup label="Core i5">
+              <option value="i5-14600K">Core i5-14600K (14th Gen)</option>
+              <option value="i5-13600K">Core i5-13600K (13th Gen)</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label>Memory</label>
+          <input type="text" name="desktop_memory" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label>Drive</label>
+          <input type="text" name="desktop_drive" class="form-control" required>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4">
+          <label>Graphics Name</label>
+          <input type="text" name="desktop_Graphics" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label>Graphics Size</label>
+          <input type="text" name="desktop_Graphics_Size" class="form-control" required>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Software -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>⚙ Software</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3"><label>Operating System</label><input type="text" name="desktop_OS" class="form-control" required></div>
+        <div class="col-md-3"><label>Office Version</label><input type="text" name="desktop_Office" class="form-control" required></div>
+        <div class="col-md-3"><label>OS Keys</label><input type="text" name="desktop_OS_keys" class="form-control" required></div>
+        <div class="col-md-3"><label>Office Keys</label><input type="text" name="desktop_Office_keys" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monitor -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>🖥 Monitor</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3"><label>Serial No</label><input type="text" id="monitor_sn_db" name="monitor_sn_db" class="form-control" required></div>
+        <div class="col-md-3">
+          <label>Brand</label>
+          <select name="monitor_brand" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in monitor_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3"><label>Model</label><input type="text" name="monitor_model" class="form-control" required></div>
+        <div class="col-md-3"><label>Size</label><input type="text" name="monitor_size" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>⌨ Keyboard</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4"><label>Serial No</label><input type="text" id="keyboard_sn_db" name="keyboard_sn_db" class="form-control" required></div>
+        <div class="col-md-4">
+          <label>Brand</label>
+          <select name="keyboard_brand" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in keyboard_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4"><label>Model</label><input type="text" name="keyboard_model" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mouse -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>🖱 Mouse</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4"><label>Serial No</label><input type="text" id="mouse_sn_db" name="mouse_sn_db" class="form-control" required></div>
+        <div class="col-md-4">
+          <label>Brand</label>
+          <select name="mouse_brand" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in mouse_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4"><label>Model</label><input type="text" name="mouse_model" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPS -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>🔌 UPS</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3"><label>Serial No</label><input type="text" id="ups_sn_db" name="ups_sn_db" class="form-control" required></div>
+        <div class="col-md-3">
+          <label>Brand</label>
+          <select name="ups_brand" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in ups_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3"><label>Model</label><input type="text" name="ups_model" class="form-control" required></div>
+        <div class="col-md-3"><label>Capacity</label><input type="text" name="ups_capacity" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>📑 Documents</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4"><label>PAR</label><input type="text" name="par_number_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Property No</label><input type="text" name="property_number_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Acquisition Type</label><input type="text" name="acquisition_type_input" class="form-control" required></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4"><label>Value</label><input type="text" name="value_desktop_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Date Received</label><input type="date" name="date_received_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Date Inspected</label><input type="date" name="date_inspected_input" class="form-control" required></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4"><label>Supplier</label><input type="text" name="supplier_name_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Status</label><input type="text" name="status_desktop_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Computer Name</label><input type="text" name="computer_name_input" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Assignment -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>👤 User Assignment</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <label>End User</label>
+          <select name="enduser_input" class="form-select" required>
+            <option value="">Select End User</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>Asset Owner</label>
+          <select name="assetowner_input" class="form-select" required>
+            <option value="">Select Asset Owner</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- JavaScript for Dynamic Form Display -->
-<script>
-  document.getElementById('equipmentSelect').addEventListener('change', function() {
-    // Hide all form containers initially
-    document.querySelectorAll('.equipment-form').forEach(function(form) {
-      form.style.display = 'none';
-    });
-    
-    // Hide additional details container
-    
-    document.getElementById('MonitorContainer').style.display = 'none';
-    document.getElementById('KeyboardContainer').style.display = 'none';
-    document.getElementById('MouseContainer').style.display = 'none';
-    document.getElementById('UPSContainer').style.display = 'none';
-    document.getElementById('DocumentsContainer').style.display = 'none';
-    document.getElementById('UserContainer').style.display = 'none';
-    
+
+   <!--  ======== LAPTOP =================== -->
+<div id="laptopForm" class="equipment-form" style="display:none;">
+  <!-- Laptop Info -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>💻 Laptop Info</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <label>Serial Number</label>
+          <input type="text" id="laptop_sn_db" name="laptop_sn_db" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label>Brand</label>
+          <select name="laptop_brand_name" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in laptop_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label>Model</label>
+          <input type="text" name="laptop_model" class="form-control" required>
+        </div>
+      </div>
 
 
 
-    // Show the selected form and additional details if Desktop is selected
-    const selectedValue = this.value;
-    if (selectedValue === 'Desktop') {
-      document.getElementById('desktopForm').style.display = 'block';
-      document.getElementById('MonitorContainer').style.display = 'block';
-      document.getElementById('KeyboardContainer').style.display = 'block';
-      document.getElementById('MouseContainer').style.display = 'block';
-      document.getElementById('UPSContainer').style.display = 'block';
-      document.getElementById('DocumentsContainer').style.display = 'block';
-      document.getElementById('UserContainer').style.display = 'block';
       
-      
-
-
-    } else if (selectedValue === 'Laptop') {
-      document.getElementById('laptopForm').style.display = 'block';
-    } else if (selectedValue === 'UPS') {
-      document.getElementById('upsForm').style.display = 'block';
-    }
-  });
-</script>
+      <!-- ✅ Added Processor, Memory, Drive -->
+      <div class="row mt-2">
+        <div class="col-md-4">
+          <label>Processor</label>
+          <input type="text" name="laptop_processor" class="form-control">
+        </div>
+        <div class="col-md-4">
+          <label>Memory (RAM)</label>
+          <input type="text" name="laptop_memory" class="form-control">
+        </div>
+        <div class="col-md-4">
+          <label>Drive</label>
+          <input type="text" name="laptop_drive" class="form-control">
+        </div>
+      </div>
+    </div>
+  </div>
   
- 
+  
 
-<script>// Always prevent to run validation first
-  async function checkDuplicateName(name) {
-    const response = await fetch(`/check_computer_name/?computer_name=${encodeURIComponent(name)}`);
-    const data = await response.json();
-    return data.exists;
-  }
+  <!-- Laptop Software -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>⚙ Software</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6"><label>Operating System</label><input type="text" name="laptop_OS" class="form-control"></div>
+        <div class="col-md-6"><label>OS Key</label><input type="text" name="laptop_OS_keys" class="form-control"></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-6"><label>Office</label><input type="text" name="laptop_Office" class="form-control"></div>
+        <div class="col-md-6"><label>Office Key</label><input type="text" name="laptop_Office_keys" class="form-control"></div>
+      </div>
+    </div>
+  </div>
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('addEquipmentForm');
-    const input = document.getElementById('computername');
-    const modalEl = document.getElementById('duplicateComputerModal');
+  <!-- Laptop Documents -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>📑 Documents</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4"><label>PAR</label><input type="text" name="par_number_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Property No</label><input type="text" name="property_number_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Acquisition Type</label><input type="text" name="acquisition_type_input" class="form-control" required></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4"><label>Value</label><input type="text" name="value_laptop_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Date Received</label><input type="date" name="date_received_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Date Inspected</label><input type="date" name="date_inspected_input" class="form-control" required></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4"><label>Supplier</label><input type="text" name="supplier_name_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Status</label><input type="text" name="status_laptop_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Computer Name</label><input type="text" name="laptop_computer_name" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
 
-    if (!form || !input || !modalEl) return;
+  <!-- Laptop User -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>👤 User Assignment</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <label>End User</label>
+          <select name="enduser_input" class="form-select" required>
+            <option value="">Select End User</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>Asset Owner</label>
+          <select name="assetowner_input" class="form-select" required>
+            <option value="">Select Asset Owner</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    const modal = new bootstrap.Modal(modalEl);
+      {% comment %} <!-- =================== UPS ONLY =================== -->
+      <div id="upsForm" class="equipment-form" style="display:none;">
+        <div class="card mb-3">
+          <div class="card-header"><h5>🔌 Printer Only</h5></div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-3"><label>Serial</label><input type="text" name="ups_sn_db" class="form-control"></div>
+              <div class="col-md-3">
+                <label>Brand</label>
+                <select name="ups_brand" class="form-select">
+                  <option value="">-- Select Brand --</option>
+                  {% for brand in ups_brands %}
+                    <option value="{{ brand.id }}">{{ brand.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3"><label>Model</label><input type="text" name="ups_model" class="form-control"></div>
+              <div class="col-md-3"><label>Capacity</label><input type="text" name="ups_capacity" class="form-control"></div>
+            </div>
+          </div>
+        </div>
+      </div> {% endcomment %}
 
-    form.addEventListener('submit', async function (e) { 
-      e.preventDefault();  // Always prevent to run validation first
-      const name = input.value.trim();
-
-      if (!name) {
-        input.classList.add('is-invalid');
-        return;
-      }
-
-      const isDuplicate = await checkDuplicateName(name);
-      if (isDuplicate) {
-        input.classList.add('is-invalid');
-        modal.show();
-      } else {
-        input.classList.remove('is-invalid');
-        // Submit only when validated and not duplicate
-        form.submit();  // ✅ this will truly submit the form
-      }
-    });
-  });
-</script> 
+      <!-- Submit -->
+      <div class="text-end mt-3">
+        <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Submit</button>
+      </div>
+    </form>
+  </div>
+</div><script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
 
 <script>
 $(function () {
-  // Helper: attach a duplicate checker to an input
-  function attachDuplicateChecker(selector, category) {
-    var $input = $(selector);
-    if (!$input.length) return; // skip if field isn't on this page
+  const $form = $("#addEquipmentForm");
 
-    var $form = $input.closest('form');
+  // 🔹 Helper: show alert
+  function showAlert(errors) {
+    $(".alert-validation").remove();
+    if (errors.length > 0) {
+      let alertBox = $(`
+        <div class="alert alert-danger alert-dismissible fade show mt-2 alert-validation">
+          <strong>❌ Please fix the following:</strong>
+          <ul class="mb-0">${errors.map(err => `<li>${err}</li>`).join("")}</ul>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `);
+      $form.prepend(alertBox);
+      $form[0].scrollIntoView({ behavior: "smooth" });
+    }
+  }
+
+  // 🔹 Helper: duplicate checker
+  function attachDuplicateChecker(selector, category) {
+    const $input = $(selector);
+    if (!$input.length) return;
 
     function notify(msg, type) {
-      if (window.$ && $.notify) {
-        $.notify({ message: msg }, { type: type || 'danger' });
+      if ($.notify) {
+        $.notify({ message: msg }, { type: type || "danger" });
       } else {
         alert(msg);
       }
     }
 
-    function normalize(v) {
-      return (v || '').trim();
-    }
+    function normalize(v) { return (v || "").trim(); }
 
-    // Check once (returns a Promise<boolean>)
     function checkOnce() {
-      var val = normalize($input.val());
+      const val = normalize($input.val());
       if (!val) {
-        $input.removeClass('is-invalid is-valid');
+        $input.removeClass("is-invalid is-valid");
         return Promise.resolve(false);
       }
       return $.get("{% url 'check_serial_no' %}", { serial: val, category: category })
         .then(function (data) {
-          var dup = !!(data && data.exists);
+          const dup = !!(data && data.exists);
           if (dup) {
-            $input.addClass('is-invalid').removeClass('is-valid');
-            notify("❌ " + category + " SN '" + val + "' already exists.", 'danger');
+            $input.addClass("is-invalid").removeClass("is-valid");
+            notify(`❌ ${category} SN '${val}' already exists.`, "danger");
           } else {
-            $input.addClass('is-valid').removeClass('is-invalid');
+            $input.addClass("is-valid").removeClass("is-invalid");
           }
           return dup;
         })
-        .catch(function () { return false; });
+        .catch(() => false);
     }
 
-    // Run on blur
-    $input.on('blur', function () { checkOnce(); });
-
-    // Hard block on submit if duplicate
-    $form.on('submit', function (e) {
-      // only gate if the input is visible/enabled on this form
-      if (!$input.is(':visible') || $input.is(':disabled')) return;
-
-      e.preventDefault();
-      checkOnce().then(function (isDup) {
-        if (isDup) {
-          $input.focus();
-        } else {
-          // allow form to continue after async check passes
-          $form.off('submit'); 
-          $form.trigger('submit');
-        }
-      });
-    });
+    $input.on("blur", () => checkOnce());
+    return checkOnce;
   }
 
-  // Attach to your known IDs (adjust if your inputs use different IDs)
-  attachDuplicateChecker('#desktop_serial_no', 'Desktop');
-  attachDuplicateChecker('#monitor_sn', 'Monitor');
-  attachDuplicateChecker('#keyboard_sn', 'Keyboard');
-  attachDuplicateChecker('#mouse_sn', 'Mouse'); // optional; runs only if not empty
-  attachDuplicateChecker('#ups_sn', 'UPS');
+  // Attach duplicate checkers
+  const dupCheckers = [
+    attachDuplicateChecker("#desktop_serial_no", "Desktop"),
+    attachDuplicateChecker("#monitor_sn_db", "Monitor"),
+    attachDuplicateChecker("#keyboard_sn_db", "Keyboard"),
+    attachDuplicateChecker("#mouse_sn_db", "Mouse"),
+    attachDuplicateChecker("#ups_sn_db", "UPS"),
+    attachDuplicateChecker("#laptop_sn_db", "Laptop"),
+  ].filter(fn => fn);
+
+  // 🔹 Unified submit handler
+  $form.on("submit", function (e) {
+    e.preventDefault();
+
+    Promise.all(dupCheckers.map(fn => fn())).then(results => {
+      if (results.includes(true)) {
+        return; // block on duplicate
+      }
+
+      let errors = [];
+      const activeForm = document.querySelector(".equipment-form[style*='block']");
+      if (activeForm) {
+        activeForm.querySelectorAll("input[required], select[required]").forEach(el => {
+          if (!el.value || el.value.trim() === "") {
+            let label = el.closest(".col-md-4, .col-md-3, .col-md-6")?.querySelector("label");
+            let fieldName = label ? label.innerText : el.name;
+            errors.push(fieldName + " is required.");
+            el.classList.add("is-invalid");
+          } else {
+            el.classList.remove("is-invalid");
+          }
+        });
+      }
+
+      if (errors.length > 0) {
+        showAlert(errors);
+        return;
+      }
+
+      // ✅ All good → submit for real
+      $form.off("submit");
+      $form.trigger("submit");
+    });
+  });
+
+  // 🔹 Toggle equipment forms
+  $("#equipmentSelect").on("change", function () {
+    // Hide & disable everything first
+    $(".equipment-form")
+      .hide()
+      .find("input, select, textarea")
+      .prop("disabled", true)
+      .prop("required", false);
+
+    if (this.value === "Desktop") {
+      const form = $("#desktopForm").show();
+      form.find("input, select, textarea").prop("disabled", false);
+
+      // mark Desktop requireds
+      form.find("[name=desktop_serial_no],[name=desktop_brand_name],[name=desktop_model],[name=desktop_processor],[name=desktop_memory],[name=desktop_drive],[name=computer_name_input]").prop("required", true);
+      form.find("[name=monitor_sn_db],[name=monitor_brand],[name=monitor_model],[name=monitor_size]").prop("required", true);
+      form.find("[name=keyboard_sn_db],[name=keyboard_brand],[name=keyboard_model]").prop("required", true);
+      form.find("[name=mouse_sn_db],[name=mouse_brand],[name=mouse_model]").prop("required", true);
+      form.find("[name=ups_sn_db],[name=ups_brand],[name=ups_model],[name=ups_capacity]").prop("required", true);
+      form.find("[name=par_number_input],[name=property_number_input],[name=acquisition_type_input],[name=value_desktop_input],[name=date_received_input],[name=date_inspected_input],[name=supplier_name_input],[name=status_desktop_input]").prop("required", true);
+      form.find("[name=enduser_input],[name=assetowner_input]").prop("required", true);
+    }
+
+    if (this.value === "Laptop") {
+      const form = $("#laptopForm").show();
+      form.find("input, select, textarea").prop("disabled", false);
+
+      // ✅ only enforce Laptop fields required by backend
+      form.find("[name=laptop_sn_db],[name=laptop_brand_name],[name=laptop_model],[name=laptop_computer_name]").prop("required", true);
+      form.find("[name=par_number_input],[name=property_number_input],[name=acquisition_type_input],[name=value_laptop_input],[name=date_received_input],[name=date_inspected_input],[name=supplier_name_input],[name=status_laptop_input]").prop("required", true);
+      form.find("[name=enduser_input],[name=assetowner_input]").prop("required", true);
+    }
+
+    if (this.value === "Printer") {
+      const form = $("#upsForm").show();
+      form.find("input, select, textarea").prop("disabled", false).prop("required", true);
+    }
+  });
+
+  // 🔹 Initialize state on load
+  $("#equipmentSelect").trigger("change");
 });
 </script>
 
-{% endblock %}
 
+
+{% endblock %}

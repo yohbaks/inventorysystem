@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3 text-primary">
+        <i class="fas fa-laptop me-2"></i> Add Laptop Package
+      </h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home"><a href="{% url 'desktop_details' %}"><i class="icon-home"></i></a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item">Laptops</li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item">Add</li>
+      </ul>
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-8 offset-md-2">
+
+          <!-- Laptop Info -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white">
+              <h5 class="mb-0">💻 Laptop Details</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label">Serial Number</label>
+                <input type="text" class="form-control" name="laptop_serial_no" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Computer Name</label>
+                <input type="text" class="form-control" name="laptop_computer_name" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Brand</label>
+                <select class="form-select" name="laptop_brand_name" required>
+                  <option value="">-- Select Brand --</option>
+                  {% for brand in laptop_brands %}
+                    <option value="{{ brand.id }}">{{ brand.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Model</label>
+                  <input type="text" class="form-control" name="laptop_model">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Processor</label>
+                  <input type="text" class="form-control" name="laptop_processor">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Memory</label>
+                  <input type="text" class="form-control" name="laptop_memory">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Drive</label>
+                  <input type="text" class="form-control" name="laptop_drive">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Software -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">⚙ Software</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Operating System</label>
+                  <input type="text" class="form-control" name="laptop_OS">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">OS Key</label>
+                  <input type="text" class="form-control" name="laptop_OS_keys">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Office</label>
+                  <input type="text" class="form-control" name="laptop_Office">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Office Key</label>
+                  <input type="text" class="form-control" name="laptop_Office_keys">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documents -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-info text-white">
+              <h5 class="mb-0">📑 Documents</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">PAR</label>
+                  <input type="text" class="form-control" name="par_number_input">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Property No</label>
+                  <input type="text" class="form-control" name="property_number_input">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Acquisition Type</label>
+                <input type="text" class="form-control" name="acquisition_type_input">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Value</label>
+                <input type="text" class="form-control" name="value_laptop_input">
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Date Received</label>
+                  <input type="date" class="form-control" name="date_received_input">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Date Inspected</label>
+                  <input type="date" class="form-control" name="date_inspected_input">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Supplier</label>
+                <input type="text" class="form-control" name="supplier_name_input">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Status</label>
+                <input type="text" class="form-control" name="status_laptop_input">
+              </div>
+            </div>
+          </div>
+
+          <!-- Users -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-warning text-dark">
+              <h5 class="mb-0">👤 User Assignment</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label">End User</label>
+                <select class="form-select" name="enduser_input">
+                  <option value="">-- Select End User --</option>
+                  {% for emp in employees %}
+                    <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Asset Owner</label>
+                <select class="form-select" name="assetowner_input">
+                  <option value="">-- Select Asset Owner --</option>
+                  {% for emp in employees %}
+                    <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="text-end">
+            <button type="submit" class="btn btn-success">
+              <i class="fas fa-save me-2"></i> Save Laptop
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -32,22 +32,22 @@
               <div><strong>Joined:</strong> {{ request.user.date_joined|date:"Y-m-d" }}</div>
             </div>
             <hr>
-<div class="text-center">
-  <h6 class="mb-2">Scan to view my assets</h6>
-  {% if profile.qr_code %}
-    <img src="{{ profile.qr_code.url }}" alt="User QR" width="180" height="180" class="rounded" />
-  {% else %}
-    <div class="text-muted small">QR will appear after refresh.</div>
-  {% endif %}
-  <div class="mt-2">
-    <a href="{% url 'user_assets_public' profile.qr_token %}" class="btn btn-outline-secondary btn-sm">
-      Open QR Link
-    </a>
-    <a href="{% url 'regenerate_user_qr' %}" class="btn btn-outline-danger btn-sm ms-1">
-      Regenerate
-    </a>
-  </div>
-</div>
+            <div class="text-center">
+              <h6 class="mb-2">Scan to view my assets</h6>
+              {% if profile.qr_code %}
+                <img src="{{ profile.qr_code.url }}" alt="User QR" width="180" height="180" class="rounded" />
+              {% else %}
+                <div class="text-muted small">QR will appear after refresh.</div>
+              {% endif %}
+              <div class="mt-2">
+                <a href="{% url 'user_assets_public' profile.qr_token %}" class="btn btn-outline-secondary btn-sm">
+                  Open QR Link
+                </a>
+                <a href="{% url 'regenerate_user_qr' %}" class="btn btn-outline-danger btn-sm ms-1">
+                  Regenerate
+                </a>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -150,10 +150,15 @@
             </form>
           </div>
         </div>
+      </div> <!-- end col-md-8 -->
+    </div> <!-- end row g-4 -->
 
-        {% if assigned_packages %}
-        <div class="card shadow-sm mt-4">
-          <div class="card-header"><h5 class="mb-0">My Assigned Equipment</h5></div>
+    <!-- Full-width Assigned Assets Section -->
+    <div class="row mt-4">
+      {% if assigned_packages %}
+      <div class="col-md-12">
+        <div class="card shadow-sm">
+          <div class="card-header"><h5 class="mb-0">My Assigned Desktop</h5></div>
           <div class="card-body table-responsive">
             <table class="table table-bordered table-hover">
               <thead>
@@ -164,14 +169,13 @@
                 {% with dd=dp.desktop_details.first %}
                 <tr>
                   <td>#{{ dp.id }}</td>
-                  <td>
-                    {% if dd %}
-                        {{ dd.computer_name }}
-                    {% else %}
-                        —
-                    {% endif %}
-                    </td>
-                  <td>{% if dd and not dd.is_disposed %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Disposed</span>{% endif %}</td>
+                  <td>{% if dd %}{{ dd.computer_name }}{% else %}—{% endif %}</td>
+                  <td>{% if dd and not dd.is_disposed %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-danger">Disposed</span>
+                      {% endif %}
+                  </td>
                 </tr>
                 {% endwith %}
                 {% endfor %}
@@ -179,10 +183,40 @@
             </table>
           </div>
         </div>
-        {% endif %}
-
       </div>
-    </div>
+      {% endif %}
+
+      {% if assigned_laptops %}
+      <div class="col-md-12 mt-4">
+        <div class="card shadow-sm">
+          <div class="card-header"><h5 class="mb-0">My Assigned Laptops</h5></div>
+          <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr><th>Package</th><th>Computer Name</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for lp in assigned_laptops %}
+                {% with ld=lp.laptop_details.first %}
+                <tr>
+                  <td>#{{ lp.id }}</td>
+                  <td>{% if ld %}{{ ld.computer_name }}{% else %}—{% endif %}</td>
+                  <td>{% if ld and not ld.is_disposed %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-danger">Disposed</span>
+                      {% endif %}
+                  </td>
+                </tr>
+                {% endwith %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div> <!-- end full-width row -->
   </div>
 </div>
 {% endblock %}
