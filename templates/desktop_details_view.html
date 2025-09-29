@@ -475,7 +475,7 @@ function printQrCode() {
       <p class="text-muted m-0">No preventive maintenance schedule found for this desktop.</p>
     {% endif %}
 
-    {% if messages %}
+    {% comment %} {% if messages %}
             <script>
               $(document).ready(function () {
                 {% for message in messages %}
@@ -492,7 +492,7 @@ function printQrCode() {
                 {% endfor %}
               });
             </script>
-            {% endif %}
+            {% endif %} {% endcomment %}
   </div>
 </div>
 
@@ -1761,24 +1761,17 @@ function printQrCode() {
 <script>
   {% if messages %}
     {% for message in messages %}
-      $.notify({
-        // Message content
-        message: "{{ message|escapejs }}"
-      },{
-        // Bootstrap Notify settings
-        type: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
-        allow_dismiss: true,
-        placement: {
-          from: "top",
-          align: "right"
-        },
-        delay: 4000, // auto-hide after 4s
-        animate: {
-          enter: 'animate__animated animate__fadeInDown',
-          exit: 'animate__animated animate__fadeOutUp'
-        }
-      });
-    {% endfor %}
+                  $.notify({
+                    message: "{{ message|escapejs }}",
+                    title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
+                    icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
+                  }, {
+                    type: "{{ message.tags }}",
+                    placement: { from: "bottom", align: "right" },
+                    delay: 4000,
+                    z_index: 9999
+                  });
+                {% endfor %}
   {% endif %}
 </script>
 

@@ -56,7 +56,8 @@
                     <!-- Laptop Dropdown -->
                     <div class="mb-3 device-select" id="laptopWrapper" style="display:none;">
                       <label class="form-label">Laptop</label>
-                      <select id="laptopSelect" class="form-select" name="laptop_id">
+                      
+                      <select id="laptopSelect" class="form-select" name="laptop_package_id">  
                         <option value="">-- Select Laptop --</option>
                         {% for l in laptops %}
                           {% if l.enduser_name and l.section_name %}
