@@ -10,11 +10,13 @@
         <div class="card card-round">
           <div class="card-header">
             <div class="card-tools">
-              {% if not laptop_details.is_disposed %}
+              {% with details=laptop_package.laptop_details.first %}
+              {% if details and not details.is_disposed %}
               <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#disposeModal">
                 <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Return to Supply
               </button>
               {% endif %}
+              {% endwith %}
               <a href="#" class="btn btn-label-info btn-round btn-sm">
                 <span class="btn-label"><i class="fa fa-print"></i></span> Maintenance
               </a>
@@ -101,7 +103,7 @@
         <div class="card card-secondary bg-secondary-gradient">
           <div class="card-body curves-shadow">
             <img src="{% static 'img/kaiadmin/logo_light.svg' %}" height="20">
-            <h1 class="py-4 mb-0">{{ laptop_details.computer_name }}</h1>
+            <h1 class="py-4 mb-0">{{ laptop_package.computer_name }}</h1>
             {% if user_details %}
             <div class="row">
               <div class="col-8 pe-0">
@@ -124,56 +126,52 @@
         <div class="card">
           <div class="card-header"><div class="card-title">Laptop Details</div></div>
           <div class="card-body">
-            {% if laptop_details %}
-            <table class="table table-head-bg-success table-bordered table-hover">
+            {% with details=laptop_package.laptop_details.first %}
+              {% if details %}
+              <table class="table table-head-bg-success table-bordered table-hover">
+                <tbody>
+                  <tr><td><strong>Serial Number</strong></td><td>{{ details.laptop_sn_db }}</td></tr>
+                  <tr><td><strong>Brand</strong></td><td>{{ details.brand_name }}</td></tr>
+                  <tr><td><strong>Model</strong></td><td>{{ details.model }}</td></tr>
+                  <tr><td><strong>Processor</strong></td><td>{{ details.processor }}</td></tr>
+                  <tr><td><strong>Memory</strong></td><td>{{ details.memory }}</td></tr>
+                  <tr><td><strong>Drive</strong></td><td>{{ details.drive }}</td></tr>
+                  <tr><td><strong>OS</strong></td><td>{{ details.laptop_OS }}</td></tr>
+                  <tr><td><strong>Office</strong></td><td>{{ details.laptop_Office }}</td></tr>
+                </tbody>
+              </table>
+              {% else %}
+                <p class="text-muted">No laptop details available.</p>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+
+        <!-- Disposal History -->
+        <div class="card mt-3">
+          <div class="card-header"><div class="card-title">Disposed History</div></div>
+          <div class="card-body">
+            {% if disposed_laptops %}
+            <table class="table table-head-bg-danger table-bordered table-hover">
+              <thead><tr><th>Serial</th><th>Brand</th><th>Model</th><th>Reason</th><th>Date</th></tr></thead>
               <tbody>
-                <tr><td><strong>Serial Number</strong></td><td>{{ laptop_details.laptop_sn_db }}</td></tr>
-                <tr><td><strong>Brand</strong></td><td>{{ laptop_details.brand_name }}</td></tr>
-                <tr><td><strong>Model</strong></td><td>{{ laptop_details.model }}</td></tr>
-                <tr><td><strong>Processor</strong></td><td>{{ laptop_details.processor }}</td></tr>
-                <tr><td><strong>Memory</strong></td><td>{{ laptop_details.memory }}</td></tr>
-                <tr><td><strong>Drive</strong></td><td>{{ laptop_details.drive }}</td></tr>
-                <tr><td><strong>OS</strong></td><td>{{ laptop_details.laptop_OS }}</td></tr>
-                <tr><td><strong>Office</strong></td><td>{{ laptop_details.laptop_Office }}</td></tr>
+                {% for d in disposed_laptops %}
+                <tr class="table-danger">
+                  <td>{{ d.serial_no }}</td>
+                  <td>{{ d.brand_name }}</td>
+                  <td>{{ d.model }}</td>
+                  <td>{{ d.reason }}</td>
+                  <td>{{ d.date_disposed|date:"Y-m-d" }}</td>
+                </tr>
+                {% endfor %}
               </tbody>
             </table>
             {% else %}
-              <p class="text-muted">No laptop details available.</p>
+            <p class="text-muted">No disposal records.</p>
             {% endif %}
           </div>
-
-
-
-
-          
         </div>
-         <!-- Disposal History -->
-    <div class="card mt-3">
-      <div class="card-header"><div class="card-title">Disposed History</div></div>
-      <div class="card-body">
-        {% if disposed_laptops %}
-        <table class="table table-head-bg-danger table-bordered table-hover">
-          <thead><tr><th>Serial</th><th>Brand</th><th>Model</th><th>Reason</th><th>Date</th></tr></thead>
-          <tbody>
-            {% for d in disposed_laptops %}
-            <tr class="table-danger">
-              <td>{{ d.serial_no }}</td>
-              <td>{{ d.brand_name }}</td>
-              <td>{{ d.model }}</td>
-              <td>{{ d.reason }}</td>
-              <td>{{ d.date_disposed|date:"Y-m-d" }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-        {% else %}
-        <p class="text-muted">No disposal records.</p>
-        {% endif %}
       </div>
-    </div>
-  </div>
-
-   
 
       <!-- User -->
       <div class="tab-pane fade" id="tab-user">
@@ -234,10 +232,41 @@
       <!-- PM Schedule -->
       <div class="tab-pane fade" id="tab-pm">
         <div class="card">
-          <div class="card-header"><div class="card-title">Preventive Maintenance</div></div>
+          <div class="card-header">
+            <div class="card-title">Preventive Maintenance Schedule</div>
+          </div>
           <div class="card-body">
             {% if pm_assignments %}
-              <p>PM schedule goes here (like desktop view).</p>
+              <table class="table table-bordered table-hover table-striped">
+                <thead class="table-light">
+                  <tr>
+                    <th>Quarter</th>
+                    <th>Section</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Remarks</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for assignment in pm_assignments %}
+                    <tr>
+                      <td>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</td>
+                      <td>{{ assignment.pm_section_schedule.section.name }}</td>
+                      <td>{{ assignment.pm_section_schedule.start_date|date:"Y-m-d" }}</td>
+                      <td>{{ assignment.pm_section_schedule.end_date|date:"Y-m-d" }}</td>
+                      <td>{{ assignment.remarks|default:"—" }}</td>
+                      <td>
+                        {% if assignment.is_completed %}
+                          <span class="badge bg-success">Completed</span>
+                        {% else %}
+                          <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             {% else %}
               <p class="text-muted">No PM schedule assigned yet.</p>
             {% endif %}
@@ -246,12 +275,12 @@
       </div>
     </div>
 
-   
 <!-- Dispose Modal -->
 <div class="modal fade" id="disposeModal" tabindex="-1">
   <div class="modal-dialog">
-    {% if laptop_details %}
-    <form method="POST" action="{% url 'dispose_laptop' laptop_details.id %}">
+    {% with details=laptop_package.laptop_details.first %}
+    {% if details %}
+    <form method="POST" action="{% url 'dispose_laptop' details.id %}">
       {% csrf_token %}
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">
@@ -273,6 +302,7 @@
         ⚠ No active laptop to dispose in this package.
       </div>
     {% endif %}
+    {% endwith %}
   </div>
 </div>
 

@@ -153,11 +153,14 @@ urlpatterns = [
     # Laptop paths - consistently use package_id
     path("laptops/", views.laptop_list, name="laptop_list"),
     path("laptops/<int:package_id>/", views.laptop_details_view, name="laptop_details_view"),
+    
     path("laptops/dispose/<int:package_id>/", views.dispose_laptop, name="dispose_laptop"),
     path("laptops/disposed/", views.disposed_laptops, name="disposed_laptops"),
-
+    
     # Maintenance (Laptop)
     path("maintenance/history/laptop/<int:package_id>/", views.maintenance_history_laptop, name="maintenance_history_laptop"),
+    
+    
     path("maintenance/checklist/laptop/<int:package_id>/", views.checklist_laptop, name="checklist_laptop"),
 
 

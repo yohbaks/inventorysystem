@@ -2275,14 +2275,15 @@ def maintenance_history_view(request, desktop_id):
         'current_pm_schedule': current_pm_schedule,  # New table data
     })
 
-def maintenance_history_laptop(request, laptop_id):
-    # Get the laptop and related details
-    laptop = get_object_or_404(LaptopDetails, pk=laptop_id)
 
-    # Completed maintenance history
+def maintenance_history_laptop(request, package_id):
+    # Get the laptop package
+    laptop_package = get_object_or_404(LaptopPackage, pk=package_id)
+
+    # Completed maintenance history (linked by laptop_package)
     maintenance_history = (
         PreventiveMaintenance.objects
-        .filter(laptop_package=laptop)
+        .filter(laptop_package=laptop_package)
         .select_related('pm_schedule_assignment__pm_section_schedule__quarter_schedule')
         .order_by('date_accomplished')
     )
@@ -2292,7 +2293,7 @@ def maintenance_history_laptop(request, laptop_id):
 
     # Current (pending) PM assignments
     current_pm_schedule = PMScheduleAssignment.objects.filter(
-        laptop_package=laptop
+        laptop_package=laptop_package
     ).select_related(
         'pm_section_schedule__quarter_schedule',
         'pm_section_schedule__section'
@@ -2302,22 +2303,13 @@ def maintenance_history_laptop(request, laptop_id):
     )
 
     return render(request, 'maintenance/laptop_history.html', {
-        'laptop': laptop,
+        'laptop_package': laptop_package,
         'maintenance_history': maintenance_history,
         'maintenance_records': maintenance_history,
         'pm': latest_pm,
         'current_pm_schedule': current_pm_schedule,  # New table data
     })
 
-
-# def get_schedule_date_range(request, quarter_id):
-#     schedule = PMSectionSchedule.objects.filter(quarter_schedule_id=quarter_id).first()
-#     if schedule:
-#         return JsonResponse({
-#             "start_date": schedule.start_date.strftime("%Y-%m-%d"),
-#             "end_date": schedule.end_date.strftime("%Y-%m-%d")
-#         })
-#     return JsonResponse({}, status=404)
 
 def get_schedule_date_range(request, quarter_id, section_id):
     try:
@@ -2555,19 +2547,24 @@ def pm_overview_view(request):
         desktop_detail = DesktopDetails.objects.filter(desktop_package=desktop).first()
         desktop.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
 
-    # ✅ Laptops list with user + section (fixed related_name)
+    # ✅ Laptops list with user + section
     laptops = list(
-        LaptopDetails.objects.prefetch_related(
+        LaptopPackage.objects.prefetch_related(
             Prefetch(
-                'user_details',   # 👈 correct related_name
+                'user_details',
                 queryset=UserDetails.objects.select_related('user_Enduser__employee_office_section')
-            )
+            ),
+            'laptop_details'  # also grab specs
         )
     )
-    for laptop in laptops:
-        u = laptop.user_details.first()  # 👈 correct reverse accessor
-        laptop.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
-        laptop.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
+
+    for package in laptops:
+        laptop_detail = package.laptop_details.first()
+        package.computer_name_display = laptop_detail.computer_name if laptop_detail else "N/A"
+
+        u = package.user_details.first()
+        package.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
+        package.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
 
     # Schedules
     schedules = PMSectionSchedule.objects.select_related('section', 'quarter_schedule')
@@ -2609,14 +2606,14 @@ def assign_pm_schedule(request):
             messages.success(request, "Desktop successfully assigned to schedule.")
 
         elif device_type == "laptop":
-            laptop_id = request.POST.get('laptop_id')
-            laptop = get_object_or_404(LaptopDetails, pk=laptop_id)
+            laptop_id = request.POST.get('laptop_package_id')   # 👈 must be LaptopPackage, not LaptopDetails
+            laptop_package = get_object_or_404(LaptopPackage, pk=laptop_id)
 
-            if PMScheduleAssignment.objects.filter(laptop_package=laptop, pm_section_schedule=schedule).exists():
+            if PMScheduleAssignment.objects.filter(laptop_package=laptop_package, pm_section_schedule=schedule).exists():
                 messages.warning(request, "This laptop is already assigned to this schedule.")
                 return redirect('pm_overview')
 
-            PMScheduleAssignment.objects.create(laptop_package=laptop, pm_section_schedule=schedule)
+            PMScheduleAssignment.objects.create(laptop_package=laptop_package, pm_section_schedule=schedule)
             messages.success(request, "Laptop successfully assigned to schedule.")
 
         else:
@@ -2624,7 +2621,6 @@ def assign_pm_schedule(request):
             return redirect('pm_overview')
 
         return redirect('pm_overview')
-
 
 def section_schedule_list_view(request):
     schedules = PMSectionSchedule.objects.select_related('quarter_schedule', 'section').order_by('-start_date')

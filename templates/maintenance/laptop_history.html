@@ -10,25 +10,27 @@
         <div class="card shadow-sm border-0">
           <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
             <div class="card-title">💻 Laptop Detailed Preventive Maintenance Info </div>
-            <a href="{% url 'checklist_laptop' laptop.id %}" class="btn btn-primary btn-sm ms-auto">+ Conduct Maintenance</a>
+            <a href="{% url 'checklist_laptop' laptop_package.id %}" class="btn btn-primary btn-sm ms-auto">+ Conduct Maintenance</a>
           </div>
 
           <div class="card-body">
 
             <!-- Laptop Information -->
+            {% with details=laptop_package.laptop_details.first %}
             <div class="mb-4">
               <h3 class="fw-bold text-dark">
-                <i class="fas fa-laptop me-2 text-primary"></i>{{ laptop.computer_name }}
+                <i class="fas fa-laptop me-2 text-primary"></i>{{ details.computer_name }}
               </h3>
               <div class="row g-3">
-                <div class="col-md-4"><span class="fw-semibold">Brand:</span> {{ laptop.brand.name }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Model:</span> {{ laptop.model }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Serial No:</span> {{ laptop.serial_number }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Processor:</span> {{ laptop.processor }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Memory:</span> {{ laptop.memory }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Drive:</span> {{ laptop.drive }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Brand:</span> {{ details.brand_name }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Model:</span> {{ details.model }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Serial No:</span> {{ details.laptop_sn_db }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Processor:</span> {{ details.processor }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Memory:</span> {{ details.memory }}</div>
+                <div class="col-md-4"><span class="fw-semibold">Drive:</span> {{ details.drive }}</div>
               </div>
             </div>
+            {% endwith %}
 
             <!-- Current PM Schedule -->
             {% if current_pm_schedule %}

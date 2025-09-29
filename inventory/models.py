@@ -633,7 +633,7 @@ class PMScheduleAssignment(models.Model):
         related_name='pm_assignments', null=True, blank=True
     )
     laptop_package = models.ForeignKey(
-        'LaptopDetails', on_delete=models.CASCADE,
+        'LaptopPackage', on_delete=models.CASCADE,   # ✅ now consistent
         related_name='pm_assignments', null=True, blank=True
     )
     pm_section_schedule = models.ForeignKey(
