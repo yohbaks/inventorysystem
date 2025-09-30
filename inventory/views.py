@@ -2327,7 +2327,8 @@ def get_schedule_date_range(request, quarter_id, section_id):
 def checklist(request, desktop_id):
     desktop = get_object_or_404(Desktop_Package, pk=desktop_id)
 
-    quarter_schedules = QuarterSchedule.objects.all().order_by('-year', 'quarter')
+    # quarter_schedules = QuarterSchedule.objects.all().order_by('-year', 'quarter')
+    
      # ❌ If desktop is disposed, block PM and show message
     is_disposed = not DesktopDetails.objects.filter(desktop_package=desktop, is_disposed=False).exists()
 
@@ -2366,7 +2367,12 @@ def checklist(request, desktop_id):
         else None
     )
     
-
+    # ✅ Only include quarters that actually have a schedule for this section
+    quarter_schedules = QuarterSchedule.objects.filter(
+        schedules__schedule_assignments__desktop_package=desktop
+    ).distinct().order_by('-year', 'quarter')
+        
+        # ❌ If no section found, block PM
     if request.method == "POST":
         quarter_id = request.POST.get("quarter_schedule_id")
         date_accomplished = request.POST.get("date_accomplished")
@@ -3396,7 +3402,9 @@ def checklist_laptop(request, package_id):
     laptop_package = get_object_or_404(LaptopPackage, pk=package_id)
     laptop = LaptopDetails.objects.filter(laptop_package=laptop_package, is_disposed=False).first()
 
-    quarter_schedules = QuarterSchedule.objects.all().order_by("-year", "quarter")
+    quarter_schedules = QuarterSchedule.objects.filter(
+        schedules__schedule_assignments__laptop_package=laptop_package
+    ).distinct().order_by("-year", "quarter")
 
     if laptop and laptop.is_disposed:
         messages.error(request, "❌ Laptop was already disposed and cannot be PM anymore.")

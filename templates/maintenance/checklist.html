@@ -106,7 +106,6 @@
     margin-top: 6px;
   }
 </style>
-
 <script>
   const quarterSelect = document.getElementById("quarter_schedule");
   const dateInput = document.getElementById("date_accomplished");
@@ -114,7 +113,7 @@
 
   quarterSelect.addEventListener("change", function () {
     const quarterId = this.value;
-    const sectionId = "{{ section_id|default:0 }}";  // ✅ Use sectionId passed from view, default to 0 if not available
+    const sectionId = "{{ section_id|default:0 }}";  // ✅ Use sectionId passed from view
 
     fetch(`/maintenance/get_schedule_dates/${quarterId}/${sectionId}/`)
       .then(response => response.json())
@@ -122,15 +121,21 @@
         if (data.start_date && data.end_date) {
           dateInput.min = data.start_date;
           dateInput.max = data.end_date;
-          dateInput.value = "";
+          // ✅ Auto-select the start_date as default
+          dateInput.value = data.start_date;
           dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
         } else {
-          dateRangeInfo.innerText = "No schedule found for this section and quarter.";
+          // Clear if somehow no schedule is returned
+          dateInput.min = "";
+          dateInput.max = "";
+          dateInput.value = "";
+          dateRangeInfo.innerText = "";
         }
       })
       .catch(() => {
         dateInput.min = "";
         dateInput.max = "";
+        dateInput.value = "";
         dateRangeInfo.innerText = "Unable to load schedule date range.";
       });
   });
@@ -154,4 +159,5 @@
     });
   </script>
 {% endif %}
+
 {% endblock %}

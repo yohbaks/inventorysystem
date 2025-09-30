@@ -122,15 +122,21 @@
         if (data.start_date && data.end_date) {
           dateInput.min = data.start_date;
           dateInput.max = data.end_date;
-          dateInput.value = "";
+          // ✅ Auto-select start_date as default
+          dateInput.value = data.start_date;
           dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
         } else {
-          dateRangeInfo.innerText = "No schedule found for this section and quarter.";
+          // Clear silently if no data
+          dateInput.min = "";
+          dateInput.max = "";
+          dateInput.value = "";
+          dateRangeInfo.innerText = "";
         }
       })
       .catch(() => {
         dateInput.min = "";
         dateInput.max = "";
+        dateInput.value = "";
         dateRangeInfo.innerText = "Unable to load schedule date range.";
       });
   });
