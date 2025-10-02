@@ -352,6 +352,13 @@ def desktop_details_view(request, package_id):
         'pm_section_schedule__quarter_schedule'
     )
 
+    # Preventive Maintenance History (Completed records)
+    maintenance_records = PreventiveMaintenance.objects.filter(
+        desktop_package=desktop_package
+    ).select_related(
+        "pm_schedule_assignment__pm_section_schedule__quarter_schedule"
+    ).order_by("-date_accomplished")
+
 
     # Change history
     enduser_history = EndUserChangeHistory.objects.filter(desktop_package=desktop_package)
@@ -421,6 +428,7 @@ def desktop_details_view(request, package_id):
         'enduser_history': enduser_history,
         'assetowner_history': assetowner_history,
         'pm_assignments': pm_assignments,
+        'maintenance_records': maintenance_records,
         'salvaged_monitors': salvaged_monitors,
         'salvaged_keyboards': salvaged_keyboards,
         'salvaged_mice': salvaged_mice,
@@ -3425,7 +3433,7 @@ def checklist_laptop(request, package_id):
         3: "Check if installed with anti-virus software authorized by IMS",
         4: "Check if anti-virus definition files are up-to-date",
         5: "Perform full virus scan using updated virus removal tool",
-        6: "Remove all un-authorized software installations",
+        6: "Remove all un-authorized     software installations",
         7: "Remove all un-authorized files (e.g. movies)",
         8: "Check working condition of hardware devices/components",
         9: "Clean hardware and components, and organize cables",
