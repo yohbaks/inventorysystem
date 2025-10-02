@@ -3347,6 +3347,18 @@ def laptop_details_view(request, package_id):
         .order_by('date_accomplished')
     )
 
+    # ✅ Get the section of the end user
+    section = (
+        user_details.user_Enduser.employee_office_section
+        if user_details and user_details.user_Enduser
+        else None
+    )
+
+    # ✅ Filter schedules only for that section
+    schedules = PMSectionSchedule.objects.select_related("quarter_schedule", "section")
+    if section:
+        schedules = schedules.filter(section=section)
+
     # ✅ Current (pending) PM assignments
     current_pm_schedule = PMScheduleAssignment.objects.filter(
         laptop_package=laptop_package
@@ -3367,6 +3379,8 @@ def laptop_details_view(request, package_id):
         'pm_assignments': pm_assignments,
         'current_pm_schedule': current_pm_schedule,
         'maintenance_records': maintenance_history,   # ✅ now available in template
+        'schedules': schedules,
+        'section': section,
     })
 
 @login_required
