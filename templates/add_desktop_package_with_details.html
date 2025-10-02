@@ -32,9 +32,7 @@
             <option value="" disabled {% if not equipment_type %}selected{% endif %}>Select Equipment Type</option>
             <option value="Desktop" {% if equipment_type == "Desktop" %}selected{% endif %}>🖥 Desktop</option>
             <option value="Laptop" {% if equipment_type == "Laptop" %}selected{% endif %}>💻 Laptop</option>
-            <option value="UPS" {% if equipment_type == "UPS" %}selected{% endif %}>🔌 UPS</option>
-            <!-- Later, if you rename UPS to Printer, just change this line: -->
-            <!-- <option value="Printer" {% if equipment_type == "Printer" %}selected{% endif %}>🖨 Printer</option> -->
+            <option value="Printer" {% if equipment_type == "Printer" %}selected{% endif %}>🔌 Printer</option>
           </select>
         </div>
       </div>
@@ -375,28 +373,56 @@
   </div>
 </div>
 
-      {% comment %} <!-- =================== UPS ONLY =================== -->
-      <div id="upsForm" class="equipment-form" style="display:none;">
-        <div class="card mb-3">
-          <div class="card-header"><h5>🔌 Printer Only</h5></div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-3"><label>Serial</label><input type="text" name="ups_sn_db" class="form-control"></div>
-              <div class="col-md-3">
-                <label>Brand</label>
-                <select name="ups_brand" class="form-select">
-                  <option value="">-- Select Brand --</option>
-                  {% for brand in ups_brands %}
-                    <option value="{{ brand.id }}">{{ brand.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="col-md-3"><label>Model</label><input type="text" name="ups_model" class="form-control"></div>
-              <div class="col-md-3"><label>Capacity</label><input type="text" name="ups_capacity" class="form-control"></div>
-            </div>
-          </div>
+      <!-- =================== PRINTER =================== -->
+<div id="printerForm" class="equipment-form" style="display:none;">
+  <div class="card mb-3">
+    <div class="card-header"><h5>🖨 Printer Info</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <label>Serial No</label>
+          <input type="text" id="printer_sn_db" name="printer_sn_db" class="form-control" required>
         </div>
-      </div> {% endcomment %}
+        <div class="col-md-4">
+          <label>Brand</label>
+          <select name="printer_brand" class="form-select" required>
+            <option value="">-- Select Brand --</option>
+            {% for brand in printer_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label>Model</label>
+          <input type="text" name="printer_model" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-md-3"><label>Type</label><input type="text" name="printer_type" class="form-control"></div>
+        <div class="col-md-3"><label>Resolution</label><input type="text" name="printer_resolution" class="form-control"></div>
+        <div class="col-md-3"><label>Monthly Duty</label><input type="text" name="printer_monthly_duty" class="form-control"></div>
+        <div class="col-md-3">
+          <label>Duplex</label>
+          <select name="printer_duplex" class="form-select">
+            <option value="True">Yes</option>
+            <option value="False" selected>No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-md-3">
+          <label>Color</label>
+          <select name="printer_color" class="form-select">
+            <option value="True" selected>Color</option>
+            <option value="False">Monochrome</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
       <!-- Submit -->
       <div class="text-end mt-3">
@@ -544,7 +570,7 @@ $(function () {
     }
 
     if (this.value === "Printer") {
-      const form = $("#upsForm").show();
+      const form = $("#printerForm").show();
       form.find("input, select, textarea").prop("disabled", false).prop("required", true);
     }
   });

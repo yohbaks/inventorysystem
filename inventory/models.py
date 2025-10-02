@@ -55,6 +55,7 @@ class Brand(models.Model):
     is_monitor = models.BooleanField(default=False)
     is_ups = models.BooleanField(default=False)
     is_desktop = models.BooleanField(default=False)
+    is_printer = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -762,3 +763,62 @@ class DisposedLaptop(models.Model):
 
     def __str__(self):
         return f"Disposed Laptop : {self.laptop.computer_name if self.laptop else self.serial_no}"
+    
+
+class PrinterDetails(models.Model):
+    desktop_package = models.ForeignKey(
+        Desktop_Package, related_name='printers',
+        on_delete=models.CASCADE
+    )
+    printer_sn_db = models.CharField(max_length=255)
+    printer_sn_norm = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True,
+        editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        from .utils_serials import normalize_sn
+        self.printer_sn_norm = normalize_sn(self.printer_sn_db)
+        super().save(*args, **kwargs)
+
+    printer_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
+    printer_model_db = models.CharField(max_length=255, null=True, blank=True)
+
+    # ✅ Printer-specific specs
+    printer_type = models.CharField(max_length=100, blank=True, null=True, help_text="Inkjet, Laser, Dot Matrix, etc.")
+    printer_color = models.BooleanField(default=True, help_text="Color or Mono")
+    printer_duplex = models.BooleanField(default=False, help_text="Duplex/Double-sided capable?")
+    printer_resolution = models.CharField(max_length=100, blank=True, null=True, help_text="e.g. 1200x1200 dpi")
+    printer_monthly_duty = models.CharField(max_length=100, blank=True, null=True, help_text="Recommended monthly duty cycle")
+
+    is_disposed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.desktop_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"
+    
+    
+class DisposedPrinter(models.Model):
+    printer_db = models.ForeignKey("PrinterDetails", on_delete=models.CASCADE)
+    desktop_package = models.ForeignKey(
+        Desktop_Package, related_name='disposed_printers',
+        on_delete=models.CASCADE, null=True
+    )
+    disposed_under = models.ForeignKey(
+        DisposedDesktopDetail, on_delete=models.CASCADE,
+        related_name="disposed_printers", null=True, blank=True
+    )
+
+    printer_sn = models.CharField(max_length=255, blank=True, null=True)
+    printer_brand = models.CharField(max_length=255, blank=True, null=True)
+    printer_model = models.CharField(max_length=255, blank=True, null=True)
+    printer_type = models.CharField(max_length=255, blank=True, null=True)
+    printer_resolution = models.CharField(max_length=255, blank=True, null=True)
+    printer_monthly_duty = models.CharField(max_length=100, blank=True, null=True)
+
+    reason = models.TextField(blank=True, null=True)
+    disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    disposed_photo = models.ImageField(upload_to="disposed_printer_photos/", null=True, blank=True)
+
+    def __str__(self):
+        return f"Disposed Printer: {self.printer_brand} {self.printer_model} ({self.printer_sn})"

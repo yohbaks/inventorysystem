@@ -5,7 +5,7 @@ from .models import (
     UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
     PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment, MaintenanceChecklistItem, SalvagedMonitor,
     SalvagedMonitorHistory, SalvagedKeyboard, SalvagedKeyboardHistory, SalvagedMouse, SalvagedMouseHistory, SalvagedUPS, SalvagedUPSHistory,
-    Profile, LaptopPackage, LaptopDetails, DisposedLaptop
+    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterDetails, DisposedPrinter
 )
 
 # Register your models here.
@@ -45,6 +45,8 @@ admin.site.register(Profile)
 admin.site.register(LaptopPackage)
 admin.site.register(LaptopDetails)
 admin.site.register(DisposedLaptop)
+admin.site.register(PrinterDetails)
+admin.site.register(DisposedPrinter)
 
 
 
