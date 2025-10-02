@@ -2370,6 +2370,8 @@ def checklist(request, desktop_id):
     # ✅ Only include quarters that actually have a schedule for this section
     quarter_schedules = QuarterSchedule.objects.filter(
         schedules__schedule_assignments__desktop_package=desktop
+    ).exclude(
+        schedules__schedule_assignments__maintenances__desktop_package=desktop
     ).distinct().order_by('-year', 'quarter')
         
         # ❌ If no section found, block PM
@@ -3404,6 +3406,8 @@ def checklist_laptop(request, package_id):
 
     quarter_schedules = QuarterSchedule.objects.filter(
         schedules__schedule_assignments__laptop_package=laptop_package
+    ).exclude(
+        schedules__schedule_assignments__maintenances__laptop_package=laptop_package
     ).distinct().order_by("-year", "quarter")
 
     if laptop and laptop.is_disposed:
