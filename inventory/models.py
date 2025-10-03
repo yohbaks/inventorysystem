@@ -22,7 +22,7 @@ def normalize_sn(value: str | None) -> str | None:
 
 
 #################
-class Desktop_Package(models.Model):
+class Equipment_Package(models.Model):
     is_disposed = models.BooleanField(default=False)
     disposal_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -67,8 +67,8 @@ def normalize_sn(value: str | None) -> str | None:
 
 
 class DesktopDetails(models.Model):
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='desktop_details', on_delete=models.CASCADE
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='desktop_details', on_delete=models.CASCADE
     )
 
     serial_no = models.CharField(max_length=255)
@@ -100,11 +100,11 @@ class DesktopDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.desktop_package} : {self.computer_name} | BRAND: {self.brand_name}"
+        return f"{self.equipment_package} : {self.computer_name} | BRAND: {self.brand_name}"
 
 
 class MonitorDetails(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors', on_delete=models.CASCADE)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='monitors', on_delete=models.CASCADE)
     monitor_sn_db = models.CharField(max_length=255)
     monitor_sn_norm = models.CharField(
         max_length=255, null=True, blank=True,
@@ -123,11 +123,11 @@ class MonitorDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.desktop_package} | BRAND: {self.monitor_brand_db}"
+        return f"{self.equipment_package} | BRAND: {self.monitor_brand_db}"
 
 
 class KeyboardDetails(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards', on_delete=models.CASCADE)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='keyboards', on_delete=models.CASCADE)
     keyboard_sn_db = models.CharField(max_length=255)
     keyboard_sn_norm = models.CharField(
         max_length=255, null=True, blank=True,
@@ -144,11 +144,11 @@ class KeyboardDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.desktop_package} : - {self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
+        return f"{self.equipment_package} : - {self.keyboard_brand_db} {self.keyboard_model_db} ({self.keyboard_sn_db})"
 
 
 class MouseDetails(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_db', on_delete=models.CASCADE)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='mouse_db', on_delete=models.CASCADE)
     mouse_sn_db = models.CharField(max_length=255, null=True)
     mouse_sn_norm = models.CharField(
         max_length=255, null=True, blank=True,
@@ -165,11 +165,11 @@ class MouseDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.desktop_package} {self.mouse_brand_db} {self.mouse_model_db} ({self.mouse_sn_db})"
+        return f"{self.equipment_package} {self.mouse_brand_db} {self.mouse_model_db} ({self.mouse_sn_db})"
 
 
 class UPSDetails(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='ups', on_delete=models.CASCADE)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='ups', on_delete=models.CASCADE)
     ups_sn_db = models.CharField(max_length=255)
     ups_sn_norm = models.CharField(
         max_length=255, null=True, blank=True,
@@ -187,13 +187,13 @@ class UPSDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.desktop_package} {self.ups_brand_db} {self.ups_model_db} ({self.ups_sn_db})"
+        return f"{self.equipment_package} {self.ups_brand_db} {self.ups_model_db} ({self.ups_sn_db})"
 
 
 #user details 
 class UserDetails(models.Model):
-    desktop_package = models.ForeignKey(
-        Desktop_Package, on_delete=models.CASCADE,
+    equipment_package = models.ForeignKey(
+        Equipment_Package, on_delete=models.CASCADE,
         null=True, blank=True, related_name='user_details'
     )
     # 👉 This must be LaptopPackage
@@ -214,8 +214,8 @@ class UserDetails(models.Model):
 
     def __str__(self):
         target = None
-        if self.desktop_package:
-            target = f"Desktop {self.desktop_package.id}"
+        if self.equipment_package:
+            target = f"Desktop {self.equipment_package.id}"
         elif self.laptop_package:
             target = f"Laptop {self.laptop_package.id}"
         return f"{target} | Enduser: {self.user_Enduser or 'N/A'} | Owner: {self.user_Assetowner or 'N/A'}"
@@ -231,7 +231,7 @@ class UserDetails(models.Model):
 
 class DisposedDesktopDetail(models.Model):
     desktop = models.ForeignKey("DesktopDetails", on_delete=models.CASCADE)
-    # desktop_package_number = models.CharField(max_length=255, blank=True, null=True)
+    # equipment_package = models.CharField(max_length=255, blank=True, null=True)
     serial_no = models.CharField(max_length=255, blank=True, null=True)
     brand_name = models.CharField(max_length=255, blank=True, null=True)
     model = models.CharField(max_length=255, blank=True, null=True)
@@ -245,7 +245,7 @@ class DisposedDesktopDetail(models.Model):
   
 class DisposedMonitor(models.Model):
     monitor_disposed_db = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='monitors_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_monitors", null=True, blank=True)
     monitor_sn = models.CharField(max_length=255, blank=True, null=True)
     monitor_brand = models.CharField(max_length=255, blank=True, null=True)
@@ -263,18 +263,18 @@ class DisposedMonitor(models.Model):
 
 class DisposedKeyboard(models.Model):
     keyboard_dispose_db = models.ForeignKey(KeyboardDetails, on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='keyboards_details', on_delete=models.CASCADE, null=True)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='keyboards_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_keyboards", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"Disposed: - {self.desktop_package} - {self.keyboard_dispose_db.keyboard_sn_db}"
+        return f"Disposed: - {self.equipment_package} - {self.keyboard_dispose_db.keyboard_sn_db}"
 
 
 
 class DisposedMouse(models.Model):
     mouse_db = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='mouse_details', on_delete=models.CASCADE, null=True)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='mouse_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_ups", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
@@ -289,12 +289,12 @@ class DisposedMouse(models.Model):
 
 class DisposedUPS(models.Model):
     ups_db = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(Desktop_Package, related_name='ups_details', on_delete=models.CASCADE, null=True)
+    equipment_package = models.ForeignKey(Equipment_Package, related_name='ups_details', on_delete=models.CASCADE, null=True)
     disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_mice", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
-        return f"Disposed: {self.desktop_package} | Brand: {self.ups_db.ups_brand_db} | SN: {self.ups_db.ups_sn_db}  "
+        return f"Disposed: {self.equipment_package} | Brand: {self.ups_db.ups_brand_db} | SN: {self.ups_db.ups_sn_db}  "
     
 
 
@@ -305,8 +305,8 @@ class DisposedUPS(models.Model):
 
 class SalvagedMonitor(models.Model):
     monitor = models.ForeignKey("MonitorDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='salvaged_monitors',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='salvaged_monitors',
         on_delete=models.CASCADE, null=True
     )
     computer_name = models.CharField(max_length=255, blank=True, null=True)
@@ -321,7 +321,7 @@ class SalvagedMonitor(models.Model):
 
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package, on_delete=models.SET_NULL,
+        Equipment_Package, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="reassigned_monitors"
     )
 
@@ -335,7 +335,7 @@ class SalvagedMonitor(models.Model):
     
 class SalvagedMonitorHistory(models.Model):
     salvaged_monitor = models.ForeignKey("SalvagedMonitor", on_delete=models.CASCADE, related_name="history")
-    reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
+    reassigned_to = models.ForeignKey("Equipment_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -346,8 +346,8 @@ class SalvagedMonitorHistory(models.Model):
 # Salvaged Keyboard
 class SalvagedKeyboard(models.Model):
     keyboard = models.ForeignKey("KeyboardDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='salvaged_keyboards',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='salvaged_keyboards',
         on_delete=models.CASCADE, null=True
     )
 
@@ -362,7 +362,7 @@ class SalvagedKeyboard(models.Model):
 
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package, on_delete=models.SET_NULL,
+        Equipment_Package, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="reassigned_keyboards"
     )
 
@@ -378,7 +378,7 @@ class SalvagedKeyboardHistory(models.Model):
     salvaged_keyboard = models.ForeignKey(
         "SalvagedKeyboard", on_delete=models.CASCADE, related_name="history"
     )
-    reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
+    reassigned_to = models.ForeignKey("Equipment_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -388,8 +388,8 @@ class SalvagedKeyboardHistory(models.Model):
 # Salvaged Mouse
 class SalvagedMouse(models.Model):
     mouse = models.ForeignKey("MouseDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='salvaged_mice',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='salvaged_mice',
         on_delete=models.CASCADE, null=True
     )
 
@@ -404,7 +404,7 @@ class SalvagedMouse(models.Model):
 
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package, on_delete=models.SET_NULL,
+        Equipment_Package, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="reassigned_mice"
     )
 
@@ -420,7 +420,7 @@ class SalvagedMouseHistory(models.Model):
     salvaged_mouse = models.ForeignKey(
         "SalvagedMouse", on_delete=models.CASCADE, related_name="history"
     )
-    reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
+    reassigned_to = models.ForeignKey("Equipment_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -430,8 +430,8 @@ class SalvagedMouseHistory(models.Model):
 # Salvaged UPS
 class SalvagedUPS(models.Model):
     ups = models.ForeignKey("UPSDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='salvaged_ups',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='salvaged_ups',
         on_delete=models.CASCADE, null=True
     )
 
@@ -447,7 +447,7 @@ class SalvagedUPS(models.Model):
 
     is_reassigned = models.BooleanField(default=False)
     reassigned_to = models.ForeignKey(
-        Desktop_Package, on_delete=models.SET_NULL,
+        Equipment_Package, on_delete=models.SET_NULL,
         null=True, blank=True, related_name="reassigned_ups"
     )
 
@@ -463,7 +463,7 @@ class SalvagedUPSHistory(models.Model):
     salvaged_ups = models.ForeignKey(
         "SalvagedUPS", on_delete=models.CASCADE, related_name="history"
     )
-    reassigned_to = models.ForeignKey("Desktop_Package", on_delete=models.SET_NULL, null=True, blank=True)
+    reassigned_to = models.ForeignKey("Equipment_Package", on_delete=models.SET_NULL, null=True, blank=True)
     reassigned_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -474,8 +474,8 @@ class SalvagedUPSHistory(models.Model):
 
 
 class DocumentsDetails(models.Model):
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='docs',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='docs',
         on_delete=models.CASCADE, null=True, blank=True
     )
     laptop_package = models.ForeignKey(
@@ -493,8 +493,8 @@ class DocumentsDetails(models.Model):
     docs_Status = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
-        if self.desktop_package:
-            return f"Docs for Desktop Package {self.desktop_package.id}"
+        if self.equipment_package:
+            return f"Docs for Desktop Package {self.equipment_package.id}"
         elif self.laptop_package:
             return f"Docs for Laptop Package {self.laptop_package.id}"
         return "Docs (unlinked)"
@@ -502,7 +502,7 @@ class DocumentsDetails(models.Model):
     
 
 class Employee(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE, null=True)
+    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE, null=True)
     employee_fname = models.CharField(max_length=100, blank=True, null=True)
     employee_mname = models.CharField(max_length=100, blank=True, null=True)
     employee_lname = models.CharField(max_length=100, blank=True, null=True)
@@ -523,14 +523,14 @@ class Employee(models.Model):
 #This tracks which user changed the End User and when.
    
 class EndUserChangeHistory(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE)
     old_enduser = models.ForeignKey(Employee, related_name="old_enduser", on_delete=models.SET_NULL, null=True, blank=True)
     new_enduser = models.ForeignKey(Employee, related_name="new_enduser", on_delete=models.CASCADE, null=True)
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
 class AssetOwnerChangeHistory(models.Model):
-    desktop_package = models.ForeignKey(Desktop_Package, on_delete=models.CASCADE)
+    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE)
     old_assetowner = models.ForeignKey(Employee, related_name="old_assetowner", on_delete=models.SET_NULL, null=True, blank=True)
     new_assetowner = models.ForeignKey(Employee, related_name="new_assetowner", on_delete=models.CASCADE, null=True)
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -538,8 +538,8 @@ class AssetOwnerChangeHistory(models.Model):
 
 # PreventiveMaintenance
 class PreventiveMaintenance(models.Model):
-    desktop_package = models.ForeignKey(
-        'Desktop_Package', related_name='maintenances',
+    equipment_package = models.ForeignKey(
+        'Equipment_Package', related_name='maintenances',
         on_delete=models.CASCADE, null=True, blank=True
     )
     # 👉 Add this (nullable so desktop rows still work)
@@ -584,7 +584,7 @@ class PreventiveMaintenance(models.Model):
     note_9 = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        device = self.desktop_package or self.laptop_package
+        device = self.equipment_package or self.laptop_package
         return f"PM for {device} on {self.date_accomplished or 'N/A'}"
 
 class MaintenanceChecklistItem(models.Model):
@@ -629,8 +629,8 @@ class PMSectionSchedule(models.Model):
         return f"{self.section.name} | {self.start_date} to {self.end_date} ({self.quarter_schedule})"
     
 class PMScheduleAssignment(models.Model):
-    desktop_package = models.ForeignKey(
-        Desktop_Package, on_delete=models.CASCADE,
+    equipment_package = models.ForeignKey(
+        Equipment_Package, on_delete=models.CASCADE,
         related_name='pm_assignments', null=True, blank=True
     )
     laptop_package = models.ForeignKey(
@@ -646,7 +646,7 @@ class PMScheduleAssignment(models.Model):
     remarks = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        target = self.desktop_package or self.laptop_package
+        target = self.equipment_package or self.laptop_package
         return f"{target} -> {self.pm_section_schedule}"
 #END - Preventivemaintenance REAL - END
 
@@ -698,7 +698,7 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
 # ======================================
 
 class LaptopPackage(models.Model):
-    """Container for laptop, with PM, QR, disposal flags (like Desktop_Package but simpler)."""
+    """Container for laptop, with PM, QR, disposal flags (like Equipment_Package but simpler)."""
     is_disposed = models.BooleanField(default=False)
     disposal_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -766,8 +766,8 @@ class DisposedLaptop(models.Model):
     
 
 class PrinterDetails(models.Model):
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='printers',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='printers',
         on_delete=models.CASCADE
     )
     printer_sn_db = models.CharField(max_length=255)
@@ -794,13 +794,13 @@ class PrinterDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.desktop_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"
+        return f"{self.equipment_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"
     
     
 class DisposedPrinter(models.Model):
     printer_db = models.ForeignKey("PrinterDetails", on_delete=models.CASCADE)
-    desktop_package = models.ForeignKey(
-        Desktop_Package, related_name='disposed_printers',
+    equipment_package = models.ForeignKey(
+        Equipment_Package, related_name='disposed_printers',
         on_delete=models.CASCADE, null=True
     )
     disposed_under = models.ForeignKey(

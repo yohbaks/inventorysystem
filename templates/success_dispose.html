@@ -53,7 +53,7 @@
           if (countdown < 0) {
               clearInterval(interval);
               // Redirect to the detailed view of the desktop package on the Keyboard tab
-              window.location.href = "{% url 'desktop_details_view' desktop_package_id %}#pills-keyboard";
+              window.location.href = "{% url 'desktop_details_view' equipment_package_id %}#pills-keyboard";
           }
       }, 1000);
   }

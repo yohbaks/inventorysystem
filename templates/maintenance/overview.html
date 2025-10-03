@@ -37,7 +37,7 @@
                     <!-- Desktop Dropdown -->
                     <div class="mb-3 device-select" id="desktopWrapper" style="display:none;">
                       <label class="form-label">Desktop Package</label>
-                      <select id="desktopSelect" class="form-select" name="desktop_package_id">
+                      <select id="desktopSelect" class="form-select" name="equipment_package_id">
                         <option value="">-- Select Desktop --</option>
                         {% for d in desktops %}
                           {% if d.enduser_name and d.section_name %}
@@ -143,8 +143,8 @@
                 <tbody>
                   {% for assignment in pm_assignments %}
                   <tr class="clickable-row"
-                      {% if assignment.desktop_package %}
-                        data-href="{% url 'maintenance_history' assignment.desktop_package.id %}"
+                      {% if assignment.equipment_package %}
+                        data-href="{% url 'maintenance_history' assignment.equipment_package.id %}"
                       {% elif assignment.laptop_package %}
                         data-href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}"
                       {% endif %}>
@@ -169,8 +169,8 @@
                       {% endif %}
                     </td>
                     <td class="text-center">
-                      {% if assignment.desktop_package %}
-                        <a href="{% url 'maintenance_history' assignment.desktop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                      {% if assignment.equipment_package %}
+                        <a href="{% url 'maintenance_history' assignment.equipment_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
                       {% elif assignment.laptop_package %}
                         <a href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
                       {% else %}

@@ -19,7 +19,7 @@ urlpatterns = [
     
 
     #desktop_details
-    path('desktop_details/', views.desktop_package_base, name='desktop_details'),  # URL pattern for desktop details
+    path('desktop_details/', views.equipment_package_base, name='desktop_details'),  # URL pattern for desktop details
     # path('desktop_details_view/<int:desktop_id>/', views.desktop_details_view, name='desktop_details_view'),  # URL pattern for desktop details view
     path('desktop_details_view/<int:package_id>/', views.desktop_details_view, name='desktop_details_view'),
     
@@ -61,7 +61,7 @@ urlpatterns = [
     path('disposed_mice/', views.disposed_mice, name='disposed_mice'),
     
 
-    path('add_desktop_package_with_details/', views.add_desktop_package_with_details, name='add_desktop_package_with_details'),
+    path('add_equipment_package_with_details/', views.add_equipment_package_with_details, name='add_equipment_package_with_details'),
     path('check_computer_name/', views.check_computer_name, name='check_computer_name'),
 
     #employees
@@ -91,7 +91,7 @@ urlpatterns = [
     path('desktop/<int:desktop_id>/pdf/', views.generate_desktop_pdf, name='generate_desktop_pdf'),
 
     #excel export
-    path('export/desktop/', views.export_desktop_packages_excel, name='export_desktop_excel'),
+    path('export/desktop/', views.export_equipment_packages_excel, name='export_desktop_excel'),
     
     #login
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),

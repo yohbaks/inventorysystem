@@ -123,17 +123,17 @@
             </li>
 
             <!-- Miscellaneous -->
-            <li class="nav-item {% if request.resolver_match.url_name == 'add_desktop_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}active{% endif %}">
+            <li class="nav-item {% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuMisc"
-                 class="{% if request.resolver_match.url_name == 'add_desktop_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name == 'add_desktop_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}true{% else %}false{% endif %}">
+                 class="{% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}{% else %}collapsed{% endif %}"
+                 aria-expanded="{% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}true{% else %}false{% endif %}">
                 <i class="fas fa-th-list"></i>
                 <p>Miscellaneous</p><span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name == 'add_desktop_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}show{% endif %}" id="menuMisc">
+              <div class="collapse {% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}show{% endif %}" id="menuMisc">
                 <ul class="nav nav-collapse">
-                  <li class="{% if request.resolver_match.url_name == 'add_desktop_package_with_details' %}active{% endif %}">
-                    <a href="{% url 'add_desktop_package_with_details' %}"><span class="sub-item">✍🏻 Add IT Equipment</span></a>
+                  <li class="{% if request.resolver_match.url_name == 'add_equipment_package_with_details' %}active{% endif %}">
+                    <a href="{% url 'add_equipment_package_with_details' %}"><span class="sub-item">✍🏻 Add IT Equipment</span></a>
                   </li>
                   <li class="{% if request.resolver_match.url_name == 'employee_list' %}active{% endif %}">
                     <a href="{% url 'employee_list' %}"><span class="sub-item">🙍🏻‍♂️ Employee</span></a>
@@ -380,7 +380,7 @@
                       <div class="notif-scroll scrollbar-outer">
                         <div class="notif-center">
                           {% for assignment in pending_pm_list %}
-                            <a href="{% url 'maintenance_history' assignment.desktop_package.id %}">
+                            <a href="{% url 'maintenance_history' assignment.equipment_package.id %}">
                               <div class="notif-icon notif-warning">
                                 <i class="fa fa-exclamation-triangle"></i>
                               </div>
@@ -390,7 +390,7 @@
                                   {% if assignment.computer_name %}
                                     {{ assignment.computer_name }}
                                   {% else %}
-                                    Desktop #{{ assignment.desktop_package.id }}
+                                    Desktop #{{ assignment.equipment_package.id }}
                                   {% endif %}
                                 </span>
                                 <span class="time">
@@ -445,7 +445,7 @@
                               <span class="text">PM Sched</span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="{% url 'add_desktop_package_with_details' %}">
+                          <a class="col-6 col-md-4 p-0" href="{% url 'add_equipment_package_with_details' %}">
                             <div class="quick-actions-item">
                               <div
                                 class="avatar-item bg-success rounded-circle"

@@ -18,7 +18,7 @@
         <tbody>
           <tr>
             <td><strong>Package Number:</strong></td>
-            <td>{{ monitor_detailse.desktop_package }}</td>
+            <td>{{ monitor_detailse.equipment_package }}</td>
           </tr>
           <tr>
             <td><strong>Serial Number:</strong></td>
@@ -87,8 +87,8 @@
           <h5 class="modal-title" id="addMonitorModalLabel">Add New Monitor</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        {% if desktop_package and desktop_package.id %}
-        <form method="POST" action="{% url 'add_monitor_to_package' desktop_package.id %}">
+        {% if equipment_package and equipment_package.id %}
+        <form method="POST" action="{% url 'add_monitor_to_package' equipment_package.id %}">
           {% csrf_token %}
           <div class="modal-body">
             <div class="mb-3">

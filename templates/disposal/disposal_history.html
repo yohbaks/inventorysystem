@@ -52,9 +52,9 @@
                     <!-- Package # -->
                     <td>
                       {% if group.category == "desktop" %}
-                        {{ item.desktop.desktop_package.id }}
+                        {{ item.desktop.equipment_package.id }}
                       {% else %}
-                        {{ item.desktop_package.id|default:"N/A" }}
+                        {{ item.equipment_package.id|default:"N/A" }}
                       {% endif %}
                     </td>
 
@@ -63,7 +63,7 @@
                       {% if group.category == "desktop" %}
                         {{ item.desktop.computer_name }}
                       {% else %}
-                        {{ item.desktop_package.computer_name|default:"N/A" }}
+                        {{ item.equipment_package.computer_name|default:"N/A" }}
                       {% endif %}
                     </td>
 

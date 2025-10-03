@@ -62,8 +62,8 @@
                     <td>{{ monitor.monitor_size_db }}</td>
 
                     <td>
-                      {% if monitor.desktop_package and monitor.desktop_package.user_details.first %}
-                        {% with user_detail=monitor.desktop_package.user_details.first %}
+                      {% if monitor.equipment_package and monitor.equipment_package.user_details.first %}
+                        {% with user_detail=monitor.equipment_package.user_details.first %}
                           <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
                           <small class="text-muted">
                             {{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office_section }}
@@ -85,8 +85,8 @@
 
                     <!-- Actions -->
                     <td>
-                      {% if monitor.status == "active" and monitor.desktop_package %}
-                        <a href="{% url 'desktop_details_view' monitor.desktop_package.id %}#pills-monitor"
+                      {% if monitor.status == "active" and monitor.equipment_package %}
+                        <a href="{% url 'desktop_details_view' monitor.equipment_package.id %}#pills-monitor"
                            class="btn btn-sm btn-primary">
                           <i class="fa fa-eye"></i> View
                         </a>

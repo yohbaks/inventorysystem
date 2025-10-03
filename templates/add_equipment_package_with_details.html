@@ -1,4 +1,4 @@
-<!-- templates/add_desktop_package_with_details.html -->
+<!-- templates/add_equipment_package_with_details.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Main Form -->
-    <form method="post" action="{% url 'add_desktop_package_with_details' %}" id="addEquipmentForm">
+    <form method="post" action="{% url 'add_equipment_package_with_details' %}" id="addEquipmentForm">
 
       {% csrf_token %}
 

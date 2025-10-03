@@ -21,10 +21,10 @@
               <a href="{% url 'export_desktop_excel' %}" class="btn btn-label-success btn-round btn-sm me-2">
                 <span class="btn-label"><i class="fa fa-pencil"></i></span> ExporT
               </a>
-              <a href="{% url 'maintenance_history' desktop_package.id %}" class="btn btn-label-info btn-round btn-sm">
+              <a href="{% url 'maintenance_history' equipment_package.id %}" class="btn btn-label-info btn-round btn-sm">
                 <span class="btn-label" ><i class="fa fa-print"></i></span> Maintenance
               </a>
-              <a href="{% url 'generate_desktop_pdf' desktop_package.id %}" class="btn btn-label-success btn-round btn-sm me-2">
+              <a href="{% url 'generate_desktop_pdf' equipment_package.id %}" class="btn btn-label-success btn-round btn-sm me-2">
                   <i class="fa fa-file-pdf"></i> Download PDF
               </a>
 
@@ -50,8 +50,8 @@
       </div>
 
       <div class="modal-body text-center">
-        {% if desktop_package.qr_code %}
-          <img id="qrImage" src="{{ desktop_package.qr_code.url }}" alt="QR Code for Desktop Package {{ desktop_package.pk }}" width="200">
+        {% if equipment_package.qr_code %}
+          <img id="qrImage" src="{{ equipment_package.qr_code.url }}" alt="QR Code for Desktop Package {{ equipment_package.pk }}" width="200">
           <p class="mt-2">Scan to view this desktop package</p>
 
           <!-- Print button -->
@@ -248,7 +248,7 @@ function printQrCode() {
               <tbody>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ desktop_detailsx.desktop_package }}</td>
+                  <td>{{ desktop_detailsx.equipment_package }}</td>
                 </tr>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -410,9 +410,9 @@ function printQrCode() {
           </button>
           <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
             {% if pm_assignments %}
-              <a class="dropdown-item" href="{% url 'checklist' desktop_package.id %}">Conduct PM</a>
+              <a class="dropdown-item" href="{% url 'checklist' equipment_package.id %}">Conduct PM</a>
             {% else %}
-              <a class="dropdown-item text-danger" href="{% url 'checklist' desktop_package.id %}">
+              <a class="dropdown-item text-danger" href="{% url 'checklist' equipment_package.id %}">
                 Conduct PM
               </a>
             {% endif %}
@@ -443,9 +443,9 @@ function printQrCode() {
         <tbody>
           {% for assignment in pm_assignments %}
             {% if assignment.is_completed %}
-              {% url 'maintenance_history' assignment.desktop_package.id as target_url %}
+              {% url 'maintenance_history' assignment.equipment_package.id as target_url %}
             {% else %}
-              {% url 'checklist' assignment.desktop_package.id as target_url %}
+              {% url 'checklist' assignment.equipment_package.id as target_url %}
             {% endif %}
             <tr class="clickable-row"
                 data-href="{{ target_url }}"
@@ -580,7 +580,7 @@ function printQrCode() {
               <tbody>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                  <td>{{ monitor_detailse.desktop_package }}</td>
+                  <td>{{ monitor_detailse.equipment_package }}</td>
                 </tr>
                 <tr>
                   <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -607,7 +607,7 @@ function printQrCode() {
             data-bs-toggle="modal" 
             data-bs-target="#editMonitorModal"
             data-id="{{ monitor_detailse.id }}"
-            data-package="{{ monitor_detailse.desktop_package.id }}"
+            data-package="{{ monitor_detailse.equipment_package.id }}"
             data-sn="{{ monitor_detailse.monitor_sn_db }}"
             data-brand="{{ monitor_detailse.monitor_brand_db }}"
             data-model="{{ monitor_detailse.monitor_model_db }}"
@@ -806,8 +806,8 @@ function printQrCode() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      {% if desktop_package and desktop_package.id %}
-      <form method="POST" action="{% url 'add_monitor_to_package' desktop_package.id %}">
+      {% if equipment_package and equipment_package.id %}
+      <form method="POST" action="{% url 'add_monitor_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
           
@@ -911,7 +911,7 @@ function printQrCode() {
           <tbody>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-              <td>{{ keyboard_detailse.desktop_package }}</td>
+              <td>{{ keyboard_detailse.equipment_package }}</td>
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -1097,8 +1097,8 @@ function printQrCode() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      {% if desktop_package and desktop_package.id %}
-      <form method="POST" action="{% url 'add_keyboard_to_package' desktop_package.id %}">
+      {% if equipment_package and equipment_package.id %}
+      <form method="POST" action="{% url 'add_keyboard_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
 
@@ -1199,7 +1199,7 @@ function printQrCode() {
           <tbody>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-              <td>{{ mouse_detailse.desktop_package}}</td>
+              <td>{{ mouse_detailse.equipment_package}}</td>
             </tr>
             <tr>
               <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -1369,8 +1369,8 @@ function printQrCode() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      {% if desktop_package and desktop_package.id %}
-      <form method="POST" action="{% url 'add_mouse_to_package' desktop_package.id %}">
+      {% if equipment_package and equipment_package.id %}
+      <form method="POST" action="{% url 'add_mouse_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
           <ul class="nav nav-pills mb-3" id="mouseAddTabs" role="tablist">
@@ -1453,7 +1453,7 @@ function printQrCode() {
                 <tbody>
                   <tr>
                     <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-                    <td>{{ ups_detailse.desktop_package}}</td>  
+                    <td>{{ ups_detailse.equipment_package}}</td>  
                   </tr>
                   <tr>
                     <td class="col-sm-6 col-md-3"><strong>Serial Number:</strong></td>
@@ -1635,8 +1635,8 @@ function printQrCode() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      {% if desktop_package and desktop_package.id %}
-      <form method="POST" action="{% url 'add_ups_to_package' desktop_package.id %}">
+      {% if equipment_package and equipment_package.id %}
+      <form method="POST" action="{% url 'add_ups_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
           <ul class="nav nav-pills mb-3" id="upsAddTabs" role="tablist">
@@ -1858,7 +1858,7 @@ function printQrCode() {
           <tbody>
             <tr>
               <td><strong>Package Number:</strong></td>
-              <td>{{ user_details.desktop_package }}</td>
+              <td>{{ user_details.equipment_package }}</td>
             </tr>
             <tr>
               <td><strong>Asset Owner:</strong></td>
@@ -2049,7 +2049,7 @@ function printQrCode() {
         <tbody>
           <tr>
             <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
-            <td>{{ documents_detailse.desktop_package }}</td>
+            <td>{{ documents_detailse.equipment_package }}</td>
           </tr>
           <tr>
             <td class="col-sm-6 col-md-3"><strong>Document PAR Number</strong></td>
@@ -2348,7 +2348,7 @@ function printQrCode() {
         if (isSubmitting) return false;
         isSubmitting = true;
         
-        let desktopId = "{{ desktop_package.id }}";
+        let desktopId = "{{ equipment_package.id }}";
         let formData = $(this).serialize();
 
         // Show loading state
@@ -2417,7 +2417,7 @@ function showError(message) {
         if (isSubmitting) return false;
         isSubmitting = true;
         
-        let desktopId = "{{ desktop_package.id }}";
+        let desktopId = "{{ equipment_package.id }}";
         let formData = $(this).serialize();
 
         // Show loading state
@@ -2481,7 +2481,7 @@ function showError(message) {
     $("#editEndUserForm").submit(function (event) {
         event.preventDefault();
         
-        let desktopId = "{{ desktop_package.id }}";
+        let desktopId = "{{ equipment_package.id }}";
         let formData = $(this).serialize();
 
         $.ajax({
@@ -2526,7 +2526,7 @@ function showError(message) {
     $("#editAssetOwnerForm").submit(function (event) {
         event.preventDefault();
         
-        let desktopId = "{{ desktop_package.id }}";
+        let desktopId = "{{ equipment_package.id }}";
         let formData = $(this).serialize();
 
         $.ajax({

@@ -72,8 +72,8 @@
                 <tbody>
                   {% for item in group.items %}
                   <tr>
-                    <td>{% if group.category == "desktop" %}{{ item.desktop.desktop_package.id }}{% else %}{{ item.desktop_package.id|default:"N/A" }}{% endif %}</td>
-                    <td>{% if group.category == "desktop" %}{{ item.desktop.computer_name }}{% else %}{{ item.desktop_package.computer_name|default:"N/A" }}{% endif %}</td>
+                    <td>{% if group.category == "desktop" %}{{ item.desktop.equipment_package.id }}{% else %}{{ item.equipment_package.id|default:"N/A" }}{% endif %}</td>
+                    <td>{% if group.category == "desktop" %}{{ item.desktop.computer_name }}{% else %}{{ item.equipment_package.computer_name|default:"N/A" }}{% endif %}</td>
                     <td>
                       {% if group.category == "desktop" %}
                         {{ item.serial_no|default:"N/A" }}

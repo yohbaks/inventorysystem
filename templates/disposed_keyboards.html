@@ -51,13 +51,13 @@
                 <tbody>
                   {% for disposed_keyboard in disposed_keyboards %}
                   <tr>
-                    <td>{{ disposed_keyboard.keyboard.desktop_package }}</td>
+                    <td>{{ disposed_keyboard.keyboard.equipment_package }}</td>
                     <td>{{ disposed_keyboard.keyboard.keyboard_sn }}</td>
                     <td>{{ disposed_keyboard.keyboard.brand }}</td>
                     <td>{{ disposed_keyboard.keyboard.model }}</td>
                     <td>{{ disposed_keyboard.disposal_date }}</td>
                     <td>
-                      <a href="{% url 'desktop_detailed_view' disposed_keyboard.keyboard.desktop_package.id %}">
+                      <a href="{% url 'desktop_detailed_view' disposed_keyboard.keyboard.equipment_package.id %}">
                         <span class="sub-item">View Details</span>
                       </a>
                     </td>

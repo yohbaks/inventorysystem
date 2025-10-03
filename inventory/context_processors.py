@@ -9,14 +9,14 @@ def pending_pm_notifications(request):
     pending_pm = PMScheduleAssignment.objects.filter(
         is_completed=False,
         pm_section_schedule__start_date__lte=near_future
-    ).select_related('desktop_package', 'pm_section_schedule__quarter_schedule', 'pm_section_schedule__section')
+    ).select_related('equipment_package', 'pm_section_schedule__quarter_schedule', 'pm_section_schedule__section')
 
     for assignment in pending_pm:
-        # Guard against missing desktop_package (e.g., laptops)
-        if assignment.desktop_package:
-            desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
+        # Guard against missing equipment_package (e.g., laptops)
+        if assignment.equipment_package:
+            desktop_detail = DesktopDetails.objects.filter(equipment_package=assignment.equipment_package).first()
             assignment.computer_name = (
-                desktop_detail.computer_name if desktop_detail else f"Desktop #{assignment.desktop_package.id}"
+                desktop_detail.computer_name if desktop_detail else f"Desktop #{assignment.equipment_package.id}"
             )
         else:
             assignment.computer_name = "N/A"
