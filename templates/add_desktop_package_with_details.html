@@ -372,8 +372,7 @@
     </div>
   </div>
 </div>
-
-      <!-- =================== PRINTER =================== -->
+<!-- =================== PRINTER =================== -->
 <div id="printerForm" class="equipment-form" style="display:none;">
   <div class="card mb-3">
     <div class="card-header"><h5>🖨 Printer Info</h5></div>
@@ -417,6 +416,54 @@
           <select name="printer_color" class="form-select">
             <option value="True" selected>Color</option>
             <option value="False">Monochrome</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📑 Printer Documents -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>📑 Documents</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4"><label>PAR</label><input type="text" name="par_number_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Property No</label><input type="text" name="property_number_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Acquisition Type</label><input type="text" name="acquisition_type_input" class="form-control" required></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4"><label>Value</label><input type="text" name="value_printer_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Date Received</label><input type="date" name="date_received_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Date Inspected</label><input type="date" name="date_inspected_input" class="form-control" required></div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-4"><label>Supplier</label><input type="text" name="supplier_name_input" class="form-control" required></div>
+        <div class="col-md-4"><label>Status</label><input type="text" name="status_printer_input" class="form-control" required></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👤 Printer User -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>👤 User Assignment</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <label>End User</label>
+          <select name="enduser_input" class="form-select" required>
+            <option value="">Select End User</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>Asset Owner</label>
+          <select name="assetowner_input" class="form-select" required>
+            <option value="">Select Asset Owner</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
           </select>
         </div>
       </div>

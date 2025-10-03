@@ -777,7 +777,6 @@ class PrinterDetails(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        from .utils_serials import normalize_sn
         self.printer_sn_norm = normalize_sn(self.printer_sn_db)
         super().save(*args, **kwargs)
 

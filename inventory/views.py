@@ -44,7 +44,7 @@ from inventory.models import (
     SalvagedMonitorHistory, SalvagedKeyboardHistory, SalvagedMouseHistory, SalvagedUPSHistory,
     EndUserChangeHistory, AssetOwnerChangeHistory,
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
-    QuarterSchedule, PMSectionSchedule, OfficeSection, Profile, LaptopPackage, LaptopDetails, DisposedLaptop, 
+    QuarterSchedule, PMSectionSchedule, OfficeSection, Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterDetails, DisposedPrinter 
 )
 
 from django.contrib.auth.decorators import login_required
@@ -58,6 +58,7 @@ from django.db import transaction, IntegrityError
 from django.db.models.functions import Upper, Trim
 from django.db.models import F
 from django.urls import NoReverseMatch
+
 
 
 ##############################################################################
@@ -1191,7 +1192,8 @@ def add_desktop_package_with_details(request):
     mouse_brands = Brand.objects.filter(is_mouse=True)
     monitor_brands = Brand.objects.filter(is_monitor=True)
     ups_brands = Brand.objects.filter(is_ups=True)
-    laptop_brands = Brand.objects.filter(is_desktop=True)  # ⚠️ adjust if you have is_laptop flag
+    printer_brands = Brand.objects.filter(is_printer=True)
+
 
     context = {
         'desktop_brands': desktop_brands,
@@ -1199,7 +1201,7 @@ def add_desktop_package_with_details(request):
         'mouse_brands': mouse_brands,
         'monitor_brands': monitor_brands,
         'ups_brands': ups_brands,
-        'laptop_brands': laptop_brands,
+        'printer_brands': printer_brands,
         'employees': employees,
     }
 
@@ -1498,7 +1500,107 @@ def add_desktop_package_with_details(request):
                 messages.error(request, f"❌ Exception: {str(e)}")
                 return render(request, 'add_desktop_package_with_details.html', context)
 
+        elif equipment_type == "Printer":
+            printer_sn = request.POST.get("printer_sn_db")
+            printer_brand = get_brand_or_none("printer_brand")
+            printer_model = request.POST.get("printer_model")
+            printer_type = request.POST.get("printer_type")
+            printer_resolution = request.POST.get("printer_resolution")
+            printer_monthly_duty = request.POST.get("printer_monthly_duty")
+            printer_color = request.POST.get("printer_color") == "True"
+            printer_duplex = request.POST.get("printer_duplex") == "True"
+
+            # validations
+            if not printer_sn: errors.append("Printer serial number is required.")
+            if not printer_brand: errors.append("Printer brand is required.")
+            if not printer_model: errors.append("Printer model is required.")
+
+            # Documents
+            if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
+            if not request.POST.get('property_number_input'): errors.append("Property Number is required.")
+            if not request.POST.get('acquisition_type_input'): errors.append("Acquisition type is required.")
+            if not request.POST.get('value_printer_input'): errors.append("Value is required.")
+            if not request.POST.get('date_received_input'): errors.append("Date received is required.")
+            if not request.POST.get('date_inspected_input'): errors.append("Date inspected is required.")
+            if not request.POST.get('supplier_name_input'): errors.append("Supplier name is required.")
+            if not request.POST.get('status_printer_input'): errors.append("Status is required.")
+
+            # User
+            if not request.POST.get('enduser_input'): errors.append("End user is required.")
+            if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
+
+            # duplicate check
+            if printer_sn and sn_exists(PrinterDetails, 'printer_sn_db', printer_sn):
+                errors.append(f"Printer SN '{printer_sn}' already exists.")
+
+            if errors:
+                for e in errors:
+                    messages.error(request, f"❌ {e}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+
+            try:
+                with transaction.atomic():
+                    # ✅ create package (reuse Desktop_Package since printer is part of infra)
+                    desktop_package = Desktop_Package.objects.create(is_disposed=False)
+
+                    # ✅ create printer details
+                    PrinterDetails.objects.create(
+                        desktop_package=desktop_package,
+                        printer_sn_db=printer_sn,
+                        printer_brand_db=printer_brand,
+                        printer_model_db=printer_model,
+                        printer_type=printer_type,
+                        printer_resolution=printer_resolution,
+                        printer_monthly_duty=printer_monthly_duty,
+                        printer_color=printer_color,
+                        printer_duplex=printer_duplex
+                    )
+
+                    # ✅ documents
+                    DocumentsDetails.objects.create(
+                        desktop_package=desktop_package,
+                        docs_PAR=request.POST.get('par_number_input'),
+                        docs_Propertyno=request.POST.get('property_number_input'),
+                        docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
+                        docs_Value=request.POST.get('value_printer_input'),
+                        docs_Datereceived=request.POST.get('date_received_input'),
+                        docs_Dateinspected=request.POST.get('date_inspected_input'),
+                        docs_Supplier=request.POST.get('supplier_name_input'),
+                        docs_Status=request.POST.get('status_printer_input')
+                    )
+
+                    # ✅ user details
+                    enduser = get_employee_or_none('enduser_input')
+                    assetowner = get_employee_or_none('assetowner_input')
+
+                    UserDetails.objects.create(
+                        desktop_package=desktop_package,
+                        user_Enduser=enduser,
+                        user_Assetowner=assetowner
+                    )
+
+                    # ✅ PM schedule
+                    if enduser and enduser.employee_office_section:
+                        for schedule in PMSectionSchedule.objects.filter(section=enduser.employee_office_section):
+                            PMScheduleAssignment.objects.get_or_create(
+                                desktop_package=desktop_package,
+                                pm_section_schedule=schedule
+                            )
+
+                    messages.success(request, "✅ Printer added successfully.")
+                    return redirect(f'/success_add/{desktop_package.id}/?type=Printer')
+
+            except IntegrityError as ie:
+                messages.error(request, f"❌ Could not save printer: duplicate detected. Details: {ie}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+            except Exception as e:
+                messages.error(request, f"❌ Exception while saving printer: {str(e)}")
+                return render(request, 'add_desktop_package_with_details.html', context)
+
     return render(request, 'add_desktop_package_with_details.html', context)
+
+
+
 
 
 
@@ -1997,7 +2099,6 @@ def salvaged_ups_detail(request, pk):
     })
 
 
-#brands
 def add_brand(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -2006,6 +2107,7 @@ def add_brand(request):
         is_mouse = 'is_mouse' in request.POST
         is_monitor = 'is_monitor' in request.POST
         is_ups = 'is_ups' in request.POST
+        is_printer = 'is_printer' in request.POST    # ✅ NEW
 
         if not Brand.objects.filter(name=name).exists():
             Brand.objects.create(
@@ -2014,12 +2116,14 @@ def add_brand(request):
                 is_keyboard=is_keyboard,
                 is_mouse=is_mouse,
                 is_monitor=is_monitor,
-                is_ups=is_ups
+                is_ups=is_ups,
+                is_printer=is_printer   # ✅ NEW
             )
         return redirect('add_brand')
 
     brands = Brand.objects.all()
     return render(request, 'add_brand.html', {'brands': brands})
+
 
 def edit_brand(request):
     if request.method == 'POST':
@@ -2031,6 +2135,7 @@ def edit_brand(request):
         brand.is_mouse = 'is_mouse' in request.POST
         brand.is_monitor = 'is_monitor' in request.POST
         brand.is_ups = 'is_ups' in request.POST
+        brand.is_printer = 'is_printer' in request.POST    # ✅ NEW
         brand.save()
     return redirect('add_brand')
 
@@ -2522,6 +2627,7 @@ def generate_pm_excel_report(request, pm_id):
     # Return the PDF file as download
     return FileResponse(open(output_pdf_path, 'rb'), as_attachment=True, filename=f'PM_Report_{pm.id}.pdf')
 
+
 def pm_overview_view(request):
     pm_assignments = PMScheduleAssignment.objects.select_related(
         'desktop_package',
@@ -2536,7 +2642,6 @@ def pm_overview_view(request):
             desktop_detail = DesktopDetails.objects.filter(desktop_package=assignment.desktop_package).first()
             assignment.computer_name_display = desktop_detail.computer_name if desktop_detail else "N/A"
         elif assignment.laptop_package:
-            # laptop_details may have multiple rows; take first
             laptop_detail = assignment.laptop_package.laptop_details.first()
             assignment.computer_name_display = laptop_detail.computer_name if laptop_detail else "N/A"
         else:
@@ -2607,8 +2712,8 @@ def pm_overview_view(request):
         'assigned_quarters_by_device_json': json.dumps(
             {k: sorted(list(v)) for k, v in assigned_quarters_by_device.items()}
         ),
+        'today': timezone.now().date(),   # ✅ for "Due" check
     })
-
 
 def assign_pm_schedule(request):
     if request.method == 'POST':

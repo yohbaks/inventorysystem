@@ -161,7 +161,11 @@
                       {% if assignment.is_completed %}
                         <span class="badge bg-success">Completed</span>
                       {% else %}
-                        <span class="badge bg-warning text-dark">Pending</span>
+                        {% if assignment.pm_section_schedule.end_date < today %}
+                          <span class="badge bg-danger">Due</span>
+                        {% else %}
+                          <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
                       {% endif %}
                     </td>
                     <td class="text-center">

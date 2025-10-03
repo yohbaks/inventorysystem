@@ -5,11 +5,9 @@
 <div class="container">
   <div class="page-inner">
     <div class="page-header">
-      <h3 class="fw-bold mb-3">Brand ManagemenTTTTTT</h3>
+      <h3 class="fw-bold mb-3">Brand Management</h3>
       <ul class="breadcrumbs mb-3">
-        <li class="nav-home">
-          <a href="#"><i class="icon-home"></i></a>
-        </li>
+        <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
         <li class="nav-item"><a href="#">Settings</a></li>
         <li class="separator"><i class="icon-arrow-right"></i></li>
@@ -39,7 +37,7 @@
               <label class="form-label">Applicable To:</label>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="is_desktop" id="desktopCheck">
-                <label class="form-check-label" for="desktopCheck">Desktop</label>
+                <label class="form-check-label" for="desktopCheck">Desktop and Laptop</label>
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="is_keyboard" id="keyboardCheck">
@@ -53,9 +51,15 @@
                 <input class="form-check-input" type="checkbox" name="is_monitor" id="monitorCheck">
                 <label class="form-check-label" for="monitorCheck">Monitor</label>
               </div>
-              <div class="form-check mb-3">
+              <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="is_ups" id="upsCheck">
                 <label class="form-check-label" for="upsCheck">UPS</label>
+              </div>
+              <!-- ✅ NEW -->
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="is_printer" id="printerCheck">
+                <label class="form-check-label" for="printerCheck">Printer</label>
               </div>
 
               <button type="submit" class="btn btn-success w-100">Add Brand</button>
@@ -75,56 +79,28 @@
           <table class="table table-hover table-bordered">
             <thead class="table-light">
               <tr>
-                
                 <th>Brand Name</th>
-                <th>Desktop</th>
+                <th>Desktop and Laptop</th>
                 <th>Keyboard</th>
                 <th>Mouse</th>
                 <th>Monitor</th>
                 <th>UPS</th>
+          
+                <th>Printer</th>  
                 <th>Action</th>
               </tr>
             </thead>
-              <tbody>
+            <tbody>
               {% for brand in brands %}
               <tr>
                 <td>{{ brand.name }}</td>
-                <td>
-  {% if brand.is_desktop %}
-    <span class="badge bg-success">✔</span>
-  {% else %}
-    <span class="badge bg-danger">✘</span>
-  {% endif %}
-</td>
-<td>
-  {% if brand.is_keyboard %}
-    <span class="badge bg-success">✔</span>
-  {% else %}
-    <span class="badge bg-danger">✘</span>
-  {% endif %}
-</td>
-<td>
-  {% if brand.is_mouse %}
-    <span class="badge bg-success">✔</span>
-  {% else %}
-    <span class="badge bg-danger">✘</span>
-  {% endif %}
-</td>
-<td>
-  {% if brand.is_monitor %}
-    <span class="badge bg-success">✔</span>
-  {% else %}
-    <span class="badge bg-danger">✘</span>
-  {% endif %}
-</td>
-<td>
-  {% if brand.is_ups %}
-    <span class="badge bg-success">✔</span>
-  {% else %}
-    <span class="badge bg-danger">✘</span>
-  {% endif %}
-</td>
-
+                <td>{% if brand.is_desktop %}<span class="badge bg-success">✔</span>{% else %}<span class="badge bg-danger">✘</span>{% endif %}</td>
+                <td>{% if brand.is_keyboard %}<span class="badge bg-success">✔</span>{% else %}<span class="badge bg-danger">✘</span>{% endif %}</td>
+                <td>{% if brand.is_mouse %}<span class="badge bg-success">✔</span>{% else %}<span class="badge bg-danger">✘</span>{% endif %}</td>
+                <td>{% if brand.is_monitor %}<span class="badge bg-success">✔</span>{% else %}<span class="badge bg-danger">✘</span>{% endif %}</td>
+                <td>{% if brand.is_ups %}<span class="badge bg-success">✔</span>{% else %}<span class="badge bg-danger">✘</span>{% endif %}</td>
+                
+                <td>{% if brand.is_printer %}<span class="badge bg-success">✔</span>{% else %}<span class="badge bg-danger">✘</span>{% endif %}</td> <!-- ✅ NEW -->
 
                 <td>
                   <button class="btn btn-sm btn-warning"
@@ -136,13 +112,22 @@
                           data-keyboard="{{ brand.is_keyboard }}"
                           data-mouse="{{ brand.is_mouse }}"
                           data-monitor="{{ brand.is_monitor }}"
-                          data-ups="{{ brand.is_ups }}">
+                          data-ups="{{ brand.is_ups }}"
+                         
+                          data-printer="{{ brand.is_printer }}"> 
                     Edit
                   </button>
                 </td>
               </tr>
               {% endfor %}
-                </tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Brand Modal -->
 <div class="modal fade" id="editBrandModal" tabindex="-1" aria-labelledby="editBrandModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -163,7 +148,7 @@
             <label class="form-label d-block">Applicable To:</label>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="edit-desktop" name="is_desktop">
-              <label class="form-check-label" for="edit-desktop">Desktop</label>
+              <label class="form-check-label" for="edit-desktop">Desktop and Laptop</label>
             </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="edit-keyboard" name="is_keyboard">
@@ -181,6 +166,12 @@
               <input class="form-check-input" type="checkbox" id="edit-ups" name="is_ups">
               <label class="form-check-label" for="edit-ups">UPS</label>
             </div>
+            
+            
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="edit-printer" name="is_printer">
+              <label class="form-check-label" for="edit-printer">Printer</label>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -188,14 +179,6 @@
         </div>
       </form>
     </div>
-  </div>
-</div>
-
-          </table>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
@@ -210,6 +193,7 @@
     document.getElementById('edit-mouse').checked = button.getAttribute('data-mouse') === 'True';
     document.getElementById('edit-monitor').checked = button.getAttribute('data-monitor') === 'True';
     document.getElementById('edit-ups').checked = button.getAttribute('data-ups') === 'True';
+    document.getElementById('edit-printer').checked = button.getAttribute('data-printer') === 'True'; // ✅ NEW
   });
 </script>
 {% endblock %}
