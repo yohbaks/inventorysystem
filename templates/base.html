@@ -26,33 +26,22 @@
     });
   </script>
 
-  <!-- CSS -->
-   
+  <!-- CSS Files -->
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/plugins.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/kaiadmin.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/fonts.min.css' %}">
-
-
-<!-- jQuery + DataTables core MUST be loaded before any page uses them -->
-  <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
-      <script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script>
-      <script src="{% static 'js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
-      <script src="{% static 'js/plugin/chart.js/chart.min.js' %}"></script>
-      <script src="{% static 'js/kaiadmin.min.js' %}"></script>
-      <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
-      <script src="{% static 'js/plugin/datatables/datatables.min.js' %}"></script>
-      <script src="{% static 'js/plugin/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
-
   {% endblock %}
 </head>
 
 <body>
   <div class="wrapper">
+
     {% block sidebar %}
     <!-- Sidebar -->
     <div class="sidebar" data-background-color="dark">
       <div class="sidebar-logo">
+        <!-- Logo Header -->
         <div class="logo-header" data-background-color="dark">
           <a href="{% url 'dashboard' %}" class="logo">
             <img src="{% static 'img/kaiadmin/logo_light.svg' %}" alt="navbar brand" class="navbar-brand" height="20" />
@@ -69,12 +58,27 @@
         <div class="sidebar-content">
           <ul class="nav nav-secondary">
 
-            <!-- Dashboard as a simple link -->
+            <!-- Dashboard (collapse like the reference) -->
             <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-              <a class="nav-link" href="{% url 'dashboard' %}">
+              <a
+                data-bs-toggle="collapse"
+                href="#menuDashboard"
+                class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}{% else %}collapsed{% endif %}"
+                aria-expanded="{% if request.resolver_match.url_name == 'dashboard' %}true{% else %}false{% endif %}"
+              >
                 <i class="fas fa-home"></i>
                 <p>Dashboard</p>
+                <span class="caret"></span>
               </a>
+              <div class="collapse {% if request.resolver_match.url_name == 'dashboard' %}show{% endif %}" id="menuDashboard">
+                <ul class="nav nav-collapse">
+                  <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}">
+                      <span class="sub-item">Main Dashboard</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </li>
 
             <li class="nav-section">
@@ -83,14 +87,14 @@
             </li>
 
             <!-- IT Equipments -->
-            <li class="nav-item {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' %}active{% endif %}">
+            <li class="nav-item {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuIT"
-                 class="{% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' %}true{% else %}false{% endif %}">
+                 class="nav-link {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}{% else %}collapsed{% endif %}"
+                 aria-expanded="{% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}true{% else %}false{% endif %}">
                 <i class="fas fa-layer-group"></i>
                 <p>IT Equipments</p><span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' %}show{% endif %}" id="menuIT">
+              <div class="collapse {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}show{% endif %}" id="menuIT">
                 <ul class="nav nav-collapse">
                   <li class="{% if request.resolver_match.url_name == 'desktop_details' %}active{% endif %}">
                     <a href="{% url 'desktop_details' %}"><span class="sub-item">🗄️ Desktops Packages</span></a>
@@ -125,7 +129,7 @@
             <!-- Miscellaneous -->
             <li class="nav-item {% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuMisc"
-                 class="{% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}{% else %}collapsed{% endif %}"
+                 class="nav-link {% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}{% else %}collapsed{% endif %}"
                  aria-expanded="{% if request.resolver_match.url_name == 'add_equipment_package_with_details' or request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'add_brand' or request.resolver_match.url_name == 'office_section_list' %}true{% else %}false{% endif %}">
                 <i class="fas fa-th-list"></i>
                 <p>Miscellaneous</p><span class="caret"></span>
@@ -151,7 +155,7 @@
             <!-- Disposals -->
             <li class="nav-item {% if request.resolver_match.url_name == 'disposal_overview' or request.resolver_match.url_name == 'disposal_history' or request.resolver_match.url_name == 'dashboard_view_chart' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuDisposals"
-                 class="{% if request.resolver_match.url_name == 'disposal_overview' or request.resolver_match.url_name == 'disposal_history' or request.resolver_match.url_name == 'dashboard_view_chart' %}{% else %}collapsed{% endif %}"
+                 class="nav-link {% if request.resolver_match.url_name == 'disposal_overview' or request.resolver_match.url_name == 'disposal_history' or request.resolver_match.url_name == 'dashboard_view_chart' %}{% else %}collapsed{% endif %}"
                  aria-expanded="{% if request.resolver_match.url_name == 'disposal_overview' or request.resolver_match.url_name == 'disposal_history' or request.resolver_match.url_name == 'dashboard_view_chart' %}true{% else %}false{% endif %}">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Disposals</p><span class="caret"></span>
@@ -171,10 +175,10 @@
               </div>
             </li>
 
-            <!-- Preventive Maintenance (unique ID) -->
+            <!-- Preventive Maintenance -->
             <li class="nav-item {% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuPM"
-                 class="{% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}{% else %}collapsed{% endif %}"
+                 class="nav-link {% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}{% else %}collapsed{% endif %}"
                  aria-expanded="{% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}true{% else %}false{% endif %}">
                 <i class="fas fa-wrench"></i>
                 <p>Preventive Maintenance</p><span class="caret"></span>
@@ -182,13 +186,13 @@
               <div class="collapse {% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}show{% endif %}" id="menuPM">
                 <ul class="nav nav-collapse">
                   <li class="{% if request.resolver_match.url_name == 'pm_overview' %}active{% endif %}">
-                    <a href="{% url 'pm_overview' %}" target="_blank"><span class="sub-item">PM Overview</span></a>
+                    <a href="{% url 'pm_overview' %}"><span class="sub-item">PM Overview</span></a>
                   </li>
                   <li class="{% if request.resolver_match.url_name == 'section_schedule_list' %}active{% endif %}">
-                    <a href="{% url 'section_schedule_list' %}" target="_blank"><span class="sub-item">PM Schedules</span></a>
+                    <a href="{% url 'section_schedule_list' %}"><span class="sub-item">PM Schedules</span></a>
                   </li>
                   <li class="{% if request.resolver_match.url_name == 'disposed_keyboards' %}active{% endif %}">
-                    <a href="{% url 'disposed_keyboards' %}" target="_blank"><span class="sub-item">4th Quarter</span></a>
+                    <a href="{% url 'disposed_keyboards' %}"><span class="sub-item">4th Quarter</span></a>
                   </li>
                 </ul>
               </div>
@@ -201,8 +205,9 @@
     <!-- End Sidebar -->
     {% endblock %}
 
-    {% block navbar %}
     <div class="main-panel">
+
+      {% block navbar %}
       <div class="main-header">
         <div class="main-header-logo">
           <div class="logo-header" data-background-color="dark">
@@ -218,365 +223,306 @@
         </div>
 
         <!-- Navbar Header -->
-          <nav
-            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
-          >
-            <div class="container-fluid">
-              <nav
-                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
-              >
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <button type="submit" class="btn btn-search pe-1">
-                      <i class="fa fa-search search-icon"></i>
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search ..."
-                    class="form-control"
-                  />
+        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+          <div class="container-fluid">
+            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <button type="submit" class="btn btn-search pe-1">
+                    <i class="fa fa-search search-icon"></i>
+                  </button>
                 </div>
-              </nav>
+                <input type="text" placeholder="Search ..." class="form-control" />
+              </div>
+            </nav>
 
-              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
-                <li
-                  class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none"
-                >
-                  <a
-                    class="nav-link dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    href="#"
-                    role="button"
-                    aria-expanded="false"
-                    aria-haspopup="true"
-                  >
-                    <i class="fa fa-search"></i>
-                  </a>
-                  <ul class="dropdown-menu dropdown-search animated fadeIn">
-                    <form class="navbar-left navbar-form nav-search">
-                      <div class="input-group">
-                        <input
-                          type="text"
-                          placeholder="Search ..."
-                          class="form-control"
-                        />
-                      </div>
-                    </form>
-                  </ul>
-                </li>
-                     
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a
-                    class="nav-link dropdown-toggle"
-                    href="#"
-                    id="messageDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    <i class="fa fa-envelope"></i>
-                  </a>
-                  <ul
-                    class="dropdown-menu messages-notif-box animated fadeIn"
-                    aria-labelledby="messageDropdown"
-                  >
-                    <li>
-                      <div
-                        class="dropdown-title d-flex justify-content-between align-items-center"
-                      >
-                        Messages
-                        <a href="#" class="small">Mark all as read</a>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="message-notif-scroll scrollbar-outer">
-                        <div class="notif-center">
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="/img/jm_denis.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Jimmy Denis</span>
-                              <span class="block"> How are you ? </span>
-                              <span class="time">5 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="/img/chadengle.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Chad</span>
-                              <span class="block"> Ok, Thanks ! </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="{% static '/img/mlane.jpg' %}"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Jhon Doe</span>
-                              <span class="block">
-                                Ready for the meeting today...
-                              </span>
-                              <span class="time">12 minutes ago</span>
-                            </div>
-                          </a>
-                          <a href="#">
-                            <div class="notif-img">
-                              <img
-                                src="/img/talha.jpg"
-                                alt="Img Profile"
-                              />
-                            </div>
-                            <div class="notif-content">
-                              <span class="subject">Talha</span>
-                              <span class="block"> Hi, Apa Kabar ? </span>
-                              <span class="time">17 minutes ago</span>
-                            </div>
-                          </a>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <a class="see-all" href="javascript:void(0);"
-                        >See all messages<i class="fa fa-angle-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-
-                {% comment %} notification area for PM {% endcomment %}
-               <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-bell"></i>
-                    {% if pending_pm_count > 0 %}
-                      <span class="notification">{{ pending_pm_count }}</span>
-                    {% endif %}
-                  </a>
-                  <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
-                    <li>
-                      <div class="dropdown-title">
-                        {% if pending_pm_count > 0 %}
-                          You have {{ pending_pm_count }} pending PM assignment{{ pending_pm_count|pluralize }}
-                        {% else %}
-                          No pending PM
-                        {% endif %}
-                      </div>
-                    </li>
-                    <li>
-                      <div class="notif-scroll scrollbar-outer">
-                        <div class="notif-center">
-                          {% for assignment in pending_pm_list %}
-                            <a href="{% url 'maintenance_history' assignment.equipment_package.id %}">
-                              <div class="notif-icon notif-warning">
-                                <i class="fa fa-exclamation-triangle"></i>
-                              </div>
-                              <div class="notif-content">
-                                <span class="block">
-                                  PM pending for 
-                                  {% if assignment.computer_name %}
-                                    {{ assignment.computer_name }}
-                                  {% else %}
-                                    Desktop #{{ assignment.equipment_package.id }}
-                                  {% endif %}
-                                </span>
-                                <span class="time">
-                                  {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
-                                  {% if assignment.is_overdue %}
-                                    <span class="badge bg-danger ms-1">Overdue</span>
-                                  {% else %}
-                                    <span class="badge bg-warning text-dark ms-1">Upcoming</span>
-                                  {% endif %}
-                                </span>
-                              </div>
-                            </a>
-                          {% empty %}
-                            <div class="notif-content">
-                              <span class="block">No pending PM tasks.</span>
-                            </div>
-                          {% endfor %}
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <a class="see-all" href="{% url 'pm_overview' %}">
-                        See all PM Tasks <i class="fa fa-angle-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-{% comment %} end notification area for PM  {% endcomment %}
-
-                <li class="nav-item topbar-icon dropdown hidden-caret">
-                  <a
-                    class="nav-link"
-                    data-bs-toggle="dropdown"
-                    href="#"
-                    aria-expanded="false"
-                  >
-                    <i class="fas fa-layer-group"></i>
-                  </a>
-                  <div class="dropdown-menu quick-actions animated fadeIn">
-                    <div class="quick-actions-header">
-                      <span class="title mb-1">Quick Actions</span>
-                      <span class="subtitle op-7">Shortcuts</span>
+            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+              <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" aria-haspopup="true">
+                  <i class="fa fa-search"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-search animated fadeIn">
+                  <form class="navbar-left navbar-form nav-search">
+                    <div class="input-group">
+                      <input type="text" placeholder="Search ..." class="form-control" />
                     </div>
-                    <div class="quick-actions-scroll scrollbar-outer">
-                      <div class="quick-actions-items">
-                        <div class="row m-0">
-                          <a class="col-6 col-md-4 p-0" href="{% url 'section_schedule_list' %}">
-                            <div class="quick-actions-item">
-                              <div class="avatar-item bg-danger rounded-circle">
-                                <i class="far fa-calendar-alt"></i>
-                              </div>
-                              <span class="text">PM Sched</span>
+                  </form>
+                </ul>
+              </li>
+
+              <li class="nav-item topbar-icon dropdown hidden-caret">
+                <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-envelope"></i>
+                </a>
+                <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                  <li>
+                    <div class="dropdown-title d-flex justify-content-between align-items-center">
+                      Messages
+                      <a href="#" class="small">Mark all as read</a>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="message-notif-scroll scrollbar-outer">
+                      <div class="notif-center">
+                        <a href="#">
+                          <div class="notif-img">
+                            <img src="{% static 'img/jm_denis.jpg' %}" alt="Img Profile" />
+                          </div>
+                          <div class="notif-content">
+                            <span class="subject">Jimmy Denis</span>
+                            <span class="block"> How are you ? </span>
+                            <span class="time">5 minutes ago</span>
+                          </div>
+                        </a>
+                        <a href="#">
+                          <div class="notif-img">
+                            <img src="{% static 'img/chadengle.jpg' %}" alt="Img Profile" />
+                          </div>
+                          <div class="notif-content">
+                            <span class="subject">Chad</span>
+                            <span class="block"> Ok, Thanks ! </span>
+                            <span class="time">12 minutes ago</span>
+                          </div>
+                        </a>
+                        <a href="#">
+                          <div class="notif-img">
+                            <img src="{% static 'img/mlane.jpg' %}" alt="Img Profile" />
+                          </div>
+                          <div class="notif-content">
+                            <span class="subject">Jhon Doe</span>
+                            <span class="block"> Ready for the meeting today... </span>
+                            <span class="time">12 minutes ago</span>
+                          </div>
+                        </a>
+                        <a href="#">
+                          <div class="notif-img">
+                            <img src="{% static 'img/talha.jpg' %}" alt="Img Profile" />
+                          </div>
+                          <div class="notif-content">
+                            <span class="subject">Talha</span>
+                            <span class="block"> Hi, Apa Kabar ? </span>
+                            <span class="time">17 minutes ago</span>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i></a>
+                  </li>
+                </ul>
+              </li>
+
+              {% comment %} notification area for PM {% endcomment %}
+              <li class="nav-item topbar-icon dropdown hidden-caret">
+                <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-bell"></i>
+                  {% if pending_pm_count > 0 %}
+                    <span class="notification">{{ pending_pm_count }}</span>
+                  {% endif %}
+                </a>
+                <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                  <li>
+                    <div class="dropdown-title">
+                      {% if pending_pm_count > 0 %}
+                        You have {{ pending_pm_count }} pending PM assignment{{ pending_pm_count|pluralize }}
+                      {% else %}
+                        No pending PM
+                      {% endif %}
+                    </div>
+                  </li>
+                  <li>
+                    <div class="notif-scroll scrollbar-outer">
+                      <div class="notif-center">
+                        {% for assignment in pending_pm_list %}
+                          <a href="{% url 'maintenance_history' assignment.equipment_package.id %}">
+                            <div class="notif-icon notif-warning">
+                              <i class="fa fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="notif-content">
+                              <span class="block">
+                                PM pending for 
+                                {% if assignment.computer_name %}
+                                  {{ assignment.computer_name }}
+                                {% else %}
+                                  Desktop #{{ assignment.equipment_package.id }}
+                                {% endif %}
+                              </span>
+                              <span class="time">
+                                {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
+                                {% if assignment.is_overdue %}
+                                  <span class="badge bg-danger ms-1">Overdue</span>
+                                {% else %}
+                                  <span class="badge bg-warning text-dark ms-1">Upcoming</span>
+                                {% endif %}
+                              </span>
                             </div>
                           </a>
-                          <a class="col-6 col-md-4 p-0" href="{% url 'add_equipment_package_with_details' %}">
-                            <div class="quick-actions-item">
-                              <div
-                                class="avatar-item bg-success rounded-circle"
-                              >
-                                <i class="fas fa-edit"></i>
-                              </div>
-                              <span class="text">Add Item</span>
+                        {% empty %}
+                          <div class="notif-content">
+                            <span class="block">No pending PM tasks.</span>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </li>
+                  <li>
+                    <a class="see-all" href="{% url 'pm_overview' %}">
+                      See all PM Tasks <i class="fa fa-angle-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              {% comment %} end notification area for PM  {% endcomment %}
+
+              <li class="nav-item topbar-icon dropdown hidden-caret">
+                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                  <i class="fas fa-layer-group"></i>
+                </a>
+                <div class="dropdown-menu quick-actions animated fadeIn">
+                  <div class="quick-actions-header">
+                    <span class="title mb-1">Quick Actions</span>
+                    <span class="subtitle op-7">Shortcuts</span>
+                  </div>
+                  <div class="quick-actions-scroll scrollbar-outer">
+                    <div class="quick-actions-items">
+                      <div class="row m-0">
+                        <a class="col-6 col-md-4 p-0" href="{% url 'section_schedule_list' %}">
+                          <div class="quick-actions-item">
+                            <div class="avatar-item bg-danger rounded-circle">
+                              <i class="far fa-calendar-alt"></i>
                             </div>
-                          </a>
-                          <a class="col-6 col-md-4 p-0" href="{% url 'export_desktop_excel' %}">
-                            <div class="quick-actions-item">
-                              <div class="avatar-item bg-info rounded-circle">
-                                <i class="fas fa-file-excel"></i>
-                              </div>
-                              <span class="text">Reports</span>
+                            <span class="text">PM Sched</span>
+                          </div>
+                        </a>
+                        <a class="col-6 col-md-4 p-0" href="{% url 'add_equipment_package_with_details' %}">
+                          <div class="quick-actions-item">
+                            <div class="avatar-item bg-success rounded-circle">
+                              <i class="fas fa-edit"></i>
                             </div>
-                          </a>
-                          <a class="col-6 col-md-4 p-0" href="{% url 'dashboard_view_chart' %}">
-                            <div class="quick-actions-item">
-                              <div
-                                class="avatar-item bg-warning rounded-circle"
-                              >
-                                <i class="fas fa-envelope"></i>
-                              </div>
-                              <span class="text">Dashboard</span>
+                            <span class="text">Add Item</span>
+                          </div>
+                        </a>
+                        <a class="col-6 col-md-4 p-0" href="{% url 'export_desktop_excel' %}">
+                          <div class="quick-actions-item">
+                            <div class="avatar-item bg-info rounded-circle">
+                              <i class="fas fa-file-excel"></i>
                             </div>
-                          </a>
-                          <a class="col-6 col-md-4 p-0" href="{% url 'disposal_overview' %}">
-                            <div class="quick-actions-item">
-                              <div
-                                class="avatar-item bg-primary rounded-circle"
-                              >
-                                <i class="far fa-trash-alt"></i>
-                              </div>
-                              <span class="text">Disposals</span>
+                            <span class="text">Reports</span>
+                          </div>
+                        </a>
+                        <a class="col-6 col-md-4 p-0" href="{% url 'dashboard_view_chart' %}">
+                          <div class="quick-actions-item">
+                            <div class="avatar-item bg-warning rounded-circle">
+                              <i class="fas fa-envelope"></i>
                             </div>
-                          </a>
-                          <a class="col-6 col-md-4 p-0" href="{% url 'employee_list' %}">
-                            <div class="quick-actions-item">
-                              <div
-                                class="avatar-item bg-secondary rounded-circle"
-                              >
-                                <i class="fas fa-user"></i>
-                              </div>
-                              <span class="text">Employee</span>
+                            <span class="text">Dashboard</span>
+                          </div>
+                        </a>
+                        <a class="col-6 col-md-4 p-0" href="{% url 'disposal_overview' %}">
+                          <div class="quick-actions-item">
+                            <div class="avatar-item bg-primary rounded-circle">
+                              <i class="far fa-trash-alt"></i>
                             </div>
-                          </a>
-                        </div>
+                            <span class="text">Disposals</span>
+                          </div>
+                        </a>
+                        <a class="col-6 col-md-4 p-0" href="{% url 'employee_list' %}">
+                          <div class="quick-actions-item">
+                            <div class="avatar-item bg-secondary rounded-circle">
+                              <i class="fas fa-user"></i>
+                            </div>
+                            <span class="text">Employee</span>
+                          </div>
+                        </a>
                       </div>
                     </div>
                   </div>
-                </li>
+                </div>
+              </li>
 
-                <li class="nav-item topbar-user dropdown hidden-caret">
-                  <a
-                    class="dropdown-toggle profile-pic"
-                    data-bs-toggle="dropdown"
-                    href="#"
-                    aria-expanded="false"
-                  >
-                    <div class="avatar-sm">
-                       <img
-                          src="{% if request.user.is_authenticated and request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'img/profile.jpg' %}{% endif %}" 
-                          alt="avatar"
-                          class="avatar-img rounded-circle"
-                        />
-                    </div>
-                    <span class="profile-username">
-                      <span class="op-7">Hi,</span>
-                      <span class="fw-bold">
-                        {% if request.user.is_authenticated %}
-                          {{ request.user.first_name|default:request.user.username }}
-                        {% else %}
-                          Guest
-                        {% endif %}
-                      </span>
+              <li class="nav-item topbar-user dropdown hidden-caret">
+                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                  <div class="avatar-sm">
+                    <img
+                      src="{% if request.user.is_authenticated and request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'img/profile.jpg' %}{% endif %}"
+                      alt="avatar"
+                      class="avatar-img rounded-circle"
+                    />
+                  </div>
+                  <span class="profile-username">
+                    <span class="op-7">Hi,</span>
+                    <span class="fw-bold">
+                      {% if request.user.is_authenticated %}
+                        {{ request.user.first_name|default:request.user.username }}
+                      {% else %}
+                        Guest
+                      {% endif %}
                     </span>
-                  </a>
-                  <ul class="dropdown-menu dropdown-user animated fadeIn">
-                    <div class="dropdown-user-scroll scrollbar-outer">
-                      <li>
-                        <div class="user-box">
-                          <div class="avatar-lg">
-                            <img src="{{ request.user.profile.avatar_url }}" class="avatar-img rounded" width="32" height="32" style="object-fit:cover;">
-
-                          </div>
-                          <div class="u-text">
-                            <h4>Yohbaks</h4>
-                            <p class="text-muted">IT Officer</p>
-                            <a href="{% url 'profile' %}" class="btn btn-primary btn-sm">View Profile</a>
-                          </div>
+                  </span>
+                </a>
+                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                  <div class="dropdown-user-scroll scrollbar-outer">
+                    <li>
+                      <div class="user-box">
+                        <div class="avatar-lg">
+                          <img src="{{ request.user.profile.avatar_url }}" class="avatar-img rounded" width="32" height="32" style="object-fit:cover;">
                         </div>
-                      </li>
-                      <li>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">My Profile</a>
-                        <a class="dropdown-item" href="#">My Balance</a>
-                        <a class="dropdown-item" href="#">Inbox</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Account Setting</a>
-                        <div class="dropdown-divider"></div>
-
-                         <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        <div class="u-text">
+                          <h4>Yohbaks</h4>
+                          <p class="text-muted">IT Officer</p>
+                          <a href="{% url 'profile' %}" class="btn btn-primary btn-sm">View Profile</a>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">My Profile</a>
+                      <a class="dropdown-item" href="#">My Balance</a>
+                      <a class="dropdown-item" href="#">Inbox</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Account Setting</a>
+                      <div class="dropdown-divider"></div>
+                      <form action="{% url 'logout' %}" method="post" style="display:inline;">
                         {% csrf_token %}
                         <button type="submit" class="dropdown-item">Logout</button>
                       </form>
-                        
-                      </li>
-                    </div>
-                  </ul>
-                </li>
-              </ul>
-            </div>
-          </nav>
-          
-           
-        </div>
-<!-- End Navbar -->
-    {% endblock %}
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- End Navbar -->
+      </div>
+      {% endblock %}
 
-    {% block content %}
-      <!-- Your pages (e.g., dashboard.html) will render here -->
-      <div class="container"><div class="page-inner"></div></div>
-    {% endblock %}
+      {% block content %}
+        <div class="container"><div class="page-inner"></div></div>
+      {% endblock %}
 
-    {% block scripts %}
-      <!-- Core JS (order matters) -->
-      
-     
+      {% block scripts %}
+      <!-- Core JS (order matters, match Kaiadmin reference) -->
+      <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
+      <script src="{% static 'js/core/popper.min.js' %}"></script>
+      <script src="{% static 'js/core/bootstrap.min.js' %}"></script>
 
-      <!-- Auto-expand parent menu if any child li has .active -->
+      <!-- Plugins -->
+      <script src="{% static 'js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
+      <script src="{% static 'js/plugin/chart.js/chart.min.js' %}"></script>
+      <script src="{% static 'js/plugin/jquery.sparkline/jquery.sparkline.min.js' %}"></script>
+      <script src="{% static 'js/plugin/chart-circle/circles.min.js' %}"></script>
+      <script src="{% static 'js/plugin/datatables/datatables.min.js' %}"></script>
+      <script src="{% static 'js/plugin/bootstrap-notify/bootstrap-notify.min.js' %}"></script>
+      <script src="{% static 'js/plugin/jsvectormap/jsvectormap.min.js' %}"></script>
+      <script src="{% static 'js/plugin/jsvectormap/world.js' %}"></script>
+      <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+
+      <!-- Kaiadmin -->
+      <script src="{% static 'js/kaiadmin.min.js' %}"></script>
+
+      <!-- Auto-expand parent menu when a child is active -->
       <script>
         document.addEventListener('DOMContentLoaded', function () {
           document.querySelectorAll('.sidebar .nav .nav-collapse li.active').forEach(function (li) {
@@ -590,7 +536,7 @@
           });
         });
       </script>
-    {% endblock %}
+      {% endblock %}
     </div> <!-- /.main-panel -->
   </div> <!-- /.wrapper -->
 </body>
