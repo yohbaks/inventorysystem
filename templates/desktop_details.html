@@ -25,8 +25,8 @@
           </div>
 
           <div class="card-body">
-            <div class="table-responsive table-head-bg-primary">
-              <table id="desktop-table" class="display table table-striped table-hover">
+             <div class="table-responsive table-head-bg-primary">
+              <table id="desktop-table" class="display table table-striped table-hover" style="width:100%">
                 <thead>
                   <tr>
                     <th>Computer Name</th>
@@ -37,18 +37,22 @@
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
-                </thead>
-                <tfoot>
-                  <tr>
-                    <th>Computer Name</th>
-                    <th>Serial Number</th>
-                    <th>Brand Name</th>
-                    <th>End User</th>
-                    <th>Asset Owner</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                  <tr class="filters">
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Name" data-column="0" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Serial" data-column="1" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-column="2" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search User" data-column="3" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-column="4" /></th>
+                    <th>
+                      <select class="form-select form-select-sm column-search" data-column="5">
+                        <option value="">All</option>
+                        <option value="Active">Active</option>
+                        <option value="Disposed">Disposed</option>
+                      </select>
+                    </th>
+                    <th></th>
                   </tr>
-                </tfoot>
+                </thead>
                 <tbody>
                   {% for item in desktops_with_items %}
                   <tr>
@@ -93,26 +97,45 @@
 {% block scripts %}
 {{ block.super }}
 <script>
-  $(document).ready(function() {
-    $("#desktop-table").DataTable({
-      pageLength: 10,
-      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-      language: {
-        lengthMenu: "Show _MENU_ entries",
-        info: "Showing _START_ to _END_ of _TOTAL_ desktops",
-        infoEmpty: "Showing 0 to 0 of 0 desktops",
-        infoFiltered: "(filtered from _MAX_ total desktops)",
-        paginate: {
-          first: "First",
-          last: "Last",
-          next: "Next",
-          previous: "Previous"
-        }
-      },
-      columnDefs: [
-        { orderable: false, targets: [5, 6] }
-      ]
-    });
+$(document).ready(function() {
+  console.log('Initializing Desktop DataTable...');
+  
+  // Initialize DataTable
+  var table = $('#desktop-table').DataTable({
+    orderCellsTop: true,
+    fixedHeader: false,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    language: {
+      lengthMenu: "Show _MENU_ entries",
+      info: "Showing _START_ to _END_ of _TOTAL_ desktops",
+      infoEmpty: "Showing 0 to 0 of 0 desktops",
+      infoFiltered: "(filtered from _MAX_ total desktops)",
+      paginate: {
+        first: "First",
+        last: "Last",
+        next: "Next",
+        previous: "Previous"
+      }
+    },
+    columnDefs: [
+      { orderable: false, targets: [5, 6] }
+    ]
   });
+  
+  console.log('Desktop DataTable initialized');
+  
+  // Apply the search using data-column attribute
+  $('.column-search').on('keyup change', function() {
+    var columnIndex = $(this).data('column');
+    var searchValue = this.value;
+    
+    console.log('Searching column ' + columnIndex + ' for: ' + searchValue);
+    
+    table.column(columnIndex).search(searchValue).draw();
+  });
+  
+  console.log('Desktop filter handlers attached');
+});
 </script>
 {% endblock %}

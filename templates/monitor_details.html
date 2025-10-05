@@ -6,11 +6,11 @@
   <div class="page-inner">
     <div class="row">
       <div class="col-md-12">
-        <div class="card shadow-sm rounded">
-          <div class="card-header bg-light">
-            <div class="card-head-row d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">🖥️ Monitor Details</h4>
-              <div class="card-tools">
+        <div class="card">
+          <div class="card-header">
+            <div class="d-flex align-items-center">
+              <h4 class="card-title">🖥️ Monitor Details</h4>
+              <div class="ms-auto">
                 <a href="#" class="btn btn-danger btn-sm me-2">
                   <i class="fa fa-arrow-left me-1"></i> Return to Supply
                 </a>
@@ -24,29 +24,27 @@
             </div>
           </div>
 
-
-
           <div class="card-body">
-            <div class="table-responsive">
-              <table id="monitor-table" class="display table table-striped table-bordered">
-                <thead class="text-white">
+            <div class="table-responsive table-head-bg-primary">
+              <table id="monitor-table" class="display table table-striped table-hover" style="width:100%">
+                <thead>
                   <tr>
-                    <th style="background-color: #6861ce; color: white;">Serial Number</th>
-                    <th style="background-color: #6861ce; color: white;">BRAND</th>
-                    <th style="background-color: #6861ce; color: white;">MODEL</th>
-                    <th style="background-color: #6861ce; color: white;">SIZE</th>
-                    <th style="background-color: #6861ce; color: white;">END USER</th>
-                    <th style="background-color: #6861ce; color: white;">STATUS</th>
-                    <th style="background-color: #6861ce; color: white;">Actions</th>
+                    <th>Serial Number</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Size</th>
+                    <th>End User</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                  <tr class="bg-white text-dark">
-                    <th><input type="text" placeholder="Search Serial" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Brand" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Model" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search Size" class="form-control form-control-sm" /></th>
-                    <th><input type="text" placeholder="Search End User" class="form-control form-control-sm" /></th>
+                  <tr class="filters">
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Serial" data-column="0" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-column="1" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-column="2" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Size" data-column="3" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search User" data-column="4" /></th>
                     <th>
-                      <select class="form-select form-select-sm">
+                      <select class="form-select form-select-sm column-search" data-column="5">
                         <option value="">All</option>
                         <option value="Active">Active</option>
                         <option value="Reassigned">Reassigned</option>
@@ -62,21 +60,15 @@
                     <td>{{ monitor.monitor_brand_db }}</td>
                     <td>{{ monitor.monitor_model_db }}</td>
                     <td>{{ monitor.monitor_size_db }}</td>
-
                     <td>
                       {% if monitor.equipment_package and monitor.equipment_package.user_details.first %}
                         {% with user_detail=monitor.equipment_package.user_details.first %}
-                          <strong>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</strong><br>
-                          <small class="text-muted">
-                            {{ user_detail.user_Enduser.employee_position }} - {{ user_detail.user_Enduser.employee_office_section }}
-                          </small>
+                          {{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}
                         {% endwith %}
                       {% else %}
-                        <span class="text-muted">N/A</span>
+                        N/A
                       {% endif %}
                     </td>
-
-                    <!-- Status -->
                     <td>
                       {% if monitor.status == "active" %}
                         <span class="badge bg-success">Active</span>
@@ -84,17 +76,15 @@
                         <span class="badge bg-secondary">Reassigned</span>
                       {% endif %}
                     </td>
-
-                    <!-- Actions -->
                     <td>
                       {% if monitor.status == "active" and monitor.equipment_package %}
                         <a href="{% url 'desktop_details_view' monitor.equipment_package.id %}#pills-monitor"
-                           class="btn btn-sm btn-primary">
+                           class="btn btn-primary btn-xs">
                           <i class="fa fa-eye"></i> View
                         </a>
                       {% elif monitor.status == "reassigned" and monitor.salvaged_id %}
                         <a href="{% url 'salvaged_monitor_detail' monitor.salvaged_id %}"
-                           class="btn btn-sm btn-secondary">
+                           class="btn btn-secondary btn-xs">
                           <i class="fa fa-history"></i> History
                         </a>
                       {% else %}
@@ -116,23 +106,41 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+{{ block.super }}
 <script>
-  $(document).ready(function () {
-    var table = $('#monitor-table').DataTable({
-      orderCellsTop: true,
-      fixedHeader: true,
-      pageLength: 10
-    });
-
-    // Setup column-specific search
-    $('#monitor-table thead tr:eq(1) th').each(function (i) {
-      $('input, select', this).on('keyup change', function () {
-        if (table.column(i).search() !== this.value) {
-          table.column(i).search(this.value).draw();
-        }
-      });
-    });
+$(document).ready(function() {
+  console.log('Initializing DataTable...');
+  
+  // Initialize DataTable
+  var table = $('#monitor-table').DataTable({
+    orderCellsTop: true,
+    fixedHeader: false,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    language: {
+      lengthMenu: "Show _MENU_ entries",
+      info: "Showing _START_ to _END_ of _TOTAL_ monitors",
+      infoEmpty: "Showing 0 to 0 of 0 monitors",
+      infoFiltered: "(filtered from _MAX_ total monitors)"
+    }
   });
+  
+  console.log('DataTable initialized');
+  
+  // Apply the search using data-column attribute
+  $('.column-search').on('keyup change', function() {
+    var columnIndex = $(this).data('column');
+    var searchValue = this.value;
+    
+    console.log('Searching column ' + columnIndex + ' for: ' + searchValue);
+    
+    table.column(columnIndex).search(searchValue).draw();
+  });
+  
+  console.log('Filter handlers attached');
+});
 </script>
 {% endblock %}

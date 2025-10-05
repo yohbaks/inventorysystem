@@ -158,9 +158,9 @@
             <div class="card-title mb-0">Recently Added IT Equipment</div>
           </div>
           <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead>
+             <div class="table-responsive">
+              <table class="table align-items-center mb-0">
+                <thead class="thead-light">
                   <tr>
                     <th>Computer Name</th>
                     <th>Serial</th>
@@ -179,7 +179,7 @@
                     <td>{{ d.model }}</td>
                     <td>{{ d.created_at|date:"Y-m-d H:i" }}</td>
                     <td>
-                      <a href="{% url 'desktop_details_view' d.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                      <a href="{% url 'desktop_details_view' d.id %}" class="btn btn-xs btn-outline-primary"><i class="fa fa-eye"></i>View</a>
                     </td>
                   </tr>
                   {% empty %}
@@ -213,26 +213,66 @@
           </div>
         </div>
 
-        <div class="card shadow-sm mt-3">
-          <div class="card-header">
-            <div class="card-title mb-0">Upcoming PM (7 days)</div>
-          </div>
-          <div class="card-body">
-            <ul class="list-group list-group-flush">
-              {% for pm in pm_upcoming %}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                  <div class="ms-2 me-auto">
-                    <div class="fw-bold">{{ pm.section }}</div>
-                    {{ pm.computer_name }} — {{ pm.range }}
-                  </div>
-                  <span class="badge bg-warning text-dark rounded-pill">Due</span>
-                </li>
-              {% empty %}
-                <li class="list-group-item text-muted">No upcoming schedules this week</li>
-              {% endfor %}
-            </ul>
-          </div>
+
+        {% comment %} Preventive Maintenance {% endcomment %}
+     <div class="card shadow-sm mt-3">
+  <div class="card-header">
+    <div class="card-title fw-bold text-primary">
+      <i class="fa fa-calendar-alt me-2 text-primary"></i> Upcoming PM (7 Days)
+    </div>
+  </div>
+
+  <div class="card-body pb-3">
+    {% if pm_upcoming %}
+      {% for pm in pm_upcoming %}
+      <div class="d-flex align-items-center mb-3">
+        <!-- Dynamic Avatar/Icon -->
+        <div class="avatar">
+          {% if pm.section|lower == "administrative section" %}
+            <img src="{% static '/img/logo_administrative_section.svg' %}" alt="Administrative" class="avatar-img rounded-circle">
+          {% elif pm.section|lower == "commission on audit" %}
+            <img src="{% static '/img/logo_commission_on_audit.svg' %}" alt="COA" class="avatar-img rounded-circle">
+          {% elif pm.section|lower == "planning section" %}
+            <img src="{% static '/img/logoproduct3.svg' %}" alt="Planning" class="avatar-img rounded-circle">
+          {% elif pm.section|lower == "ict section" %}
+            <img src="{% static '/img/logoproduct4.svg' %}" alt="ICT" class="avatar-img rounded-circle">
+          {% else %}
+            <img src="{% static '/img/defaulticon.svg' %}" alt="Other Section" class="avatar-img rounded-circle">
+          {% endif %}
         </div>
+
+        <!-- PM Details -->
+        <div class="flex-1 pt-1 ms-2">
+          <h6 class="fw-bold mb-1 text-dark">{{ pm.computer_name }}</h6>
+          <small class="text-muted d-block">
+            <i class="fa fa-building me-1"></i> {{ pm.section }} &nbsp; | &nbsp;
+            <i class="fa fa-clock me-1"></i> {{ pm.range }}
+          </small>
+        </div>
+
+        <!-- Badge -->
+        <div class="d-flex ms-auto align-items-center">
+          <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+            <i class="fa fa-exclamation-circle me-1"></i> Due
+          </span>
+        </div>
+      </div>
+
+      <!-- Separator between entries -->
+      {% if not forloop.last %}
+      <div class="separator-dashed mb-2"></div>
+      {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="text-center text-muted py-3">
+        <i class="fa fa-info-circle me-1"></i> No upcoming schedules this week
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+
       </div>
     </div>
 
