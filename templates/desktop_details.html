@@ -6,11 +6,11 @@
   <div class="page-inner">
     <div class="row">
       <div class="col-md-12">
-        <div class="card shadow-sm rounded">
-          <div class="card-header bg-light">
-            <div class="card-head-row d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0">🗄️ Desktop Details</h4>
-              <div class="card-tools">
+        <div class="card">
+          <div class="card-header">
+            <div class="d-flex align-items-center">
+              <h4 class="card-title">🗄️ Desktop Details</h4>
+              <div class="ms-auto">
                 <a href="#" class="btn btn-danger btn-sm me-2">
                   <i class="fa fa-arrow-left me-1"></i> Return to Supply
                 </a>
@@ -25,41 +25,36 @@
           </div>
 
           <div class="card-body">
-            <div class="table-responsive">
-              <table id="desktop-table" class="display table table-striped table-bordered">
-                <thead class="text-white">
+            <div class="table-responsive table-head-bg-primary">
+              <table id="desktop-table" class="display table table-striped table-hover">
+                <thead>
                   <tr>
-                    <th style="background-color: #6861ce; color: white;">Computer Name</th>
-                    <th style="background-color: #6861ce; color: white;">Serial Number</th>
-                    <th style="background-color: #6861ce; color: white;">Brand Name</th>
-                    <th style="background-color: #6861ce; color: white;">Processor</th>
-                    <th style="background-color: #6861ce; color: white;">Memory</th>
-                    <th style="background-color: #6861ce; color: white;">End User</th>
-                    <th style="background-color: #6861ce; color: white;">Asset Owner</th>
-                    <th style="background-color: #6861ce; color: white;">Status</th>
-                    <th style="background-color: #6861ce; color: white;">Actions</th>
-                  </tr>
-                  <tr class="bg-white text-dark">
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Name" /></th>
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Serial" /></th>
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Brand" /></th>
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Processor" /></th>
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Memory" /></th>
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search User" /></th>
-                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Owner" /></th>
-                    <th></th>
-                    <th></th>
+                    <th>Computer Name</th>
+                    <th>Serial Number</th>
+                    <th>Brand Name</th>
+                    <th>End User</th>
+                    <th>Asset Owner</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
-
+                <tfoot>
+                  <tr>
+                    <th>Computer Name</th>
+                    <th>Serial Number</th>
+                    <th>Brand Name</th>
+                    <th>End User</th>
+                    <th>Asset Owner</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </tfoot>
                 <tbody>
                   {% for item in desktops_with_items %}
                   <tr>
                     <td>{{ item.desktop.computer_name }}</td>
                     <td>{{ item.desktop.serial_no }}</td>
                     <td>{{ item.desktop.brand_name }}</td>
-                    <td>{{ item.desktop.processor }}</td>
-                    <td>{{ item.desktop.memory }}</td>
                     <td>
                       {% for userx in item.user %}
                         {{ userx.user_Enduser }}<br>
@@ -67,7 +62,7 @@
                     </td>
                     <td>
                       {% for userx in item.user %}
-                        {{ userx.user_Assetowner  }}<br>
+                        {{ userx.user_Assetowner }}<br>
                       {% endfor %}
                     </td>
                     <td>
@@ -78,7 +73,7 @@
                       {% endif %}
                     </td>
                     <td>
-                      <a href="{% url 'desktop_details_view' item.desktop.id %}" class="btn btn-sm btn-primary">
+                      <a href="{% url 'desktop_details_view' item.desktop.id %}" class="btn btn-primary btn-xs">
                         <i class="fa fa-eye"></i> View
                       </a>
                     </td>
@@ -93,22 +88,30 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+{{ block.super }}
 <script>
-  $(document).ready(function () {
-    var table = $('#desktop-table').DataTable({
-      orderCellsTop: true,
-      fixedHeader: true,
-      pageLength: 10
-    });
-
-    // Setup column-specific search
-    $('#desktop-table thead tr:eq(1) th').each(function (i) {
-      $('input', this).on('keyup change', function () {
-        if (table.column(i).search() !== this.value) {
-          table.column(i).search(this.value).draw();
+  $(document).ready(function() {
+    $("#desktop-table").DataTable({
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+      language: {
+        lengthMenu: "Show _MENU_ entries",
+        info: "Showing _START_ to _END_ of _TOTAL_ desktops",
+        infoEmpty: "Showing 0 to 0 of 0 desktops",
+        infoFiltered: "(filtered from _MAX_ total desktops)",
+        paginate: {
+          first: "First",
+          last: "Last",
+          next: "Next",
+          previous: "Previous"
         }
-      });
+      },
+      columnDefs: [
+        { orderable: false, targets: [5, 6] }
+      ]
     });
   });
 </script>
