@@ -6,16 +6,10 @@
   <div class="page-inner">
     <div class="row">
       <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-center">
-              <h4 class="card-title"><i class="fas fa-tools me-2"></i> Preventive Maintenance Overview</h4>
-              <div class="ms-auto">
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-                  <i class="fa fa-plus me-1"></i> Assign Device
-                </button>
-              </div>
-            </div>
+        <div class="card shadow-sm rounded">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Preventive Maintenance Overview Summary</h4>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Assign Device to Schedule</button>
           </div>
 
           <!-- Add Schedule Modal -->
@@ -26,7 +20,7 @@
                 <div class="modal-content">
                   <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Assign Device to Schedule</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
                     
@@ -124,32 +118,25 @@
             </script>
             {% endif %}
 
-            <div class="table-responsive table-head-bg-primary">
-              <table id="pm-table" class="display table table-striped table-hover" style="width:100%">
-                <thead>
+            <div class="table-responsive">
+              <table id="pm-table" class="display table table-striped table-bordered table-hover">
+                <thead class="text-white">
                   <tr>
-                    <th>Quarter</th>
-                    <th>Section</th>
-                    <th>Computer Name</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th style="background-color:#6861ce;">Quarter</th>
+                    <th style="background-color:#6861ce;">Section</th>
+                    <th style="background-color:#6861ce;">Computer Name</th>
+                    <th style="background-color:#6861ce;">Start Date</th>
+                    <th style="background-color:#6861ce;">End Date</th>
+                    <th style="background-color:#6861ce;">Status</th>
+                    <th style="background-color:#6861ce;">Actions</th>
                   </tr>
-                  <tr class="filters">
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Quarter" data-column="0" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Section" data-column="1" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-column="2" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Start" data-column="3" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search End" data-column="4" /></th>
-                    <th>
-                      <select class="form-select form-select-sm column-search" data-column="5">
-                        <option value="">All</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Due">Due</option>
-                        <option value="Pending">Pending</option>
-                      </select>
-                    </th>
+                  <tr class="bg-white text-dark">
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Quarter" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Section" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Computer" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Start" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search End" /></th>
+                    <th><input type="text" class="form-control form-control-sm" placeholder="Search Status" /></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -183,13 +170,9 @@
                     </td>
                     <td class="text-center">
                       {% if assignment.equipment_package %}
-                        <a href="{% url 'maintenance_history' assignment.equipment_package.id %}" class="btn btn-sm btn-primary">
-                          <i class="fa fa-eye"></i> View
-                        </a>
+                        <a href="{% url 'maintenance_history' assignment.equipment_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
                       {% elif assignment.laptop_package %}
-                        <a href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" class="btn btn-sm btn-primary">
-                          <i class="fa fa-eye"></i> View
-                        </a>
+                        <a href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" class="btn btn-sm btn-outline-primary">View</a>
                       {% else %}
                         <span class="text-muted">N/A</span>
                       {% endif %}
@@ -206,117 +189,79 @@
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-{{ block.super }}
 <script>
-$(document).ready(function() {
-  console.log('Initializing PM Overview DataTable...');
-  
-  // Initialize DataTable
-  var table = $('#pm-table').DataTable({
-    orderCellsTop: true,
-    fixedHeader: false,
-    pageLength: 10,
-    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
-    language: {
-      lengthMenu: "Show _MENU_ entries",
-      info: "Showing _START_ to _END_ of _TOTAL_ assignments",
-      infoEmpty: "Showing 0 to 0 of 0 assignments",
-      infoFiltered: "(filtered from _MAX_ total assignments)"
-    }
-  });
-  
-  console.log('DataTable initialized');
-  
-  // Apply the search using data-column attribute
-  $('.column-search').on('keyup change', function() {
-    var columnIndex = $(this).data('column');
-    var searchValue = this.value;
-    
-    console.log('Searching column ' + columnIndex + ' for: ' + searchValue);
-    
-    table.column(columnIndex).search(searchValue).draw();
-  });
-  
-  console.log('Filter handlers attached');
-
-  // Device type toggle
-  $('#deviceTypeSelect').on('change', function() {
-    $('.device-select').hide().find('select').prop('required', false);
-    if (this.value === 'desktop') {
-      $('#desktopWrapper').show().find('select').prop('required', true);
-    }
-    if (this.value === 'laptop') {
-      $('#laptopWrapper').show().find('select').prop('required', true);
-    }
-    $('#scheduleSelect').val('');
-    $('#scheduleSelect option').show();
-  });
-
-  // Clickable table rows
-  $('.clickable-row').on('click', function(e) {
-    // Don't navigate if clicking on a button or link
-    if ($(e.target).closest('a, button').length) return;
-    
-    const href = $(this).data('href');
-    if (href) window.location.href = href;
-  });
-
-  // --- Assigned quarters from backend ---
-  let assignedQuarters = {};
-  try {
-    assignedQuarters = JSON.parse('{{ assigned_quarters_by_device_json|escapejs }}');
-  } catch (e) {
-    console.error('assigned_quarters_by_device_json parse error:', e);
-    assignedQuarters = {};
-  }
-
-  // Filter schedules when picking a device
-  function filterSchedules(deviceType, deviceId, selectedSection) {
-    const key = deviceType + '-' + deviceId;
-    const assignedForDevice = (assignedQuarters[key] || []).map(String);
-
-    $('#scheduleSelect option').each(function() {
-      const $opt = $(this);
-      if ($opt.val() === '') {
-        $opt.show();
-        return;
-      }
-
-      const scheduleSection = ($opt.data('section') || '').trim();
-      const quarterId = String($opt.data('quarter') || '');
-
-      let hide = false;
-
-      // hide if section mismatch (only when we know the device's section)
-      if (selectedSection && scheduleSection && scheduleSection !== selectedSection) {
-        hide = true;
-      }
-
-      // hide if this quarter already assigned to this device
-      if (deviceId && quarterId && assignedForDevice.includes(quarterId)) {
-        hide = true;
-      }
-
-      $opt.toggle(!hide);
+  $(function () {
+    // DataTables
+    var table = $('#pm-table').DataTable({ orderCellsTop: true, fixedHeader: true, pageLength: 10 });
+    $('#pm-table thead tr:eq(1) th').each(function (i) {
+      $('input', this).on('keyup change', function () {
+        if (table.column(i).search() !== this.value) table.column(i).search(this.value).draw();
+      });
     });
 
-    $('#scheduleSelect').val('');
-  }
+    // Device type toggle
+    $('#deviceTypeSelect').on('change', function () {
+      $('.device-select').hide().find('select').prop('required', false);
+      if (this.value === 'desktop') $('#desktopWrapper').show().find('select').prop('required', true);
+      if (this.value === 'laptop')  $('#laptopWrapper').show().find('select').prop('required', true);
+      $('#scheduleSelect').val(''); $('#scheduleSelect option').show();
+    });
 
-  $('#desktopSelect').on('change', function() {
-    const id = $(this).val();
-    const section = ($(this).find(':selected').data('section') || '').trim();
-    filterSchedules('desktop', id, section);
-  });
+    // Clickable table rows
+    $('.clickable-row').on('click', function () {
+      const href = $(this).data('href'); if (href) window.location.href = href;
+    });
 
-  $('#laptopSelect').on('change', function() {
-    const id = $(this).val();
-    const section = ($(this).find(':selected').data('section') || '').trim();
-    filterSchedules('laptop', id, section);
+    // --- Assigned quarters from backend ---
+    let assignedQuarters = {};
+    try {
+      assignedQuarters = JSON.parse('{{ assigned_quarters_by_device_json|escapejs }}');
+    } catch (e) {
+      console.error('assigned_quarters_by_device_json parse error:', e);
+      assignedQuarters = {};
+    }
+
+    // Filter schedules when picking a device
+    function filterSchedules(deviceType, deviceId, selectedSection) {
+      const key = deviceType + '-' + deviceId;
+      const assignedForDevice = (assignedQuarters[key] || []).map(String);
+
+      $('#scheduleSelect option').each(function () {
+        const $opt = $(this);
+        if ($opt.val() === '') { $opt.show(); return; }
+
+        const scheduleSection = ($opt.data('section') || '').trim();
+        const quarterId = String($opt.data('quarter') || '');
+
+        let hide = false;
+
+        // hide if section mismatch (only when we know the device's section)
+        if (selectedSection && scheduleSection && scheduleSection !== selectedSection) {
+          hide = true;
+        }
+
+        // hide if this quarter already assigned to this device
+        if (deviceId && quarterId && assignedForDevice.includes(quarterId)) {
+          hide = true;
+        }
+
+        $opt.toggle(!hide);
+      });
+
+      $('#scheduleSelect').val('');
+    }
+
+    $('#desktopSelect').on('change', function () {
+      const id = $(this).val();
+      const section = ($(this).find(':selected').data('section') || '').trim();
+      filterSchedules('desktop', id, section);
+    });
+
+    $('#laptopSelect').on('change', function () {
+      const id = $(this).val();
+      const section = ($(this).find(':selected').data('section') || '').trim();
+      filterSchedules('laptop', id, section);
+    });
   });
-});
 </script>
 {% endblock %}

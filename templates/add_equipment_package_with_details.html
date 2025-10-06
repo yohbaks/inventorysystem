@@ -28,7 +28,8 @@
       <div class="card mb-3">
         <div class="card-header"><h5>Select Equipment Type</h5></div>
         <div class="card-body">
-          <select class="form-select" id="equipmentSelect" name="name_input" required>
+          <select class="form-select form-control-lg" id="equipmentSelect" name="name_input" required>
+            
             <option value="" disabled {% if not equipment_type %}selected{% endif %}>Select Equipment Type</option>
             <option value="Desktop" {% if equipment_type == "Desktop" %}selected{% endif %}>🖥 Desktop</option>
             <option value="Laptop" {% if equipment_type == "Laptop" %}selected{% endif %}>💻 Laptop</option>
@@ -52,7 +53,7 @@
         </div>
         <div class="col-md-4">
           <label>Brand</label>
-          <select name="desktop_brand_name" class="form-select" required>
+          <select name="desktop_brand_name" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in desktop_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -74,7 +75,7 @@
       <div class="row">
         <div class="col-md-4">
           <label>Processor</label>
-          <select class="form-select" id="desktop_processor" name="desktop_processor" required>
+          <select class="form-select form-control" id="desktop_processor" name="desktop_processor" required>
              <option value="" disabled selected>-- Select Processor --</option>
             <optgroup label="Core i9">
               <option value="i9-14900K">Core i9-14900K (14th Gen)</option>
@@ -134,7 +135,7 @@
         <div class="col-md-3"><label>Serial No</label><input type="text" id="monitor_sn_db" name="monitor_sn_db" class="form-control" required></div>
         <div class="col-md-3">
           <label>Brand</label>
-          <select name="monitor_brand" class="form-select" required>
+          <select name="monitor_brand" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in monitor_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -155,7 +156,7 @@
         <div class="col-md-4"><label>Serial No</label><input type="text" id="keyboard_sn_db" name="keyboard_sn_db" class="form-control" required></div>
         <div class="col-md-4">
           <label>Brand</label>
-          <select name="keyboard_brand" class="form-select" required>
+          <select name="keyboard_brand" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in keyboard_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -175,7 +176,7 @@
         <div class="col-md-4"><label>Serial No</label><input type="text" id="mouse_sn_db" name="mouse_sn_db" class="form-control" required></div>
         <div class="col-md-4">
           <label>Brand</label>
-          <select name="mouse_brand" class="form-select" required>
+          <select name="mouse_brand" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in mouse_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -195,7 +196,7 @@
         <div class="col-md-3"><label>Serial No</label><input type="text" id="ups_sn_db" name="ups_sn_db" class="form-control" required></div>
         <div class="col-md-3">
           <label>Brand</label>
-          <select name="ups_brand" class="form-select" required>
+          <select name="ups_brand" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in ups_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -237,7 +238,7 @@
       <div class="row">
         <div class="col-md-6">
           <label>End User</label>
-          <select name="enduser_input" class="form-select" required>
+          <select name="enduser_input" class="form-select form-control" required>
             <option value="">Select End User</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
@@ -246,7 +247,7 @@
         </div>
         <div class="col-md-6">
           <label>Asset Owner</label>
-          <select name="assetowner_input" class="form-select" required>
+          <select name="assetowner_input" class="form-select form-control" required>
             <option value="">Select Asset Owner</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
