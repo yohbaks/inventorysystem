@@ -53,12 +53,6 @@ from inventory.models import (
 )
 
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
-
-
-
 
 
 ##############################################################################
@@ -3075,7 +3069,13 @@ def print_salvage_overview(request):
 
 # views_dashboard_snippet.py — paste this into your views.py
 
-
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.db.models.functions import TruncMonth
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
+from calendar import month_abbr
 
 # Import your models below — adjust names if your app uses different model class names
 
@@ -3104,220 +3104,100 @@ def _monthly_counts_qs(qs, date_field, months=6):
     labels = _months_back_labels(months)
     return labels, [map_counts.get(lbl, 0) for lbl in labels]
 
-
-# ALL FOR DASHBOARD
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Count, Q
-from collections import defaultdict
-
 @login_required
 def dashboard_pro(request):
-    """Enhanced Dashboard with expanded KPIs, lifecycle insights, and trends."""
-    today = timezone.now().date()
-    next_week = today + timedelta(days=7)
-    months = 3  # disposal trend range
-
-    # ===================== KPI COUNTS =====================
+    # KPIs
     total_packages = Equipment_Package.objects.count()
     active_packages = Equipment_Package.objects.filter(is_disposed=False).count()
-
-    # Equipment type breakdown (Active only)
-    total_desktops = DesktopDetails.objects.filter(is_disposed=False).count()
-    total_monitors = MonitorDetails.objects.filter(is_disposed=False).count()
-    total_keyboards = KeyboardDetails.objects.filter(is_disposed=False).count()
-    total_mice = MouseDetails.objects.filter(is_disposed=False).count()
-    total_ups = UPSDetails.objects.filter(is_disposed=False).count()
-    total_laptops = LaptopDetails.objects.filter(is_disposed=False).count()
-    total_printers = PrinterDetails.objects.filter(is_disposed=False).count()
-
-    # Disposed counts
-    disposed_desktops = DisposedDesktopDetail.objects.count()
-    disposed_monitors = DisposedMonitor.objects.count()
-    disposed_keyboards = DisposedKeyboard.objects.count()
-    disposed_mice = DisposedMouse.objects.count()
-    disposed_ups = DisposedUPS.objects.count()
-    disposed_laptops = DisposedLaptop.objects.count()
-    disposed_printers = DisposedPrinter.objects.count()
-
     disposed_all = (
-        disposed_desktops
-        + disposed_monitors
-        + disposed_keyboards
-        + disposed_mice
-        + disposed_ups
-        + disposed_laptops
-        + disposed_printers
+        DisposedDesktopDetail.objects.count() +
+        DisposedMonitor.objects.count() +
+        DisposedKeyboard.objects.count() +
+        DisposedMouse.objects.count() +
+        DisposedUPS.objects.count()
     )
-
     pm_pending = PMScheduleAssignment.objects.filter(is_completed=False).count()
 
-    # Health score: % active – penalty for disposed ratio
-    if total_packages > 0:
-        health_score = round(
-            ((active_packages / total_packages) * 100) - ((disposed_all / (total_packages + disposed_all)) * 10), 
-            2
-        )
-        health_score = max(0, min(100, health_score))  # Clamp between 0-100
-    else:
-        health_score = 0
+    # Trend (last 3 months)
+    months = 3
+    lbls, desktop_series = _monthly_counts_qs(DisposedDesktopDetail.objects.all(), 'date_disposed', months)
+    _, mouse_series = _monthly_counts_qs(DisposedMouse.objects.all(), 'disposal_date', months)
+    _, keyboard_series = _monthly_counts_qs(DisposedKeyboard.objects.all(), 'disposal_date', months)
+    _, ups_series = _monthly_counts_qs(DisposedUPS.objects.all(), 'disposal_date', months)  
 
-    # ===================== DISPOSAL TRENDS =====================
-    lbls, desktop_series = _monthly_counts_qs(DisposedDesktopDetail.objects.all(), "date_disposed", months)
-    _, mouse_series = _monthly_counts_qs(DisposedMouse.objects.all(), "disposal_date", months)
-    _, keyboard_series = _monthly_counts_qs(DisposedKeyboard.objects.all(), "disposal_date", months)
-    _, ups_series = _monthly_counts_qs(DisposedUPS.objects.all(), "disposal_date", months)
-
-    # Disposed by Category (Pie/Donut chart)
-    disposed_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS", "Laptop", "Printer"]
+    # Disposed by category (all-time)
+    disposed_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS"]
     disposed_data = [
-        disposed_desktops,
-        disposed_monitors,
-        disposed_keyboards,
-        disposed_mice,
-        disposed_ups,
-        disposed_laptops,
-        disposed_printers,
+        DisposedDesktopDetail.objects.count(),
+        DisposedMonitor.objects.count(),
+        DisposedKeyboard.objects.count(),
+        DisposedMouse.objects.count(),
+        DisposedUPS.objects.count(),
     ]
 
-    # Active vs Disposed Stacked Bar
-    stack_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS", "Laptop", "Printer"]
+    # Active vs Disposed by category
+    stack_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS"]
     active_counts = [
-        total_desktops,
-        total_monitors,
-        total_keyboards,
-        total_mice,
-        total_ups,
-        total_laptops,
-        total_printers,
+        DesktopDetails.objects.filter(is_disposed=False).count(),
+        MonitorDetails.objects.filter(is_disposed=False).count(),
+        KeyboardDetails.objects.filter(is_disposed=False).count(),
+        MouseDetails.objects.filter(is_disposed=False).count(),
+        UPSDetails.objects.filter(is_disposed=False).count(),
     ]
     disposed_counts = [
-        disposed_desktops,
-        disposed_monitors,
-        disposed_keyboards,
-        disposed_mice,
-        disposed_ups,
-        disposed_laptops,
-        disposed_printers,
+        DesktopDetails.objects.filter(is_disposed=True).count(),
+        MonitorDetails.objects.filter(is_disposed=True).count(),
+        KeyboardDetails.objects.filter(is_disposed=True).count(),
+        MouseDetails.objects.filter(is_disposed=True).count(),
+        UPSDetails.objects.filter(is_disposed=True).count(),
     ]
 
-    # ===================== TOP 5 BRANDS =====================
-    # Count desktops + laptops by brand
-    brand_counts = defaultdict(int)
-    
-    for desktop in DesktopDetails.objects.filter(is_disposed=False).select_related('brand_name'):
-        if desktop.brand_name:
-            brand_counts[desktop.brand_name.name] += 1
-    
-    for laptop in LaptopDetails.objects.filter(is_disposed=False).select_related('brand_name'):
-        if laptop.brand_name:
-            brand_counts[laptop.brand_name.name] += 1
-    
-    # Sort and get top 5
-    top_brands = sorted(brand_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-    brand_labels = [b[0] for b in top_brands]
-    brand_data = [b[1] for b in top_brands]
+    # Recent items
+    recent = DesktopDetails.objects.filter(is_disposed=False).order_by('-created_at')[:10]
 
-    # ===================== ASSETS BY OFFICE SECTION =====================
-    section_counts = defaultdict(int)
-    
-    # Count from UserDetails for Equipment_Package (Desktops)
-    for ud in UserDetails.objects.filter(
-        equipment_package__isnull=False,
-        equipment_package__is_disposed=False
-    ).select_related('user_Assetowner__employee_office_section'):
-        if ud.user_Assetowner and ud.user_Assetowner.employee_office_section:
-            section_counts[ud.user_Assetowner.employee_office_section.name] += 1
-    
-    # Count from UserDetails for LaptopPackage
-    for ud in UserDetails.objects.filter(
-        laptop_package__isnull=False,
-        laptop_package__is_disposed=False
-    ).select_related('user_Assetowner__employee_office_section'):
-        if ud.user_Assetowner and ud.user_Assetowner.employee_office_section:
-            section_counts[ud.user_Assetowner.employee_office_section.name] += 1
-    
-    # Sort sections
-    sorted_sections = sorted(section_counts.items(), key=lambda x: x[1], reverse=True)
-    section_labels = [s[0] for s in sorted_sections]
-    section_data = [s[1] for s in sorted_sections]
-
-    # ===================== RECENT ITEMS =====================
-    recent = DesktopDetails.objects.filter(is_disposed=False).order_by("-created_at")[:10]
-
-    # ===================== UPCOMING PM =====================
-    upcoming = PMSectionSchedule.objects.filter(
-        start_date__lte=next_week, end_date__gte=today
-    ).select_related("section")
+    # Upcoming PM (next 7 days)
+    today = timezone.now().date()
+    next_week = today + timedelta(days=7)
+    upcoming = (PMSectionSchedule.objects
+                .filter(start_date__lte=next_week, end_date__gte=today)
+                .select_related('section'))
     pm_upcoming = []
     for s in upcoming:
-        assignment = PMScheduleAssignment.objects.filter(
-            pm_section_schedule=s
-        ).select_related('equipment_package', 'laptop_package').first()
-        
+        assignment = PMScheduleAssignment.objects.filter(pm_section_schedule=s).select_related('equipment_package').first()
         comp = "—"
-        if assignment:
-            if assignment.equipment_package_id:
-                dd = DesktopDetails.objects.filter(
-                    equipment_package=assignment.equipment_package
-                ).first()
-                comp = dd.computer_name if dd else "—"
-            elif assignment.laptop_package_id:
-                ld = LaptopDetails.objects.filter(
-                    laptop_package=assignment.laptop_package
-                ).first()
-                comp = ld.computer_name if ld else "—"
-        
+        if assignment and assignment.equipment_package_id:
+            dd = DesktopDetails.objects.filter(equipment_package=assignment.equipment_package).first()
+            comp = dd.computer_name if dd else "—"
         pm_upcoming.append({
-            "section": s.section.name if getattr(s, "section", None) else "—",
+            "section": s.section.name if getattr(s, 'section', None) else "—",
             "range": f"{s.start_date} – {s.end_date}",
             "computer_name": comp,
         })
 
-    # ===================== AUDIT TRAIL =====================
-    enduser = EndUserChangeHistory.objects.select_related(
-        "equipment_package", "new_enduser", "old_enduser"
-    ).order_by("-changed_at")[:5]
-    assetown = AssetOwnerChangeHistory.objects.select_related(
-        "equipment_package", "new_assetowner", "old_assetowner"
-    ).order_by("-changed_at")[:5]
-
+    # Audit trail (10 latest changes)
+    enduser = EndUserChangeHistory.objects.select_related('equipment_package','new_enduser','old_enduser').order_by('-changed_at')[:5]
+    assetown = AssetOwnerChangeHistory.objects.select_related('equipment_package','new_assetowner','old_assetowner').order_by('-changed_at')[:5]
     audit = []
     for e in enduser:
-        old_name = e.old_enduser.full_name if e.old_enduser else 'None'
-        new_name = e.new_enduser.full_name if e.new_enduser else 'None'
         audit.append({
             "type": "End User",
             "when": e.changed_at.strftime("%Y-%m-%d %H:%M"),
-            "text": f"Desktop Package #{e.equipment_package_id}: <strong>{old_name}</strong> → <strong>{new_name}</strong>",
+            "text": f"Desktop Package #{e.equipment_package_id}: <strong>{e.old_enduser or 'None'}</strong> → <strong>{e.new_enduser}</strong>",
         })
     for a in assetown:
-        old_name = a.old_assetowner.full_name if a.old_assetowner else 'None'
-        new_name = a.new_assetowner.full_name if a.new_assetowner else 'None'
         audit.append({
             "type": "Asset Owner",
             "when": a.changed_at.strftime("%Y-%m-%d %H:%M"),
-            "text": f"Desktop Package #{a.equipment_package_id}: <strong>{old_name}</strong> → <strong>{new_name}</strong>",
+            "text": f"Desktop Package #{a.equipment_package_id}: <strong>{a.old_assetowner or 'None'}</strong> → <strong>{a.new_assetowner}</strong>",
         })
     audit = sorted(audit, key=lambda x: x["when"], reverse=True)[:10]
 
-    # ===================== CONTEXT =====================
     context = {
         "kpis": {
             "total_packages": total_packages,
             "active_packages": active_packages,
             "disposed_all": disposed_all,
             "pm_pending": pm_pending,
-            "total_desktops": total_desktops,
-            "total_monitors": total_monitors,
-            "total_keyboards": total_keyboards,
-            "total_mice": total_mice,
-            "total_ups": total_ups,
-            "total_laptops": total_laptops,
-            "total_printers": total_printers,
-            "health_score": health_score,
         },
         "charts": {
             "months": months,
@@ -3331,52 +3211,14 @@ def dashboard_pro(request):
             "stack_labels": stack_labels,
             "stack_active": active_counts,
             "stack_disposed": disposed_counts,
-            "brand_labels": brand_labels,
-            "brand_data": brand_data,
-            "section_labels": section_labels,
-            "section_data": section_data,
         },
         "recent": recent,
         "audit": audit,
         "pm_upcoming": pm_upcoming,
     }
-
     return render(request, "dashboard.html", context)
 
 
-# ===================== HELPER FUNCTION =====================
-def _monthly_counts_qs(queryset, date_field, months):
-    """
-    Returns (labels, data) for the last N months of disposal counts.
-    """
-    from datetime import datetime
-    from dateutil.relativedelta import relativedelta
-    
-    today = timezone.now().date()
-    labels = []
-    data = []
-    
-    for i in range(months - 1, -1, -1):
-        month_date = today - relativedelta(months=i)
-        month_start = month_date.replace(day=1)
-        
-        # Get last day of month
-        if month_date.month == 12:
-            month_end = month_date.replace(day=31)
-        else:
-            next_month = month_date.replace(day=28) + relativedelta(days=4)
-            month_end = next_month - relativedelta(days=next_month.day)
-        
-        count = queryset.filter(
-            **{f"{date_field}__gte": month_start, f"{date_field}__lte": month_end}
-        ).count()
-        
-        labels.append(month_start.strftime("%b %Y"))
-        data.append(count)
-    
-    return labels, data
-
-#end all for dashboard
 
 #QR code for Profile
 @login_required

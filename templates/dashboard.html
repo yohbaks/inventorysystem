@@ -2,116 +2,183 @@
 {% load static %}
 
 {% block content %}
-      
-
 <div class="container">
   <div class="page-inner">
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
-      <div> 
+    <!-- Header -->
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+      <div>
         <h3 class="fw-bold mb-1">Dashboard</h3>
-        <p class="text-muted mb-0">Asset Sync Invenotry System V3</p>
+        <p class="text-muted mb-0">Asset Sync Inventory System V3</p>
       </div>
       <div class="ms-md-auto py-2 py-md-0">
         <a href="{% url 'add_equipment_package_with_details' %}" class="btn btn-primary btn-round">
-          <i class="fas fa-plus me-1"></i> Add item
+          <i class="fas fa-plus me-1"></i> Add Item
         </a>
       </div>
     </div>
 
-    <!-- KPIs -->
-    <div class="row g-3">
-  <!-- Desktop Packages -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-primary card-round shadow-sm">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-5">
-            <div class="icon-big text-center">
-              <i class="fas fa-boxes"></i>
+    <!-- KPI Row 1 -->
+    <div class="row g-3 mb-3">
+      <!-- Total Packages -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-primary card-round shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-5">
+                <div class="icon-big text-center">
+                  <i class="fas fa-boxes"></i>
+                </div>
+              </div>
+              <div class="col-7 col-stats text-center">
+                <div class="numbers">
+                  <p class="card-category mb-0">Total Packages</p>
+                  <h4 class="card-title mb-0">{{ kpis.total_packages }}</h4>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="col-7 col-stats">
-            <div class="numbers">
-              <p class="card-category">Desktop Packages</p>
-              <h4 class="card-title">{{ kpis.total_packages }}</h4>
+        </div>
+      </div>
+
+      <!-- Active Packages -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-success card-round shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-5">
+                <div class="icon-big text-center">
+                  <i class="far fa-check-circle"></i>
+                </div>
+              </div>
+              <div class="col-7 col-stats text-center">
+                <div class="numbers">
+                  <p class="card-category mb-0">Active Packages</p>
+                  <h4 class="card-title mb-0">{{ kpis.active_packages }}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disposed (All) -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-danger card-round shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-5">
+                <div class="icon-big text-center">
+                  <i class="far fa-trash-alt"></i>
+                </div>
+              </div>
+              <div class="col-7 col-stats text-center">
+                <div class="numbers">
+                  <p class="card-category mb-0">Disposed (All)</p>
+                  <h4 class="card-title mb-0">{{ kpis.disposed_all }}</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending PM -->
+      <div class="col-sm-6 col-md-3">
+        <div class="card card-stats card-info card-round shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-5">
+                <div class="icon-big text-center">
+                  <i class="far fa-calendar-alt"></i>
+                </div>
+              </div>
+              <div class="col-7 col-stats text-center">
+                <div class="numbers">
+                  <p class="card-category mb-0">Pending PM</p>
+                  <h4 class="card-title mb-0">{{ kpis.pm_pending }}</h4>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Active -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-success card-round shadow-sm">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-5">
-            <div class="icon-big text-center">
-              <i class="far fa-check-circle"></i>
-            </div>
+    <!-- KPI Row 2 - Equipment Categories -->
+    <div class="row g-3 mb-3">
+      <!-- Desktops -->
+      <div class="col-sm-6 col-md-2">
+        <div class="card shadow-sm border-0 text-center">
+          <div class="card-body py-3">
+            <i class="fas fa-desktop fa-2x text-primary mb-2"></i>
+            <p class="fw-bold text-muted small mb-1">Desktops</p>
+            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_desktops }}</h5>
           </div>
-          <div class="col-7 col-stats">
-            <div class="numbers">
-              <p class="card-category">Active</p>
-              <h4 class="card-title">{{ kpis.active_packages }}</h4>
-            </div>
+        </div>
+      </div>
+
+      <!-- Laptops -->
+      <div class="col-sm-6 col-md-2">
+        <div class="card shadow-sm border-0 text-center">
+          <div class="card-body py-3">
+            <i class="fas fa-laptop fa-2x text-info mb-2"></i>
+            <p class="fw-bold text-muted small mb-1">Laptops</p>
+            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_laptops }}</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Printers -->
+      <div class="col-sm-6 col-md-2">
+        <div class="card shadow-sm border-0 text-center">
+          <div class="card-body py-3">
+            <i class="fas fa-print fa-2x text-purple mb-2"></i>
+            <p class="fw-bold text-muted small mb-1">Printers</p>
+            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_printers }}</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPS -->
+      <div class="col-sm-6 col-md-2">
+        <div class="card shadow-sm border-0 text-center">
+          <div class="card-body py-3">
+            <i class="fas fa-plug fa-2x text-warning mb-2"></i>
+            <p class="fw-bold text-muted small mb-1">UPS Units</p>
+            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_ups }}</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monitors -->
+      <div class="col-sm-6 col-md-2">
+        <div class="card shadow-sm border-0 text-center">
+          <div class="card-body py-3">
+            <i class="fas fa-tv fa-2x text-secondary mb-2"></i>
+            <p class="fw-bold text-muted small mb-1">Monitors</p>
+            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_monitors|default:"0" }}</h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Score -->
+      <div class="col-sm-6 col-md-2">
+        <div class="card shadow-sm border-0 text-center">
+          <div class="card-body py-3">
+            <i class="fas fa-heartbeat fa-2x text-success mb-2"></i>
+            <p class="fw-bold text-muted small mb-1">Health Score</p>
+            <h5 class="fw-bold text-dark mb-0">{{ kpis.health_score }}%</h5>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Disposed (All) -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-danger card-round shadow-sm">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-5">
-            <div class="icon-big text-center">
-              <i class="far fa-trash-alt"></i>
-            </div>
-          </div>
-          <div class="col-7 col-stats">
-            <div class="numbers">
-              <p class="card-category">Disposed (All)</p>
-              <h4 class="card-title">{{ kpis.disposed_all }}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Pending PM -->
-  <div class="col-sm-6 col-md-3">
-    <div class="card card-stats card-info card-round shadow-sm">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-5">
-            <div class="icon-big text-center">
-              <i class="far fa-calendar-alt"></i>
-            </div>
-          </div>
-          <div class="col-7 col-stats">
-            <div class="numbers">
-              <p class="card-category">Pending PM</p>
-              <h4 class="card-title">{{ kpis.pm_pending }}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 
     <!-- Charts Row 1 -->
-    <div class="row g-3 mt-1">
+    <div class="row g-3 mb-3">
       <div class="col-lg-8">
         <div class="card shadow-sm">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="card-title mb-0">Disposal Trend (Last {{ charts.months }} Months)</div>
+          <div class="card-header">
+            <h5 class="card-title mb-0">Disposal Trend (Last {{ charts.months }} Months)</h5>
           </div>
           <div class="card-body">
             <div class="chart-container" style="height: 320px;">
@@ -120,10 +187,11 @@
           </div>
         </div>
       </div>
+
       <div class="col-lg-4">
         <div class="card shadow-sm">
           <div class="card-header">
-            <div class="card-title mb-0">Disposed by Category</div>
+            <h5 class="card-title mb-0">Disposed by Category</h5>
           </div>
           <div class="card-body">
             <div class="chart-container" style="height: 320px;">
@@ -135,11 +203,11 @@
     </div>
 
     <!-- Charts Row 2 -->
-    <div class="row g-3 mt-1">
-      <div class="col-lg-12">
+    <div class="row g-3 mb-3">
+      <div class="col-lg-6">
         <div class="card shadow-sm">
           <div class="card-header">
-            <div class="card-title mb-0">Active vs Disposed by Category</div>
+            <h5 class="card-title mb-0">Active vs Disposed by Category</h5>
           </div>
           <div class="card-body">
             <div class="chart-container" style="height: 300px;">
@@ -148,18 +216,48 @@
           </div>
         </div>
       </div>
+
+      <div class="col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Top 5 Brands</h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="brandChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Recent + Audit + PM -->
-    <div class="row g-3 mt-1">
+    <!-- Charts Row 3 -->
+    <div class="row g-3 mb-3">
+      <div class="col-lg-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Assets by Office Section</h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height: 400px;">
+              <canvas id="sectionChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity & Audit Trail -->
+    <div class="row g-3 mb-3">
+      <!-- Recently Added -->
       <div class="col-xl-6">
         <div class="card shadow-sm">
           <div class="card-header">
-            <div class="card-title mb-0">Recently Added IT Equipment</div>
+            <h5 class="card-title mb-0">Recently Added IT Equipment</h5>
           </div>
           <div class="card-body">
-             <div class="table-responsive">
-              <table class="table align-items-center mb-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-items-center mb-0">
                 <thead class="thead-light">
                   <tr>
                     <th>Computer Name</th>
@@ -167,23 +265,27 @@
                     <th>Brand</th>
                     <th>Model</th>
                     <th>Created</th>
-                    <th></th>
+                    <th class="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for d in recent %}
                   <tr>
-                    <td>{{ d.computer_name }}</td>
+                    <td class="fw-bold">{{ d.computer_name }}</td>
                     <td>{{ d.serial_no }}</td>
                     <td>{{ d.brand_name }}</td>
                     <td>{{ d.model }}</td>
                     <td>{{ d.created_at|date:"Y-m-d H:i" }}</td>
-                    <td>
-                      <a href="{% url 'desktop_details_view' d.id %}" class="btn btn-xs btn-outline-primary"><i class="fa fa-eye"></i>View</a>
+                    <td class="text-center">
+                      <a href="{% url 'desktop_details_view' d.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fa fa-eye"></i> View
+                      </a>
                     </td>
                   </tr>
                   {% empty %}
-                  <tr><td colspan="6" class="text-muted text-center">No recent items</td></tr>
+                  <tr>
+                    <td colspan="6" class="text-muted text-center py-4">No recent items</td>
+                  </tr>
                   {% endfor %}
                 </tbody>
               </table>
@@ -191,91 +293,72 @@
           </div>
         </div>
       </div>
+
+      <!-- Audit Trail & Upcoming PM -->
       <div class="col-xl-6">
-        <div class="card shadow-sm">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="card-title mb-0">Audit Trail (Latest Changes)</div>
+        <!-- Audit Trail -->
+        <div class="card shadow-sm mb-3">
+          <div class="card-header">
+            <h5 class="card-title mb-0">Audit Trail (Latest Changes)</h5>
           </div>
           <div class="card-body">
             <ul class="list-group list-group-flush">
               {% for ev in audit %}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                  <div class="ms-2 me-auto">
-                    <div class="fw-bold">{{ ev.type }}</div>
-                    {{ ev.text|safe }}
-                  </div>
-                  <span class="badge bg-light text-muted rounded-pill">{{ ev.when }}</span>
-                </li>
+              <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                <div class="ms-2 me-auto">
+                  <div class="fw-bold">{{ ev.type }}</div>
+                  <small class="text-muted">{{ ev.text|safe }}</small>
+                </div>
+                <span class="badge bg-light text-muted rounded-pill">{{ ev.when }}</span>
+              </li>
               {% empty %}
-                <li class="list-group-item text-muted">No recent changes</li>
+              <li class="list-group-item text-muted text-center py-3">No recent changes</li>
               {% endfor %}
             </ul>
           </div>
         </div>
 
-
-        {% comment %} Preventive Maintenance {% endcomment %}
-     <div class="card shadow-sm mt-3">
-  <div class="card-header">
-    <div class="card-title fw-bold text-primary">
-      <i class="fa fa-calendar-alt me-2 text-primary"></i> Upcoming PM (7 Days)
-    </div>
-  </div>
-
-  <div class="card-body pb-3">
-    {% if pm_upcoming %}
-      {% for pm in pm_upcoming %}
-      <div class="d-flex align-items-center mb-3">
-        <!-- Dynamic Avatar/Icon -->
-        <div class="avatar">
-          {% if pm.section|lower == "administrative section" %}
-            <img src="{% static '/img/logo_administrative_section.svg' %}" alt="Administrative" class="avatar-img rounded-circle">
-          {% elif pm.section|lower == "commission on audit" %}
-            <img src="{% static '/img/logo_commission_on_audit.svg' %}" alt="COA" class="avatar-img rounded-circle">
-          {% elif pm.section|lower == "planning section" %}
-            <img src="{% static '/img/logoproduct3.svg' %}" alt="Planning" class="avatar-img rounded-circle">
-          {% elif pm.section|lower == "ict section" %}
-            <img src="{% static '/img/logoproduct4.svg' %}" alt="ICT" class="avatar-img rounded-circle">
-          {% else %}
-            <img src="{% static '/img/defaulticon.svg' %}" alt="Other Section" class="avatar-img rounded-circle">
-          {% endif %}
+        <!-- Upcoming PM -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-warning bg-opacity-10">
+            <h5 class="card-title mb-0 text-primary">
+              <i class="fa fa-calendar-alt me-2"></i> Upcoming PM (7 Days)
+            </h5>
+          </div>
+          <div class="card-body">
+            {% if pm_upcoming %}
+              {% for pm in pm_upcoming %}
+              <div class="d-flex align-items-center mb-3">
+                <div class="avatar avatar-sm">
+                  <img src="{% static 'img/defaulticon.svg' %}" alt="Section" class="avatar-img rounded-circle">
+                </div>
+                <div class="flex-1 ms-3">
+                  <h6 class="fw-bold mb-1 text-dark">{{ pm.computer_name }}</h6>
+                  <small class="text-muted">
+                    <i class="fa fa-building me-1"></i> {{ pm.section }} | 
+                    <i class="fa fa-clock me-1"></i> {{ pm.range }}
+                  </small>
+                </div>
+                <div class="ms-auto">
+                  <span class="badge bg-warning text-dark px-3 py-2">
+                    <i class="fa fa-exclamation-circle me-1"></i> Due
+                  </span>
+                </div>
+              </div>
+              {% if not forloop.last %}
+              <hr class="my-2">
+              {% endif %}
+              {% endfor %}
+            {% else %}
+              <div class="text-center text-muted py-4">
+                <i class="fa fa-info-circle fa-2x mb-2 d-block"></i>
+                <p class="mb-0">No upcoming schedules this week</p>
+              </div>
+            {% endif %}
+          </div>
         </div>
-
-        <!-- PM Details -->
-        <div class="flex-1 pt-1 ms-2">
-          <h6 class="fw-bold mb-1 text-dark">{{ pm.computer_name }}</h6>
-          <small class="text-muted d-block">
-            <i class="fa fa-building me-1"></i> {{ pm.section }} &nbsp; | &nbsp;
-            <i class="fa fa-clock me-1"></i> {{ pm.range }}
-          </small>
-        </div>
-
-        <!-- Badge -->
-        <div class="d-flex ms-auto align-items-center">
-          <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-            <i class="fa fa-exclamation-circle me-1"></i> Due
-          </span>
-        </div>
-      </div>
-
-      <!-- Separator between entries -->
-      {% if not forloop.last %}
-      <div class="separator-dashed mb-2"></div>
-      {% endif %}
-      {% endfor %}
-    {% else %}
-      <div class="text-center text-muted py-3">
-        <i class="fa fa-info-circle me-1"></i> No upcoming schedules this week
-      </div>
-    {% endif %}
-  </div>
-</div>
-
-
-
       </div>
     </div>
-
   </div>
 </div>
 {% endblock %}
@@ -283,103 +366,212 @@
 {% block scripts %}
 {{ block.super }}
 <script>
-// ========= Data from view ===========
+// ========= Chart Data =========
 const DISP_LABELS = {{ charts.labels|safe }};
 const DISP_DESKTOP = {{ charts.desktop|safe }};
 const DISP_MOUSE = {{ charts.mouse|safe }};
 const DISP_KEYBOARD = {{ charts.keyboard|safe }};
 const DISP_UPS = {{ charts.ups|safe }};
-
 const DISPOSED_BY_CAT_LABELS = {{ charts.disposed_by_cat_labels|safe }};
 const DISPOSED_BY_CAT_DATA = {{ charts.disposed_by_cat_data|safe }};
-
 const ACTIVE_VS_DISPOSED_LABELS = {{ charts.stack_labels|safe }};
 const ACTIVE_COUNTS = {{ charts.stack_active|safe }};
 const DISPOSED_COUNTS = {{ charts.stack_disposed|safe }};
+const BRAND_LABELS = {{ charts.brand_labels|safe }};
+const BRAND_DATA = {{ charts.brand_data|safe }};
+const SECTION_LABELS = {{ charts.section_labels|safe }};
+const SECTION_DATA = {{ charts.section_data|safe }};
 
-// ========= Charts ===========
+// ========= Chart Options =========
+const commonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+      position: 'bottom',
+      labels: {
+        padding: 15,
+        usePointStyle: true
+      }
+    }
+  }
+};
+
+// ========= Initialize Charts =========
 (function() {
-  const trendCtx = document.getElementById('disposalTrendChart');
-  if (trendCtx) {
-    new Chart(trendCtx.getContext('2d'), {
+  // 1. Disposal Trend Chart
+  const trendCanvas = document.getElementById('disposalTrendChart');
+  if (trendCanvas) {
+    new Chart(trendCanvas, {
       type: 'line',
       data: {
         labels: DISP_LABELS,
         datasets: [
-          {label: 'Desktop', data: DISP_DESKTOP, tension: 0.4, borderWidth: 2, fill: false, borderColor: '#1d7af3', pointRadius: 3},
-          {label: 'Mouse', data: DISP_MOUSE, tension: 0.4, borderWidth: 2, fill: false, borderColor: '#59d05d', pointRadius: 3},
-          {label: 'Keyboard', data: DISP_KEYBOARD, tension: 0.4, borderWidth: 2, fill: false, borderColor: '#f3545d', pointRadius: 3},
-          {label: 'UPS',      data: DISP_UPS,      tension: 0.4, borderWidth: 2, fill: false, borderColor: '#fdaf4b', pointRadius: 3},
+          {
+            label: 'Desktop',
+            data: DISP_DESKTOP,
+            borderColor: '#1d7af3',
+            backgroundColor: 'rgba(29, 122, 243, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Mouse',
+            data: DISP_MOUSE,
+            borderColor: '#59d05d',
+            backgroundColor: 'rgba(89, 208, 93, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Keyboard',
+            data: DISP_KEYBOARD,
+            borderColor: '#f3545d',
+            backgroundColor: 'rgba(243, 84, 93, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'UPS',
+            data: DISP_UPS,
+            borderColor: '#fdaf4b',
+            backgroundColor: 'rgba(253, 175, 75, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
         ]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {mode: 'index', intersect: false},
-        plugins: {
-          legend: {position: 'bottom'}
-        },
+        ...commonOptions,
         scales: {
-          y: {beginAtZero: true, ticks: {precision:0}}
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
         }
       }
     });
   }
 
-  const donutEl = document.getElementById('disposedByCategoryChart');
-if (donutEl) {
-  const labels = Array.isArray(DISPOSED_BY_CAT_LABELS) ? DISPOSED_BY_CAT_LABELS : [];
-  const data = (Array.isArray(DISPOSED_BY_CAT_DATA) ? DISPOSED_BY_CAT_DATA : []).map(n => Number(n) || 0);
-  const total = data.reduce((a, b) => a + b, 0);
-
-  const palette = ['#1d7af3', '#59d05d', '#f3545d', '#fdaf4b', '#8b5cf6']; // blue, green, red, orange, violet
-  const bg = labels.map((_, i) => palette[i % palette.length]);
-
-  const cfg = {
-    type: 'doughnut',
-    data: {
-      labels: total ? labels : ['No data'],
-      datasets: [{
-        data: total ? data : [1],
-        backgroundColor: total ? bg : ['#e9ecef'],
-        hoverBackgroundColor: total ? bg : ['#e9ecef'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' },
-        tooltip: { enabled: !!total }
+  // 2. Disposed by Category Doughnut Chart
+  const donutCanvas = document.getElementById('disposedByCategoryChart');
+  if (donutCanvas) {
+    new Chart(donutCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: DISPOSED_BY_CAT_LABELS,
+        datasets: [{
+          data: DISPOSED_BY_CAT_DATA,
+          backgroundColor: ['#1d7af3', '#59d05d', '#f3545d', '#fdaf4b', '#8b5cf6'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
       },
-      cutout: '60%'
-    }
-  };
+      options: commonOptions
+    });
+  }
 
-  // Prevent duplicate charts on hot-reload/navigate
-  if (donutEl.__chart) donutEl.__chart.destroy();
-  donutEl.__chart = new Chart(donutEl.getContext('2d'), cfg);
-}
-
-  const stackCtx = document.getElementById('activeDisposedStacked');
-  if (stackCtx) {
-    new Chart(stackCtx.getContext('2d'), {
+  // 3. Active vs Disposed Stacked Bar Chart
+  const stackedCanvas = document.getElementById('activeDisposedStacked');
+  if (stackedCanvas) {
+    new Chart(stackedCanvas, {
       type: 'bar',
       data: {
         labels: ACTIVE_VS_DISPOSED_LABELS,
         datasets: [
-          {label: 'Active', data: ACTIVE_COUNTS, backgroundColor: '#59d05d'},
-          {label: 'Disposed', data: DISPOSED_COUNTS, backgroundColor: '#f3545d'}
+          {
+            label: 'Active',
+            data: ACTIVE_COUNTS,
+            backgroundColor: '#59d05d'
+          },
+          {
+            label: 'Disposed',
+            data: DISPOSED_COUNTS,
+            backgroundColor: '#f3545d'
+          }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
         scales: {
-          x: { stacked: true },
-          y: { stacked: true, beginAtZero: true, ticks: {precision:0} }
+          x: {
+            stacked: true
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  // 4. Top 5 Brands Chart
+  const brandCanvas = document.getElementById('brandChart');
+  if (brandCanvas) {
+    new Chart(brandCanvas, {
+      type: 'bar',
+      data: {
+        labels: BRAND_LABELS,
+        datasets: [{
+          label: 'Assets',
+          data: BRAND_DATA,
+          backgroundColor: '#1d7af3'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  // 5. Assets by Section Chart
+  const sectionCanvas = document.getElementById('sectionChart');
+  if (sectionCanvas) {
+    new Chart(sectionCanvas, {
+      type: 'bar',
+      data: {
+        labels: SECTION_LABELS,
+        datasets: [{
+          label: 'Assets',
+          data: SECTION_DATA,
+          backgroundColor: '#59d05d'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true
+          }
         }
       }
     });

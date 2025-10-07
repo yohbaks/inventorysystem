@@ -28,7 +28,7 @@
       <div class="card mb-3">
         <div class="card-header"><h5>Select Equipment Type</h5></div>
         <div class="card-body">
-          <select class="form-select form-control-lg" id="equipmentSelect" name="name_input" required>
+          <select class="form-select form-control" id="equipmentSelect" name="name_input" required>
             
             <option value="" disabled {% if not equipment_type %}selected{% endif %}>Select Equipment Type</option>
             <option value="Desktop" {% if equipment_type == "Desktop" %}selected{% endif %}>🖥 Desktop</option>
@@ -273,7 +273,7 @@
         </div>
         <div class="col-md-4">
           <label>Brand</label>
-          <select name="laptop_brand_name" class="form-select" required>
+          <select name="laptop_brand_name" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in laptop_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -353,7 +353,7 @@
       <div class="row">
         <div class="col-md-6">
           <label>End User</label>
-          <select name="enduser_input" class="form-select" required>
+          <select name="enduser_input" class="form-select form-control" required>
             <option value="">Select End User</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
@@ -362,7 +362,7 @@
         </div>
         <div class="col-md-6">
           <label>Asset Owner</label>
-          <select name="assetowner_input" class="form-select" required>
+          <select name="assetowner_input" class="form-select form-control" required>
             <option value="">Select Asset Owner</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
@@ -385,7 +385,7 @@
         </div>
         <div class="col-md-4">
           <label>Brand</label>
-          <select name="printer_brand" class="form-select" required>
+          <select name="printer_brand" class="form-select form-control" required>
             <option value="">-- Select Brand --</option>
             {% for brand in printer_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
@@ -404,7 +404,7 @@
         <div class="col-md-3"><label>Monthly Duty</label><input type="text" name="printer_monthly_duty" class="form-control"></div>
         <div class="col-md-3">
           <label>Duplex</label>
-          <select name="printer_duplex" class="form-select">
+          <select name="printer_duplex" class="form-select form-control">
             <option value="True">Yes</option>
             <option value="False" selected>No</option>
           </select>
@@ -414,7 +414,7 @@
       <div class="row mt-2">
         <div class="col-md-3">
           <label>Color</label>
-          <select name="printer_color" class="form-select">
+          <select name="printer_color" class="form-select form-control">
             <option value="True" selected>Color</option>
             <option value="False">Monochrome</option>
           </select>
@@ -451,7 +451,7 @@
       <div class="row">
         <div class="col-md-6">
           <label>End User</label>
-          <select name="enduser_input" class="form-select" required>
+          <select name="enduser_input" class="form-select form-control" required>
             <option value="">Select End User</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
@@ -460,7 +460,7 @@
         </div>
         <div class="col-md-6">
           <label>Asset Owner</label>
-          <select name="assetowner_input" class="form-select" required>
+          <select name="assetowner_input" class="form-select form-control" required>
             <option value="">Select Asset Owner</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>

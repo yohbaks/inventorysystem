@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- ✅ Added overall top padding to push card lower -->
+<div class="container-fluid px-4" style="padding-top: 4.5rem;">  
+  <div class="page-inner mb-5"><!-- ✅ mb-5 for nice bottom space -->
+    <div class="card card-round shadow border-0 mt-3"><!-- ✅ mt-3 for extra separation -->
+      <div class="card-header py-4 d-flex justify-content-between align-items-center"
+           style="background: linear-gradient(135deg, #4e73df, #224abe); color: white;">
+        <div class="d-flex align-items-center">
+          <i class="fa fa-print me-2 fs-4"></i>
+          <h4 class="card-title mb-0 fw-semibold">Printer Inventory</h4>
+        </div>
+        <div>
+          <a href="{% url 'disposed_printers' %}" class="btn btn-light btn-sm shadow-sm">
+            <i class="fa fa-trash-alt me-1"></i> Disposed Printers
+          </a>
+        </div>
+      </div>
+
+      <div class="card-body py-4"><!-- ✅ more padding inside the card -->
+        {% if printers %}
+        <div class="table-responsive">
+          <table id="printerTable" class="table table-hover table-striped align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Serial No.</th>
+                <th>Type</th>
+                <th>Color</th>
+                <th>Duplex</th>
+                <th>Resolution</th>
+                <th>Monthly Duty</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+                <tbody>
+                {% for printer in printers %}
+                <tr id="printer-row-{{ printer.id }}" class="{% if printer.is_disposed %}table-danger{% endif %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td class="fw-semibold">{{ printer.printer_brand_db|default:"—" }}</td>
+                    <td>{{ printer.printer_model_db|default:"—" }}</td>
+                    <td><span class="badge bg-secondary">{{ printer.printer_sn_db }}</span></td>
+                    <td>{{ printer.printer_type|default:"—" }}</td>
+                    <td>
+                    {% if printer.printer_color %}
+                        <span class="badge bg-success">Color</span>
+                    {% else %}
+                        <span class="badge bg-dark">Mono</span>
+                    {% endif %}
+                    </td>
+                    <td>
+                    {% if printer.printer_duplex %}
+                        <i class="fa fa-check-circle text-success"></i>
+                    {% else %}
+                        <i class="fa fa-times-circle text-danger"></i>
+                    {% endif %}
+                    </td>
+                    <td>{{ printer.printer_resolution|default:"—" }}</td>
+                    <td>{{ printer.printer_monthly_duty|default:"—" }}</td>
+
+                    <!-- 🟩 NEW STATUS BADGE -->
+                    <td class="text-center">
+                    {% if printer.is_disposed %}
+                        <span class="badge bg-danger"><i class="fa fa-trash me-1"></i> Disposed</span>
+                    {% else %}
+                        <span class="badge bg-success"><i class="fa fa-check me-1"></i> Active</span>
+                    {% endif %}
+                    </td>
+
+                    <!-- 🛠️ ACTIONS -->
+                    <td class="text-center">
+                    <div class="btn-group">
+                        <a href="{% url 'printer_details_view' printer.id %}"
+                        class="btn btn-sm btn-outline-primary" title="View Details">
+                        <i class="fa fa-eye"></i>
+                        </a>
+                        {% if not printer.is_disposed %}
+                        <button
+                        class="btn btn-sm btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#disposePrinterModal"
+                        data-id="{{ printer.id }}"
+                        data-brand="{{ printer.printer_brand_db }}"
+                        data-model="{{ printer.printer_model_db }}">
+                        <i class="fa fa-trash"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center py-4 mt-3">
+          <i class="fa fa-info-circle me-2"></i> No printers found in the inventory.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🗑️ Dispose Modal -->
+<div class="modal fade" id="disposePrinterModal" tabindex="-1" aria-labelledby="disposePrinterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg border-0 rounded-3">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-semibold"><i class="fa fa-trash me-2"></i> Dispose Printer</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="disposeMessage" class="mb-3"></p>
+        <form id="disposePrinterForm">
+          {% csrf_token %}
+          <input type="hidden" id="disposePrinterId" name="printer_id">
+          <div class="form-group mb-3">
+            <label class="form-label fw-semibold">Reason for Disposal</label>
+            <textarea name="reason" id="reason" class="form-control" rows="3"
+                      placeholder="Enter reason..." required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDisposeBtn">
+          <i class="fa fa-check me-1"></i> Confirm Dispose
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Toast -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+  <div id="disposeToast" class="toast align-items-center text-bg-success border-0 shadow" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMessage">Printer disposed successfully.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("disposePrinterModal");
+  const messageEl = document.getElementById("disposeMessage");
+  const printerIdInput = document.getElementById("disposePrinterId");
+  const confirmBtn = document.getElementById("confirmDisposeBtn");
+  const toast = new bootstrap.Toast(document.getElementById("disposeToast"));
+  const toastMsg = document.getElementById("toastMessage");
+
+  modal.addEventListener("show.bs.modal", event => {
+    const button = event.relatedTarget;
+    const id = button.getAttribute("data-id");
+    const brand = button.getAttribute("data-brand");
+    const model = button.getAttribute("data-model");
+    printerIdInput.value = id;
+    messageEl.innerHTML = `Are you sure you want to dispose <strong>${brand || 'Unknown'} ${model || ''}</strong>?`;
+  });
+
+  confirmBtn.addEventListener("click", () => {
+    const printerId = printerIdInput.value;
+    const reason = document.getElementById("reason").value.trim();
+    if (!reason) return alert("Please enter a reason for disposal.");
+
+    fetch(`/printers/dispose/${printerId}/`, {
+      method: "POST",
+      headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+      body: new URLSearchParams({ reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        toastMsg.textContent = data.message;
+        toast.show();
+        modal.querySelector("button.btn-close").click();
+        const row = document.getElementById(`printer-row-${printerId}`);
+        row.classList.add("table-danger");
+        row.querySelector("td:last-child").innerHTML = `<span class='badge bg-danger'>Disposed</span>`;
+      } else {
+        alert(data.message);
+      }
+    });
+  });
+
+  // DataTable setup
+  $('#printerTable').DataTable({
+    responsive: true,
+    pageLength: 10,
+    order: [[1, "asc"]],
+    language: {
+      search: "_INPUT_",
+      searchPlaceholder: "Search printer..."
+    }
+  });
+});
+</script>
+{% endblock %}

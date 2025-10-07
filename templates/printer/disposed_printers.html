@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner py-4">
+    <div class="card card-round shadow-sm animated fadeIn border-0">
+      <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="fa fa-trash me-2 fs-4"></i>
+          <h4 class="card-title mb-0 fw-semibold">Disposed Printers</h4>
+        </div>
+        <div>
+          <a href="{% url 'printer_list' %}" class="btn btn-light btn-sm shadow-sm">
+            <i class="fa fa-arrow-left me-1"></i> Back to Printer List
+          </a>
+        </div>
+      </div>
+
+      <div class="card-body">
+        {% if disposed_printers %}
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Serial Number</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Type</th>
+                <th>Resolution</th>
+                <th>Package ID</th>
+                <th>Disposal Date</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for printer in disposed_printers %}
+              <tr>
+                <td><span class="badge bg-secondary">{{ printer.printer_sn }}</span></td>
+                <td>{{ printer.printer_brand|default:"—" }}</td>
+                <td>{{ printer.printer_model|default:"—" }}</td>
+                <td>{{ printer.printer_type|default:"—" }}</td>
+                <td>{{ printer.printer_resolution|default:"—" }}</td>
+<td>
+  <a href="{% url 'printer_details_view' printer.id %}" 
+     class="badge bg-info text-white">
+    #{{ printer.id }}
+  </a>
+</td>
+                <td>{{ printer.disposal_date|date:"Y-m-d H:i" }}</td>
+                <td>{{ printer.reason|truncatewords:10 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+          <i class="fa fa-info-circle me-2"></i> No disposed printers found.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

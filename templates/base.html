@@ -87,14 +87,17 @@
             </li>
 
             <!-- IT Equipments -->
-            <li class="nav-item {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}active{% endif %}">
+           <!-- IT Equipments -->
+            <li class="nav-item {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuIT"
-                 class="nav-link {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}true{% else %}false{% endif %}">
+                class="nav-link {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}{% else %}collapsed{% endif %}"
+                aria-expanded="{% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}true{% else %}false{% endif %}">
                 <i class="fas fa-layer-group"></i>
-                <p>IT Equipments</p><span class="caret"></span>
+                <p>IT Equipments</p>
+                <span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name == 'desktop_details' or request.resolver_match.url_name == 'monitor_details' or request.resolver_match.url_name == 'keyboard_details' or request.resolver_match.url_name == 'mouse_details' or request.resolver_match.url_name == 'ups_details' or request.resolver_match.url_name == 'laptop_list' %}show{% endif %}" id="menuIT">
+
+              <div class="collapse {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}show{% endif %}" id="menuIT">
                 <ul class="nav nav-collapse">
                   <li class="{% if request.resolver_match.url_name == 'desktop_details' %}active{% endif %}">
                     <a href="{% url 'desktop_details' %}"><span class="sub-item">🗄️ Desktops Packages</span></a>
@@ -113,6 +116,11 @@
                   </li>
                   <li class="{% if request.resolver_match.url_name == 'laptop_list' %}active{% endif %}">
                     <a href="{% url 'laptop_list' %}"><span class="sub-item">💻 Laptop</span></a>
+                  </li>
+
+                  <!-- ✅ NEW Printer Link -->
+                  <li class="{% if request.resolver_match.url_name == 'printer_list' %}active{% endif %}">
+                    <a href="{% url 'printer_list' %}"><span class="sub-item">🖨️ Printer</span></a>
                   </li>
                 </ul>
               </div>
@@ -171,6 +179,9 @@
                   <li class="{% if request.resolver_match.url_name == 'dashboard_view_chart' %}active{% endif %}">
                     <a href="{% url 'dashboard_view_chart' %}"><span class="sub-item">📊 Disposed Chart</span></a>
                   </li>
+                  <li class="{% if request.resolver_match.url_name == 'dashboard_view_chart' %}active{% endif %}">
+                    <a href="{% url 'disposed_printers' %}"><span class="sub-item">📊 Disposed Printer</span></a>
+                  </li>                 
                 </ul>
               </div>
             </li>
@@ -191,9 +202,7 @@
                   <li class="{% if request.resolver_match.url_name == 'section_schedule_list' %}active{% endif %}">
                     <a href="{% url 'section_schedule_list' %}"><span class="sub-item">PM Schedules</span></a>
                   </li>
-                  <li class="{% if request.resolver_match.url_name == 'disposed_keyboards' %}active{% endif %}">
-                    <a href="{% url 'disposed_keyboards' %}"><span class="sub-item">4th Quarter</span></a>
-                  </li>
+                  
                 </ul>
               </div>
             </li>

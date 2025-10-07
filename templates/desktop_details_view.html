@@ -1782,60 +1782,6 @@ function printQrCode() {
   {% endif %}
 </script>
 
-<!-- end disposed all -->
-<!-- 
-
- <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    {% if desktop_detailsx and desktop_detailsx.id %}
-    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
-      {% csrf_token %}
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Dispose Desktop Package: {{ desktop_detailsx.computer_name }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="reason" class="form-label">Reason for disposal</label>
-            <textarea name="reason" class="form-control" required></textarea>
-          </div>
-          <p class="text-warning">
-            Please <strong>do not dispose of peripherals</strong> such as keyboards, monitors, and other devices if they are still functioning. Keeping equipment that works helps to reduce waste and saves costs!
-          </p>
-
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="monitor" id="monitor">
-            <label class="form-check-label" for="monitor">Dispose Monitor(s)</label> 
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="keyboard" id="keyboard">
-            <label class="form-check-label" for="keyboard">Dispose Keyboard (s)</label> 
-          </div>
-
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="mouse" id="mouse">
-            <label class="form-check-label" for="mouse">Dispose Mouse (s)</label> 
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="ups" id="ups">
-            <label class="form-check-label" for="ups">Dispose UPS (s)</label>
-          </div>
-          
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger">Dispose</button>
-        </div>
-      </div>
-    </form>
-    {% else %}
-  <div class="alert alert-warning">
-    Cannot dispose: Desktop details are missing.
-  </div>
-{% endif %}
-  </div>
-</div> -->
 
 
 <!-- User Details Tab -->
@@ -1848,16 +1794,20 @@ function printQrCode() {
     <div class="card-body">
       {% if user_details %}
         <!-- User Details Table -->
+
+
+
+                  
         <table class="table table-head-bg-success table-bordered table-hover">
           <thead>
             <tr>
-              <th>ATTRIBUTES</th>
-              <th>DETAILS</th>
+              <th scope="col-md-4 ms-auto me-auto">ATTRIBUTES</th>
+              <th scope="col">DETAILS</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>Package Number:</strong></td>
+              <td class="col-sm-6 col-md-3"><strong>Package Number:</strong></td>
               <td>{{ user_details.equipment_package }}</td>
             </tr>
             <tr>
@@ -2080,9 +2030,15 @@ function printQrCode() {
             <td>{{ documents_detailse.docs_Supplier }}</td>
           </tr>
            <tr>
-            <td class="col-sm-6 col-md-3"><strong>Status</strong></td>
-            <td>{{ documents_detailse.docs_Status }}</td>
-          </tr>       
+              <td class="col-sm-6 col-md-3"><strong>Status</strong></td>
+              <td>
+                {% if equipment_package.is_disposed %}
+                  <span class="badge bg-danger">Disposed</span>
+                {% else %}
+                  <span class="badge bg-success">Operational</span>
+                {% endif %}
+              </td>
+            </tr>    
         </tbody>
       </table>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDocumentsdModal">Edit</button>

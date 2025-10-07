@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+      
+
+<div class="container">
+  <div class="page-inner">
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-3">
+      <div> 
+        <h3 class="fw-bold mb-1">Dashboard</h3>
+        <p class="text-muted mb-0">Asset Sync Invenotry System V3</p>
+      </div>
+      <div class="ms-md-auto py-2 py-md-0">
+        <a href="{% url 'add_equipment_package_with_details' %}" class="btn btn-primary btn-round">
+          <i class="fas fa-plus me-1"></i> Add item
+        </a>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3">
+  <!-- Desktop Packages -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-primary card-round shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+            <div class="icon-big text-center">
+              <i class="fas fa-boxes"></i>
+            </div>
+          </div>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Desktop Packages</p>
+              <h4 class="card-title">{{ kpis.total_packages }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-success card-round shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+            <div class="icon-big text-center">
+              <i class="far fa-check-circle"></i>
+            </div>
+          </div>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Active</p>
+              <h4 class="card-title">{{ kpis.active_packages }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disposed (All) -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-danger card-round shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+            <div class="icon-big text-center">
+              <i class="far fa-trash-alt"></i>
+            </div>
+          </div>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Disposed (All)</p>
+              <h4 class="card-title">{{ kpis.disposed_all }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending PM -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-info card-round shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+            <div class="icon-big text-center">
+              <i class="far fa-calendar-alt"></i>
+            </div>
+          </div>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Pending PM</p>
+              <h4 class="card-title">{{ kpis.pm_pending }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Charts Row 1 -->
+    <div class="row g-3 mt-1">
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-title mb-0">Disposal Trend (Last {{ charts.months }} Months)</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height: 320px;">
+              <canvas id="disposalTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <div class="card-title mb-0">Disposed by Category</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height: 320px;">
+              <canvas id="disposedByCategoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-3 mt-1">
+      <div class="col-lg-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <div class="card-title mb-0">Active vs Disposed by Category</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="activeDisposedStacked"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent + Audit + PM -->
+    <div class="row g-3 mt-1">
+      <div class="col-xl-6">
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <div class="card-title mb-0">Recently Added IT Equipment</div>
+          </div>
+          <div class="card-body">
+             <div class="table-responsive">
+              <table class="table align-items-center mb-0">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Computer Name</th>
+                    <th>Serial</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Created</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for d in recent %}
+                  <tr>
+                    <td>{{ d.computer_name }}</td>
+                    <td>{{ d.serial_no }}</td>
+                    <td>{{ d.brand_name }}</td>
+                    <td>{{ d.model }}</td>
+                    <td>{{ d.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>
+                      <a href="{% url 'desktop_details_view' d.id %}" class="btn btn-xs btn-outline-primary"><i class="fa fa-eye"></i>View</a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr><td colspan="6" class="text-muted text-center">No recent items</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xl-6">
+        <div class="card shadow-sm">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-title mb-0">Audit Trail (Latest Changes)</div>
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              {% for ev in audit %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                  <div class="ms-2 me-auto">
+                    <div class="fw-bold">{{ ev.type }}</div>
+                    {{ ev.text|safe }}
+                  </div>
+                  <span class="badge bg-light text-muted rounded-pill">{{ ev.when }}</span>
+                </li>
+              {% empty %}
+                <li class="list-group-item text-muted">No recent changes</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+
+        {% comment %} Preventive Maintenance {% endcomment %}
+     <div class="card shadow-sm mt-3">
+  <div class="card-header">
+    <div class="card-title fw-bold text-primary">
+      <i class="fa fa-calendar-alt me-2 text-primary"></i> Upcoming PM (7 Days)
+    </div>
+  </div>
+
+  <div class="card-body pb-3">
+    {% if pm_upcoming %}
+      {% for pm in pm_upcoming %}
+      <div class="d-flex align-items-center mb-3">
+        <!-- Dynamic Avatar/Icon -->
+        <div class="avatar">
+          {% if pm.section|lower == "administrative section" %}
+            <img src="{% static '/img/logo_administrative_section.svg' %}" alt="Administrative" class="avatar-img rounded-circle">
+          {% elif pm.section|lower == "commission on audit" %}
+            <img src="{% static '/img/logo_commission_on_audit.svg' %}" alt="COA" class="avatar-img rounded-circle">
+          {% elif pm.section|lower == "planning section" %}
+            <img src="{% static '/img/logoproduct3.svg' %}" alt="Planning" class="avatar-img rounded-circle">
+          {% elif pm.section|lower == "ict section" %}
+            <img src="{% static '/img/logoproduct4.svg' %}" alt="ICT" class="avatar-img rounded-circle">
+          {% else %}
+            <img src="{% static '/img/defaulticon.svg' %}" alt="Other Section" class="avatar-img rounded-circle">
+          {% endif %}
+        </div>
+
+        <!-- PM Details -->
+        <div class="flex-1 pt-1 ms-2">
+          <h6 class="fw-bold mb-1 text-dark">{{ pm.computer_name }}</h6>
+          <small class="text-muted d-block">
+            <i class="fa fa-building me-1"></i> {{ pm.section }} &nbsp; | &nbsp;
+            <i class="fa fa-clock me-1"></i> {{ pm.range }}
+          </small>
+        </div>
+
+        <!-- Badge -->
+        <div class="d-flex ms-auto align-items-center">
+          <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+            <i class="fa fa-exclamation-circle me-1"></i> Due
+          </span>
+        </div>
+      </div>
+
+      <!-- Separator between entries -->
+      {% if not forloop.last %}
+      <div class="separator-dashed mb-2"></div>
+      {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="text-center text-muted py-3">
+        <i class="fa fa-info-circle me-1"></i> No upcoming schedules this week
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+// ========= Data from view ===========
+const DISP_LABELS = {{ charts.labels|safe }};
+const DISP_DESKTOP = {{ charts.desktop|safe }};
+const DISP_MOUSE = {{ charts.mouse|safe }};
+const DISP_KEYBOARD = {{ charts.keyboard|safe }};
+const DISP_UPS = {{ charts.ups|safe }};
+
+const DISPOSED_BY_CAT_LABELS = {{ charts.disposed_by_cat_labels|safe }};
+const DISPOSED_BY_CAT_DATA = {{ charts.disposed_by_cat_data|safe }};
+
+const ACTIVE_VS_DISPOSED_LABELS = {{ charts.stack_labels|safe }};
+const ACTIVE_COUNTS = {{ charts.stack_active|safe }};
+const DISPOSED_COUNTS = {{ charts.stack_disposed|safe }};
+
+// ========= Charts ===========
+(function() {
+  const trendCtx = document.getElementById('disposalTrendChart');
+  if (trendCtx) {
+    new Chart(trendCtx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: DISP_LABELS,
+        datasets: [
+          {label: 'Desktop', data: DISP_DESKTOP, tension: 0.4, borderWidth: 2, fill: false, borderColor: '#1d7af3', pointRadius: 3},
+          {label: 'Mouse', data: DISP_MOUSE, tension: 0.4, borderWidth: 2, fill: false, borderColor: '#59d05d', pointRadius: 3},
+          {label: 'Keyboard', data: DISP_KEYBOARD, tension: 0.4, borderWidth: 2, fill: false, borderColor: '#f3545d', pointRadius: 3},
+          {label: 'UPS',      data: DISP_UPS,      tension: 0.4, borderWidth: 2, fill: false, borderColor: '#fdaf4b', pointRadius: 3},
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {mode: 'index', intersect: false},
+        plugins: {
+          legend: {position: 'bottom'}
+        },
+        scales: {
+          y: {beginAtZero: true, ticks: {precision:0}}
+        }
+      }
+    });
+  }
+
+  const donutEl = document.getElementById('disposedByCategoryChart');
+if (donutEl) {
+  const labels = Array.isArray(DISPOSED_BY_CAT_LABELS) ? DISPOSED_BY_CAT_LABELS : [];
+  const data = (Array.isArray(DISPOSED_BY_CAT_DATA) ? DISPOSED_BY_CAT_DATA : []).map(n => Number(n) || 0);
+  const total = data.reduce((a, b) => a + b, 0);
+
+  const palette = ['#1d7af3', '#59d05d', '#f3545d', '#fdaf4b', '#8b5cf6']; // blue, green, red, orange, violet
+  const bg = labels.map((_, i) => palette[i % palette.length]);
+
+  const cfg = {
+    type: 'doughnut',
+    data: {
+      labels: total ? labels : ['No data'],
+      datasets: [{
+        data: total ? data : [1],
+        backgroundColor: total ? bg : ['#e9ecef'],
+        hoverBackgroundColor: total ? bg : ['#e9ecef'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { enabled: !!total }
+      },
+      cutout: '60%'
+    }
+  };
+
+  // Prevent duplicate charts on hot-reload/navigate
+  if (donutEl.__chart) donutEl.__chart.destroy();
+  donutEl.__chart = new Chart(donutEl.getContext('2d'), cfg);
+}
+
+  const stackCtx = document.getElementById('activeDisposedStacked');
+  if (stackCtx) {
+    new Chart(stackCtx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ACTIVE_VS_DISPOSED_LABELS,
+        datasets: [
+          {label: 'Active', data: ACTIVE_COUNTS, backgroundColor: '#59d05d'},
+          {label: 'Disposed', data: DISPOSED_COUNTS, backgroundColor: '#f3545d'}
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true, beginAtZero: true, ticks: {precision:0} }
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

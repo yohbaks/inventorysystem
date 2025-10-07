@@ -165,5 +165,14 @@ urlpatterns = [
 
 
 
+    # ================================
+    # PRINTER ROUTES
+    # ================================
+    path("printers/", views.printer_list, name="printer_list"),
+    path("printers/<int:printer_id>/", views.printer_details_view, name="printer_details_view"),
+    path("printers/dispose/<int:printer_id>/", views.dispose_printer, name="dispose_printer"),
+    path("printers/disposed/", views.disposed_printers, name="disposed_printers"),
+
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

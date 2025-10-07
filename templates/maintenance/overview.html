@@ -162,9 +162,21 @@
                         data-href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}"
                       {% endif %}>
                     <td>
-                      <span class="badge bg-info">
-                        {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                      </span>
+                      {% with quarter=assignment.pm_section_schedule.quarter_schedule.get_quarter_display %}
+                        {% if quarter == "Q1" or quarter == "1st Quarter" %}
+                          <span class="badge bg-primary">
+                        {% elif quarter == "Q2" or quarter == "2nd Quarter" %}
+                          <span class="badge bg-warning text-dark">
+                        {% elif quarter == "Q3" or quarter == "3rd Quarter" %}
+                          <span class="badge bg-success">
+                        {% elif quarter == "Q4" or quarter == "4th Quarter" %}
+                          <span class="badge bg-danger">
+                        {% else %}
+                          <span class="badge bg-info">
+                        {% endif %}
+                          {{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                        </span>
+                      {% endwith %}
                     </td>
                     <td>{{ assignment.pm_section_schedule.section.name }}</td>
                     <td>{{ assignment.computer_name_display }}</td>
