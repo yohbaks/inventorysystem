@@ -1290,8 +1290,10 @@ function printQrCode() {
         </div>
       {% endif %}
 
-                {% if not has_active_mouse and has_active_desktop and not salvaged_mice_view.exists %}
-                  <p class="text-danger">No available Mouse for this desktop package. You can still add a mouse under this package.</p>
+
+
+                {% if not has_active_mouse and not has_active_desktop and not salvaged_mice_view %}
+                  <p class="text-danger">This Mouse was completely disposed under the whole package.</p>
                 {% endif %}
                             
                 {% if not has_active_mouse and has_active_desktop and not salvage_mice_view %}
@@ -1436,7 +1438,7 @@ function printQrCode() {
             
             <!-- Conditionally show Add UPS Button only if no active mice are present -->
             {% if not has_active_ups and has_active_desktop %}
-              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUpsModal">Add UPS</button>
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUPSModal">Add UPS</button>
             {% endif %}
           </div>
           
@@ -1553,7 +1555,7 @@ function printQrCode() {
               </div>
             {% endif %}
 
-                {% if not has_active_ups and not has_active_desktop and not salvaged_ups_view%}
+                {% if not has_active_ups and not has_active_desktop and not salvaged_ups_view %}
                 <p class="text-danger">This UPS was completely disposed under the whole package.</p>
                 {% endif %}
 
@@ -1625,7 +1627,7 @@ function printQrCode() {
           </div>
         </div>
       
-        <!-- Add UPS Modal -->
+       
         <!-- Add UPS Modal -->
 <div class="modal fade" id="addUPSModal" tabindex="-1" aria-labelledby="addUPSModalLabel" aria-hidden="true">
   <div class="modal-dialog">

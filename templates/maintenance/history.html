@@ -3,6 +3,9 @@
 {% load static %}
 
 {% block content %}
+
+{% now "Y-m-d" as today %}
+
 <div class="container">
   <div class="page-inner">
     <div class="row justify-content-center">
@@ -65,10 +68,13 @@
                       <td>
                         {% if schedule.is_completed %}
                           <span class="badge bg-success">Completed</span>
+                        {% elif schedule.is_overdue %}
+                          <span class="badge bg-danger">Overdue</span>
                         {% else %}
                           <span class="badge bg-warning text-dark">Pending</span>
                         {% endif %}
                       </td>
+
                     </tr>
                     {% endfor %}
                   </tbody>

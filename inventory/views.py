@@ -1201,7 +1201,13 @@ def add_equipment_package_with_details(request):
     mouse_brands = Brand.objects.filter(is_mouse=True)
     monitor_brands = Brand.objects.filter(is_monitor=True)
     ups_brands = Brand.objects.filter(is_ups=True)
+    
     printer_brands = Brand.objects.filter(is_printer=True)
+
+    if hasattr(Brand, "is_laptop"):
+        laptop_brands = Brand.objects.filter(Q(is_laptop=True) | Q(is_desktop=True))
+    else:
+        laptop_brands = Brand.objects.filter(is_desktop=True)
 
 
     context = {
@@ -1211,6 +1217,7 @@ def add_equipment_package_with_details(request):
         'monitor_brands': monitor_brands,
         'ups_brands': ups_brands,
         'printer_brands': printer_brands,
+        'laptop_brands': laptop_brands, 
         'employees': employees,
     }
 
@@ -2386,6 +2393,12 @@ def maintenance_history_view(request, desktop_id):
         'pm_section_schedule__quarter_schedule__quarter'
     )
 
+        # ✅ Add overdue flag for each schedule
+    today = timezone.now().date()
+    for schedule in current_pm_schedule:
+        end_date = schedule.pm_section_schedule.end_date
+        schedule.is_overdue = (not schedule.is_completed) and (end_date < today)
+
     return render(request, 'maintenance/history.html', {
         'desktop': desktop,
         'desktop_details': desktop_details,
@@ -3165,10 +3178,11 @@ def dashboard_pro(request):
         health_score = 0
 
     # ===================== DISPOSAL TRENDS =====================
-    lbls, desktop_series = _monthly_counts_qs(DisposedDesktopDetail.objects.all(), "date_disposed", months)
-    _, mouse_series = _monthly_counts_qs(DisposedMouse.objects.all(), "disposal_date", months)
-    _, keyboard_series = _monthly_counts_qs(DisposedKeyboard.objects.all(), "disposal_date", months)
-    _, ups_series = _monthly_counts_qs(DisposedUPS.objects.all(), "disposal_date", months)
+
+    lbls, desktop_series = _monthly_counts_qs(DisposedDesktopDetail.objects.all(), months=months)
+    _, mouse_series = _monthly_counts_qs(DisposedMouse.objects.all(), months=months)
+    _, keyboard_series = _monthly_counts_qs(DisposedKeyboard.objects.all(), months=months)
+    _, ups_series = _monthly_counts_qs(DisposedUPS.objects.all(), months=months)
 
     # Disposed by Category (Pie/Donut chart)
     disposed_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS", "Laptop", "Printer"]
@@ -3345,36 +3359,66 @@ def dashboard_pro(request):
 
 
 # ===================== HELPER FUNCTION =====================
-def _monthly_counts_qs(queryset, date_field, months):
+def _monthly_counts_qs(queryset, date_field=None, months=3):
     """
-    Returns (labels, data) for the last N months of disposal counts.
+    Auto-detects which date field to use ('date_disposed' or 'disposal_date')
+    and returns (labels, data) for the last N months of disposal counts.
+    Handles both DateField and DateTimeField gracefully.
     """
-    from datetime import datetime
+    from datetime import datetime, timedelta
     from dateutil.relativedelta import relativedelta
-    
+    from django.utils import timezone
+    from django.db.models import DateField, DateTimeField
+
     today = timezone.now().date()
     labels = []
     data = []
-    
+
+    # ---------- Auto-detect date field ----------
+    model = queryset.model
+    model_fields = [f.name for f in model._meta.fields]
+    if not date_field:
+        if "date_disposed" in model_fields:
+            date_field = "date_disposed"
+        elif "disposal_date" in model_fields:
+            date_field = "disposal_date"
+        else:
+            raise ValueError(
+                f"{model.__name__} has no valid date field "
+                "(expected 'date_disposed' or 'disposal_date')."
+            )
+
+    field_obj = model._meta.get_field(date_field)
+    is_datetime = isinstance(field_obj, DateTimeField)
+
+    # ---------- Build monthly counts ----------
     for i in range(months - 1, -1, -1):
         month_date = today - relativedelta(months=i)
-        month_start = month_date.replace(day=1)
-        
-        # Get last day of month
+        month_start_naive = datetime(month_date.year, month_date.month, 1)
         if month_date.month == 12:
-            month_end = month_date.replace(day=31)
+            month_end_naive = datetime(month_date.year, 12, 31, 23, 59, 59)
         else:
-            next_month = month_date.replace(day=28) + relativedelta(days=4)
-            month_end = next_month - relativedelta(days=next_month.day)
-        
+            next_month = month_start_naive + relativedelta(months=1)
+            month_end_naive = next_month - timedelta(seconds=1)
+
+        # ✅ If the field is datetime → make timezone-aware
+        if is_datetime:
+            month_start = timezone.make_aware(month_start_naive)
+            month_end = timezone.make_aware(month_end_naive)
+        else:
+            # If DateField, just use date objects (avoid tz mismatch)
+            month_start = month_start_naive.date()
+            month_end = month_end_naive.date()
+
         count = queryset.filter(
             **{f"{date_field}__gte": month_start, f"{date_field}__lte": month_end}
         ).count()
-        
+
         labels.append(month_start.strftime("%b %Y"))
         data.append(count)
-    
+
     return labels, data
+
 
 #end all for dashboard
 
@@ -3524,26 +3568,48 @@ def regenerate_user_qr(request):
 def user_assets_public(request, token):
     """
     Public (or internal) page: by QR token. No login required.
-    Shows packages assigned to this user + history.
+    Shows all IT assets assigned to this user + history.
+    Includes Desktops, Laptops, and Printers.
     """
     profile = get_object_or_404(Profile, qr_token=token)
     employee = profile.employee
 
     packages = Equipment_Package.objects.none()
     desktops = DesktopDetails.objects.none()
+    laptops = LaptopPackage.objects.none()
+    printers = PrinterDetails.objects.none()
+
     if employee:
-        packages = (Equipment_Package.objects
-                    .filter(user_details__user_Enduser=employee)
-                    .distinct())
+        # 🖥 DESKTOP PACKAGES
+        packages = (
+            Equipment_Package.objects
+            .filter(user_details__user_Enduser=employee)
+            .distinct()
+        )
         desktops = DesktopDetails.objects.filter(equipment_package__in=packages)
 
-    # History & disposals across those packages
+        # 💻 LAPTOP PACKAGES
+        laptops = (
+            LaptopPackage.objects
+            .filter(user_details__user_Enduser=employee)
+            .distinct()
+        )
+
+        # 🖨 PRINTERS under their desktop packages
+        printers = (
+            PrinterDetails.objects
+            .filter(equipment_package__in=packages)
+            .select_related("printer_brand_db")
+        )
+
+    # 🗑 Disposals (for all desktop-related assets)
     disposed_desktops = DisposedDesktopDetail.objects.filter(desktop__equipment_package__in=packages)
     disposed_monitors = DisposedMonitor.objects.filter(monitor_disposed_db__equipment_package__in=packages)
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__equipment_package__in=packages)
     disposed_mice = DisposedMouse.objects.filter(mouse_db__equipment_package__in=packages)
     disposed_ups = DisposedUPS.objects.filter(ups_db__equipment_package__in=packages)
 
+    # 🕒 Change history
     enduser_history = EndUserChangeHistory.objects.filter(equipment_package__in=packages).order_by('-changed_at')
     assetowner_history = AssetOwnerChangeHistory.objects.filter(equipment_package__in=packages).order_by('-changed_at')
 
@@ -3552,6 +3618,8 @@ def user_assets_public(request, token):
         "employee": employee,
         "packages": packages,
         "desktops": desktops,
+        "laptops": laptops,
+        "printers": printers,
         "disposed_desktops": disposed_desktops,
         "disposed_monitors": disposed_monitors,
         "disposed_keyboards": disposed_keyboards,
@@ -3560,6 +3628,8 @@ def user_assets_public(request, token):
         "enduser_history": enduser_history,
         "assetowner_history": assetowner_history,
     })
+
+
 @login_required
 def laptop_list(request):
     # Grab all LaptopPackages

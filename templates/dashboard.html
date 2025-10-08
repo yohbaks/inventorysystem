@@ -329,9 +329,19 @@
             {% if pm_upcoming %}
               {% for pm in pm_upcoming %}
               <div class="d-flex align-items-center mb-3">
-                <div class="avatar avatar-sm">
-                  <img src="{% static 'img/defaulticon.svg' %}" alt="Section" class="avatar-img rounded-circle">
-                </div>
+                 <div class="avatar">
+                    {% if pm.section|lower == "administrative section" %}
+                      <img src="{% static '/img/logo_administrative_section.svg' %}" alt="Administrative" class="avatar-img rounded-circle">
+                    {% elif pm.section|lower == "commission on audit" %}
+                      <img src="{% static '/img/logo_commission_on_audit.svg' %}" alt="COA" class="avatar-img rounded-circle">
+                    {% elif pm.section|lower == "planning section" %}
+                      <img src="{% static '/img/logoproduct3.svg' %}" alt="Planning" class="avatar-img rounded-circle">
+                    {% elif pm.section|lower == "ict section" %}
+                      <img src="{% static '/img/logoproduct4.svg' %}" alt="ICT" class="avatar-img rounded-circle">
+                    {% else %}
+                      <img src="{% static '/img/defaulticon.svg' %}" alt="Other Section" class="avatar-img rounded-circle">
+                    {% endif %}
+                  </div>
                 <div class="flex-1 ms-3">
                   <h6 class="fw-bold mb-1 text-dark">{{ pm.computer_name }}</h6>
                   <small class="text-muted">
@@ -382,196 +392,272 @@ const BRAND_DATA = {{ charts.brand_data|safe }};
 const SECTION_LABELS = {{ charts.section_labels|safe }};
 const SECTION_DATA = {{ charts.section_data|safe }};
 
-// ========= Chart Options =========
-const commonOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: true,
-      position: 'bottom',
-      labels: {
-        padding: 15,
-        usePointStyle: true
-      }
-    }
-  }
-};
-
 // ========= Initialize Charts =========
 (function() {
-  // 1. Disposal Trend Chart
-  const trendCanvas = document.getElementById('disposalTrendChart');
-  if (trendCanvas) {
-    new Chart(trendCanvas, {
+  // 1. Disposal Trend Line Chart (Styled like reference)
+  var disposalCanvas = document.getElementById('disposalTrendChart');
+  if (disposalCanvas) {
+    var disposalCtx = disposalCanvas.getContext('2d');
+    
+    var myDisposalChart = new Chart(disposalCtx, {
       type: 'line',
       data: {
         labels: DISP_LABELS,
         datasets: [
           {
             label: 'Desktop',
-            data: DISP_DESKTOP,
             borderColor: '#1d7af3',
-            backgroundColor: 'rgba(29, 122, 243, 0.1)',
-            tension: 0.4,
-            fill: true
+            pointBorderColor: '#FFF',
+            pointBackgroundColor: '#1d7af3',
+            pointBorderWidth: 2,
+            pointHoverRadius: 4,
+            pointHoverBorderWidth: 1,
+            pointRadius: 4,
+            backgroundColor: 'transparent',
+            fill: true,
+            tension: 0.4,  // ✅ this line makes it curve
+            borderWidth: 2,
+            data: DISP_DESKTOP
           },
           {
             label: 'Mouse',
-            data: DISP_MOUSE,
             borderColor: '#59d05d',
-            backgroundColor: 'rgba(89, 208, 93, 0.1)',
-            tension: 0.4,
-            fill: true
+            pointBorderColor: '#FFF',
+            pointBackgroundColor: '#59d05d',
+            pointBorderWidth: 2,
+            pointHoverRadius: 4,
+            pointHoverBorderWidth: 1,
+            pointRadius: 4,
+            backgroundColor: 'transparent',
+            fill: true,
+            borderWidth: 2,
+            data: DISP_MOUSE
           },
           {
             label: 'Keyboard',
-            data: DISP_KEYBOARD,
             borderColor: '#f3545d',
-            backgroundColor: 'rgba(243, 84, 93, 0.1)',
-            tension: 0.4,
-            fill: true
+            pointBorderColor: '#FFF',
+            pointBackgroundColor: '#f3545d',
+            pointBorderWidth: 2,
+            pointHoverRadius: 4,
+            pointHoverBorderWidth: 1,
+            pointRadius: 4,
+            backgroundColor: 'transparent',
+            fill: true,
+            borderWidth: 2,
+            data: DISP_KEYBOARD
           },
           {
             label: 'UPS',
-            data: DISP_UPS,
             borderColor: '#fdaf4b',
-            backgroundColor: 'rgba(253, 175, 75, 0.1)',
-            tension: 0.4,
-            fill: true
+            pointBorderColor: '#FFF',
+            pointBackgroundColor: '#fdaf4b',
+            pointBorderWidth: 2,
+            pointHoverRadius: 4,
+            pointHoverBorderWidth: 1,
+            pointRadius: 4,
+            backgroundColor: 'transparent',
+            fill: true,
+            borderWidth: 2,
+            data: DISP_UPS
           }
         ]
       },
       options: {
-        ...commonOptions,
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 10,
+            fontColor: '#1d7af3'
+          }
+        },
+        tooltips: {
+          bodySpacing: 4,
+          mode: 'nearest',
+          intersect: 0,
+          position: 'nearest',
+          xPadding: 10,
+          yPadding: 10,
+          caretPadding: 10
+        },
+        layout: {
+          padding: { left: 15, right: 15, top: 15, bottom: 15 }
+        },
         scales: {
-          y: {
-            beginAtZero: true,
+          yAxes: [{
             ticks: {
-              stepSize: 1
+              beginAtZero: true,
+              stepSize: 5
             }
+          }]
+        }
+      }
+    });
+  }
+
+  // 2. Disposed by Category Pie Chart
+  var pieCanvas = document.getElementById('disposedByCategoryChart');
+  if (pieCanvas) {
+    var pieCtx = pieCanvas.getContext('2d');
+    
+    var myPieChart = new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: DISPOSED_BY_CAT_DATA,
+          backgroundColor: ['#1d7af3', '#f3545d', '#fdaf4b', '#59d05d', '#716aca'],
+          borderWidth: 0
+        }],
+        labels: DISPOSED_BY_CAT_LABELS
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: {
+          position: 'bottom',
+          labels: {
+            fontColor: 'rgb(154, 154, 154)',
+            fontSize: 11,
+            usePointStyle: true,
+            padding: 20
+          }
+        },
+        pieceLabel: {
+          render: 'percentage',
+          fontColor: 'white',
+          fontSize: 14
+        },
+        tooltips: false,
+        layout: {
+          padding: {
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: 20
           }
         }
       }
     });
   }
 
-  // 2. Disposed by Category Doughnut Chart
-  const donutCanvas = document.getElementById('disposedByCategoryChart');
-  if (donutCanvas) {
-    new Chart(donutCanvas, {
-      type: 'doughnut',
-      data: {
-        labels: DISPOSED_BY_CAT_LABELS,
-        datasets: [{
-          data: DISPOSED_BY_CAT_DATA,
-          backgroundColor: ['#1d7af3', '#59d05d', '#f3545d', '#fdaf4b', '#8b5cf6'],
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
-      },
-      options: commonOptions
-    });
-  }
-
   // 3. Active vs Disposed Stacked Bar Chart
-  const stackedCanvas = document.getElementById('activeDisposedStacked');
+  var stackedCanvas = document.getElementById('activeDisposedStacked');
   if (stackedCanvas) {
-    new Chart(stackedCanvas, {
+    var stackedCtx = stackedCanvas.getContext('2d');
+    
+    var myStackedChart = new Chart(stackedCtx, {
       type: 'bar',
       data: {
         labels: ACTIVE_VS_DISPOSED_LABELS,
         datasets: [
           {
             label: 'Active',
-            data: ACTIVE_COUNTS,
-            backgroundColor: '#59d05d'
+            backgroundColor: '#59d05d',
+            borderColor: '#59d05d',
+            data: ACTIVE_COUNTS
           },
           {
             label: 'Disposed',
-            data: DISPOSED_COUNTS,
-            backgroundColor: '#f3545d'
+            backgroundColor: '#f3545d',
+            borderColor: '#f3545d',
+            data: DISPOSED_COUNTS
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top'
-          }
+        legend: {
+          position: 'bottom'
+        },
+        title: {
+          display: false
+        },
+        tooltips: {
+          mode: 'index',
+          intersect: false
         },
         scales: {
-          x: {
+          xAxes: [{
             stacked: true
-          },
-          y: {
+          }],
+          yAxes: [{
             stacked: true,
-            beginAtZero: true
-          }
+            ticks: {
+              beginAtZero: true,
+              stepSize: 5
+            }
+          }]
         }
       }
     });
   }
 
-  // 4. Top 5 Brands Chart
-  const brandCanvas = document.getElementById('brandChart');
+  // 4. Top 5 Brands Bar Chart
+  var brandCanvas = document.getElementById('brandChart');
   if (brandCanvas) {
-    new Chart(brandCanvas, {
+    var brandCtx = brandCanvas.getContext('2d');
+    
+    var myBrandChart = new Chart(brandCtx, {
       type: 'bar',
       data: {
         labels: BRAND_LABELS,
         datasets: [{
           label: 'Assets',
-          data: BRAND_DATA,
-          backgroundColor: '#1d7af3'
+          backgroundColor: 'rgb(23, 125, 255)',
+          borderColor: 'rgb(23, 125, 255)',
+          data: BRAND_DATA
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
+        legend: {
+          display: false
         },
         scales: {
-          y: {
-            beginAtZero: true
-          }
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+              stepSize: 5
+            }
+          }]
         }
       }
     });
   }
 
-  // 5. Assets by Section Chart
-  const sectionCanvas = document.getElementById('sectionChart');
+  // 5. Assets by Section Horizontal Bar Chart
+  var sectionCanvas = document.getElementById('sectionChart');
   if (sectionCanvas) {
-    new Chart(sectionCanvas, {
-      type: 'bar',
+    var sectionCtx = sectionCanvas.getContext('2d');
+    
+    var mySectionChart = new Chart(sectionCtx, {
+      type: 'horizontalBar',
       data: {
         labels: SECTION_LABELS,
         datasets: [{
           label: 'Assets',
-          data: SECTION_DATA,
-          backgroundColor: '#59d05d'
+          backgroundColor: '#59d05d',
+          borderColor: '#59d05d',
+          data: SECTION_DATA
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        indexAxis: 'y',
-        plugins: {
-          legend: {
-            display: false
-          }
+        legend: {
+          display: false
         },
         scales: {
-          x: {
-            beginAtZero: true
-          }
+          xAxes: [{
+            ticks: {
+              beginAtZero: true,
+              stepSize: 5
+            }
+          }]
         }
       }
     });

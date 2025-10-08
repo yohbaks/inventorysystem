@@ -56,6 +56,7 @@ class Brand(models.Model):
     is_ups = models.BooleanField(default=False)
     is_desktop = models.BooleanField(default=False)
     is_printer = models.BooleanField(default=False)
+    is_laptop = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -275,7 +276,7 @@ class DisposedKeyboard(models.Model):
 class DisposedMouse(models.Model):
     mouse_db = models.ForeignKey(MouseDetails, on_delete=models.CASCADE)
     equipment_package = models.ForeignKey(Equipment_Package, related_name='mouse_details', on_delete=models.CASCADE, null=True)
-    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_ups", null=True, blank=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_mice", null=True, blank=True)
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):
@@ -290,7 +291,8 @@ class DisposedMouse(models.Model):
 class DisposedUPS(models.Model):
     ups_db = models.ForeignKey(UPSDetails, on_delete=models.CASCADE)
     equipment_package = models.ForeignKey(Equipment_Package, related_name='ups_details', on_delete=models.CASCADE, null=True)
-    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_mice", null=True, blank=True)
+    disposed_under = models.ForeignKey(DisposedDesktopDetail, on_delete=models.CASCADE, related_name="disposed_ups", null=True, blank=True)
+    
     disposal_date = models.DateField(default=timezone.now)
 
     def __str__(self):

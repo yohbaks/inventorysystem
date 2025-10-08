@@ -2,6 +2,7 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
+    <!-- Profile Header -->
     <div class="card shadow-sm mb-3">
       <div class="card-body d-flex align-items-center gap-3">
         <img src="{{ profile_owner.avatar_url }}" alt="" class="rounded-circle" width="64" height="64" style="object-fit:cover;">
@@ -14,8 +15,9 @@
       </div>
     </div>
 
+    <!-- 🖥 Assigned Desktop Packages -->
     <div class="card shadow-sm mb-4">
-      <div class="card-header"><h5 class="mb-0">Assigned Packages</h5></div>
+      <div class="card-header"><h5 class="mb-0">🖥 Assigned Desktop Packages</h5></div>
       <div class="card-body table-responsive">
         <table class="table table-bordered table-hover">
           <thead><tr><th>Package</th><th>Computer Name</th><th>Status</th></tr></thead>
@@ -35,14 +37,76 @@
               </tr>
             {% endwith %}
             {% empty %}
-              <tr><td colspan="3" class="text-muted">No assigned equipment.</td></tr>
+              <tr><td colspan="3" class="text-muted">No assigned desktop equipment.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- 💻 Assigned Laptop Packages -->
+    {% if laptops %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><h5 class="mb-0">💻 Assigned Laptop Packages</h5></div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead><tr><th>Package</th><th>Computer Name</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for lp in laptops %}
+              {% with ld=lp.laptop_details.first %}
+              <tr>
+                <td>#{{ lp.id }}</td>
+                <td>{{ ld.computer_name|default:"—" }}</td>
+                <td>
+                  {% if ld and not ld.is_disposed %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-danger">Disposed</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endwith %}
+            {% empty %}
+              <tr><td colspan="3" class="text-muted">No assigned laptops.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 🖨 Assigned Printers -->
+    {% if printers %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><h5 class="mb-0">🖨 Assigned Printers</h5></div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead><tr><th>Serial No</th><th>Brand</th><th>Model</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for p in printers %}
+              <tr>
+                <td>{{ p.printer_sn_db }}</td>
+                <td>{{ p.printer_brand_db.name|default:"—" }}</td>
+                <td>{{ p.printer_model_db|default:"—" }}</td>
+                <td>
+                  {% if not p.is_disposed %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-danger">Disposed</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-muted">No assigned printers.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="row">
+      <!-- 📜 Change History -->
       <div class="col-md-6">
         <div class="card shadow-sm mb-4">
           <div class="card-header"><h6 class="mb-0">Change History (End User / Asset Owner)</h6></div>
@@ -67,6 +131,7 @@
         </div>
       </div>
 
+      <!-- 🗑 Disposal Logs -->
       <div class="col-md-6">
         <div class="card shadow-sm mb-4">
           <div class="card-header"><h6 class="mb-0">Disposal Logs</h6></div>
@@ -88,6 +153,12 @@
                 {% endfor %}
                 {% for d in disposed_ups %}
                   <tr><td>UPS</td><td>{{ d.ups_db.ups_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
+                {% endfor %}
+                {% for d in disposed_laptops %}
+                  <tr><td>Laptop</td><td>{{ d.serial_no }} {{ d.model }}</td><td>{{ d.date_disposed|date:"Y-m-d" }}</td></tr>
+                {% endfor %}
+                {% for d in disposed_printers %}
+                  <tr><td>Printer</td><td>{{ d.printer_sn }} {{ d.printer_model }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
                 {% empty %}
                   <tr><td colspan="3" class="text-muted">No disposals.</td></tr>
                 {% endfor %}
@@ -96,7 +167,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </div>
