@@ -2744,7 +2744,7 @@ def assign_pm_schedule(request):
         schedule = get_object_or_404(PMSectionSchedule, pk=schedule_id)
 
         if device_type == "desktop":
-            desktop_id = request.POST.get('equipment_package')
+            desktop_id = request.POST.get('equipment_package_id')
             desktop = get_object_or_404(Equipment_Package, pk=desktop_id)
 
             if PMScheduleAssignment.objects.filter(equipment_package=desktop, pm_section_schedule=schedule).exists():

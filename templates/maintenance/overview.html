@@ -331,4 +331,57 @@ $(document).ready(function() {
   });
 });
 </script>
+
+<script>
+$(document).ready(function() {
+  // ✅ FLOAT SUCCESS TOAST + CLOSE MODAL AFTER SUCCESS
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'success' %}
+        // Close the modal if open
+        $('#addScheduleModal').modal('hide');
+
+        // Floating success notification
+        $.notify({
+          title: '<strong><i class="fa fa-check me-1"></i>Success</strong><br>',
+          message: "{{ message|escapejs }}"
+        }, {
+          type: 'success',
+          placement: {
+            from: "bottom",
+            align: "right"
+          },
+          delay: 3500,
+          allow_dismiss: true,
+          z_index: 2000,
+          animate: {
+            enter: 'animated fadeInRight',
+            exit: 'animated fadeOutRight'
+          }
+        });
+      {% elif message.tags == 'error' %}
+        $.notify({
+          title: '<strong><i class="fa fa-times me-1"></i>Error</strong><br>',
+          message: "{{ message|escapejs }}"
+        }, {
+          type: 'danger',
+          placement: { from: "bottom", align: "right" },
+          delay: 4000,
+          z_index: 2000
+        });
+      {% elif message.tags == 'warning' %}
+        $.notify({
+          title: '<strong><i class="fa fa-exclamation me-1"></i>Warning</strong><br>',
+          message: "{{ message|escapejs }}"
+        }, {
+          type: 'warning',
+          placement: { from: "bottom", align: "right" },
+          delay: 4000,
+          z_index: 2000
+        });
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+});
+</script>
 {% endblock %}

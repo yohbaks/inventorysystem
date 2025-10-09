@@ -54,7 +54,7 @@
         <div class="col-md-4">
           <label>Brand</label>
           <select name="desktop_brand_name" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in desktop_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -94,7 +94,16 @@
         </div>
         <div class="col-md-4">
           <label>Memory</label>
-          <input type="text" name="desktop_memory" class="form-control" required>
+          
+          <select class="form-select form-control mt-2" id="desktop_memory" name="desktop_memory">
+            <option value="" disabled selected>-- Select Memory --</option>
+            <option value="4GB">4GB</option>
+            <option value="8GB">8GB</option>
+            <option value="16GB">16GB</option>
+            <option value="32GB">32GB</option>
+            <option value="64GB">64GB</option>
+            <option value="128GB">128GB</option>
+            </select>
         </div>
         <div class="col-md-4">
           <label>Drive</label>
@@ -136,7 +145,7 @@
         <div class="col-md-3">
           <label>Brand</label>
           <select name="monitor_brand" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in monitor_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -157,7 +166,7 @@
         <div class="col-md-4">
           <label>Brand</label>
           <select name="keyboard_brand" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in keyboard_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -177,7 +186,7 @@
         <div class="col-md-4">
           <label>Brand</label>
           <select name="mouse_brand" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in mouse_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -197,7 +206,7 @@
         <div class="col-md-3">
           <label>Brand</label>
           <select name="ups_brand" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in ups_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -216,7 +225,17 @@
       <div class="row">
         <div class="col-md-4"><label>PAR</label><input type="text" name="par_number_input" class="form-control" required></div>
         <div class="col-md-4"><label>Property No</label><input type="text" name="property_number_input" class="form-control" required></div>
-        <div class="col-md-4"><label>Acquisition Type</label><input type="text" name="acquisition_type_input" class="form-control" required></div>
+        <div class="col-md-4">
+          <label for="acquisition_type" class="form-label">Acquisition Type</label>
+          <select name="acquisition_type_input" id="acquisition_type" class="form-select form-control" required>
+            <option value="">-- Select Acquisition Type --</option>
+            <option value="Procured">Procured</option>
+            <option value="Donated">Donated</option>
+            <option value="Turned over by DPWH Central Office">Turned over by DPWH Central Office</option>
+            <option value="Turned over by Contractor/Project">Turned over by Contractor/Project</option>
+            <option value="Turned over by Regional Office">Turned over by Regional Office</option>
+          </select>
+        </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-4"><label>Value</label><input type="text" name="value_desktop_input" class="form-control" required></div>
@@ -239,7 +258,7 @@
         <div class="col-md-6">
           <label>End User</label>
           <select name="enduser_input" class="form-select form-control" required>
-            <option value="">Select End User</option>
+            <option value="" disabled selected>Select End User</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
             {% endfor %}
@@ -248,7 +267,7 @@
         <div class="col-md-6">
           <label>Asset Owner</label>
           <select name="assetowner_input" class="form-select form-control" required>
-            <option value="">Select Asset Owner</option>
+            <option value="" disabled selected>Select Asset Owner</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
             {% endfor %}
@@ -274,7 +293,7 @@
         <div class="col-md-4">
           <label>Brand</label>
           <select name="laptop_brand_name" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in laptop_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -297,7 +316,16 @@
         </div>
         <div class="col-md-4">
           <label>Memory (RAM)</label>
-          <input type="text" name="laptop_memory" class="form-control">
+          
+          <select class="form-select form-control mt-2" id="laptop_memory" name="laptop_memory">
+            <option value="" disabled selected>-- Select Memory --</option>
+            <option value="4GB">4GB</option>
+            <option value="8GB">8GB</option>
+            <option value="16GB">16GB</option>
+            <option value="32GB">32GB</option>
+            <option value="64GB">64GB</option>
+            <option value="128GB">128GB</option>
+            </select> 
         </div>
         <div class="col-md-4">
           <label>Drive</label>
@@ -331,7 +359,17 @@
       <div class="row">
         <div class="col-md-4"><label>PAR</label><input type="text" name="par_number_input" class="form-control" required></div>
         <div class="col-md-4"><label>Property No</label><input type="text" name="property_number_input" class="form-control" required></div>
-        <div class="col-md-4"><label>Acquisition Type</label><input type="text" name="acquisition_type_input" class="form-control" required></div>
+        <div class="col-md-4">
+          <label for="acquisition_type" class="form-label">Acquisition Type</label>
+          <select name="acquisition_type_input" id="acquisition_type" class="form-select form-control" required>
+            <option value="">-- Select Acquisition Type --</option>
+            <option value="Procured">Procured</option>
+            <option value="Donated">Donated</option>
+            <option value="Turned over by DPWH Central Office">Turned over by DPWH Central Office</option>
+            <option value="Turned over by Contractor/Project">Turned over by Contractor/Project</option>
+            <option value="Turned over by Regional Office">Turned over by Regional Office</option>
+          </select>
+        </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-4"><label>Value</label><input type="text" name="value_laptop_input" class="form-control" required></div>
@@ -354,7 +392,7 @@
         <div class="col-md-6">
           <label>End User</label>
           <select name="enduser_input" class="form-select form-control" required>
-            <option value="">Select End User</option>
+            <option value="" disabled selected>Select End User</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
             {% endfor %}
@@ -363,7 +401,7 @@
         <div class="col-md-6">
           <label>Asset Owner</label>
           <select name="assetowner_input" class="form-select form-control" required>
-            <option value="">Select Asset Owner</option>
+            <option value="" disabled selected>Select Asset Owner</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
             {% endfor %}
@@ -386,7 +424,7 @@
         <div class="col-md-4">
           <label>Brand</label>
           <select name="printer_brand" class="form-select form-control" required>
-            <option value="">-- Select Brand --</option>
+            <option value="" disabled selected>-- Select Brand --</option>
             {% for brand in printer_brands %}
               <option value="{{ brand.id }}">{{ brand.name }}</option>
             {% endfor %}
@@ -430,7 +468,17 @@
       <div class="row">
         <div class="col-md-4"><label>PAR</label><input type="text" name="par_number_input" class="form-control" required></div>
         <div class="col-md-4"><label>Property No</label><input type="text" name="property_number_input" class="form-control" required></div>
-        <div class="col-md-4"><label>Acquisition Type</label><input type="text" name="acquisition_type_input" class="form-control" required></div>
+        <div class="col-md-4">
+          <label for="acquisition_type" class="form-label">Acquisition Type</label>
+          <select name="acquisition_type_input" id="acquisition_type" class="form-select form-control" required>
+            <option value="" disabled selected>-- Select Acquisition Type --</option>
+            <option value="Procured">Procured</option>
+            <option value="Donated">Donated</option>
+            <option value="Turned over by DPWH Central Office">Turned over by DPWH Central Office</option>
+            <option value="Turned over by Contractor/Project">Turned over by Contractor/Project</option>
+            <option value="Turned over by Regional Office">Turned over by Regional Office</option>
+          </select>
+        </div>
       </div>
       <div class="row mt-2">
         <div class="col-md-4"><label>Value</label><input type="text" name="value_printer_input" class="form-control" required></div>
@@ -461,7 +509,7 @@
         <div class="col-md-6">
           <label>Asset Owner</label>
           <select name="assetowner_input" class="form-select form-control" required>
-            <option value="">Select Asset Owner</option>
+            <option value="" disabled selected>Select Asset Owner</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
             {% endfor %}
