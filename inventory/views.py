@@ -49,7 +49,7 @@ from inventory.models import (
     EndUserChangeHistory, AssetOwnerChangeHistory,
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
     QuarterSchedule, PMSectionSchedule, OfficeSection, Profile,
-    LaptopPackage, LaptopDetails, DisposedLaptop, PrinterDetails, DisposedPrinter
+    LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter 
 )
 
 
@@ -1527,9 +1527,12 @@ def add_equipment_package_with_details(request):
             printer_duplex = request.POST.get("printer_duplex") == "True"
 
             # validations
-            if not printer_sn: errors.append("Printer serial number is required.")
-            if not printer_brand: errors.append("Printer brand is required.")
-            if not printer_model: errors.append("Printer model is required.")
+            if not printer_sn:
+                errors.append("Printer serial number is required.")
+            if not printer_brand:
+                errors.append("Printer brand is required.")
+            if not printer_model:
+                errors.append("Printer model is required.")
 
             # Documents
             if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
@@ -1545,7 +1548,7 @@ def add_equipment_package_with_details(request):
             if not request.POST.get('enduser_input'): errors.append("End user is required.")
             if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
 
-            # duplicate check
+            # Duplicate check
             if printer_sn and sn_exists(PrinterDetails, 'printer_sn_db', printer_sn):
                 errors.append(f"Printer SN '{printer_sn}' already exists.")
 
@@ -1556,12 +1559,12 @@ def add_equipment_package_with_details(request):
 
             try:
                 with transaction.atomic():
-                    # ✅ create package (reuse Equipment_Package since printer is part of infra)
-                    equipment_package = Equipment_Package.objects.create(is_disposed=False)
+                    # ✅ Create printer package
+                    printer_package = PrinterPackage.objects.create(is_disposed=False)
 
-                    # ✅ create printer details
+                    # ✅ Create printer details
                     PrinterDetails.objects.create(
-                        equipment_package=equipment_package,
+                        printer_package=printer_package,
                         printer_sn_db=printer_sn,
                         printer_brand_db=printer_brand,
                         printer_model_db=printer_model,
@@ -1572,9 +1575,9 @@ def add_equipment_package_with_details(request):
                         printer_duplex=printer_duplex
                     )
 
-                    # ✅ documents
+                    # ✅ Create documents
                     DocumentsDetails.objects.create(
-                        equipment_package=equipment_package,
+                        printer_package=printer_package,
                         docs_PAR=request.POST.get('par_number_input'),
                         docs_Propertyno=request.POST.get('property_number_input'),
                         docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
@@ -1585,26 +1588,20 @@ def add_equipment_package_with_details(request):
                         docs_Status=request.POST.get('status_printer_input')
                     )
 
-                    # ✅ user details
+                    # ✅ Create user details
                     enduser = get_employee_or_none('enduser_input')
                     assetowner = get_employee_or_none('assetowner_input')
 
                     UserDetails.objects.create(
-                        equipment_package=equipment_package,
+                        printer_package=printer_package,
                         user_Enduser=enduser,
                         user_Assetowner=assetowner
                     )
 
-                    # ✅ PM schedule
-                    if enduser and enduser.employee_office_section:
-                        for schedule in PMSectionSchedule.objects.filter(section=enduser.employee_office_section):
-                            PMScheduleAssignment.objects.get_or_create(
-                                equipment_package=equipment_package,
-                                pm_section_schedule=schedule
-                            )
-
+                    # ✅ No PM logic for printers
                     messages.success(request, "✅ Printer added successfully.")
-                    return redirect(f'/success_add/{equipment_package.id}/?type=Printer')
+                    return redirect('success_page', package_id=printer_package.id)
+
 
             except IntegrityError as ie:
                 messages.error(request, f"❌ Could not save printer: duplicate detected. Details: {ie}")
@@ -3878,7 +3875,8 @@ def checklist_laptop(request, package_id):
 
 def printer_list(request):
     """List all printers, both active and disposed, with status badges."""
-    printers = PrinterDetails.objects.select_related('printer_brand_db', 'equipment_package').all()
+    
+    printers = PrinterDetails.objects.select_related('printer_package', 'printer_brand_db')
     print("🖨️ VIEW CALLED — TOTAL PRINTER COUNT:", printers.count())
     return render(request, 'printer/printer_list.html', {'printers': printers})
 

@@ -190,28 +190,36 @@ class UPSDetails(models.Model):
     def __str__(self):
         return f"{self.equipment_package} {self.ups_brand_db} {self.ups_model_db} ({self.ups_sn_db})"
 
-
-#user details 
 class UserDetails(models.Model):
+    # 💻 Desktop equipment
     equipment_package = models.ForeignKey(
         Equipment_Package, on_delete=models.CASCADE,
         null=True, blank=True, related_name='user_details'
     )
-    # 👉 This must be LaptopPackage
+
+    # 💼 Laptop package
     laptop_package = models.ForeignKey(
         'LaptopPackage', on_delete=models.CASCADE,
         null=True, blank=True, related_name='user_details'
     )
+
+    # 🖨 Printer package (NEW)
+    printer_package = models.ForeignKey(
+        'PrinterPackage', on_delete=models.CASCADE,
+        null=True, blank=True, related_name='user_details'
+    )
+
+    # 👥 Assigned people
     user_Enduser = models.ForeignKey(
         'Employee', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='enduser_details'
-    )
+    )   
     user_Assetowner = models.ForeignKey(
         'Employee', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='assetowner_details'
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)  
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         target = None
@@ -219,6 +227,10 @@ class UserDetails(models.Model):
             target = f"Desktop {self.equipment_package.id}"
         elif self.laptop_package:
             target = f"Laptop {self.laptop_package.id}"
+        elif self.printer_package:
+            target = f"Printer {self.printer_package.id}"
+        else:
+            target = "Unassigned"
         return f"{target} | Enduser: {self.user_Enduser or 'N/A'} | Owner: {self.user_Assetowner or 'N/A'}"
 
 
@@ -484,6 +496,11 @@ class DocumentsDetails(models.Model):
         "LaptopPackage", related_name='docs',
         on_delete=models.CASCADE, null=True, blank=True
     )
+    printer_package = models.ForeignKey(
+        "PrinterPackage", related_name='docs',
+        on_delete=models.CASCADE, null=True, blank=True
+    )
+
 
     docs_PAR = models.CharField(max_length=100, blank=True, null=True)
     docs_Propertyno = models.CharField(max_length=100, blank=True, null=True)
@@ -499,6 +516,8 @@ class DocumentsDetails(models.Model):
             return f"Docs for Desktop Package {self.equipment_package.id}"
         elif self.laptop_package:
             return f"Docs for Laptop Package {self.laptop_package.id}"
+        elif self.printer_package:
+            return f"Docs for Printer Package {self.printer_package.id}"
         return "Docs (unlinked)"
     
     
@@ -767,10 +786,31 @@ class DisposedLaptop(models.Model):
         return f"Disposed Laptop : {self.laptop.computer_name if self.laptop else self.serial_no}"
     
 
+################################################## PRINTER MODELS
+
+class PrinterPackage(models.Model):
+    """Standalone printer package (separate from desktop equipment)."""
+    is_disposed = models.BooleanField(default=False)
+    disposal_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    qr_code = models.ImageField(upload_to='qr_codes/printers', blank=True, null=True)
+    pm_schedule_date = models.DateField(null=True, blank=True)
+    pm_schedule_notes = models.TextField(null=True, blank=True)
+
+    @property
+    def printer_name(self):
+        printer = self.printer_details.first()
+        return printer.printer_model_db if printer else "N/A"
+
+    def __str__(self):
+        return f"Printer Package {self.pk}"
+
+
 class PrinterDetails(models.Model):
-    equipment_package = models.ForeignKey(
-        Equipment_Package, related_name='printers',
-        on_delete=models.CASCADE
+    printer_package = models.ForeignKey(
+        PrinterPackage, related_name='printers',
+        on_delete=models.CASCADE, null=True
     )
     printer_sn_db = models.CharField(max_length=255)
     printer_sn_norm = models.CharField(
@@ -796,13 +836,13 @@ class PrinterDetails(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.equipment_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"
+        return f"{self.printer_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"
     
     
 class DisposedPrinter(models.Model):
     printer_db = models.ForeignKey("PrinterDetails", on_delete=models.CASCADE)
-    equipment_package = models.ForeignKey(
-        Equipment_Package, related_name='disposed_printers',
+    printer_package = models.ForeignKey(
+        PrinterPackage, related_name='disposed_printers',
         on_delete=models.CASCADE, null=True
     )
     disposed_under = models.ForeignKey(
