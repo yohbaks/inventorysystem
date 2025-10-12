@@ -321,7 +321,7 @@
         <!-- Upcoming PM -->
         <div class="card shadow-sm">
           <div class="card-header bg-warning bg-opacity-10">
-            <h5 class="card-title mb-0 text-primary">
+            <h5 class="card-title mb-0 text-dark">
               <i class="fa fa-calendar-alt me-2"></i> Upcoming PM (7 Days)
             </h5>
           </div>
@@ -338,6 +338,8 @@
                       <img src="{% static '/img/logoproduct3.svg' %}" alt="Planning" class="avatar-img rounded-circle">
                     {% elif pm.section|lower == "ict section" %}
                       <img src="{% static '/img/logoproduct4.svg' %}" alt="ICT" class="avatar-img rounded-circle">
+                    {% elif pm.section|lower == "construction section" %}
+                      <img src="{% static '/img/cons-circle.svg' %}" alt="Construction" class="avatar-img rounded-circle">
                     {% else %}
                       <img src="{% static '/img/defaulticon.svg' %}" alt="Other Section" class="avatar-img rounded-circle">
                     {% endif %}

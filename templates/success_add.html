@@ -10,7 +10,7 @@
       </h3>
       <ul class="breadcrumbs mb-0">
         <li class="nav-home">
-          <a href="{% url 'desktop_details' %}">
+          <a href="{% url 'dashboard' %}">
             <i class="icon-home"></i>
           </a>
         </li>
@@ -50,18 +50,27 @@
               </a>
 
               {% if equipment_type == "Desktop" %}
-                <a href="{% url 'desktop_details_view' package_id %}" class="btn btn-lg btn-primary px-4">
+                <a href="{{ redirect_url }}" class="btn btn-lg btn-primary px-4">
                   <i class="fas fa-eye me-2"></i> View Desktop Details
                 </a>
                 <a href="{% url 'desktop_details' %}" class="btn btn-lg btn-secondary px-4">
                   <i class="fas fa-list me-2"></i> Back to Desktop List
                 </a>
-             {% elif equipment_type == "Laptop" %}
-                <a href="{% url 'laptop_details_view' package_id %}" class="btn btn-lg btn-primary px-4">
+
+              {% elif equipment_type == "Laptop" %}
+                <a href="{{ redirect_url }}" class="btn btn-lg btn-primary px-4">
                   <i class="fas fa-eye me-2"></i> View Laptop Details
                 </a>
                 <a href="{% url 'dashboard' %}" class="btn btn-lg btn-secondary px-4">
                   <i class="fas fa-list me-2"></i> Back to Dashboard
+                </a>
+
+              {% elif equipment_type == "Printer" %}
+                <a href="{{ redirect_url }}" class="btn btn-lg btn-primary px-4">
+                  <i class="fas fa-eye me-2"></i> View Printer Details
+                </a>
+                <a href="{% url 'printer_list' %}" class="btn btn-lg btn-secondary px-4">
+                  <i class="fas fa-list me-2"></i> Back to Printer List
                 </a>
               {% endif %}
             </div>
@@ -91,18 +100,13 @@
 
     const interval = setInterval(() => {
       countdownElement.innerHTML = countdown;
-      countdownBar.style.width = (countdown * 20) + "%"; // 5s -> 100%, 0s -> 0%
+      countdownBar.style.width = (countdown * 20) + "%";
 
       countdown--;
 
       if (countdown < 0) {
         clearInterval(interval);
-
-        {% if equipment_type == "Desktop" %}
-          window.location.href = "{% url 'desktop_details_view' package_id %}";
-        {% elif equipment_type == "Laptop" %}
-          window.location.href = "{% url 'laptop_details_view' package_id %}";
-        {% endif %}
+        window.location.href = "{{ redirect_url }}"; // ✅ unified redirect
       }
     }, 1000);
   }

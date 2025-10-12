@@ -3,149 +3,302 @@
 {% load static %}
 
 {% block content %}
-
 {% now "Y-m-d" as today %}
+<br><br><br><br>
+<div class="page-inner py-4">
+  <!-- Header Section -->
+  <div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="min-height: 60px;">
+      <div>
+        <h3 class="fw-bold mb-2 d-flex align-items-center gap-2">
+          <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-3 p-2" style="width: 40px; height: 40px;">
+            <i class="fas fa-address-card"></i>
+          </span>
+          <span>Workstation Preventive Maintenance</span>
+        </h3>
+        <p class="text-muted mb-0 small ps-1">Comprehensive maintenance tracking and schedule management</p>
+      </div>
+      <a href="{% url 'checklist' desktop.id %}" class="btn btn-primary px-4 shadow-sm flex-shrink-0" style="padding-top: 0.5rem; padding-bottom: 0.5rem; white-space: nowrap;">
+        <i class="fas fa-plus me-2"></i>Conduct Maintenance
+      </a>
+    </div>
+  </div>
 
-<div class="container">
-  <div class="page-inner">
-    <div class="row justify-content-center">
-      <div class="col-lg-12">
-        <div class="card shadow-sm border-0">
-          <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
-            <div class="card-title">🛠 Workstation Detailed Preventive Maintenance Info </div>
-            <a href="{% url 'checklist' desktop.id %}" class="btn btn-primary btn-sm ms-auto">+ Conduct Maintenance</a>
+  <!-- Workstation Info Card -->
+  {% if desktop_details %}
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-3 p-3 me-3" style="width: 56px; height: 56px;">
+          <i class="fas fa-desktop text-primary fs-4"></i>
+        </div>
+        <div>
+          <h4 class="fw-bold mb-1">{{ desktop_details.computer_name }}</h4>
+          <p class="text-muted mb-0 small">Workstation Details</p>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Brand</span>
+            <span class="fw-semibold">{{ desktop_details.brand_name }}</span>
           </div>
-
-          <div class="card-body">
-
-            {% if desktop_details %}
-            <div class="mb-4">
-              <h3 class="fw-bold text-dark"><i class="fas fa-desktop me-2 text-primary"></i>{{ desktop_details.computer_name }}</h3>
-              <div class="row g-3">
-                <div class="col-md-4"><span class="fw-semibold">Brand:</span> {{ desktop_details.brand_name }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Model:</span> {{ desktop_details.model }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Serial No:</span> {{ desktop_details.serial_no }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Processor:</span> {{ desktop_details.processor }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Memory:</span> {{ desktop_details.memory }}</div>
-                <div class="col-md-4"><span class="fw-semibold">Drive:</span> {{ desktop_details.drive }}</div>
-              </div>
-            </div>
-            {% endif %}
-
-            {% if user_details %}
-            <div class="mb-4">
-              <h6 class="text-primary fw-semibold"><i class="fas fa-user me-2"></i>User Information</h6>
-              <div>
-                <strong>End User:</strong>
-                {{ user_details.user_Enduser.full_name|default:"—" }}<br>
-                <strong>Asset Owner:</strong>
-                {{ user_details.user_Assetowner.full_name|default:"—" }}
-              </div>
-            </div>
-            {% endif %}
-
-            {% if current_pm_schedule %}
-            <div class="mb-4">
-              <h6 class="text-primary fw-semibold"><i class="fas fa-calendar-check me-2"></i>Current PM Schedule</h6>
-              <div class="table-responsive">
-                <table class="table table-striped table-bordered table-head-bg-info">
-                  <thead class="bg-info text-white">
-                    <tr>
-                      <th>Quarter</th>
-                      <th>Section</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for schedule in current_pm_schedule %}
-                    <tr>
-                      <td>{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</td>
-                      <td>{{ schedule.pm_section_schedule.section.name }}</td>
-                      <td>{{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}</td>
-                      <td>{{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}</td>
-                      <td>
-                        {% if schedule.is_completed %}
-                          <span class="badge bg-success">Completed</span>
-                        {% elif schedule.is_overdue %}
-                          <span class="badge bg-danger">Overdue</span>
-                        {% else %}
-                          <span class="badge bg-warning text-dark">Pending</span>
-                        {% endif %}
-                      </td>
-
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {% endif %}
-
-            {% if maintenance_records %}
-            <div class="table-responsive mt-4">
-              <table class="table table-bordered table-head-bg-info table-bordered-bd-info mt-4">
-                <thead class="bg-primary text-white">
-                  <tr>
-                    <th>Date Accomplished</th>
-                    <th>Office</th>
-                    <th>Quarter</th>
-                    <th>Maintenance Tasks</th>
-                    <th class="text-center">PDF</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for record in maintenance_records %}
-                  <tr>
-                    <td>{{ record.date_accomplished|date:"M d, Y" }}</td>
-                    <td>{{ record.office }}</td>
-                    <td>
-                      {% if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule %}
-                        {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
-                        {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.year }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td>
-                      <ul class="list-unstyled mb-0 ps-2">
-                        {% for i in "123456789"|make_list %}
-                          {% with task_field="task_"|add:i note_field="note_"|add:i %}
-                          <li>
-                            {% if record|get_attr:task_field %}
-                              <span class="badge bg-success mb-1">✅ Task {{ i }} - Done</span>
-                            {% else %}
-                              <span class="badge bg-secondary mb-1">❌ Task {{ i }} - Not Done</span>
-                            {% endif %}
-                            {% with note=record|get_attr:note_field %}
-                              {% if note %}
-                                <br><small class="text-muted ps-2">📝 {{ note }}</small>
-                              {% endif %}
-                            {% endwith %}
-                          </li>
-                          {% endwith %}
-                        {% endfor %}
-                      </ul>
-                    </td>
-                    <td class="text-center">
-                      <a href="{% url 'generate_pm_pdf' record.id %}" class="btn btn-sm btn-outline-danger" title="Download PDF">
-                        <i class="fas fa-file-pdf"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-            {% else %}
-            <div class="alert alert-warning mt-4">No preventive maintenance history records found for this computer.</div>
-            {% endif %}
-
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Model</span>
+            <span class="fw-semibold">{{ desktop_details.model }}</span>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Serial Number</span>
+            <span class="fw-semibold font-monospace small">{{ desktop_details.serial_no }}</span>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Processor</span>
+            <span class="fw-semibold">{{ desktop_details.processor }}</span>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Memory</span>
+            <span class="fw-semibold">{{ desktop_details.memory }}</span>
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+          <div class="d-flex flex-column">
+            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Storage Drive</span>
+            <span class="fw-semibold">{{ desktop_details.drive }}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <!-- User Information Card -->
+    {% if user_details %}
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-info bg-opacity-10 rounded-3 p-3 me-3" style="width: 48px; height: 48px;">
+              <i class="fas fa-user-circle text-info fs-5"></i>
+            </div>
+            <h5 class="fw-bold mb-0">User Information</h5>
+          </div>
+          <div class="d-flex flex-column gap-3">
+            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+              <div>
+                <span class="text-muted small d-block mb-1">End User</span>
+                <span class="fw-semibold">{{ user_details.user_Enduser.full_name|default:"Not Assigned" }}</span>
+              </div>
+              <i class="fas fa-user text-muted"></i>
+            </div>
+            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+              <div>
+                <span class="text-muted small d-block mb-1">Asset Owner</span>
+                <span class="fw-semibold">{{ user_details.user_Assetowner.full_name|default:"Not Assigned" }}</span>
+              </div>
+              <i class="fas fa-user-tie text-muted"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Current Schedule Card -->
+    {% if current_pm_schedule %}
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 rounded-3 p-3 me-3" style="width: 48px; height: 48px;">
+              <i class="fas fa-calendar-check text-warning fs-5"></i>
+            </div>
+            <h5 class="fw-bold mb-0">Current PM Schedule</h5>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            {% for schedule in current_pm_schedule %}
+            <div class="p-3 border border-2 rounded-3 {% if schedule.is_completed %}border-success{% elif schedule.is_overdue %}border-danger{% else %}border-warning{% endif %}">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <h6 class="fw-bold mb-1">{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</h6>
+                  <p class="text-muted small mb-0">{{ schedule.pm_section_schedule.section.name }}</p>
+                </div>
+                {% if schedule.is_completed %}
+                  <span class="badge bg-success rounded-pill px-3">Completed</span>
+                {% elif schedule.is_overdue %}
+                  <span class="badge bg-danger rounded-pill px-3">Overdue</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                {% endif %}
+              </div>
+              <div class="d-flex gap-3 text-muted small">
+                <span><i class="fas fa-calendar-day me-1"></i>{{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}</span>
+                <span><i class="fas fa-calendar-times me-1"></i>{{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Maintenance History -->
+  <div class="card border-0 shadow-sm rounded-4 mt-4">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-3 p-3 me-3" style="width: 48px; height: 48px;">
+          <i class="fas fa-history text-success fs-5"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-0">Maintenance History</h5>
+          <p class="text-muted small mb-0">Complete record of all maintenance activities</p>
+        </div>
+      </div>
+
+      {% if maintenance_records %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr class="border-bottom border-2">
+              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Date</th>
+              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Office</th>
+              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Quarter</th>
+              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Tasks Completed</th>
+              <th class="text-muted text-uppercase small fw-semibold py-3 text-center" style="font-size: 0.75rem;">Report</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in maintenance_records %}
+            <tr class="border-bottom">
+              <td class="py-3">
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary bg-opacity-10 rounded-2 p-2 me-2">
+                    <i class="fas fa-calendar-day text-primary small"></i>
+                  </div>
+                  <span class="fw-semibold">{{ record.date_accomplished|date:"M d, Y" }}</span>
+                </div>
+              </td>
+              <td class="py-3">{{ record.office }}</td>
+              <td class="py-3">
+                {% if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule %}
+                  <span class="badge bg-light text-dark border px-3 py-2">
+                    {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
+                    {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.year }}
+                  </span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td class="py-3">
+                <div class="d-flex flex-wrap gap-2">
+                  {% for i in "123456789"|make_list %}
+                    {% with task_field="task_"|add:i note_field="note_"|add:i %}
+                      {% if record|get_attr:task_field %}
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1" 
+                              data-bs-toggle="tooltip" 
+                              {% with note=record|get_attr:note_field %}
+                                {% if note %}title="{{ note }}"{% endif %}
+                              {% endwith %}>
+                          <i class="fas fa-check-circle me-1"></i>Task {{ i }}
+                        </span>
+                      {% else %}
+                        <span class="badge bg-light text-muted border px-2 py-1">
+                          <i class="fas fa-times-circle me-1"></i>Task {{ i }}
+                        </span>
+                      {% endif %}
+                    {% endwith %}
+                  {% endfor %}
+                </div>
+              </td>
+              <td class="py-3 text-center">
+                <a href="{% url 'generate_pm_pdf' record.id %}" 
+                   class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                   data-bs-toggle="tooltip" 
+                   title="Download PDF Report">
+                  <i class="fas fa-file-pdf me-1"></i>PDF
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert alert-warning border-0 rounded-3 d-flex align-items-center mb-0" role="alert">
+        <div class="bg-warning bg-opacity-10 rounded-3 p-3 me-3">
+          <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
+        </div>
+        <div>
+          <h6 class="fw-bold mb-1">No Maintenance Records</h6>
+          <p class="mb-0 small">No preventive maintenance history has been recorded for this workstation yet.</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
 </div>
+
+<style>
+  /* Custom styling optimized for Bootstrap 5.3.2 */
+  .card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  
+  .table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+  
+  .table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.03);
+  }
+  
+  .btn {
+    transition: all 0.2s ease;
+  }
+  
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .gap-2 {
+    gap: 0.5rem !important;
+  }
+
+  .gap-3 {
+    gap: 1rem !important;
+  }
+</style>
+
+<script>
+  // Initialize Bootstrap tooltips
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+
 {% endblock %}

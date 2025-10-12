@@ -275,11 +275,28 @@ def salvage_ups_logic(ups, new_package=None, notes=None):
 @login_required  
 
 def success_page(request, package_id):
+    """Success page after adding desktop, laptop, or printer package."""
+    # Get the equipment type from querystring (?type=Desktop/Laptop/Printer)
     equipment_type = request.GET.get("type", "Unknown")
-    return render(request, "success_add.html", {
+
+    # Default redirect (fallback if type is missing)
+    redirect_url = reverse("dashboard")
+
+    # Generate the correct redirect URL depending on equipment type
+    if equipment_type == "Desktop":
+        redirect_url = reverse("desktop_details_view", kwargs={"package_id": package_id})
+    elif equipment_type == "Laptop":
+        redirect_url = reverse("laptop_details_view", kwargs={"package_id": package_id})
+    elif equipment_type == "Printer":
+        redirect_url = reverse("printer_details_view", kwargs={"printer_id": package_id})  # ✅ FIXED HERE
+
+    # Pass data to the template
+    context = {
         "package_id": package_id,
         "equipment_type": equipment_type,
-    })
+        "redirect_url": redirect_url,
+    }
+    return render(request, "success_add.html", context)
     
 
 
@@ -1563,7 +1580,7 @@ def add_equipment_package_with_details(request):
                     printer_package = PrinterPackage.objects.create(is_disposed=False)
 
                     # ✅ Create printer details
-                    PrinterDetails.objects.create(
+                    printer = PrinterDetails.objects.create(
                         printer_package=printer_package,
                         printer_sn_db=printer_sn,
                         printer_brand_db=printer_brand,
@@ -1600,7 +1617,7 @@ def add_equipment_package_with_details(request):
 
                     # ✅ No PM logic for printers
                     messages.success(request, "✅ Printer added successfully.")
-                    return redirect('success_page', package_id=printer_package.id)
+                    return redirect(reverse("success_page", args=[printer.id]) + "?type=Printer")
 
 
             except IntegrityError as ie:
@@ -3881,24 +3898,25 @@ def printer_list(request):
     return render(request, 'printer/printer_list.html', {'printers': printers})
 
 
+
 def printer_details_view(request, printer_id):
     """Detailed view for a single printer with linked user and documents info."""
     printer = get_object_or_404(PrinterDetails, id=printer_id)
 
-    # Get associated user and document details
-    user_details = UserDetails.objects.filter(equipment_package=printer.equipment_package).first()
-    docs_details = DocumentsDetails.objects.filter(equipment_package=printer.equipment_package).first()
-    
-    # ✅ Get disposal history for this equipment package
+    # ✅ Fetch related details using printer_package
+    user_details = UserDetails.objects.filter(printer_package=printer.printer_package).first()
+    docs_details = DocumentsDetails.objects.filter(printer_package=printer.printer_package).first()
+
+    # ✅ Fetch disposal history (based on printer_package)
     disposed_printers = DisposedPrinter.objects.filter(
-        equipment_package=printer.equipment_package
+        printer_package=printer.printer_package
     ).order_by('-disposal_date')
 
     context = {
         'printer': printer,
         'user_details': user_details,
         'docs_details': docs_details,
-        'disposed_printers': disposed_printers,  # ✅ Add this
+        'disposed_printers': disposed_printers,
     }
     return render(request, 'printer/printer_details_view.html', context)
 
@@ -3909,43 +3927,43 @@ def dispose_printer(request, printer_id):
         return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
     
     printer = get_object_or_404(PrinterDetails, id=printer_id)
-    
-    # Prevent re-disposing
+
+    # ✅ Prevent double disposal
     if printer.is_disposed:
         return JsonResponse({"status": "error", "message": "This printer is already disposed."})
 
     reason = request.POST.get("reason", "No reason provided.")
-    user_details = UserDetails.objects.filter(equipment_package=printer.equipment_package).first()
 
-    # Create disposal record
+    # ✅ Create disposal record
     DisposedPrinter.objects.create(
         printer_db=printer,
-        equipment_package=printer.equipment_package,
+        printer_package=printer.printer_package,  # updated reference
         printer_sn=printer.printer_sn_db,
         printer_brand=str(printer.printer_brand_db) if printer.printer_brand_db else None,
         printer_model=printer.printer_model_db,
         printer_type=printer.printer_type,
         printer_resolution=printer.printer_resolution,
         printer_monthly_duty=printer.printer_monthly_duty,
-        reason=reason
+        reason=reason,
     )
-    
-    # Mark as disposed
+
+    # ✅ Mark the printer as disposed
     printer.is_disposed = True
     printer.save()
-    
-    # Mark package as disposed if needed
-    printer.equipment_package.is_disposed = True
-    printer.equipment_package.disposal_date = timezone.now()
-    printer.equipment_package.save()
+
+    # ✅ Mark the package as disposed too
+    if printer.printer_package:
+        printer.printer_package.is_disposed = True
+        printer.printer_package.disposal_date = timezone.now()
+        printer.printer_package.save()
 
     return JsonResponse({
-        "status": "success", 
+        "status": "success",
         "message": f"Printer {printer.printer_model_db or 'Unknown'} disposed successfully."
     })
-    
+
 
 def disposed_printers(request):
     """List all disposed printers."""
-    disposed = DisposedPrinter.objects.all().select_related('printer_db')
+    disposed = DisposedPrinter.objects.all().select_related('printer_db', 'printer_package')
     return render(request, 'printer/disposed_printers.html', {'disposed_printers': disposed})
