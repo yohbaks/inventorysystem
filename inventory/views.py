@@ -3609,11 +3609,11 @@ def user_assets_public(request, token):
             .distinct()
         )
 
-        # 🖨 PRINTERS under their desktop packages
+        # 🖨 PRINTERS - now uses printer_package (not equipment_package)
         printers = (
             PrinterDetails.objects
-            .filter(equipment_package__in=packages)
-            .select_related("printer_brand_db")
+            .select_related("printer_package", "printer_brand_db")
+            .filter(printer_package__is_disposed=False)
         )
 
     # 🗑 Disposals (for all desktop-related assets)
