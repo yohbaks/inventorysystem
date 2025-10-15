@@ -11,9 +11,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="min-height: 60px;">
       <div>
         <h3 class="fw-bold mb-2 d-flex align-items-center gap-2">
-          <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-3 p-2" style="width: 40px; height: 40px;">
-            <i class="fas fa-address-card"></i>
-          </span>
+          
           <span>Workstation Preventive Maintenance</span>
         </h3>
         <p class="text-muted mb-0 small ps-1">Comprehensive maintenance tracking and schedule management</p>
@@ -120,8 +118,10 @@
       <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-body p-4">
           <div class="d-flex align-items-center mb-4">
-            <span class="stamp stamp-md bg-warning me-3">
-              <i class="fas fa-calendar-check text-warning fs-5"></i>
+            <div class="stamp stamp-md bg-warning bg-opacity-10 me-3 rounded-3 p-3" style="width: 56px; height: 56px;">
+              <i class="fas fa-calendar-check text-warning fs-3"></i>
+            </div>  
+  
             </span>
             <h5 class="fw-bold mb-0">Current PM Schedule</h5>
           </div>
@@ -158,10 +158,9 @@
   <div class="card border-0 shadow-sm rounded-4 mt-4">
     <div class="card-body p-4">
       <div class="d-flex align-items-center mb-4">
-        <span class="stamp stamp-md bg-success me-3">
-                      <i class="fas fa-heading"></i>
-                    </span>
-          
+        <div class="stamp stamp-md bg-secondary bg-opacity-10 me-3 rounded-3 p-3" style="width: 56px; height: 56px;">
+              <i class="fas fa-heading text-warning fs-3"></i>
+            </div>     
         <div>
           <h5 class="fw-bold mb-0">Maintenance History</h5>
           <p class="text-muted small mb-0">Complete record of all maintenance activities</p>
@@ -238,10 +237,10 @@
       </div>
       {% else %}
       <div class="alert alert-warning border-0 rounded-3 d-flex align-items-center mb-0" role="alert">
-        <div class="bg-warning bg-opacity-10 rounded-3 p-3 me-3">
-          <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
-        </div>
-        <div>
+          <span class="stamp stamp-md bg-warning me-3">
+                      <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
+                    </span>
+           <div>
           <h6 class="fw-bold mb-1">No Maintenance Records</h6>
           <p class="mb-0 small">No preventive maintenance history has been recorded for this workstation yet.</p>
         </div>
