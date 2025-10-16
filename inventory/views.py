@@ -8,6 +8,8 @@ from io import BytesIO
 from datetime import datetime, timedelta
 from calendar import month_abbr
 from collections import defaultdict
+import pythoncom
+from win32com.client import Dispatch
 
 # Django
 from django.conf import settings
@@ -2422,10 +2424,10 @@ def maintenance_history_view(request, desktop_id):
         'pm': latest_pm,
         'current_pm_schedule': current_pm_schedule,  # New table data
     })
-
 def maintenance_history_laptop(request, package_id):
     laptop_package = get_object_or_404(LaptopPackage, pk=package_id)
 
+    # ✅ Fetch all maintenance history for this laptop
     maintenance_history = (
         PreventiveMaintenance.objects
         .filter(laptop_package=laptop_package)
@@ -2435,6 +2437,7 @@ def maintenance_history_laptop(request, package_id):
 
     latest_pm = maintenance_history.last()
 
+    # ✅ Fetch current PM schedule for this laptop
     current_pm_schedule = PMScheduleAssignment.objects.filter(
         laptop_package=laptop_package
     ).select_related(
@@ -2445,12 +2448,20 @@ def maintenance_history_laptop(request, package_id):
         'pm_section_schedule__quarter_schedule__quarter'
     )
 
+    # ✅ Fetch linked user details for this laptop
+    user_details = UserDetails.objects.filter(laptop_package=laptop_package).select_related(
+        'user_Enduser__employee_office_section',
+        'user_Assetowner__employee_office_section'
+    ).first()
+
+    # ✅ Render the page with all needed context
     return render(request, 'maintenance/laptop_history.html', {
         'laptop_package': laptop_package,
         'maintenance_history': maintenance_history,
         'maintenance_records': maintenance_history,
         'pm': latest_pm,
         'current_pm_schedule': current_pm_schedule,
+        'user_details': user_details,  # ✅ now added
     })
 
 

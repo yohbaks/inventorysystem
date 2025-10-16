@@ -6,21 +6,21 @@
 {% now "Y-m-d" as today %}
 <br><br><br><br>
 <div class="page-inner py-4">
-  <!-- Header Section -->
-  <div class="page-header mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="min-height: 60px;">
+
+<!-- Header Section -->
+<!-- Header Section -->
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
       <div>
-        <h3 class="fw-bold mb-2 d-flex align-items-center gap-2">
-          
-          <span>Workstation Preventive Maintenance</span>
-        </h3>
-        <p class="text-muted mb-0 small ps-1">Comprehensive maintenance tracking and schedule management</p>
+        <h3 class="fw-bold mb-1">Workstation Preventive Maintenance</h3>
+        <p class="text-muted mb-0">Comprehensive maintenance tracking and schedule management</p>
       </div>
-      <a href="{% url 'checklist' desktop.id %}" class="btn btn-primary px-4 shadow-sm flex-shrink-0" style="padding-top: 0.5rem; padding-bottom: 0.5rem; white-space: nowrap;">
-        <i class="fas fa-plus me-2"></i>Conduct Maintenance
-      </a>
+      <div class="ms-md-auto py-2 py-md-0">
+        <a href="{% url 'checklist' desktop.id %}" class="btn btn-primary btn-round">
+          <i class="fas fa-plus me-1"></i> Conduct Maintenance
+        </a>
+      </div>
     </div>
-  </div>
+  
 
   <!-- Workstation Info Card -->
   {% if desktop_details %}
