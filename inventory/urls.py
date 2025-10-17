@@ -88,7 +88,7 @@ urlpatterns = [
     path('add_brand/', views.add_brand, name='add_brand'),
     path('edit_brand/', views.edit_brand, name='edit_brand'),
     #print
-    path('desktop/<int:desktop_id>/pdf/', views.generate_desktop_pdf, name='generate_desktop_pdf'),
+    path('desktop/<int:package_id>/pdf/', views.generate_desktop_pdf, name='generate_desktop_pdf'),
 
     #excel export
     path('export/desktop/', views.export_equipment_packages_excel, name='export_desktop_excel'),
@@ -153,6 +153,9 @@ urlpatterns = [
     # Laptop paths - consistently use package_id
     path("laptops/", views.laptop_list, name="laptop_list"),
     path("laptops/<int:package_id>/", views.laptop_details_view, name="laptop_details_view"),
+
+    path('laptop/<int:package_id>/pdf/', views.generate_laptop_pdf, name='generate_laptop_pdf'),
+
     
     path("laptops/dispose/<int:package_id>/", views.dispose_laptop, name="dispose_laptop"),
     path("laptops/disposed/", views.disposed_laptops, name="disposed_laptops"),

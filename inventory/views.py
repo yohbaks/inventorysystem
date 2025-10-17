@@ -10,6 +10,7 @@ from calendar import month_abbr
 from collections import defaultdict
 import pythoncom
 from win32com.client import Dispatch
+from django.http import HttpResponse, Http404
 
 # Django
 from django.conf import settings
@@ -2174,15 +2175,27 @@ def edit_brand(request):
 #print
 from django.templatetags.static import static
 
-def generate_desktop_pdf(request, desktop_id):
-    desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
-    equipment_package = desktop_details.equipment_package
+def generate_desktop_pdf(request, package_id):
+    # ✅ Use Equipment_Package instead of DesktopDetails
+    equipment_package = get_object_or_404(Equipment_Package, id=package_id)
+    desktop_details = equipment_package.desktop_details.first()
+
+    if not desktop_details:
+        raise Http404("No DesktopDetails found for this package.")
 
     # Current (non-disposed) components
-    keyboard_details = KeyboardDetails.objects.filter(equipment_package=equipment_package, is_disposed=False).first()
-    mouse_details = MouseDetails.objects.filter(equipment_package=equipment_package, is_disposed=False).first()
-    monitor_details = MonitorDetails.objects.filter(equipment_package=equipment_package, is_disposed=False).first()
-    ups_details = UPSDetails.objects.filter(equipment_package=equipment_package, is_disposed=False).first()
+    keyboard_details = KeyboardDetails.objects.filter(
+        equipment_package=equipment_package, is_disposed=False
+    ).first()
+    mouse_details = MouseDetails.objects.filter(
+        equipment_package=equipment_package, is_disposed=False
+    ).first()
+    monitor_details = MonitorDetails.objects.filter(
+        equipment_package=equipment_package, is_disposed=False
+    ).first()
+    ups_details = UPSDetails.objects.filter(
+        equipment_package=equipment_package, is_disposed=False
+    ).first()
 
     # Documents
     documents_details = DocumentsDetails.objects.filter(equipment_package=equipment_package)
@@ -2191,14 +2204,28 @@ def generate_desktop_pdf(request, desktop_id):
     user_details = UserDetails.objects.filter(equipment_package=equipment_package).first()
 
     # ✅ History data
-    asset_owner_history = AssetOwnerChangeHistory.objects.filter(equipment_package=equipment_package).order_by("-changed_at")
-    enduser_history = EndUserChangeHistory.objects.filter(equipment_package=equipment_package).order_by("-changed_at")
+    asset_owner_history = AssetOwnerChangeHistory.objects.filter(
+        equipment_package=equipment_package
+    ).order_by("-changed_at")
+    enduser_history = EndUserChangeHistory.objects.filter(
+        equipment_package=equipment_package
+    ).order_by("-changed_at")
 
-    disposed_desktops = DisposedDesktopDetail.objects.filter(desktop__equipment_package=equipment_package).order_by("-date_disposed")
-    disposed_monitors = DisposedMonitor.objects.filter(equipment_package=equipment_package).order_by("-disposal_date")
-    disposed_keyboards = DisposedKeyboard.objects.filter(equipment_package=equipment_package).order_by("-disposal_date")
-    disposed_mice = DisposedMouse.objects.filter(equipment_package=equipment_package).order_by("-disposal_date")
-    disposed_ups = DisposedUPS.objects.filter(equipment_package=equipment_package).order_by("-disposal_date")
+    disposed_desktops = DisposedDesktopDetail.objects.filter(
+        desktop__equipment_package=equipment_package
+    ).order_by("-date_disposed")
+    disposed_monitors = DisposedMonitor.objects.filter(
+        equipment_package=equipment_package
+    ).order_by("-disposal_date")
+    disposed_keyboards = DisposedKeyboard.objects.filter(
+        equipment_package=equipment_package
+    ).order_by("-disposal_date")
+    disposed_mice = DisposedMouse.objects.filter(
+        equipment_package=equipment_package
+    ).order_by("-disposal_date")
+    disposed_ups = DisposedUPS.objects.filter(
+        equipment_package=equipment_package
+    ).order_by("-disposal_date")
 
     # QR code
     qr_code_url = None
@@ -2207,6 +2234,9 @@ def generate_desktop_pdf(request, desktop_id):
 
     # ✅ Logo fix – build absolute URL
     logo_url = request.build_absolute_uri(static('img/logo.png'))
+
+    # ✅ Smart filename
+    filename = f"desktop_{desktop_details.computer_name or equipment_package.id}_details.pdf"
 
     # Render PDF template
     html_string = render_to_string('pdf_template.html', {
@@ -2232,8 +2262,9 @@ def generate_desktop_pdf(request, desktop_id):
     })
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename=desktop_{desktop_id}_details.pdf'
+    response['Content-Disposition'] = f'inline; filename={filename}'
     HTML(string=html_string).write_pdf(response)
+
     return response
 
 #export to excel
@@ -3769,6 +3800,69 @@ def dispose_laptop(request, package_id):
         return redirect("laptop_details_view", package_id=laptop_package.id)
 
     return redirect("laptop_details_view", package_id=laptop_package.id)
+
+
+def generate_laptop_pdf(request, package_id):
+    from django.templatetags.static import static
+    from django.template.loader import render_to_string
+    from weasyprint import HTML
+
+    laptop_package = get_object_or_404(LaptopPackage, id=package_id)
+    laptop_details = laptop_package.laptop_details.first()
+
+    if not laptop_details:
+        raise Http404("No LaptopDetails found for this package.")
+
+    # ✅ Documents
+    documents_details = DocumentsDetails.objects.filter(laptop_package=laptop_package).first()
+
+    # ✅ Current user
+    user_details = UserDetails.objects.filter(laptop_package=laptop_package).first()
+
+    # ✅ Disposed history
+    disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package=laptop_package).order_by("-date_disposed")
+
+    # ✅ Maintenance history
+    maintenance_records = PreventiveMaintenance.objects.filter(laptop_package=laptop_package).order_by("date_accomplished")
+
+    # ✅ Current PM Schedule
+    current_pm_schedule = PMScheduleAssignment.objects.filter(laptop_package=laptop_package).select_related(
+        "pm_section_schedule__quarter_schedule", "pm_section_schedule__section"
+    ).order_by(
+        "pm_section_schedule__quarter_schedule__year",
+        "pm_section_schedule__quarter_schedule__quarter"
+    )
+
+    # ✅ QR and logo
+    qr_code_url = None
+    if laptop_package.qr_code:
+        qr_code_url = request.build_absolute_uri(laptop_package.qr_code.url)
+
+    logo_url = request.build_absolute_uri(static('img/logo.png'))
+
+    # ✅ Filename
+    filename = f"laptop_{laptop_details.computer_name or laptop_package.id}_details.pdf"
+
+    # ✅ Render HTML template
+    html_string = render_to_string('laptop/pdf_template_laptop.html', {
+        "laptop_package": laptop_package,
+        "laptop_details": laptop_details,
+        "user_details": user_details,
+        "documents_details": documents_details,
+        "disposed_laptops": disposed_laptops,
+        "maintenance_records": maintenance_records,
+        "current_pm_schedule": current_pm_schedule,
+        "qr_code_url": qr_code_url,
+        "logo_url": logo_url,
+    })
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    HTML(string=html_string).write_pdf(response)
+    return response
+
+
+
 
 
 @login_required

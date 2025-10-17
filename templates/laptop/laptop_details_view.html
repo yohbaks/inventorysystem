@@ -19,7 +19,7 @@
               <a href="#" class="btn btn-label-info btn-round btn-sm">
                 <span class="btn-label"><i class="fa fa-print"></i></span> Maintenance
               </a>
-              <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+              <a href="{% url 'generate_laptop_pdf' laptop_package.id %}" class="btn btn-label-success btn-round btn-sm me-2">
                 <i class="fa fa-file-pdf"></i> Download PDF
               </a>
               <button type="button" class="btn btn-label-warning btn-round btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">

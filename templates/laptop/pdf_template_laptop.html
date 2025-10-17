@@ -1,0 +1,294 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IT Asset Portfolio | {{ laptop_details.computer_name|default:"N/A" }}</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --success: #10b981;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --border: #e5e7eb;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      color: #111827;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 10px auto;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px 10px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header img.logo {
+      height: 32px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .header small {
+      font-size: 11px;
+      opacity: .8;
+      display: block;
+    }
+    .badge {
+      background: #fff;
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    .card {
+      flex: 1 1 45%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--light);
+      padding: 8px 12px;
+      font-weight: bold;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .card-body {
+      padding: 10px;
+      font-size: 12px;
+    }
+    .spec {
+      margin-bottom: 5px;
+    }
+    .spec span {
+      font-weight: bold;
+      color: var(--gray);
+      display: inline-block;
+      min-width: 110px;
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 8px;
+      font-size: 12px;
+    }
+    .user-info {
+      font-size: 11px;
+    }
+
+    .qr-card {
+      width: 240px;
+      margin: 20px auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.05);
+      text-align: center;
+      padding: 12px;
+    }
+    .qr-card h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .qr-box {
+      background: var(--light);
+      border-radius: 6px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+    .qr-box img {
+      max-width: 130px;
+      max-height: 130px;
+    }
+    .footer {
+      margin-top: 15px;
+      font-size: 10px;
+      color: var(--gray);
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+    }
+
+    .history-section {
+      margin-top: 25px;
+    }
+
+    @page {
+      margin: 10mm;
+    }
+    @media print {
+      body { background: none; }
+      .container { border: none; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-left">
+      <img src="{{ logo_url }}" alt="Logo" class="logo">
+      <div>
+        <h1>IT Asset Portfolio</h1>
+        <small>Comprehensive equipment summary</small>
+      </div>
+    </div>
+    <div class="badge">ASSET-{{ documents_details.docs_PAR|default:"N/A" }}</div>
+  </div>
+
+  <div class="grid">
+    <!-- Laptop -->
+    <div class="card">
+      <div class="card-header">Laptop Device <span style="background:var(--success);color:#fff;padding:1px 4px;border-radius:3px;font-size:9px;">ACTIVE</span></div>
+      <div class="card-body">
+        <div class="spec"><span>Computer Name:</span>{{ laptop_details.computer_name|default:"–" }}</div>
+        <div class="spec"><span>Serial Number:</span>{{ laptop_details.laptop_sn_db|default:"–" }}</div>
+        <div class="spec"><span>Brand/Model:</span>{{ laptop_details.brand_name|default:"–" }} {{ laptop_details.model|default:"" }}</div>
+        <div class="spec"><span>Processor:</span>{{ laptop_details.processor|default:"–" }}</div>
+        <div class="spec"><span>Memory:</span>{{ laptop_details.memory|default:"–" }}</div>
+        <div class="spec"><span>Storage:</span>{{ laptop_details.drive|default:"–" }}</div>
+        <div class="spec"><span>Operating System:</span>{{ laptop_details.laptop_OS|default:"–" }}</div>
+        <div class="spec"><span>Office Suite:</span>{{ laptop_details.laptop_Office|default:"–" }}</div>
+      </div>
+    </div>
+
+    <!-- Assignment -->
+    {% if user_details %}
+    <div class="card">
+      <div class="card-header">Assignment</div>
+      <div class="card-body">
+        {% if user_details.user_Assetowner %}
+        <div class="user-block">
+          <div class="avatar">{{ user_details.user_Assetowner.employee_fname|first|upper }}{{ user_details.user_Assetowner.employee_lname|first|upper }}</div>
+          <div class="user-info">
+            <div><strong>{{ user_details.user_Assetowner.full_name|default:"–" }}</strong></div>
+            <div>{{ user_details.user_Assetowner.employee_position|default:"–" }} • {{ user_details.user_Assetowner.employee_office_section|default:"–" }}</div>
+          </div>
+        </div>
+        {% endif %}
+        {% if user_details.user_Enduser %}
+        <div class="user-block">
+          <div class="avatar">{{ user_details.user_Enduser.employee_fname|first|upper }}{{ user_details.user_Enduser.employee_lname|first|upper }}</div>
+          <div class="user-info">
+            <div><strong>{{ user_details.user_Enduser.full_name|default:"–" }}</strong></div>
+            <div>{{ user_details.user_Enduser.employee_position|default:"–" }} • {{ user_details.user_Enduser.employee_office_section|default:"–" }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Documents -->
+    {% if documents_details %}
+    <div class="card" style="flex:1 1 100%;">
+      <div class="card-header">Documents</div>
+      <div class="card-body">
+        <div class="spec"><span>PAR No:</span>{{ documents_details.docs_PAR|default:"–" }}</div>
+        <div class="spec"><span>Property No:</span>{{ documents_details.docs_Propertyno|default:"–" }}</div>
+        <div class="spec"><span>Acquisition Type:</span>{{ documents_details.docs_Acquisition_Type|default:"–" }}</div>
+        <div class="spec"><span>Value:</span>{{ documents_details.docs_Value|default:"–" }}</div>
+        <div class="spec"><span>Date Received:</span>{{ documents_details.docs_Datereceived|default:"–" }}</div>
+        <div class="spec"><span>Supplier:</span>{{ documents_details.docs_Supplier|default:"–" }}</div>
+        <div class="spec"><span>Status:</span>{{ documents_details.docs_Status|default:"–" }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- History Section -->
+  <div class="history-section">
+    <div class="card" style="flex:1 1 100%;">
+      <div class="card-header">Maintenance & Disposal History</div>
+      <div class="card-body">
+        {% if maintenance_records %}
+        <h6>Preventive Maintenance</h6>
+        {% for record in maintenance_records %}
+          <div class="spec">
+            <span>{{ record.date_accomplished|date:"F j, Y" }}</span>
+            – {{ record.office|default:"N/A" }} ({{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display|default:"–" }})
+          </div>
+        {% endfor %}
+        <hr>
+        {% endif %}
+
+        {% if disposed_laptops %}
+        <h6>Disposed Laptops</h6>
+        {% for d in disposed_laptops %}
+          <div class="spec">{{ d.serial_no|default:"–" }} disposed ({{ d.date_disposed|date:"F j, Y" }}) – {{ d.reason|default:"N/A" }}</div>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Wallet Card -->
+  <div class="qr-card">
+    <h4>DPWH PROPERTY</h4>
+    <div class="qr-box">
+      {% if qr_code_url %}
+      <img src="{{ qr_code_url }}" alt="QR Code">
+      {% else %}
+      <span class="text-muted">QR CODE PLACEHOLDER</span>
+      {% endif %}
+    </div>
+    <div class="small">Scan to view digital asset record</div>
+    <div class="small">Asset ID: {{ documents_details.docs_PAR|default:"N/A" }}</div>
+  </div>
+
+  <div class="footer">
+    <p>This document contains confidential information • Generated on {% now "F j, Y" %} at {% now "g:i A" %}</p>
+    <p>© {% now "Y" %} IT Asset Management System • Valid without signature</p>
+  </div>
+</div>
+</body>
+</html>
