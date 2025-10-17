@@ -1,0 +1,91 @@
+
+<!-- Dispose Modal  for desktop, I put it in here so that tanan pills maka click sa button -->
+<div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    {% if desktop_detailsx and desktop_detailsx.id %}
+    <form method="POST" action="{% url 'dispose_desktop' desktop_detailsx.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Dispose Desktop Package: {{ desktop_detailsx.computer_name }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="reason" class="form-label">Reason for disposal</label>
+            <textarea name="reason" class="form-control" required></textarea>
+          </div>
+          <p class="text-warning">
+            Please <strong>do not dispose of peripherals</strong> such as keyboards, monitors, and other devices if they are still functioning. Keeping equipment that works helps to reduce waste and saves costs!
+          </p>
+
+          <!-- Monitor -->
+          <div class="mb-3">
+            <label for="monitor" class="form-label">Monitor</label>
+            <select class="form-select" name="monitor" id="monitor">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose Monitor(s)</option>
+              <option value="salvage">Salvage Monitor(s)</option>
+            </select>
+          </div>
+
+          <!-- Keyboard -->
+          <div class="mb-3">
+            <label for="keyboard" class="form-label">Keyboard</label>
+            <select class="form-select" name="keyboard" id="keyboard">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose Keyboard(s)</option>
+              <option value="salvage">Salvage Keyboard(s)</option>
+            </select>
+          </div>
+
+          <!-- Mouse -->
+          <div class="mb-3">
+            <label for="mouse" class="form-label">Mouse</label>
+            <select class="form-select" name="mouse" id="mouse">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose Mouse(s)</option>
+              <option value="salvage">Salvage Mouse(s)</option>
+            </select>
+          </div>
+
+          <!-- UPS -->
+          <div class="mb-3">
+            <label for="ups" class="form-label">UPS</label>
+            <select class="form-select" name="ups" id="ups">
+              <option value="">-- Select Action --</option>
+              <option value="dispose">Dispose UPS(s)</option>
+              <option value="salvage">Salvage UPS(s)</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Dispose</button>
+        </div>
+      </div>
+    </form>
+    {% else %}
+    <div class="alert alert-warning">
+      Cannot dispose: Desktop details are missing.
+    </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+  {% if messages %}
+    {% for message in messages %}
+                  $.notify({
+                    message: "{{ message|escapejs }}",
+                    title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
+                    icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
+                  }, {
+                    type: "{{ message.tags }}",
+                    placement: { from: "bottom", align: "right" },
+                    delay: 4000,
+                    z_index: 9999
+                  });
+                {% endfor %}
+  {% endif %}
+</script>

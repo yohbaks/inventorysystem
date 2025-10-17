@@ -275,15 +275,15 @@
   <div class="qr-card">
     <h4>DPWH PROPERTY</h4>
     <div class="qr-box">
-      {% if qr_code_url %}
-      <img src="{{ qr_code_url }}" alt="QR Code">
-      {% else %}
-      <span class="text-muted">QR CODE PLACEHOLDER</span>
-      {% endif %}
+        {% if qr_code_url %}
+        <img src="{{ qr_code_url }}" alt="QR Code">
+        {% else %}
+        <span class="text-muted">QR CODE PLACEHOLDER</span>
+        {% endif %}
     </div>
     <div class="small">Scan to view digital asset record</div>
     <div class="small">Asset ID: {{ documents_details.docs_PAR|default:"N/A" }}</div>
-  </div>
+   </div>
 
   <div class="footer">
     <p>This document contains confidential information • Generated on {% now "F j, Y" %} at {% now "g:i A" %}</p>

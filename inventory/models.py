@@ -10,6 +10,7 @@ from io import BytesIO  # Import BytesIO to handle the image in memory
 from django.dispatch import receiver    
 from django.db.models.signals import post_save
 import uuid
+from django.conf import settings
 
 
 # Create your models here.
@@ -18,7 +19,20 @@ def normalize_sn(value: str | None) -> str | None:
     v = (value or "").strip()
     return v.upper() if v else None
 
+# ✅ put this once at the top of models.py
 
+
+def generate_qr_for_laptop(instance):
+    """Generate a QR code for LaptopPackage and attach it to the model."""
+    try:
+        qr_url = f"{settings.SITE_URL}{reverse('laptop_details_view', args=[instance.id])}"
+        qr = qrcode.make(qr_url)
+        qr_io = BytesIO()
+        qr.save(qr_io, format='PNG')
+        qr_filename = f"laptop_qr_{instance.id}.png"
+        instance.qr_code.save(qr_filename, File(qr_io), save=False)
+    except Exception as e:
+        print("❌ QR generation failed:", e)
 
 
 #################
@@ -61,10 +75,7 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
-# ✅ put this once at the top of models.py
-def normalize_sn(value: str | None) -> str | None:
-    v = (value or "").strip()
-    return v.upper() if v else None
+
 
 
 class DesktopDetails(models.Model):
@@ -737,6 +748,15 @@ class LaptopPackage(models.Model):
     def __str__(self):
         return f"Laptop Package {self.pk}"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.qr_code:
+            generate_qr_for_laptop(self)
+            super().save(update_fields=["qr_code"])  
+
+    def __str__(self):
+        return f"Laptop Package {self.pk}"           
+             
 
 class LaptopDetails(models.Model):
     """Main laptop specs"""

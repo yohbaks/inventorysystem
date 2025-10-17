@@ -1,0 +1,53 @@
+
+<!-- Update keyboard Modal or edit keyboard-->
+
+<div class="modal fade" id="editKeyboardModal" tabindex="-1" aria-labelledby="editKeyboardModal" aria-hidden="true">
+  <div class="modal-dialog">
+     {% if keyboard_detailse and keyboard_detailse.id %}
+    <form method="POST" action="{% url 'update_keyboard' pk=keyboard_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editKeyboardModal">Edit Keyboard</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="keyboardId">
+
+          
+          <div class="mb-3">
+            <label for="editSN" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="editSN" name="keyboard_sn_db" required value="{{ keyboard_detailse.keyboard_sn_db }}" required>
+          </div>
+          <div class="mb-3">
+            <label for="editBrand" class="form-label">Brand</label>
+            <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandK in keyboard_brands %}
+                <option value="{{ brandK.id }}"
+                        {% if keyboard_detailse.keyboard_brand_db.id == brandK.id %}selected{% endif %}>
+                  {{ brandK.name }}
+                </option>
+              {% endfor %}
+              </select>
+          </div>
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Model</label>
+            <input type="text" class="form-control" id="editModel" name="keyboard_model_db" value="{{ keyboard_detailse.keyboard_model_db }}" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Keyboard Details</button>
+        </div>
+      </div>
+    </form>
+
+     {% else %}
+      <div class="alert alert-danger m-3">
+        Cannot edit keyboard: data not available.
+      </div>
+    {% endif %}
+  </div>
+</div>

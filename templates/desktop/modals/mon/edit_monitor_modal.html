@@ -1,0 +1,48 @@
+
+<div class="modal fade" id="editMonitorModal" tabindex="-1" aria-labelledby="editMonitorModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <form method="POST" action="{% url 'update_monitor' pk=monitor_detailse.id %}">
+              {% csrf_token %}
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editMonitorModalLabel">Edit Monitor</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <input type="hidden" id="monitorId">
+        
+                  
+                  <div class="mb-3">
+                    <label for="editSN" class="form-label">Serial Number</label>
+                    <input type="text" class="form-control" id="editSN" name="monitor_sn_db" required value="{{ monitor_detailse.monitor_sn_db }}">
+                  </div>
+                  <div class="mb-3">
+                    <label for="editBrand" class="form-label">Brand</label>
+                    
+                    <select class="form-select form-control" id="editBrand" name="monitor_brand_db" required>
+                      <option value="" disabled>Select Brand</option>
+                      {% for brandM in monitor_brands %}
+                        <option value="{{ brandM.id }}"
+                                {% if monitor_detailse.monitor_brand_db.id == brandM.id %}selected{% endif %}>
+                          {{ brandM.name }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="editModel" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="editModel" name="monitor_model_db" value="{{ monitor_detailse.monitor_model_db }}">
+                  </div>
+                  <div class="mb-3">
+                    <label for="editSize" class="form-label">Monitor Size</label>
+                    <input type="text" class="form-control" id="editSize" name="monitor_size_db" value="{{ monitor_detailse.monitor_size_db }}">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Update Monitor</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>

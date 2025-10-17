@@ -3862,7 +3862,13 @@ def generate_laptop_pdf(request, package_id):
     return response
 
 
-
+def generate_qr_for_laptop(instance):
+    """Generate a QR code for LaptopPackage and attach it to the model."""
+    qr = qrcode.make(f"{settings.SITE_URL}{reverse('laptop_details_view', args=[instance.id])}")
+    qr_io = BytesIO()
+    qr.save(qr_io, format='PNG')
+    qr_filename = f"laptop_qr_{instance.id}.png"
+    instance.qr_code.save(qr_filename, File(qr_io), save=False)
 
 
 @login_required

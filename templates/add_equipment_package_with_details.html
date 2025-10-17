@@ -128,10 +128,91 @@
     <div class="card-header"><h5>⚙ Software</h5></div>
     <div class="card-body">
       <div class="row">
-        <div class="col-md-3"><label>Operating System</label><input type="text" name="desktop_OS" class="form-control" required></div>
-        <div class="col-md-3"><label>Office Version</label><input type="text" name="desktop_Office" class="form-control" required></div>
-        <div class="col-md-3"><label>OS Keys</label><input type="text" name="desktop_OS_keys" class="form-control" required></div>
-        <div class="col-md-3"><label>Office Keys</label><input type="text" name="desktop_Office_keys" class="form-control" required></div>
+        <div class="col-md-3">
+            <label>Operating System</label>
+            <select name="desktop_OS" id="desktop_OS" class="form-select form-control" required>
+              <option value="" disabled selected>Select OS</option>
+              <option value="Windows 11 Pro">Windows 11 Pro</option>
+              <option value="Windows 11 Home">Windows 11 Home</option>
+              <option value="Windows 11 Enterprise">Windows 11 Enterprise</option>
+              <option value="Windows 10 Pro">Windows 10 Pro</option>
+              <option value="Windows 10 Home">Windows 10 Home</option>
+              <option value="Windows 10 Enterprise">Windows 10 Enterprise</option>
+              <option value="Windows 8.1 Pro">Windows 8.1 Pro</option>
+              <option value="Windows 8 Pro">Windows 8 Pro</option>
+              <option value="Windows 7 Ultimate">Windows 7 Ultimate</option>
+              <option value="Windows 7 Professional">Windows 7 Professional</option>
+              <option value="Windows Server 2022">Windows Server 2022</option>
+              <option value="Windows Server 2019">Windows Server 2019</option>
+              <option value="Windows Server 2016">Windows Server 2016</option>
+              <option value="Windows Server 2012 R2">Windows Server 2012 R2</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        <div class="col-md-3">
+          
+  <label>Office Version</label>
+  <select name="desktop_Office" id="desktop_Office" class="form-select form-control" required>
+    <option value="" disabled selected>Select Office Version</option>
+
+    <!-- 🟢 Latest Versions -->
+    <option value="Microsoft Office 2024 Professional Plus">Microsoft Office 2024 Professional Plus</option>
+    <option value="Microsoft Office 2024 Standard">Microsoft Office 2024 Standard</option>
+    <option value="Microsoft Office 2021 Professional Plus">Microsoft Office 2021 Professional Plus</option>
+    <option value="Microsoft Office 2021 Standard">Microsoft Office 2021 Standard</option>
+    <option value="Microsoft Office 2019 Professional Plus">Microsoft Office 2019 Professional Plus</option>
+    <option value="Microsoft Office 2019 Standard">Microsoft Office 2019 Standard</option>
+    <option value="Microsoft Office 2016 Professional Plus">Microsoft Office 2016 Professional Plus</option>
+    <option value="Microsoft Office 2016 Standard">Microsoft Office 2016 Standard</option>
+    <option value="Microsoft Office 2013 Professional Plus">Microsoft Office 2013 Professional Plus</option>
+    <option value="Microsoft Office 2013 Standard">Microsoft Office 2013 Standard</option>
+
+    <!-- 🟠 Home and Business Versions -->
+    <option value="Microsoft Office 2021 Home and Business">Microsoft Office 2021 Home and Business</option>
+    <option value="Microsoft Office 2019 Home and Business">Microsoft Office 2019 Home and Business</option>
+    <option value="Microsoft Office 2016 Home and Business">Microsoft Office 2016 Home and Business</option>
+
+    <!-- 🔵 Subscription-based -->
+    <option value="Office 365 (Microsoft 365)">Office 365 (Microsoft 365)</option>
+
+    <!-- ⚪ Alternatives -->
+    <option value="LibreOffice">LibreOffice</option>
+    <option value="WPS Office">WPS Office</option>
+    <option value="OpenOffice">OpenOffice</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
+        <div class="col-md-3">
+  <label for="desktop_OS_keys" class="form-label">OS Key</label>
+  <input 
+    type="text" 
+    name="desktop_OS_keys" 
+    id="desktop_OS_keys" 
+    class="form-control" 
+    placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+    maxlength="29"
+    required
+    style="text-transform: uppercase;"
+    oninput="formatProductKey(this)"
+  >
+</div>
+
+<div class="col-md-3">
+  <label for="desktop_Office_keys" class="form-label">Office Key</label>
+  <input 
+    type="text" 
+    name="desktop_Office_keys" 
+    id="desktop_Office_keys" 
+    class="form-control" 
+    placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+    maxlength="29"
+    required
+    style="text-transform: uppercase;"
+    oninput="formatProductKey(this)"
+  >
+</div>
+
+
       </div>
     </div>
   </div>
@@ -339,18 +420,111 @@
 
   <!-- Laptop Software -->
   <div class="card mb-3">
-    <div class="card-header"><h5>⚙ Software</h5></div>
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-6"><label>Operating System</label><input type="text" name="laptop_OS" class="form-control"></div>
-        <div class="col-md-6"><label>OS Key</label><input type="text" name="laptop_OS_keys" class="form-control"></div>
+  <div class="card-header">
+    <h5>⚙ Software</h5>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <!-- Operating System -->
+      <div class="col-md-6">
+        <label for="laptop_OS" class="form-label">Operating System</label>
+        <select name="laptop_OS" id="laptop_OS" class="form-select form-control" required>
+          <option value="" disabled selected>Select OS</option>
+          <option value="Windows 11 Pro">Windows 11 Pro</option>
+          <option value="Windows 11 Home">Windows 11 Home</option>
+          <option value="Windows 11 Enterprise">Windows 11 Enterprise</option>
+          <option value="Windows 10 Pro">Windows 10 Pro</option>
+          <option value="Windows 10 Home">Windows 10 Home</option>
+          <option value="Windows 10 Enterprise">Windows 10 Enterprise</option>
+          <option value="Windows 8.1 Pro">Windows 8.1 Pro</option>
+          <option value="Windows 8 Pro">Windows 8 Pro</option>
+          <option value="Windows 7 Ultimate">Windows 7 Ultimate</option>
+          <option value="Windows 7 Professional">Windows 7 Professional</option>
+          <option value="Windows Server 2022">Windows Server 2022</option>
+          <option value="Windows Server 2019">Windows Server 2019</option>
+          <option value="Windows Server 2016">Windows Server 2016</option>
+          <option value="Windows Server 2012 R2">Windows Server 2012 R2</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
-      <div class="row mt-2">
-        <div class="col-md-6"><label>Office</label><input type="text" name="laptop_Office" class="form-control"></div>
-        <div class="col-md-6"><label>Office Key</label><input type="text" name="laptop_Office_keys" class="form-control"></div>
+
+      <!-- OS Key -->
+      <div class="col-md-6">
+        <label for="laptop_OS_keys" class="form-label">OS Key</label>
+        <input 
+          type="text" 
+          name="laptop_OS_keys" 
+          id="laptop_OS_keys" 
+          class="form-control" 
+          placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+          maxlength="29"
+          style="text-transform: uppercase;"
+          oninput="formatProductKey(this)"
+        />
+      </div>
+    </div>
+
+    <div class="row mt-2">
+      <!-- Office Version -->
+      <div class="col-md-6">
+        <label for="laptop_Office" class="form-label">Office Version</label>
+        <select name="laptop_Office" id="laptop_Office" class="form-select form-control" required>
+          <option value="" disabled selected>Select Office Version</option>
+
+          <!-- 🟢 Latest Versions -->
+          <option value="Microsoft Office 2024 Professional Plus">Microsoft Office 2024 Professional Plus</option>
+          <option value="Microsoft Office 2024 Standard">Microsoft Office 2024 Standard</option>
+          <option value="Microsoft Office 2021 Professional Plus">Microsoft Office 2021 Professional Plus</option>
+          <option value="Microsoft Office 2021 Standard">Microsoft Office 2021 Standard</option>
+          <option value="Microsoft Office 2019 Professional Plus">Microsoft Office 2019 Professional Plus</option>
+          <option value="Microsoft Office 2019 Standard">Microsoft Office 2019 Standard</option>
+          <option value="Microsoft Office 2016 Professional Plus">Microsoft Office 2016 Professional Plus</option>
+          <option value="Microsoft Office 2016 Standard">Microsoft Office 2016 Standard</option>
+          <option value="Microsoft Office 2013 Professional Plus">Microsoft Office 2013 Professional Plus</option>
+          <option value="Microsoft Office 2013 Standard">Microsoft Office 2013 Standard</option>
+
+          <!-- 🟠 Home and Business Versions -->
+          <option value="Microsoft Office 2021 Home and Business">Microsoft Office 2021 Home and Business</option>
+          <option value="Microsoft Office 2019 Home and Business">Microsoft Office 2019 Home and Business</option>
+          <option value="Microsoft Office 2016 Home and Business">Microsoft Office 2016 Home and Business</option>
+
+          <!-- 🔵 Subscription-based -->
+          <option value="Office 365 (Microsoft 365)">Office 365 (Microsoft 365)</option>
+
+          <!-- ⚪ Alternatives -->
+          <option value="LibreOffice">LibreOffice</option>
+          <option value="WPS Office">WPS Office</option>
+          <option value="OpenOffice">OpenOffice</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Office Key -->
+      <div class="col-md-6">
+        <label for="laptop_Office_keys" class="form-label">Office Key</label>
+        <input 
+          type="text" 
+          name="laptop_Office_keys" 
+          id="laptop_Office_keys" 
+          class="form-control" 
+          placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+          maxlength="29"
+          style="text-transform: uppercase;"
+          oninput="formatOfficeKey(this)"
+        />
+
+        <script>
+        function formatOfficeKey(input) {
+          // Remove all non-alphanumeric characters
+          let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+          // Insert a hyphen after every 5 characters
+          input.value = value.match(/.{1,5}/g)?.join('-') || '';
+        }
+        </script>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Laptop Documents -->
   <div class="card mb-3">
@@ -676,6 +850,14 @@ $(function () {
 });
 </script>
 
-
+<script>
+  // ✅ Universal function for OS & Office keys (works for desktop and laptop)
+  function formatProductKey(input) {
+    // Remove all non-alphanumeric characters
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    // Insert hyphens every 5 characters
+    input.value = value.match(/.{1,5}/g)?.join('-') || '';
+  }
+</script>
 
 {% endblock %}
