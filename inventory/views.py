@@ -59,17 +59,23 @@ from inventory.models import (
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
+from django.db.models import F, Value
+from django.db.models.functions import Upper, Trim
 
 
 
 
 
 ##############################################################################
+# ✅ AJAX: Check if serial number exists across multiple models (with exclude_id support)
+
+
 def check_serial_no(request):
     serial = (request.GET.get('serial') or '').strip()
     category = (request.GET.get('category') or '').strip()
+    exclude_id = request.GET.get('exclude_id')
 
-    # quick exit if missing
+    # Quick exit if missing
     if not serial or not category:
         return JsonResponse({'exists': False})
 
@@ -85,19 +91,64 @@ def check_serial_no(request):
         "Laptop": (LaptopDetails, "laptop_sn_db"),
         "Printer": (PrinterDetails, "printer_sn_db"),
     }
+
     Model, field_name = model_map.get(category, (None, None))
     if not Model:
         return JsonResponse({'exists': False})
 
-    # Case/whitespace-insensitive existence check
-    exists = Model.objects.annotate(
+    # Base query normalized (case + whitespace insensitive)
+    query = Model.objects.annotate(
         sn_norm=Upper(Trim(F(field_name)))
-    ).filter(sn_norm=serial_norm).exists()
+    ).filter(sn_norm=serial_norm)
 
+    # ✅ Exclude current record if editing (prevents false duplicate)
+    if exclude_id:
+        query = query.exclude(id=exclude_id)
+
+    exists = query.exists()
     return JsonResponse({'exists': exists})
 
+# AJAX: Check if Monitor serial number exists in desktop details view
+def check_monitor_sn(request):
+    """AJAX: Check if a Monitor serial number already exists."""
+    sn = request.GET.get("sn", "").strip().upper()
+    package_id = request.GET.get("package_id")
+    qs = MonitorDetails.objects.filter(monitor_sn_norm=sn)
+    if package_id:
+        qs = qs.exclude(equipment_package_id=package_id)
+    return JsonResponse({"exists": qs.exists()})
 
+# AJAX: Check if Keyboard serial number exists in desktop details view
+def check_keyboard_sn(request):
+    """AJAX: Check if a Keyboard serial number already exists."""
+    sn = request.GET.get("sn", "").strip().upper()
+    package_id = request.GET.get("package_id")
+    qs = KeyboardDetails.objects.filter(keyboard_sn_norm=sn)
+    if package_id:
+        qs = qs.exclude(equipment_package_id=package_id)
+    return JsonResponse({"exists": qs.exists()})
 
+# AJAX: Check if Mouse serial number exists in desktop details view
+def check_mouse_sn(request):
+    """AJAX: Check if a Mouse serial number already exists."""
+    sn = request.GET.get("sn", "").strip().upper()
+    package_id = request.GET.get("package_id")
+    qs = MouseDetails.objects.filter(mouse_sn_norm=sn)
+    if package_id:
+        qs = qs.exclude(equipment_package_id=package_id)
+    return JsonResponse({"exists": qs.exists()})
+
+# AJAX: Check if UPS serial number exists in desktop details view
+def check_ups_sn(request):
+    """AJAX: Check if a UPS serial number already exists."""
+    sn = request.GET.get("sn", "").strip().upper()
+    package_id = request.GET.get("package_id")
+    qs = UPSDetails.objects.filter(ups_sn_norm=sn)
+    if package_id:
+        qs = qs.exclude(equipment_package_id=package_id)
+    return JsonResponse({"exists": qs.exists()})
+
+# Salvage logic for components
 def salvage_monitor_logic(monitor, new_package=None, notes=None):
     # Ensure uniqueness by monitor_sn
     salvaged_monitor, created = SalvagedMonitor.objects.get_or_create(
@@ -956,62 +1007,86 @@ def add_monitor_to_package(request, package_id):
     if request.method == "POST":
         salvaged_monitor_id = request.POST.get("salvaged_monitor_id")
 
+        # ==========================
+        # 🧩 CASE 1: REASSIGN SALVAGED MONITOR
+        # ==========================
         if salvaged_monitor_id:
             salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
 
+            # 🛑 Prevent reusing an already reassigned monitor
             if salvaged_monitor.is_reassigned:
                 messages.error(request, "❌ This salvaged monitor has already been reassigned.")
                 return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # ✅ Create active monitor record
-            MonitorDetails.objects.create(
-                equipment_package=equipment_package,
-                monitor_sn_db=salvaged_monitor.monitor_sn,
-                monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
-                monitor_model_db=salvaged_monitor.monitor_model,
-                monitor_size_db=salvaged_monitor.monitor_size,
-                is_disposed=False,
-            )
+            # ✅ Duplicate serial check
+            sn_norm = salvaged_monitor.monitor_sn.strip().upper()
+            if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
+                messages.error(request, f"❌ A monitor with serial number '{sn_norm}' already exists.")
+                return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # ✅ Update salvaged record
-            salvaged_monitor.is_reassigned = True
-            salvaged_monitor.reassigned_to = equipment_package
-            salvaged_monitor.save()
+            try:
+                MonitorDetails.objects.create(
+                    equipment_package=equipment_package,
+                    monitor_sn_db=salvaged_monitor.monitor_sn,
+                    monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
+                    monitor_model_db=salvaged_monitor.monitor_model,
+                    monitor_size_db=salvaged_monitor.monitor_size,
+                    is_disposed=False,
+                )
 
-            # ✅ Log history
-            SalvagedMonitorHistory.objects.create(
-                salvaged_monitor=salvaged_monitor,
-                reassigned_to=equipment_package,
-            )
+                # ✅ Update salvaged record
+                salvaged_monitor.is_reassigned = True
+                salvaged_monitor.reassigned_to = equipment_package
+                salvaged_monitor.save()
 
-            messages.success(request, "✅ Salvaged monitor reassigned and logged.")
+                # ✅ Log history
+                SalvagedMonitorHistory.objects.create(
+                    salvaged_monitor=salvaged_monitor,
+                    reassigned_to=equipment_package,
+                )
+
+                messages.success(request, "✅ Salvaged monitor reassigned and logged.")
+            except IntegrityError:
+                messages.error(request, "❌ Duplicate monitor serial number detected.")
             return redirect("desktop_details_view", package_id=equipment_package.id)
 
-
+        # ==========================
+        # 🧩 CASE 2: MANUAL INPUT
+        # ==========================
         else:
-            # Case 2: Manual Input
-            monitor_sn = request.POST.get("monitor_sn")
+            monitor_sn = request.POST.get("monitor_sn", "").strip()
             monitor_brand_id = request.POST.get("monitor_brand_db")
             monitor_model = request.POST.get("monitor_model")
             monitor_size = request.POST.get("monitor_size")
 
+            # 🛑 Basic validation
             if not monitor_sn or not monitor_model:
                 messages.error(request, "❌ Please fill in all required fields.")
                 return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # ✅ Convert brand ID into Brand instance
-            brand_instance = Brand.objects.filter(id=monitor_brand_id).first() if monitor_brand_id else None
+            # ✅ Normalize SN
+            sn_norm = monitor_sn.upper()
 
-            MonitorDetails.objects.create(
-                equipment_package=equipment_package,
-                monitor_sn_db=monitor_sn,
-                monitor_brand_db=brand_instance,
-                monitor_model_db=monitor_model,
-                monitor_size_db=monitor_size,
-                is_disposed=False,
-            )
+            # ✅ Duplicate check before saving
+            if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
+                messages.error(request, f"❌ A monitor with serial number '{monitor_sn}' already exists.")
+                return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            messages.success(request, "✅ New monitor added successfully.")
+            # ✅ Create monitor safely
+            try:
+                brand_instance = Brand.objects.filter(id=monitor_brand_id).first() if monitor_brand_id else None
+                MonitorDetails.objects.create(
+                    equipment_package=equipment_package,
+                    monitor_sn_db=monitor_sn,
+                    monitor_brand_db=brand_instance,
+                    monitor_model_db=monitor_model,
+                    monitor_size_db=monitor_size,
+                    is_disposed=False,
+                )
+                messages.success(request, "✅ New monitor added successfully.")
+            except IntegrityError:
+                messages.error(request, f"❌ Duplicate monitor serial number '{monitor_sn}' detected.")
+
             return redirect("desktop_details_view", package_id=equipment_package.id)
 
     messages.error(request, "❌ Invalid request.")
@@ -1736,23 +1811,24 @@ def delete_employee(request, employee_id):
 
 ##update asset owner
 
+
 def update_asset_owner(request, desktop_id):
     if request.method == 'POST':
         try:
             with transaction.atomic():
                 new_assetowner_id = request.POST.get('assetowner_input')
                 if not new_assetowner_id:
-                    return JsonResponse({'success': False, 'error': 'Please select an asset owner'})
+                    return JsonResponse({'success': False, 'error': 'Please select an asset owner.'}, status=400)
 
                 new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
                 user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
                 old_assetowner = user_details.user_Assetowner
 
-                # Update asset owner
+                # ✅ Update asset owner
                 user_details.user_Assetowner = new_assetowner
                 user_details.save()
 
-                # Save history record
+                # ✅ Log change
                 AssetOwnerChangeHistory.objects.create(
                     equipment_package=user_details.equipment_package,
                     old_assetowner=old_assetowner,
@@ -1761,57 +1837,70 @@ def update_asset_owner(request, desktop_id):
                     changed_at=timezone.now()
                 )
 
-                return JsonResponse({'success': True})
-                
+            # ✅ Always return *after* leaving transaction.atomic() block
+            return JsonResponse({'success': True, 'message': 'Asset Owner updated successfully!'}, status=200)
+
         except Exception as e:
+            print("Error updating Asset Owner:", e)
             return JsonResponse({
-                'success': False, 
+                'success': False,
                 'error': f"Error updating Asset Owner: {str(e)}"
-            }, status=400)
-    
+            }, status=500)
+
+    # ❌ Invalid request method
     return JsonResponse({
-        'success': False, 
+        'success': False,
         'error': 'Invalid request method.'
     }, status=405)
     
 def update_end_user(request, desktop_id):
-    if request.method == 'POST':
-        try:
-            with transaction.atomic():
-                new_enduser_id = request.POST.get('enduser_input')
-                if not new_enduser_id:
-                    return JsonResponse({'success': False, 'error': 'Please select an end user'})
+    """AJAX: Update End User assignment for a Desktop Package"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid request method.'
+        }, status=405)
 
-                new_enduser = get_object_or_404(Employee, id=new_enduser_id)
-                user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
-                old_enduser = user_details.user_Enduser
+    try:
+        with transaction.atomic():
+            new_enduser_id = request.POST.get('enduser_input')
 
-                # Update end user
-                user_details.user_Enduser = new_enduser
-                user_details.save()
+            # ✅ Validate selection
+            if not new_enduser_id:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Please select an end user.'
+                }, status=400)
 
-                # Save history record
-                EndUserChangeHistory.objects.create(
-                    equipment_package=user_details.equipment_package,
-                    old_enduser=old_enduser,
-                    new_enduser=new_enduser,
-                    changed_by=request.user,
-                    changed_at=timezone.now()
-                )
+            # ✅ Fetch relevant records
+            new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+            user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
 
-                return JsonResponse({'success': True})
-                
-                
-        except Exception as e:
+            old_enduser = user_details.user_Enduser
+
+            # ✅ Update
+            user_details.user_Enduser = new_enduser
+            user_details.save()
+
+            # ✅ Log history
+            EndUserChangeHistory.objects.create(
+                equipment_package=user_details.equipment_package,
+                old_enduser=old_enduser,
+                new_enduser=new_enduser,
+                changed_by=request.user if request.user.is_authenticated else None,
+                changed_at=timezone.now()
+            )
+
             return JsonResponse({
-                'success': False, 
-                'error': f"Error updating End User: {str(e)}"
-            }, status=400)
-    
-    return JsonResponse({
-        'success': False, 
-        'error': 'Invalid request method.'
-    }, status=405)
+                'success': True,
+                'message': 'End user updated successfully.'
+            })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"Error updating End User: {str(e)}"
+        }, status=500)
 
 # sa kadaghanan na dispose katung naay checkbox sa monitor, mouse, keyboard, ups, etc.
 @require_POST

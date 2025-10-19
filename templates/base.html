@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="{% static 'css/plugins.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/kaiadmin.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/fonts.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/modern-style.css' %}">
   {% endblock %}
 </head>
 
@@ -529,6 +530,8 @@
       <script src="{% static 'js/plugin/jsvectormap/world.js' %}"></script>
       <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
 
+     
+      <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
       <!-- Kaiadmin -->
       <script src="{% static 'js/kaiadmin.min.js' %}"></script>
 
@@ -546,7 +549,9 @@
           });
         });
       </script>
-      {% endblock %}
+     {% endblock %}
+     
+{% block extra_js %}{% endblock %}
     </div> <!-- /.main-panel -->
   </div> <!-- /.wrapper -->
 </body>

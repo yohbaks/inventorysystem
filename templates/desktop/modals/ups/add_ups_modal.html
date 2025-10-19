@@ -1,0 +1,63 @@
+<!-- Add UPS Modal -->
+<div class="modal fade" id="addUPSModal" tabindex="-1" aria-labelledby="addUPSModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New UPS</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      {% if equipment_package and equipment_package.id %}
+      <form method="POST" action="{% url 'add_ups_to_package' equipment_package.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <ul class="nav nav-pills mb-3" id="upsAddTabs" role="tablist">
+            <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#ups-manual">Manual Input</a></li>
+            <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#ups-salvage">From Salvage</a></li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- Manual -->
+            <div class="tab-pane fade show active" id="ups-manual">
+              <div class="mb-3"><label>Serial Number</label>
+                <input type="text" class="form-control" name="ups_sn" id="ups_sn">
+              </div>
+              <div class="mb-3"><label>Brand</label>
+                <select class="form-select form-control" name="ups_brand_db">
+                  <option value="" disabled selected>Select Brand</option>
+                  {% for brandUPS in ups_brands %}
+                    <option value="{{ brandUPS.id }}">{{ brandUPS.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3"><label>Model</label>
+                <input type="text" class="form-control" name="ups_model">
+              </div>
+            </div>
+
+            <!-- Salvage -->
+            <div class="tab-pane fade" id="ups-salvage">
+              <div class="mb-3"><label>Choose Salvaged UPS</label>
+                <select class="form-select" name="salvaged_ups_id">
+                  <option value="" disabled selected>Select Salvaged UPS</option>
+                  {% for salvaged in salvaged_ups %}
+                    <option value="{{ salvaged.id }}">{{ salvaged.ups_sn }} - {{ salvaged.ups_brand }} ({{ salvaged.ups_model }})</option>
+                  {% empty %}
+                    <option disabled>No salvaged UPS available</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add UPS</button>
+        </div>
+      </form>
+      {% else %}
+        <div class="alert alert-danger m-3">Desktop package not available.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>

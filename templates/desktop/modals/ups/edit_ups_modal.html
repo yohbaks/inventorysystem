@@ -1,0 +1,85 @@
+<!-- UPS Update Modal / Edit Details -->
+<div class="modal fade" id="editUpsModal" tabindex="-1" aria-labelledby="editUpsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    
+    {% if ups_detailse %}
+    <form method="POST" action="{% url 'update_ups' pk=ups_detailse.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="editUpsModalLabel">Edit UPS Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- ✅ FIXED: hidden field ID now matches JS -->
+          <input type="hidden" id="editUPSID" value="{{ ups_detailse.id }}">
+
+          <div class="mb-3">
+            <label for="editUPSSN" class="form-label">Serial Number</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="editUPSSN" 
+              name="ups_sn_db" 
+              value="{{ ups_detailse.ups_sn_db|default:'' }}" 
+              required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editUPSBrand" class="form-label">Brand</label>
+            <select class="form-select form-control" id="editUPSBrand" name="ups_brand_db" required>
+              <option value="" disabled>Select Brand</option>
+              {% for brandUPS in ups_brands %}
+                <option value="{{ brandUPS.id }}"
+                  {% if ups_detailse.ups_brand_db.id == brandUPS.id %}selected{% endif %}>
+                  {{ brandUPS.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="editUPSModel" class="form-label">Model</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="editUPSModel" 
+              name="ups_model_db" 
+              value="{{ ups_detailse.ups_model_db|default:'' }}" 
+              required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editUPSCapacity" class="form-label">Capacity</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              id="editUPSCapacity" 
+              name="ups_capacity_db" 
+              value="{{ ups_detailse.ups_capacity_db|default:'' }}" 
+              required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update UPS Details</button>
+        </div>
+      </div>
+    </form>
+    {% else %}
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <div class="alert alert-warning" style="border-radius: 1rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+            No UPS record found for this package.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>

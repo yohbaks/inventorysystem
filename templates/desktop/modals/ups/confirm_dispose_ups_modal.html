@@ -1,0 +1,36 @@
+<!-- Confirm Dispose UPS Modal -->
+<div class="modal fade" id="confirmDisposeUpsModal" tabindex="-1" aria-labelledby="confirmDisposeUpsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDisposeUpsModalLabel">Confirm Disposal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        {% if ups_detailse %}
+          Are you sure you want to dispose of this UPS (SN: <strong>{{ ups_detailse.ups_sn_db }}</strong>)?
+        {% else %}
+          <div class="alert alert-warning" style="border-radius: 1rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+            No UPS found for this package. Disposal not available.
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+        {% if ups_detailse %}
+        <!-- ✅ Only render form if UPS exists -->
+        <form method="POST" action="{% url 'ups_disposed' ups_detailse.id %}" class="dispose-ups-form d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Confirm Dispose
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,9 +1,7 @@
-
-<!-- Update keyboard Modal or edit keyboard-->
-
+<!-- Update keyboard Modal or edit keyboard -->
 <div class="modal fade" id="editKeyboardModal" tabindex="-1" aria-labelledby="editKeyboardModal" aria-hidden="true">
   <div class="modal-dialog">
-     {% if keyboard_detailse and keyboard_detailse.id %}
+    {% if keyboard_detailse and keyboard_detailse.id %}
     <form method="POST" action="{% url 'update_keyboard' pk=keyboard_detailse.id %}">
       {% csrf_token %}
       <div class="modal-content">
@@ -12,13 +10,15 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" id="keyboardId">
+          <!-- ✅ Correct hidden field -->
+          <input type="hidden" id="editKeyboardID" value="{{ keyboard_detailse.id }}">
 
-          
           <div class="mb-3">
-            <label for="editSN" class="form-label">Serial Number</label>
-            <input type="text" class="form-control" id="editSN" name="keyboard_sn_db" required value="{{ keyboard_detailse.keyboard_sn_db }}" required>
+            <label for="editKeyboardSN" class="form-label">Serial Number</label>
+            <input type="text" class="form-control" id="editKeyboardSN" name="keyboard_sn_db"
+                   value="{{ keyboard_detailse.keyboard_sn_db }}" required>
           </div>
+
           <div class="mb-3">
             <label for="editBrand" class="form-label">Brand</label>
             <select class="form-select form-control" id="editBrand" name="keyboard_brand_db" required>
@@ -29,25 +29,26 @@
                   {{ brandK.name }}
                 </option>
               {% endfor %}
-              </select>
-          </div>
-          <div class="mb-3">
-            <label for="editModel" class="form-label">Model</label>
-            <input type="text" class="form-control" id="editModel" name="keyboard_model_db" value="{{ keyboard_detailse.keyboard_model_db }}" required>
+            </select>
           </div>
 
+          <div class="mb-3">
+            <label for="editModel" class="form-label">Model</label>
+            <input type="text" class="form-control" id="editModel" name="keyboard_model_db"
+                   value="{{ keyboard_detailse.keyboard_model_db }}" required>
+          </div>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Update Keyboard Details</button>
         </div>
       </div>
     </form>
-
-     {% else %}
-      <div class="alert alert-danger m-3">
-        Cannot edit keyboard: data not available.
-      </div>
+    {% else %}
+    <div class="alert alert-danger m-3">
+      Cannot edit keyboard: data not available.
+    </div>
     {% endif %}
   </div>
 </div>

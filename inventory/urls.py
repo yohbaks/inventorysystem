@@ -69,8 +69,8 @@ urlpatterns = [
     path('employees/', views.employee_list, name='employee_list'),  # Handles both GET (list) and POST (add) employees
     path('employees/update/<int:employee_id>/', views.update_employee, name='update_employee'), # update employee
     path('employees/delete/<int:employee_id>/', views.delete_employee, name='delete_employee'), # delete employee
-    path('updateeee_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # update user
-    path('updateeee_asset_owner/<int:desktop_id>/', views.update_asset_owner, name='update_asset_owner'), # update asset owner
+    path('update_end_user/<int:desktop_id>/', views.update_end_user, name='update_end_user'), # update user
+    path('update_asset_owner/<int:desktop_id>/', views.update_asset_owner, name='update_asset_owner'), # update asset owner
 
     #update desktop, monitor, mouse, ups
     path('desktop/<int:pk>/update/',    views.update_desktop, name='update_desktop'),
@@ -176,6 +176,9 @@ urlpatterns = [
     path("printers/dispose/<int:printer_id>/", views.dispose_printer, name="dispose_printer"),
     path("printers/disposed/", views.disposed_printers, name="disposed_printers"),
 
-
+    path("check_monitor_sn/", views.check_monitor_sn, name="check_monitor_sn"),
+    path("check_keyboard_sn/", views.check_keyboard_sn, name="check_keyboard_sn"),
+    path("check_mouse_sn/", views.check_mouse_sn, name="check_mouse_sn"),
+    path("check_ups_sn/", views.check_ups_sn, name="check_ups_sn"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

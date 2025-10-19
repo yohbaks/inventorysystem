@@ -1393,6 +1393,7 @@ function printQrCode() {
     </div>
   </div>
 
+
   <!-- Add Mouse Modal -->
 <div class="modal fade" id="addMouseModal" tabindex="-1" aria-labelledby="addMouseModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -2325,235 +2326,91 @@ function printQrCode() {
     </div>
   </div>
 </div>
-
 <script>
-  $(document).ready(function() {
-    // Track if form is being submitted
-    let isSubmitting = false;
-    
-    $("#editEndUserForm").submit(function(event) {
-        event.preventDefault();
-        
-        if (isSubmitting) return false;
-        isSubmitting = true;
-        
-        let desktopId = "{{ equipment_package.id }}";
-        let formData = $(this).serialize();
+$(document).ready(function () {
+  // --- Asset Owner Transfer Form ---
+  const assetForm = $('#editAssetOwnerForm');
 
-        // Show loading state
-        let submitBtn = $(this).find('button[type="submit"]');
-        submitBtn.prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...'
-        );
+  assetForm.on('submit', function (e) {
+    e.preventDefault();
 
-        $.ajax({
-            type: "POST",
-            url: "/updateeee_end_user/" + desktopId + "/",
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    // Hide modal immediately
-                    var modal = bootstrap.Modal.getInstance(document.getElementById('editEndUserModal'));
-                    modal.hide();
-                    
-                    // Show success toast
-                    var toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_End_User'));
-                    toast.show();
-                    
-                    // Full page reload after 1 second
-                    setTimeout(function() {
-                        window.location.href = window.location.href.split('#')[0] + '#pills-user';
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    showError(response.error || "Failed to update End User");
-                }
-            },
-            error: function(xhr) {
-                showError(xhr.responseJSON?.error || "Something went wrong");
-            },
-            complete: function() {
-                isSubmitting = false;
-                submitBtn.prop('disabled', false).html('Save Changes');
-            }
-        });
+    const url = assetForm.data('url');
+    const submitBtn = $('#submitButtonAsset');
+    const spinner = submitBtn.find('.spinner-border');
+    const btnText = submitBtn.find('.button-text');
+    const errorBox = $('#assetOwnerError');
+    const desktopId = "{{ equipment_package.id }}";
+    const payload = assetForm.serialize(); // includes csrfmiddlewaretoken
+
+    // Disable submit button and show loading state
+    submitBtn.prop('disabled', true);
+    spinner.removeClass('d-none');
+    btnText.text('Saving...');
+    errorBox.addClass('d-none').text('');
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: payload,
+      success: function (resp) {
+        if (resp.success) {
+          $('#editAssetOwnerModal').modal('hide');
+          // ✅ Optional: Show success toast
+          $.notify({
+            title: "✅ Success",
+            message: "Asset owner transferred successfully!",
+            icon: "fa fa-check-circle"
+          }, {
+            type: "success",
+            placement: { from: "bottom", align: "right" },
+            delay: 2500,
+            z_index: 9999
+          });
+
+          // ✅ Refresh after slight delay
+          setTimeout(() => {
+            window.location.href = `/desktop_details_view/${desktopId}/#pills-user`;
+            window.location.reload();
+          }, 1000);
+        } else {
+          const msg = resp.error || 'Transfer failed.';
+          showError(msg);
+        }
+      },
+      error: function (xhr) {
+        const msg = xhr.responseJSON?.error || "Server error while transferring ownership.";
+        showError(msg);
+      },
+      complete: function () {
+        submitBtn.prop('disabled', false);
+        spinner.addClass('d-none');
+        btnText.text('Save Changes');
+      }
     });
 
-    // Reset form when modal is closed
-    $('#editEndUserModal').on('hidden.bs.modal', function() {
-        $(this).find('form')[0].reset();
-    });
-});
+    // --- Local helper ---
+    function showError(msg) {
+      $.notify({
+        title: "⚠️ Error",
+        message: msg,
+        icon: "fa fa-exclamation-triangle"
+      }, {
+        type: "danger",
+        placement: { from: "bottom", align: "right" },
+        delay: 4000,
+        z_index: 9999
+      });
+      errorBox.text(msg).removeClass('d-none');
+    }
+  });
 
-function showError(message) {
-    Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: message,
-    });
-}
-</script>
-
-
-<script>
-  $(document).ready(function() {
-    // Track if form is being submitted
-    let isSubmitting = false;
-    
-    $("#editAssetOwnerForm").submit(function(event) {
-        event.preventDefault();
-        
-        if (isSubmitting) return false;
-        isSubmitting = true;
-        
-        let desktopId = "{{ equipment_package.id }}";
-        let formData = $(this).serialize();
-
-        // Show loading state
-        let submitBtn = $(this).find('button[type="submit"]');
-        submitBtn.prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...'
-        );
-
-        $.ajax({
-            type: "POST",
-            url: "/updateeee_asset_owner/" + desktopId + "/",
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    // Hide modal immediately
-                    var modal = bootstrap.Modal.getInstance(document.getElementById('editAssetOwnerModal'));
-                    modal.hide();
-                    
-                    // Show success toast
-                    var toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_Asset_Owner'));
-                    toast.show();
-                    
-                    // Full page reload after 1 second
-                    setTimeout(function() {
-                        window.location.href = window.location.href.split('#')[0] + '#pills-user';
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    showError(response.error || "Failed to update Asset Owner");
-                }
-            },
-            error: function(xhr) {
-                showError(xhr.responseJSON?.error || "Something went wrong");
-            },
-            complete: function() {
-                isSubmitting = false;
-                submitBtn.prop('disabled', false).html('Save Changes');
-            }
-        });
-    });
-
-    // Reset form when modal is closed
-    $('#editAssetOwnerModal').on('hidden.bs.modal', function() {
-        $(this).find('form')[0].reset();
-    });
-});
-
-function showError(message) {
-    Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: message,
-    });
-}
-</script>
-
-
-
-<script>
-  $(document).ready(function () {
-    $("#editEndUserForm").submit(function (event) {
-        event.preventDefault();
-        
-        let desktopId = "{{ equipment_package.id }}";
-        let formData = $(this).serialize();
-
-        $.ajax({
-            type: "POST",
-            url: "/updateeee_end_user/" + desktopId + "/",
-            data: formData,
-            success: function (response) {
-                if (response.success) {
-                    // Close the modal first
-                    $('#editEndUserModal').modal('hide');
-                    
-                    // Show success toast
-                    let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_End_User'));
-                    toast.show();
-                    
-                    // Redirect after a short delay to allow modal to close
-                    setTimeout(function() {
-                        window.location.href = `/desktop_details_view/${desktopId}/#pills-user`;
-                    }, 500); // 500ms delay
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: response.error || "Failed to update End User",
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Something went wrong while updating the End User.",
-                });
-            }
-        });
-    });
+  // Reset modal when closed
+  $('#editAssetOwnerModal').on('hidden.bs.modal', function () {
+    assetForm.trigger('reset');
+    $('#assetOwnerError').addClass('d-none').text('');
+  });
 });
 </script>
 
-<script>
-  $(document).ready(function () {
-    $("#editAssetOwnerForm").submit(function (event) {
-        event.preventDefault();
-        
-        let desktopId = "{{ equipment_package.id }}";
-        let formData = $(this).serialize();
-
-        $.ajax({
-            type: "POST",
-            url: "/updateeee_asset_owner/" + desktopId + "/",
-            data: formData,
-            success: function (response) {
-                if (response.success) {
-                    // Close the modal first
-                    $('#editAssetOwnerModal').modal('hide');
-                    
-                    // Show success toast
-                    let toast = new bootstrap.Toast(document.getElementById('updateSuccessToast_Asset_Owner'));
-                    toast.show();
-                    
-                    // Redirect after a short delay to allow modal to close
-                    setTimeout(function() {
-                        window.location.href = `/desktop_details_view/${desktopId}/#pills-user`;
-                    }, 500); // 500ms delay
-                } else {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        text: response.error || "Failed to update Asset Owner",
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Something went wrong while updating the Asset Owner.",
-                });
-            }
-        });
-    });
-});
-</script> 
-
-
+ 
 {% endblock %}

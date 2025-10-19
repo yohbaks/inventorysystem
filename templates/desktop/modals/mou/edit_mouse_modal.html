@@ -1,0 +1,58 @@
+<!-- Update Mouse Modal -->
+<div class="modal fade" id="editMouseModal" tabindex="-1" aria-labelledby="editMouseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST"
+          action="{% if mouse_detailse %}{% url 'update_mouse' pk=mouse_detailse.id %}{% else %}#{% endif %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="editMouseModalLabel">Edit Mouse Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          {% if mouse_detailse %}
+            <!-- ✅ FIXED: Hidden field must match JS -->
+            <input type="hidden" id="editMouseID" value="{{ mouse_detailse.id }}">
+
+            <div class="mb-3">
+              <label for="editMouseSN" class="form-label">Serial Number</label>
+              <input type="text" class="form-control" id="editMouseSN" name="mouse_sn_db"
+                     value="{{ mouse_detailse.mouse_sn_db }}" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="editMouseBrand" class="form-label">Brand</label>
+              <select class="form-select form-control" id="editMouseBrand" name="mouse_brand_db" required>
+                <option value="" disabled>Select Brand</option>
+                {% for brandMouse in mouse_brands %}
+                  <option value="{{ brandMouse.id }}"
+                          {% if mouse_detailse.mouse_brand_db.id == brandMouse.id %}selected{% endif %}>
+                    {{ brandMouse.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="editMouseModel" class="form-label">Model</label>
+              <input type="text" class="form-control" id="editMouseModel" name="mouse_model_db"
+                     value="{{ mouse_detailse.mouse_model_db }}" required>
+            </div>
+          {% else %}
+            <div class="alert alert-warning text-center mb-0">
+              ⚠️ No active mouse found for this package.
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          {% if mouse_detailse %}
+            <button type="submit" class="btn btn-primary">Update Mouse Details</button>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

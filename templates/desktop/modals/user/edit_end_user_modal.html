@@ -1,0 +1,38 @@
+<!-- Edit EndUser Modal -->
+<div class="modal fade" id="editEndUserModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit End User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Hand the exact URL to JS via data-url -->
+      <form id="editEndUserForm"
+            data-url="{% url 'update_end_user' desktop_id=equipment_package.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Select End User</label>
+            <select class="form-select" name="enduser_input" required>
+              <option value="">Select End User</option>
+              {% for employee in employees %}
+                <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="alert alert-danger d-none" id="enduserError"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submitButton">
+            <span class="button-text">Save Changes</span>
+            <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>

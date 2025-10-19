@@ -1,0 +1,33 @@
+<!-- Disposal Confirmation Modal -->
+        <div class="modal fade" id="confirmDisposeMouseModal" tabindex="-1" aria-labelledby="confirmDisposeMouseModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="confirmDisposeMouseModalLabel">Confirm Disposal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to dispose of this mouse?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <!-- Disposal form inside modal -->
+                {% comment %} <form method="POST" action="{% url 'mouse_disposed' mouse_detailse.id %}" class="dispose-mouse-form d-inline"> {% endcomment %}
+                  <form method="POST" 
+                        action="{% if mouse_detailse %}{% url 'mouse_disposed' mouse_detailse.id %}{% else %}#{% endif %}" 
+                        class="dispose-mouse-form d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger"
+                                {% if not mouse_detailse %}disabled title="No active mouse to dispose"{% endif %}>
+                            Confirm Dispose
+                        </button>
+                    </form>  
+                
+                {% csrf_token %}
+                    
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        

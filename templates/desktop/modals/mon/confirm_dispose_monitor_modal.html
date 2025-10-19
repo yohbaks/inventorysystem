@@ -1,22 +1,30 @@
 <!-- Disposal Confirmation Modal -->
-                <div class="modal fade" id="confirmDisposeModal_Monitor" tabindex="-1" aria-labelledby="confirmDisposeModal_Monitor" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="confirmDisposeModal_Monitor">Confirm Disposal</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        Are you sure you want to dispose of this Monitor?
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <!-- Disposal form inside modal -->
-                        <form method="POST" action="{% url 'monitor_disposed' monitor_detailse.id %}" class="dispose-monitor-form d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Confirm Dispose</button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+<div class="modal fade" id="confirmDisposeModal_Monitor" tabindex="-1" aria-labelledby="confirmDisposeModal_MonitorLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="confirmDisposeModal_MonitorLabel">Confirm Disposal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        Are you sure you want to dispose of this monitor?
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+        <!-- ✅ Safe form with null-check -->
+        <form method="POST"
+              action="{% if monitor_detailse %}{% url 'monitor_disposed' monitor_detailse.id %}{% else %}#{% endif %}"
+              class="dispose-monitor-form d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger"
+                  {% if not monitor_detailse %}disabled title="No active monitor to dispose"{% endif %}>
+            Confirm Dispose
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

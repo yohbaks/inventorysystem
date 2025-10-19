@@ -1,10 +1,11 @@
-{% extends 'base.html' %}
-{% load static %} 
-{% block content %}
-{% load custom_filters %}
+{% extends "base.html" %}
+{% load static %}
 
+{% block content %}
+
+
+{% block extra_css %}
 <style>
-/* Modern Design System */
 :root {
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -14,443 +15,12 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
-
-/* Modern Container */
-.modern-container {
-  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #ddd6fe 100%);
-  min-height: 100vh;
-  padding: 2rem;
-  padding-top: 6rem;
-}
-
-/* Hero Header Card */
-.hero-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%);
-  border-radius: 1.5rem;
-  padding: 2rem;
-  color: white;
-  box-shadow: var(--shadow-xl);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 2rem;
-}
-
-.hero-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 300px;
-  height: 300px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-}
-
-.hero-header::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -10%;
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-}
-
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.info-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.info-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 1rem;
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.info-label {
-  font-size: 0.875rem;
-  opacity: 0.8;
-  margin-bottom: 0.25rem;
-}
-
-.info-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-/* Modern Action Buttons */
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.modern-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 1rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: var(--shadow-md);
-}
-
-.modern-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.btn-primary {
-  background: white;
-  color: #667eea;
-}
-
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  backdrop-filter: blur(10px);
-}
-
-/* Modern Tab Navigation */
-.modern-tabs {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 0.5rem;
-  box-shadow: var(--shadow-xl);
-  margin-bottom: 1.5rem;
-  display: flex;
-  overflow-x: auto;
-  gap: 0.5rem;
-}
-
-.modern-tabs::-webkit-scrollbar {
-  height: 4px;
-}
-
-.modern-tabs::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
-  border-radius: 2px;
-}
-
-.nav-pills .nav-link {
-  padding: 1rem 1.5rem;
-  border-radius: 1rem;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-weight: 600;
-  color: #6b7280;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.nav-pills .nav-link:hover {
-  background: #f3f4f6;
-}
-
-.nav-pills .nav-link.active {
-  background: var(--gradient-primary);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-/* Modern Card */
-.modern-card {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: var(--shadow-xl);
-  margin-bottom: 1.5rem;
-}
-
-.card-header-modern {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.card-title-modern {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-/* Spec Grid */
-.spec-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.spec-item {
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  padding: 1.25rem;
-  transition: all 0.3s ease;
-}
-
-.spec-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: #667eea;
-}
-
-.spec-label {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.spec-value {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-/* Software Section */
-.software-section {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
-  border: 1px solid #93c5fd;
-  border-radius: 1rem;
-}
-
-.software-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  color: #1e40af;
-  margin-bottom: 1rem;
-}
-
-/* PM Schedule Sidebar */
-.pm-schedule-card {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-xl);
-}
-
-.pm-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.pm-icon {
-  padding: 1rem;
-  background: var(--gradient-success);
-  border-radius: 1rem;
-  color: white;
-}
-
-.pm-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pm-item:hover {
-  box-shadow: var(--shadow-md);
-  border-color: #667eea;
-}
-
-.pm-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-completed {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.status-pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-/* Badge System */
-.badge-modern {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.badge-success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge-danger {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-/* Quick Actions */
-.quick-actions {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-xl);
-  margin-bottom: 1.5rem;
-}
-
-.action-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 1rem;
-  margin-bottom: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  color: inherit;
-}
-
-.action-item:hover {
-  background: #f3f4f6;
-  transform: translateX(4px);
-}
-
-/* Status Card */
-.status-card {
-  background: var(--gradient-success);
-  color: white;
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-xl);
-}
-
-.status-disposed {
-  background: var(--gradient-danger);
-}
-
-/* Table Modern */
-.table-modern {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 0.5rem;
-}
-
-.table-modern thead th {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem;
-  font-weight: 600;
-  text-align: left;
-}
-
-.table-modern thead th:first-child {
-  border-radius: 1rem 0 0 1rem;
-}
-
-.table-modern thead th:last-child {
-  border-radius: 0 1rem 1rem 0;
-}
-
-.table-modern tbody tr {
-  background: white;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-}
-
-.table-modern tbody tr:hover {
-  transform: translateX(4px);
-  box-shadow: var(--shadow-md);
-}
-
-.table-modern tbody td {
-  padding: 1rem;
-  border-top: 1px solid #f3f4f6;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.table-modern tbody td:first-child {
-  border-left: 1px solid #f3f4f6;
-  border-radius: 1rem 0 0 1rem;
-}
-
-.table-modern tbody td:last-child {
-  border-right: 1px solid #f3f4f6;
-  border-radius: 0 1rem 1rem 0;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 1.75rem;
-  }
-  
-  .modern-tabs {
-    padding: 0.25rem;
-  }
-  
-  .nav-pills .nav-link {
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
-  }
-  
-  .spec-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>
+{% endblock %}
+
 
 <div class="modern-container">
   <div class="container-fluid">
-    
     <!-- Hero Header -->
     <div class="hero-header">
       <div class="hero-content">
@@ -669,6 +239,75 @@
                 No monitor available for this desktop package.
               </div>
               {% endif %}
+
+
+              <!-- ✅ DISPOSED MONITORS HISTORY SECTION -->
+{% if disposed_monitor %}
+<div class="mt-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
+      <i class="fas fa-history"></i> Disposed Monitor History
+    </h3>
+    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
+      {{ disposed_monitor.count }} Disposed
+    </span>
+  </div>
+
+  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
+    {% for monitor in disposed_monitor %}
+    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem; position: relative; overflow: hidden;">
+      <div style="position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #dc2626;"></div>
+      
+      <div style="padding-left: 0.75rem;">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; display: inline-block; margin-bottom: 0.5rem;">
+              <i class="fas fa-trash-alt"></i> DISPOSED
+            </span>
+            <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
+              <i class="far fa-calendar"></i> {{ monitor.disposal_date|date:"F d, Y h:i A" }}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ monitor.monitor_sn }}</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-3">
+            <div class="spec-label" style="color: #7f1d1d;">Brand</div>
+            <div class="spec-value" style="color: #991b1b;">{{ monitor.monitor_brand|default:"—" }}</div>
+          </div>
+          <div class="col-md-3">
+            <div class="spec-label" style="color: #7f1d1d;">Model</div>
+            <div class="spec-value" style="color: #991b1b;">{{ monitor.monitor_model|default:"—" }}</div>
+          </div>
+          <div class="col-md-3">
+            <div class="spec-label" style="color: #7f1d1d;">Size</div>
+            <div class="spec-value" style="color: #991b1b;">{{ monitor.monitor_size|default:"—" }}</div>
+          </div>
+          <div class="col-md-3">
+            <div class="spec-label" style="color: #7f1d1d;">Computer</div>
+            <div class="spec-value" style="color: #991b1b; font-size: 0.875rem;">{{ desktop_detailsx.computer_name|default:"—" }}</div>
+          </div>
+        </div>
+
+        {% if monitor.reason %}
+        <div class="mt-3" style="padding: 0.75rem; background: rgba(127, 29, 29, 0.1); border-radius: 0.5rem; border-left: 3px solid #dc2626;">
+          <div style="font-size: 0.75rem; color: #7f1d1d; font-weight: 600; margin-bottom: 0.25rem;">
+            <i class="fas fa-comment-alt"></i> Disposal Reason
+          </div>
+          <div style="font-size: 0.875rem; color: #991b1b;">{{ monitor.reason }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+<!-- END ✅ DISPOSED MONITORS HISTORY SECTION -->
+
             </div>
           </div>
 
@@ -713,6 +352,55 @@
                 No keyboard available for this desktop package.
               </div>
               {% endif %}
+
+<!-- ✅ DISPOSED KEYBOARD HISTORY SECTION -->
+{% if disposed_keyboards.exists %}
+<div class="mt-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
+      <i class="fas fa-history"></i> Disposed Keyboard History
+    </h3>
+    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
+      {{ disposed_keyboard.count }} Disposed
+    </span>
+  </div>
+
+  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
+    {% for disposed_keyboard in disposed_keyboards %}
+    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem;">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-trash-alt"></i> DISPOSED
+          </span>
+          <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
+            <i class="far fa-calendar"></i> {{ disposed_keyboard.disposal_date|date:"F d, Y" }}
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ disposed_keyboard.keyboard_dispose_db.keyboard_sn_db }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Brand</div>
+          <div class="spec-value" style="color: #991b1b;">{{ disposed_keyboard.keyboard_dispose_db.keyboard_brand_db }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Model</div>
+          <div class="spec-value" style="color: #991b1b;">{{ disposed_keyboard.keyboard_dispose_db.keyboard_model_db }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+
+              
             </div>
           </div>
 
@@ -757,6 +445,57 @@
                 No mouse available for this desktop package.
               </div>
               {% endif %}
+
+
+              <!-- ✅ DISPOSED MOUSE HISTORY SECTION -->
+{% if disposed_mouse.exists %}
+<div class="mt-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
+      <i class="fas fa-history"></i> Disposed Mouse History
+    </h3>
+    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
+      {{ disposed_mouse.count }} Disposed
+    </span>
+  </div>
+
+  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
+    {% for mouse in disposed_mouse %}
+    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem;">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-trash-alt"></i> DISPOSED
+          </span>
+          <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
+            <i class="far fa-calendar"></i> {{ mouse.disposal_date|date:"F d, Y" }}
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ mouse.mouse_db.mouse_sn_db }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Brand</div>
+          <div class="spec-value" style="color: #991b1b;">{{ mouse.mouse_db.mouse_brand_db }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Model</div>
+          <div class="spec-value" style="color: #991b1b;">{{ mouse.mouse_db.mouse_model_db }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+<!-- END ✅ DISPOSED MOUSE HISTORY SECTION -->
+
+
+
+
             </div>
           </div>
 
@@ -805,6 +544,58 @@
                 No UPS available for this desktop package.
               </div>
               {% endif %}
+
+<!-- ✅ DISPOSED UPS HISTORY SECTION -->
+{% if disposed_ups.exists %}
+<div class="mt-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
+      <i class="fas fa-history"></i> Disposed UPS History
+    </h3>
+    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
+      {{ disposed_ups.count }} Disposed
+    </span>
+  </div>
+
+  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
+    {% for ups in disposed_ups %}
+    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem;">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-trash-alt"></i> DISPOSED
+          </span>
+          <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
+            <i class="far fa-calendar"></i> {{ ups.disposal_date|date:"F d, Y" }}
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ ups.ups_db.ups_sn_db }}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Brand</div>
+          <div class="spec-value" style="color: #991b1b;">{{ ups.ups_db.ups_brand_db }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Model</div>
+          <div class="spec-value" style="color: #991b1b;">{{ ups.ups_db.ups_model_db }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Capacity</div>
+          <div class="spec-value" style="color: #991b1b;">{{ ups.ups_db.ups_capacity_db }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+<!-- END ✅ DISPOSED UPS HISTORY SECTION -->
+
+
             </div>
           </div>
 
@@ -1127,27 +918,290 @@ Include all your existing modals here:
 {% include 'desktop/modals/key/edit_keyboard_modal.html' %}
 <!-- Confirm Dispose Keyboard Modal -->
 {% include 'desktop/modals/key/confirm_dispose_keyboard_modal.html' %}
+<!-- Add Mouse Modal -->
+{% include 'desktop/modals/mou/add_mouse_modal.html' %}
+<!-- Edit Mouse Modal -->
+{% include 'desktop/modals/mou/edit_mouse_modal.html' %}
+<!-- Confirm Dispose Mouse Modal -->
+{% include 'desktop/modals/mou/confirm_dispose_mouse_modal.html' %}
+<!-- Add UPS Modal -->
+{% include 'desktop/modals/ups/add_ups_modal.html' %}
+<!-- Edit UPS Modal -->
+{% include 'desktop/modals/ups/edit_ups_modal.html' %}
+<!-- Confirm Dispose UPS Modal -->
+{% include 'desktop/modals/ups/confirm_dispose_ups_modal.html' %}
+<!-- Edit End User Modal -->
+{% include 'desktop/modals/user/edit_end_user_modal.html' %}
+<!-- Edit Asset Owner Modal -->
+{% include 'desktop/modals/user/edit_asset_owner_modal.html' %}
 
 
 
+{% block extra_js %}
+
+<!-- ==================== SERIAL NUMBER DUPLICATE CHECK SCRIPT ==================== -->
+<script>
+$(document).ready(function() {
+  console.log("🔍 Serial check script loaded with Desktop support!");
+
+  // 🔧 Shared helper functions
+  function resetField(inputSelector, modalSelector) {
+    $(inputSelector).removeClass('is-invalid').css('border-color', '');
+    $(modalSelector + ' button[type="submit"]').prop('disabled', false);
+  }
+
+  function checkDuplicate(sn, category, excludeID, inputSelector, modalSelector, label) {
+    $.ajax({
+      url: "{% url 'check_serial_no' %}",
+      data: { serial: sn, category: category, exclude_id: excludeID },
+      success: function(resp) {
+        if (resp.exists) {
+          $(inputSelector).addClass('is-invalid').css('border-color', '#dc3545');
+          $(modalSelector + ' button[type="submit"]').prop('disabled', true);
+          $.notify({
+            title: "Duplicate Serial",
+            message: `⚠️ ${label} with SN '${sn}' already exists!`,
+            icon: "fa fa-exclamation-triangle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 5000,
+            z_index: 9999
+          });
+        } else {
+          $(inputSelector).removeClass('is-invalid').css('border-color', '#28a745');
+          $(modalSelector + ' button[type="submit"]').prop('disabled', false);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error("❌ AJAX Error:", status, error);
+      }
+    });
+  }
+
+  // ✅ Add Modals
+  const addMappings = [
+    { id: "#monitor_sn", cat: "Monitor", modal: "#addMonitorModal" },
+    { id: "#keyboard_sn", cat: "Keyboard", modal: "#addKeyboardModal" },
+    { id: "#mouse_sn", cat: "Mouse", modal: "#addMouseModal" },
+    { id: "#ups_sn", cat: "UPS", modal: "#addUPSModal" },
+    { id: "#desktop_sn", cat: "Desktop", modal: "#addDesktopModal" },
+  ];
+  addMappings.forEach(item => {
+    $(document).on('blur keyup', item.id, function() {
+      const sn = $(this).val().trim();
+      if (!sn) return resetField(item.id, item.modal);
+      checkDuplicate(sn, item.cat, '', item.id, item.modal, item.cat);
+    });
+  });
+
+  // ✅ Edit Modals (unique check with exclude_id)
+  const editMappings = [
+    { id: "#editMonitorSN", cat: "Monitor", modal: "#editMonitorModal", idField: "#editMonitorID" },
+    { id: "#editKeyboardSN", cat: "Keyboard", modal: "#editKeyboardModal", idField: "#editKeyboardID" },
+    { id: "#editMouseSN", cat: "Mouse", modal: "#editMouseModal", idField: "#editMouseID" },
+    { id: "#editUPSSN", cat: "UPS", modal: "#editUpsModal", idField: "#editUPSID" },
+    { id: "#editDesktopSN", cat: "Desktop", modal: "#editDesktopModal", idField: "#editDesktopID" },
+  ];
+  editMappings.forEach(item => {
+    $(document).on('blur keyup', item.id, function() {
+      const sn = $(this).val().trim();
+      const id = $(item.idField).val();
+      if (!sn) return resetField(item.id, item.modal);
+      checkDuplicate(sn, item.cat, id, item.id, item.modal, item.cat);
+    });
+  });
+
+  // ✅ Reset validation when switching to "From Salvage"
+  $('#salvage-tab').on('click', function() {
+    $('#monitor_sn, #keyboard_sn, #mouse_sn, #ups_sn, #desktop_sn')
+      .removeClass('is-invalid')
+      .css('border-color', '');
+    $('.modal button[type="submit"]').prop('disabled', false);
+  });
+});
+</script>
+
+<!-- ==================== END USER UPDATE SCRIPT ==================== -->
+<script>
+(function() {
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  const form = document.getElementById('editEndUserForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const url = form.dataset.url;
+    if (!url) {
+      console.error('❌ Missing data-url on #editEndUserForm');
+      return;
+    }
+
+    const submitBtn = document.getElementById('submitButton');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const btnText = submitBtn.querySelector('.button-text');
+    const errorBox = document.getElementById('enduserError');
+
+    submitBtn.disabled = true;
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Saving...';
+    if (errorBox) { errorBox.classList.add('d-none'); errorBox.textContent = ''; }
+
+    const payload = $(form).serialize();
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: payload,
+      success: function(resp) {
+        if (resp.success) {
+          $('#editEndUserModal').modal('hide');
+          $.notify({
+            title: "✅ Success",
+            message: "End user updated successfully!",
+            icon: "fa fa-check-circle"
+          }, {
+            type: "success",
+            placement: { from: "bottom", align: "right" },
+            delay: 3000
+          });
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          const msg = resp.error || "Unknown error.";
+          $.notify({ title: "⚠️ Failed", message: msg, icon: "fa fa-exclamation-triangle" },
+                   { type: "danger", placement: { from: "bottom", align: "right" }, delay: 5000 });
+          if (errorBox) { errorBox.textContent = msg; errorBox.classList.remove('d-none'); }
+        }
+      },
+      error: function(xhr) {
+        const msg = xhr.responseJSON?.error || "Server error";
+        $.notify({ title: "❌ Server Error", message: msg, icon: "fa fa-times-circle" },
+                 { type: "danger", placement: { from: "bottom", align: "right" }, delay: 5000 });
+      },
+      complete: function() {
+        submitBtn.disabled = false;
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Save Changes';
+      }
+    });
+  });
+})();
+</script>
+
+<!-- ==================== ASSET OWNER TRANSFER SCRIPT ==================== -->
 
 <script>
-  {% if messages %}
-    $(document).ready(function () {
-      {% for message in messages %}
-        $.notify({
-          message: "{{ message|escapejs }}",
-          title: "{% if message.tags == 'success' %}Success{% elif message.tags == 'error' %}Error{% elif message.tags == 'warning' %}Warning{% else %}Notice{% endif %}",
-          icon: "{% if message.tags == 'success' %}fa fa-check{% elif message.tags == 'error' %}fa fa-times{% elif message.tags == 'warning' %}fa fa-exclamation{% else %}fa fa-info{% endif %}"
-        }, {
-          type: "{{ message.tags }}",
-          placement: { from: "bottom", align: "right" },
-          delay: 4000,
-          z_index: 9999
-        });
-      {% endfor %}
+$(document).ready(function () {
+  // --- Asset Owner Transfer Form ---
+  const assetForm = $('#editAssetOwnerForm');
+
+  assetForm.on('submit', function (e) {
+    e.preventDefault();
+
+    const url = assetForm.data('url');
+    const submitBtn = $('#submitButtonAsset');
+    const spinner = submitBtn.find('.spinner-border');
+    const btnText = submitBtn.find('.button-text');
+    const errorBox = $('#assetOwnerError');
+    const desktopId = "{{ equipment_package.id }}";
+    const payload = assetForm.serialize(); // includes csrfmiddlewaretoken
+
+    // Disable submit button and show loading state
+    submitBtn.prop('disabled', true);
+    spinner.removeClass('d-none');
+    btnText.text('Saving...');
+    errorBox.addClass('d-none').text('');
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: payload,
+      success: function (resp) {
+        if (resp.success) {
+          $('#editAssetOwnerModal').modal('hide');
+          // ✅ Optional: Show success toast
+          $.notify({
+            title: "✅ Success",
+            message: "Asset owner transferred successfully!",
+            icon: "fa fa-check-circle"
+          }, {
+            type: "success",
+            placement: { from: "bottom", align: "right" },
+            delay: 2500,
+            z_index: 9999
+          });
+
+          // ✅ Refresh after slight delay
+          setTimeout(() => {
+            window.location.href = `/desktop_details_view/${desktopId}/#pills-user`;
+            window.location.reload();
+          }, 1000);
+        } else {
+          const msg = resp.error || 'Transfer failed.';
+          showError(msg);
+        }
+      },
+      error: function (xhr) {
+        const msg = xhr.responseJSON?.error || "Server error while transferring ownership.";
+        showError(msg);
+      },
+      complete: function () {
+        submitBtn.prop('disabled', false);
+        spinner.addClass('d-none');
+        btnText.text('Save Changes');
+      }
     });
-  {% endif %}
+
+    // --- Local helper ---
+    function showError(msg) {
+      $.notify({
+        title: "⚠️ Error",
+        message: msg,
+        icon: "fa fa-exclamation-triangle"
+      }, {
+        type: "danger",
+        placement: { from: "bottom", align: "right" },
+        delay: 4000,
+        z_index: 9999
+      });
+      errorBox.text(msg).removeClass('d-none');
+    }
+  });
+
+  // Reset modal when closed
+  $('#editAssetOwnerModal').on('hidden.bs.modal', function () {
+    assetForm.trigger('reset');
+    $('#assetOwnerError').addClass('d-none').text('');
+  });
+});
 </script>
+
+
+
+{% endblock %}
+
+
 
 {% endblock %}

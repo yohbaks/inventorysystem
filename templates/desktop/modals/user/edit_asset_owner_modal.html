@@ -1,0 +1,35 @@
+
+    <!-- Edit AssetOwner Modal -->
+    <div class="modal fade" id="editAssetOwnerModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Transfer Ownership</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="editAssetOwnerForm" data-url="{% url 'update_asset_owner' desktop_id=equipment_package.id %}">
+  {% csrf_token %}
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Select Asset Owner</label>
+      <select class="form-select" name="assetowner_input" required>
+        <option value="">Select Asset Owner</option>
+        {% for employee in employees %}
+          <option value="{{ employee.id }}">{{ employee.employee_fname }} {{ employee.employee_lname }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="alert alert-danger d-none" id="assetOwnerError"></div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" class="btn btn-primary" id="submitButtonAsset">
+      <span class="button-text">Save Changes</span>
+      <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+    </button>
+  </div>
+</form>
+        </div>
+      </div>
+    </div>
+
