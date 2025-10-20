@@ -523,9 +523,7 @@ def keyboard_detailed_view(request, keyboard_id):
     # Render the detailed view of the keyboard
     return render(request, 'keyboard_detailed_view.html', {'keyboard': keyboard})
 
-# def keyboard_update(request, keyboard_id):
-#     keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
-    
+
 
 
 
@@ -552,35 +550,63 @@ def update_desktop(request, pk):
 #update monitor details
 @require_POST
 def update_monitor(request, pk):
-    monitor                     = get_object_or_404(MonitorDetails, pk=pk)
-    monitor.monitor_sn_db       = request.POST.get('monitor_sn_db')
+    try:
+        monitor = get_object_or_404(MonitorDetails, pk=pk)
+        monitor.monitor_sn_db = request.POST.get('monitor_sn_db')
+        brand_id = request.POST.get('monitor_brand_db')
+        monitor.monitor_brand_db = get_object_or_404(Brand, pk=brand_id)
+        monitor.monitor_model_db = request.POST.get('monitor_model_db')
+        monitor.monitor_size_db = request.POST.get('monitor_size_db')
+        monitor.save()
 
-    brand_id = request.POST.get('monitor_brand_db')#check if the brand_id is valid
-    monitor.monitor_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+        base_url = reverse('desktop_details_view', kwargs={'package_id': monitor.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-monitor"
 
-    monitor.monitor_model_db    = request.POST.get('monitor_model_db')
-    monitor.monitor_size_db     = request.POST.get('monitor_size_db')
-    
-    monitor.save()
+        return JsonResponse({
+            'success': True,
+            'message': 'Monitor updated successfully!',
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating monitor: {str(e)}'
+        })
 
-    base_url = reverse('desktop_details_view', kwargs={'package_id': monitor.equipment_package.pk})
-    return redirect(f'{base_url}#pills-monitor')
 
 #update keyboard details
-@require_POST
+
 def update_keyboard(request, pk):
-    keyboard                    = get_object_or_404(KeyboardDetails, pk=pk)
-    keyboard.keyboard_sn_db     = request.POST.get('keyboard_sn_db')
+    try:
+        keyboard = get_object_or_404(KeyboardDetails, pk=pk)
 
-    brand_id = request.POST.get('keyboard_brand_db')#check if the brand_id is valid
-    keyboard.keyboard_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+        # 🧩 Update fields
+        keyboard.keyboard_sn_db = request.POST.get('keyboard_sn_db')
+        brand_id = request.POST.get('keyboard_brand_db')
+        keyboard.keyboard_brand_db = get_object_or_404(Brand, pk=brand_id)
+        keyboard.keyboard_model_db = request.POST.get('keyboard_model_db')
 
-    keyboard.keyboard_model_db  = request.POST.get('keyboard_model_db')
-    
-    keyboard.save()
+        keyboard.save()
 
-    base_url = reverse('desktop_details_view', kwargs={'package_id': keyboard.equipment_package.pk})
-    return redirect(f'{base_url}#pills-keyboard')
+        # ✅ Prepare redirect URL for same page + same pill
+        base_url = reverse('desktop_details_view', kwargs={'package_id': keyboard.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-keyboard"
+
+        # ✅ Return JSON for AJAX success
+        return JsonResponse({
+            'success': True,
+            'message': 'Keyboard updated successfully!',
+            'redirect_url': redirect_url
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating keyboard: {str(e)}'
+        })
+
+
+
 
 @require_POST
 def update_mouse(request, pk):
@@ -630,31 +656,42 @@ def update_documents(request, pk):
                                             ######## SINGLE DISPOSAL TAB ###########
 
 
-
-# Keyboard disposal under Keyboard pill page
+@require_POST
 def keyboard_disposed(request, keyboard_id):
-    if request.method == 'POST':
+    try:
         keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
         keyboard.is_disposed = True
         keyboard.save()
 
-        # Create a DisposedKeyboard record
+        # Create DisposedKeyboard record
         DisposedKeyboard.objects.create(
             keyboard_dispose_db=keyboard,
             equipment_package=keyboard.equipment_package,
-            disposed_under=None,  # optional if linked to a desktop disposal
+            disposed_under=None,
             disposal_date=timezone.now()
         )
 
-        # ➕ If salvaged before, tag as disposed
+        # Mark salvaged record as disposed (if any)
         SalvagedKeyboard.objects.filter(keyboard_sn=keyboard.keyboard_sn_db).update(
             is_disposed=True,
             disposed_date=timezone.now()
         )
 
-        return redirect(f'/desktop_details_view/{keyboard.equipment_package.id}/#pills-keyboard')
+        # Redirect URL (for reloading the Keyboard tab)
+        base_url = reverse('desktop_details_view', kwargs={'package_id': keyboard.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-keyboard"
 
-    return redirect('desktop_details_view', package_id=keyboard.equipment_package.id)
+        return JsonResponse({
+            'success': True,
+            'message': 'Keyboard disposed successfully!',
+            'redirect_url': redirect_url
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error disposing keyboard: {str(e)}'
+        })
 
 
 # Mouse disposal under Mouse pill page
@@ -677,13 +714,12 @@ def mouse_disposed(request, mouse_id):
             is_disposed=True,
             disposed_date=timezone.now()
         )
+        Base_url = reverse('desktop_details_view', kwargs={'package_id': mouse.equipment_package.pk})
+        return redirect(f'{Base_url}#pills-mouse')
+  
 
-        return redirect(f'/desktop_details_view/{mouse.equipment_package.id}/#pills-mouse')
 
-    return redirect('desktop_details_view', package_id=mouse.equipment_package.id)
-
-
-# UPS disposal under UPS pill page
+                            ############### UPS disposal under UPS pill page  #############
 def ups_disposed(request, ups_id):
     if request.method == 'POST':
         ups = get_object_or_404(UPSDetails, id=ups_id)
@@ -703,10 +739,8 @@ def ups_disposed(request, ups_id):
             is_disposed=True,
             disposed_date=timezone.now()
         )
-
-        return redirect(f'/desktop_details_view/{ups.equipment_package.id}/#pills-ups')
-
-    return redirect('desktop_details_view', package_id=ups.equipment_package.id)
+        Base_url = reverse('desktop_details_view', kwargs={'package_id': ups.equipment_package.pk})
+        return redirect(f'{Base_url}#pills-ups')
 
                                             ######## SINGLE END TAB ###########
 
@@ -962,20 +996,13 @@ def mouse_detailed_view(request, mouse_id):
 
 
 
-
-#monitor disposal under keyboard pill page
+@require_POST
 def monitor_disposed(request, monitor_id):
-    """Dispose a single monitor, record it in DisposedMonitor, 
-    and tag any SalvagedMonitor entries as disposed."""
-    monitor = get_object_or_404(MonitorDetails, id=monitor_id)
-
-    # Handle POST submission (disposal action)
-    if request.method == 'POST':
-        # Mark monitor as disposed
+    try:
+        monitor = get_object_or_404(MonitorDetails, id=monitor_id)
         monitor.is_disposed = True
         monitor.save()
 
-        # Create a disposal log entry
         DisposedMonitor.objects.create(
             monitor_disposed_db=monitor,
             equipment_package=monitor.equipment_package,
@@ -986,45 +1013,52 @@ def monitor_disposed(request, monitor_id):
             reason=request.POST.get("reason") or "Disposed individually",
         )
 
-        # Update any matching SalvagedMonitor entries
         SalvagedMonitor.objects.filter(monitor_sn=monitor.monitor_sn_db).update(
             is_disposed=True,
             disposed_date=timezone.now()
         )
 
-        messages.success(request, f"✅ Monitor '{monitor.monitor_model_db}' has been disposed successfully.")
-        return redirect(f'/desktop_details_view/{monitor.equipment_package.id}/#pills-monitor')
+        base_url = reverse('desktop_details_view', kwargs={'package_id': monitor.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-monitor"
 
-    # Handle non-POST access gracefully (fallback redirect)
-    messages.warning(request, "⚠️ Invalid request method. Please use the disposal form.")
-    return redirect(f'/desktop_details_view/{monitor.equipment_package.id}/#pills-monitor')
+        return JsonResponse({
+            'success': True,
+            'message': f"✅ Monitor '{monitor.monitor_model_db}' disposed successfully!",
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f"Error disposing monitor: {str(e)}"
+        })
 
 
-#MONITORS
+
 def add_monitor_to_package(request, package_id):
     equipment_package = get_object_or_404(Equipment_Package, id=package_id)
 
     if request.method == "POST":
         salvaged_monitor_id = request.POST.get("salvaged_monitor_id")
 
-        # ==========================
-        # 🧩 CASE 1: REASSIGN SALVAGED MONITOR
-        # ==========================
-        if salvaged_monitor_id:
-            salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
+        try:
+            # CASE 1: Salvaged Monitor
+            if salvaged_monitor_id:
+                salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
+                if salvaged_monitor.is_reassigned:
+                    msg = "❌ This salvaged monitor has already been reassigned."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # 🛑 Prevent reusing an already reassigned monitor
-            if salvaged_monitor.is_reassigned:
-                messages.error(request, "❌ This salvaged monitor has already been reassigned.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
+                sn_norm = salvaged_monitor.monitor_sn.strip().upper()
+                if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
+                    msg = f"❌ A monitor with serial number '{sn_norm}' already exists."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # ✅ Duplicate serial check
-            sn_norm = salvaged_monitor.monitor_sn.strip().upper()
-            if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
-                messages.error(request, f"❌ A monitor with serial number '{sn_norm}' already exists.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
-
-            try:
                 MonitorDetails.objects.create(
                     equipment_package=equipment_package,
                     monitor_sn_db=salvaged_monitor.monitor_sn,
@@ -1034,47 +1068,41 @@ def add_monitor_to_package(request, package_id):
                     is_disposed=False,
                 )
 
-                # ✅ Update salvaged record
                 salvaged_monitor.is_reassigned = True
                 salvaged_monitor.reassigned_to = equipment_package
                 salvaged_monitor.save()
 
-                # ✅ Log history
                 SalvagedMonitorHistory.objects.create(
                     salvaged_monitor=salvaged_monitor,
                     reassigned_to=equipment_package,
                 )
 
-                messages.success(request, "✅ Salvaged monitor reassigned and logged.")
-            except IntegrityError:
-                messages.error(request, "❌ Duplicate monitor serial number detected.")
-            return redirect("desktop_details_view", package_id=equipment_package.id)
+                msg = "✅ Salvaged monitor reassigned and logged."
 
-        # ==========================
-        # 🧩 CASE 2: MANUAL INPUT
-        # ==========================
-        else:
-            monitor_sn = request.POST.get("monitor_sn", "").strip()
-            monitor_brand_id = request.POST.get("monitor_brand_db")
-            monitor_model = request.POST.get("monitor_model")
-            monitor_size = request.POST.get("monitor_size")
+            # CASE 2: Manual Input
+            else:
+                monitor_sn = request.POST.get("monitor_sn", "").strip()
+                monitor_brand_id = request.POST.get("monitor_brand_db")
+                monitor_model = request.POST.get("monitor_model")
+                monitor_size = request.POST.get("monitor_size")
 
-            # 🛑 Basic validation
-            if not monitor_sn or not monitor_model:
-                messages.error(request, "❌ Please fill in all required fields.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
+                if not monitor_sn or not monitor_model:
+                    msg = "❌ Please fill in all required fields."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # ✅ Normalize SN
-            sn_norm = monitor_sn.upper()
+                sn_norm = monitor_sn.upper()
+                if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
+                    msg = f"❌ A monitor with serial number '{monitor_sn}' already exists."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            # ✅ Duplicate check before saving
-            if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
-                messages.error(request, f"❌ A monitor with serial number '{monitor_sn}' already exists.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
-
-            # ✅ Create monitor safely
-            try:
                 brand_instance = Brand.objects.filter(id=monitor_brand_id).first() if monitor_brand_id else None
+
                 MonitorDetails.objects.create(
                     equipment_package=equipment_package,
                     monitor_sn_db=monitor_sn,
@@ -1083,14 +1111,28 @@ def add_monitor_to_package(request, package_id):
                     monitor_size_db=monitor_size,
                     is_disposed=False,
                 )
-                messages.success(request, "✅ New monitor added successfully.")
-            except IntegrityError:
-                messages.error(request, f"❌ Duplicate monitor serial number '{monitor_sn}' detected.")
 
+                msg = "✅ New monitor added successfully."
+
+            base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
+            redirect_url = f"{base_url}#pills-monitor"
+
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
+
+            messages.success(request, msg)
+            return redirect(redirect_url)
+
+        except Exception as e:
+            err = f"❌ Error adding monitor: {str(e)}"
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': False, 'message': err})
+            messages.error(request, err)
             return redirect("desktop_details_view", package_id=equipment_package.id)
 
     messages.error(request, "❌ Invalid request.")
     return redirect("desktop_details_view", package_id=equipment_package.id)
+
 
 
 
@@ -1100,63 +1142,60 @@ def add_keyboard_to_package(request, package_id):
     if request.method == "POST":
         salvaged_keyboard_id = request.POST.get("salvaged_keyboard_id")
 
-        if salvaged_keyboard_id:
-            # Case 1: Reassign salvaged keyboard
-            salvaged_keyboard = get_object_or_404(SalvagedKeyboard, id=salvaged_keyboard_id)
+        try:
+            if salvaged_keyboard_id:
+                salvaged_keyboard = get_object_or_404(SalvagedKeyboard, id=salvaged_keyboard_id)
+                if salvaged_keyboard.is_reassigned:
+                    msg = "❌ This salvaged keyboard has already been reassigned."
+                    return JsonResponse({'success': False, 'message': msg})
 
-            if salvaged_keyboard.is_reassigned:
-                messages.error(request, "❌ This salvaged keyboard has already been reassigned.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
+                KeyboardDetails.objects.create(
+                    equipment_package=equipment_package,
+                    keyboard_sn_db=salvaged_keyboard.keyboard_sn,
+                    keyboard_brand_db=Brand.objects.filter(name=salvaged_keyboard.keyboard_brand).first(),
+                    keyboard_model_db=salvaged_keyboard.keyboard_model,
+                    is_disposed=False,
+                )
 
-            # ✅ Create active keyboard record
-            KeyboardDetails.objects.create(
-                equipment_package=equipment_package,
-                keyboard_sn_db=salvaged_keyboard.keyboard_sn,
-                keyboard_brand_db=Brand.objects.filter(name=salvaged_keyboard.keyboard_brand).first(),
-                keyboard_model_db=salvaged_keyboard.keyboard_model,
-                is_disposed=False,
-            )
+                salvaged_keyboard.is_reassigned = True
+                salvaged_keyboard.reassigned_to = equipment_package
+                salvaged_keyboard.save()
 
-            # ✅ Update salvaged record
-            salvaged_keyboard.is_reassigned = True
-            salvaged_keyboard.reassigned_to = equipment_package
-            salvaged_keyboard.save()
+                SalvagedKeyboardHistory.objects.create(
+                    salvaged_keyboard=salvaged_keyboard,
+                    reassigned_to=equipment_package,
+                )
 
-            # ✅ Log history
-            SalvagedKeyboardHistory.objects.create(
-                salvaged_keyboard=salvaged_keyboard,
-                reassigned_to=equipment_package,
-            )
+                msg = "✅ Salvaged keyboard reassigned and logged."
+            else:
+                keyboard_sn = request.POST.get("keyboard_sn")
+                keyboard_brand_id = request.POST.get("keyboard_brand_db")
+                keyboard_model = request.POST.get("keyboard_model")
 
-            messages.success(request, "✅ Salvaged keyboard reassigned and logged.")
-            return redirect("desktop_details_view", package_id=equipment_package.id)
+                if not keyboard_sn or not keyboard_model:
+                    msg = "❌ Please fill in all required fields."
+                    return JsonResponse({'success': False, 'message': msg})
 
-        else:
-            # Case 2: Manual Input
-            keyboard_sn = request.POST.get("keyboard_sn")
-            keyboard_brand_id = request.POST.get("keyboard_brand_db")
-            keyboard_model = request.POST.get("keyboard_model")
+                brand_instance = Brand.objects.filter(id=keyboard_brand_id).first() if keyboard_brand_id else None
 
-            if not keyboard_sn or not keyboard_model:
-                messages.error(request, "❌ Please fill in all required fields.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
+                KeyboardDetails.objects.create(
+                    equipment_package=equipment_package,
+                    keyboard_sn_db=keyboard_sn,
+                    keyboard_brand_db=brand_instance,
+                    keyboard_model_db=keyboard_model,
+                    is_disposed=False,
+                )
 
-            # ✅ Convert brand ID into Brand instance
-            brand_instance = Brand.objects.filter(id=keyboard_brand_id).first() if keyboard_brand_id else None
+                msg = "✅ New keyboard added successfully."
 
-            KeyboardDetails.objects.create(
-                equipment_package=equipment_package,
-                keyboard_sn_db=keyboard_sn,
-                keyboard_brand_db=brand_instance,
-                keyboard_model_db=keyboard_model,
-                is_disposed=False,
-            )
+            base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
+            redirect_url = f"{base_url}#pills-keyboard"
+            return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
 
-            messages.success(request, "✅ New keyboard added successfully.")
-            return redirect("desktop_details_view", package_id=equipment_package.id)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Error adding keyboard: {str(e)}'})
 
-    messages.error(request, "❌ Invalid request.")
-    return redirect("desktop_details_view", package_id=package_id)
+    return JsonResponse({'success': False, 'message': 'Invalid request.'})
 
 
 

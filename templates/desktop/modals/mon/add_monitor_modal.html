@@ -7,7 +7,7 @@
       </div>
 
       {% if equipment_package and equipment_package.id %}
-      <form method="POST" action="{% url 'add_monitor_to_package' equipment_package.id %}">
+      <form method="POST" id="addMonitorForm" action="{% url 'add_monitor_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
           

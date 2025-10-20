@@ -71,7 +71,15 @@
 
           <div class="mb-3">
             <label for="desktop_memory_form" class="form-label">Memory</label>
-            <input type="text" class="form-control" id="desktop_memory_form" name="desktop_memory_form" value="{{ desktop_detailsx.memory }}" required>
+            <select class="form-select form-control mt-2" id="desktop_memory_form" name="desktop_memory_form">
+            <option value="{{ desktop_detailsx.memory }}" disabled selected>{{ desktop_detailsx.memory }}</option>
+            <option value="4GB">4GB</option>
+            <option value="8GB">8GB</option>
+            <option value="16GB">16GB</option>
+            <option value="32GB">32GB</option>
+            <option value="64GB">64GB</option>
+            <option value="128GB">128GB</option>
+            </select>
           </div>
 
           <div class="mb-3">

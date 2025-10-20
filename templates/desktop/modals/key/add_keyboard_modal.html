@@ -1,5 +1,4 @@
-
-  <!-- Add Keyboard Modal -->
+<!-- ✅ Add Keyboard Modal -->
 <div class="modal fade" id="addKeyboardModal" tabindex="-1" aria-labelledby="addKeyboardModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -9,11 +8,11 @@
       </div>
 
       {% if equipment_package and equipment_package.id %}
-      <form method="POST" action="{% url 'add_keyboard_to_package' equipment_package.id %}">
+      <form id="addKeyboardForm"  method="POST" action="{% url 'add_keyboard_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
 
-          <!-- Tabs for Manual or Salvage -->
+          <!-- ✅ Tabs for Manual or Salvage -->
           <ul class="nav nav-pills mb-3" id="keyboardAddTabs" role="tablist">
             <li class="nav-item">
               <a class="nav-link active" id="keyboard-manual-tab" data-bs-toggle="pill" href="#keyboard-manual-input" role="tab">Manual Input</a>
@@ -25,7 +24,7 @@
 
           <div class="tab-content" id="keyboardAddTabsContent">
             
-            <!-- Manual Input -->
+            <!-- 🧩 Manual Input Tab -->
             <div class="tab-pane fade show active" id="keyboard-manual-input" role="tabpanel">
               <div class="mb-3">
                 <label for="keyboard_sn" class="form-label">Serial Number</label>
@@ -46,7 +45,7 @@
               </div>
             </div>
 
-            <!-- Salvaged Keyboards -->
+            <!-- 🧩 Salvaged Keyboards Tab -->
             <div class="tab-pane fade" id="keyboard-salvage-select" role="tabpanel">
               <div class="mb-3">
                 <label for="salvaged_keyboard" class="form-label">Choose Salvaged Keyboard</label>
@@ -65,9 +64,13 @@
 
           </div>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Add Keyboard</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm d-none"></span>
+            <span class="button-text">Add Keyboard</span>
+          </button>
         </div>
       </form>
       {% else %}
@@ -77,5 +80,4 @@
       {% endif %}
     </div> 
   </div>   
-</div>     
 </div>

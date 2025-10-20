@@ -1,6 +1,6 @@
 <div class="modal fade" id="editMonitorModal" tabindex="-1" aria-labelledby="editMonitorModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST" 
+    <form method="POST" id="editMonitorForm"
           action="{% if monitor_detailse %}{% url 'update_monitor' pk=monitor_detailse.id %}{% else %}#{% endif %}">
       {% csrf_token %}
       <div class="modal-content">

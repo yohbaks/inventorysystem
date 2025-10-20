@@ -15,7 +15,7 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 
         <!-- ✅ Safe form with null-check -->
-        <form method="POST"
+        <form method="POST" id="disposeMonitorForm"
               action="{% if monitor_detailse %}{% url 'monitor_disposed' monitor_detailse.id %}{% else %}#{% endif %}"
               class="dispose-monitor-form d-inline">
           {% csrf_token %}
