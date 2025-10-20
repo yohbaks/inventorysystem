@@ -380,7 +380,14 @@ def equipment_package_base(request):
 @login_required
 def desktop_details_view(request, package_id):
     equipment_package = get_object_or_404(Equipment_Package, id=package_id)
-    desktop_details = DesktopDetails.objects.filter(equipment_package=equipment_package, is_disposed=False).first()
+    desktop_details = (
+        DesktopDetails.objects.filter(equipment_package=equipment_package)
+        .order_by('-id')
+        .first()
+    )
+    if desktop_details:
+        desktop_details.refresh_from_db()
+
     # Generate QR code if missing
     if not equipment_package.qr_code:
         equipment_package.generate_qr_code()
@@ -610,48 +617,86 @@ def update_keyboard(request, pk):
 
 @require_POST
 def update_mouse(request, pk):
-    mouse = get_object_or_404(MouseDetails, pk=pk)
-    mouse.mouse_sn_db       = request.POST.get('mouse_sn_db')
+    try:
+        mouse = get_object_or_404(MouseDetails, pk=pk)
+        mouse.mouse_sn_db = request.POST.get('mouse_sn_db')
 
-    brand_id = request.POST.get('mouse_brand_db')#check if the brand_id is valid
-    mouse.mouse_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+        brand_id = request.POST.get('mouse_brand_db')
+        mouse.mouse_brand_db = get_object_or_404(Brand, pk=brand_id)
+        mouse.mouse_model_db = request.POST.get('mouse_model_db')
 
-    mouse.mouse_model_db    = request.POST.get('mouse_model_db')
+        mouse.save()
 
-    mouse.save()
-    base_url = reverse('desktop_details_view', kwargs={'package_id': mouse.equipment_package.pk})
-    return redirect(f'{base_url}#pills-mouse')
+        base_url = reverse('desktop_details_view', kwargs={'package_id': mouse.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-mouse"
 
+        return JsonResponse({
+            'success': True,
+            'message': 'Mouse updated successfully!',
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating mouse: {str(e)}'
+        })
+
+
+# 🧱 UPDATE UPS
 @require_POST
 def update_ups(request, pk):
-    ups = get_object_or_404(UPSDetails, pk=pk)
-    ups.ups_sn_db       = request.POST.get('ups_sn_db')
+    try:
+        ups = get_object_or_404(UPSDetails, pk=pk)
+        ups.ups_sn_db = request.POST.get('ups_sn_db')
 
-    brand_id = request.POST.get('ups_brand_db')#check if the brand_id is valid
-    ups.ups_brand_db = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+        brand_id = request.POST.get('ups_brand_db')
+        ups.ups_brand_db = get_object_or_404(Brand, pk=brand_id)
+        ups.ups_model_db = request.POST.get('ups_model_db')
+        ups.ups_capacity_db = request.POST.get('ups_capacity_db')
+        ups.save()
 
-    ups.ups_model_db    = request.POST.get('ups_model_db')
-    ups.ups_capacity_db = request.POST.get('ups_capacity_db')
+        base_url = reverse('desktop_details_view', kwargs={'package_id': ups.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-ups"
 
-    ups.save()
-    base_url = reverse('desktop_details_view', kwargs={'package_id': ups.equipment_package.pk})
-    return redirect(f'{base_url}#pills-ups')
+        return JsonResponse({
+            'success': True,
+            'message': 'UPS details updated successfully!',
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating UPS: {str(e)}'
+        })
 
 @require_POST
 def update_documents(request, pk):
-    documents = get_object_or_404(DocumentsDetails, pk=pk)
-    documents.docs_PAR = request.POST.get('docs_PAR')
-    documents.docs_Propertyno = request.POST.get('docs_Propertyno')
-    documents.docs_Acquisition_Type = request.POST.get('docs_Acquisition_Type')
-    documents.docs_Value = request.POST.get('docs_Value')
-    documents.docs_Datereceived = request.POST.get('docs_Datereceived')
-    documents.docs_Dateinspected = request.POST.get('docs_Dateinspected')
-    documents.docs_Supplier = request.POST.get('docs_Supplier')
-    documents.docs_Status = request.POST.get('docs_Status')
+    try:
+        documents = get_object_or_404(DocumentsDetails, pk=pk)
+        documents.docs_PAR = request.POST.get('docs_PAR')
+        documents.docs_Propertyno = request.POST.get('docs_Propertyno')
+        documents.docs_Acquisition_Type = request.POST.get('docs_Acquisition_Type')
+        documents.docs_Value = request.POST.get('docs_Value')
+        documents.docs_Datereceived = request.POST.get('docs_Datereceived')
+        documents.docs_Dateinspected = request.POST.get('docs_Dateinspected')
+        documents.docs_Supplier = request.POST.get('docs_Supplier')
+        documents.docs_Status = request.POST.get('docs_Status')
 
-    documents.save()
-    base_url = reverse('desktop_details_view', kwargs={'package_id': documents.equipment_package.pk})
-    return redirect(f'{base_url}#pills-documents')
+        documents.save()
+
+        base_url = reverse('desktop_details_view', kwargs={'package_id': documents.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-documents"
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Document details updated successfully!',
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error updating documents: {str(e)}'
+        })
 
                                             ######## SINGLE DISPOSAL TAB ###########
 
@@ -695,52 +740,75 @@ def keyboard_disposed(request, keyboard_id):
 
 
 # Mouse disposal under Mouse pill page
+@require_POST
 def mouse_disposed(request, mouse_id):
-    if request.method == 'POST':
+    try:
         mouse = get_object_or_404(MouseDetails, id=mouse_id)
         mouse.is_disposed = True
         mouse.save()
 
-        # Create a DisposedMouse record
         DisposedMouse.objects.create(
             mouse_db=mouse,
             equipment_package=mouse.equipment_package,
-            disposed_under=None,  # optional if tied to a full desktop disposal
+            disposed_under=None,
             disposal_date=timezone.now()
         )
 
-        # ➕ If salvaged before, tag as disposed
         SalvagedMouse.objects.filter(mouse_sn=mouse.mouse_sn_db).update(
             is_disposed=True,
             disposed_date=timezone.now()
         )
-        Base_url = reverse('desktop_details_view', kwargs={'package_id': mouse.equipment_package.pk})
-        return redirect(f'{Base_url}#pills-mouse')
-  
+
+        base_url = reverse('desktop_details_view', kwargs={'package_id': mouse.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-mouse"
+
+        return JsonResponse({
+            'success': True,
+            'message': f"✅ Mouse '{mouse.mouse_model_db}' disposed successfully!",
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f"Error disposing mouse: {str(e)}"
+        })
+
 
 
                             ############### UPS disposal under UPS pill page  #############
+# 🧱 DISPOSE UPS
+@require_POST
 def ups_disposed(request, ups_id):
-    if request.method == 'POST':
+    try:
         ups = get_object_or_404(UPSDetails, id=ups_id)
         ups.is_disposed = True
         ups.save()
 
-        # Create a DisposedUPS record
         DisposedUPS.objects.create(
             ups_db=ups,
             equipment_package=ups.equipment_package,
-            disposed_under=None,  # optional if tied to a full desktop disposal
+            disposed_under=None,
             disposal_date=timezone.now()
         )
 
-        # ➕ If salvaged before, tag as disposed
         SalvagedUPS.objects.filter(ups_sn=ups.ups_sn_db).update(
             is_disposed=True,
             disposed_date=timezone.now()
         )
-        Base_url = reverse('desktop_details_view', kwargs={'package_id': ups.equipment_package.pk})
-        return redirect(f'{Base_url}#pills-ups')
+
+        base_url = reverse('desktop_details_view', kwargs={'package_id': ups.equipment_package.pk})
+        redirect_url = f"{base_url}#pills-ups"
+
+        return JsonResponse({
+            'success': True,
+            'message': f"✅ UPS '{ups.ups_model_db}' disposed successfully!",
+            'redirect_url': redirect_url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error disposing UPS: {str(e)}'
+        })
 
                                             ######## SINGLE END TAB ###########
 
@@ -1205,116 +1273,159 @@ def add_mouse_to_package(request, package_id):
 
     if request.method == "POST":
         salvaged_mouse_id = request.POST.get("salvaged_mouse_id")
+        try:
+            # 🧩 CASE 1: Salvaged Mouse
+            if salvaged_mouse_id:
+                salvaged_mouse = get_object_or_404(SalvagedMouse, id=salvaged_mouse_id)
+                if salvaged_mouse.is_reassigned:
+                    msg = "❌ This salvaged mouse has already been reassigned."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-        # Case 1: Salvaged Mouse
-        if salvaged_mouse_id:
-            salvaged_mouse = get_object_or_404(SalvagedMouse, id=salvaged_mouse_id)
+                MouseDetails.objects.create(
+                    equipment_package=equipment_package,
+                    mouse_sn_db=salvaged_mouse.mouse_sn,
+                    mouse_brand_db=Brand.objects.filter(name=salvaged_mouse.mouse_brand).first(),
+                    mouse_model_db=salvaged_mouse.mouse_model,
+                    is_disposed=False,
+                )
 
-            if salvaged_mouse.is_reassigned:
-                messages.error(request, "❌ This salvaged mouse has already been reassigned.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
+                salvaged_mouse.is_reassigned = True
+                salvaged_mouse.reassigned_to = equipment_package
+                salvaged_mouse.save()
 
-            MouseDetails.objects.create(
-                equipment_package=equipment_package,
-                mouse_sn_db=salvaged_mouse.mouse_sn,
-                mouse_brand_db=Brand.objects.filter(name=salvaged_mouse.mouse_brand).first(),
-                mouse_model_db=salvaged_mouse.mouse_model,
-                is_disposed=False,
-            )
+                SalvagedMouseHistory.objects.create(
+                    salvaged_mouse=salvaged_mouse,
+                    reassigned_to=equipment_package,
+                )
 
-            salvaged_mouse.is_reassigned = True
-            salvaged_mouse.reassigned_to = equipment_package
-            salvaged_mouse.save()
+                msg = "✅ Salvaged mouse reassigned and logged."
 
-            SalvagedMouseHistory.objects.create(
-                salvaged_mouse=salvaged_mouse,
-                reassigned_to=equipment_package,
-            )
+            # 🧩 CASE 2: Manual Input
+            else:
+                mouse_sn = request.POST.get("mouse_sn")
+                mouse_brand_id = request.POST.get("mouse_brand_db")
+                mouse_model = request.POST.get("mouse_model")
 
-            messages.success(request, "✅ Salvaged mouse reassigned and logged.")
+                if not mouse_sn or not mouse_model:
+                    msg = "❌ Please fill in all required fields."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
+
+                brand_instance = Brand.objects.filter(id=mouse_brand_id).first() if mouse_brand_id else None
+
+                MouseDetails.objects.create(
+                    equipment_package=equipment_package,
+                    mouse_sn_db=mouse_sn,
+                    mouse_brand_db=brand_instance,
+                    mouse_model_db=mouse_model,
+                    is_disposed=False,
+                )
+
+                msg = "✅ New mouse added successfully."
+
+            base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
+            redirect_url = f"{base_url}#pills-mouse"
+
+            # ✅ AJAX Response
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
+
+            messages.success(request, msg)
+            return redirect(redirect_url)
+
+        except Exception as e:
+            msg = f"❌ Error adding mouse: {str(e)}"
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': False, 'message': msg})
+            messages.error(request, msg)
             return redirect("desktop_details_view", package_id=equipment_package.id)
-
-        # Case 2: Manual Input
-        mouse_sn = request.POST.get("mouse_sn")
-        mouse_brand_id = request.POST.get("mouse_brand_db")
-        mouse_model = request.POST.get("mouse_model")
-
-        if not mouse_sn or not mouse_model:
-            messages.error(request, "❌ Please fill in all required fields.")
-            return redirect("desktop_details_view", package_id=equipment_package.id)
-
-        brand_instance = Brand.objects.filter(id=mouse_brand_id).first() if mouse_brand_id else None
-
-        MouseDetails.objects.create(
-            equipment_package=equipment_package,
-            mouse_sn_db=mouse_sn,
-            mouse_brand_db=brand_instance,
-            mouse_model_db=mouse_model,
-            is_disposed=False,
-        )
-
-        messages.success(request, "✅ New mouse added successfully.")
-        return redirect("desktop_details_view", package_id=equipment_package.id)
 
     messages.error(request, "❌ Invalid request.")
     return redirect("desktop_details_view", package_id=package_id)
 
 
+
+# 🧱 ADD UPS
 def add_ups_to_package(request, package_id):
     equipment_package = get_object_or_404(Equipment_Package, id=package_id)
 
     if request.method == "POST":
         salvaged_ups_id = request.POST.get("salvaged_ups_id")
+        try:
+            # ✅ Case 1: Salvaged UPS
+            if salvaged_ups_id:
+                salvaged_ups = get_object_or_404(SalvagedUPS, id=salvaged_ups_id)
 
-        # Case 1: Salvaged UPS
-        if salvaged_ups_id:
-            salvaged_ups = get_object_or_404(SalvagedUPS, id=salvaged_ups_id)
+                if salvaged_ups.is_reassigned:
+                    msg = "❌ This salvaged UPS has already been reassigned."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-            if salvaged_ups.is_reassigned:
-                messages.error(request, "❌ This salvaged UPS has already been reassigned.")
-                return redirect("desktop_details_view", package_id=equipment_package.id)
+                UPSDetails.objects.create(
+                    equipment_package=equipment_package,
+                    ups_sn_db=salvaged_ups.ups_sn,
+                    ups_brand_db=Brand.objects.filter(name=salvaged_ups.ups_brand).first(),
+                    ups_model_db=salvaged_ups.ups_model,
+                    is_disposed=False,
+                )
 
-            UPSDetails.objects.create(
-                equipment_package=equipment_package,
-                ups_sn_db=salvaged_ups.ups_sn,
-                ups_brand_db=Brand.objects.filter(name=salvaged_ups.ups_brand).first(),
-                ups_model_db=salvaged_ups.ups_model,
-                is_disposed=False,
-            )
+                salvaged_ups.is_reassigned = True
+                salvaged_ups.reassigned_to = equipment_package
+                salvaged_ups.save()
 
-            salvaged_ups.is_reassigned = True
-            salvaged_ups.reassigned_to = equipment_package
-            salvaged_ups.save()
+                SalvagedUPSHistory.objects.create(
+                    salvaged_ups=salvaged_ups,
+                    reassigned_to=equipment_package,
+                )
 
-            SalvagedUPSHistory.objects.create(
-                salvaged_ups=salvaged_ups,
-                reassigned_to=equipment_package,
-            )
+                msg = "✅ Salvaged UPS reassigned and logged."
 
-            messages.success(request, "✅ Salvaged UPS reassigned and logged.")
+            # ✅ Case 2: Manual Input
+            else:
+                ups_sn = request.POST.get("ups_sn")
+                ups_brand_id = request.POST.get("ups_brand_db")
+                ups_model = request.POST.get("ups_model")
+
+                if not ups_sn or not ups_model:
+                    msg = "❌ Please fill in all required fields."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
+
+                brand_instance = Brand.objects.filter(id=ups_brand_id).first() if ups_brand_id else None
+
+                UPSDetails.objects.create(
+                    equipment_package=equipment_package,
+                    ups_sn_db=ups_sn,
+                    ups_brand_db=brand_instance,
+                    ups_model_db=ups_model,
+                    is_disposed=False,
+                )
+                msg = "✅ New UPS added successfully."
+
+            base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
+            redirect_url = f"{base_url}#pills-ups"
+
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
+
+            messages.success(request, msg)
+            return redirect(redirect_url)
+
+        except Exception as e:
+            msg = f"❌ Error adding UPS: {str(e)}"
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': False, 'message': msg})
+            messages.error(request, msg)
             return redirect("desktop_details_view", package_id=equipment_package.id)
-
-        # Case 2: Manual Input
-        ups_sn = request.POST.get("ups_sn")
-        ups_brand_id = request.POST.get("ups_brand_db")
-        ups_model = request.POST.get("ups_model")
-
-        if not ups_sn or not ups_model:
-            messages.error(request, "❌ Please fill in all required fields.")
-            return redirect("desktop_details_view", package_id=equipment_package.id)
-
-        brand_instance = Brand.objects.filter(id=ups_brand_id).first() if ups_brand_id else None
-
-        UPSDetails.objects.create(
-            equipment_package=equipment_package,
-            ups_sn_db=ups_sn,
-            ups_brand_db=brand_instance,
-            ups_model_db=ups_model,
-            is_disposed=False,
-        )
-
-        messages.success(request, "✅ New UPS added successfully.")
-        return redirect("desktop_details_view", package_id=equipment_package.id)
 
     messages.error(request, "❌ Invalid request.")
     return redirect("desktop_details_view", package_id=package_id)
@@ -1941,115 +2052,124 @@ def update_end_user(request, desktop_id):
             'error': f"Error updating End User: {str(e)}"
         }, status=500)
 
-# sa kadaghanan na dispose katung naay checkbox sa monitor, mouse, keyboard, ups, etc.
+
+
 @require_POST
 def dispose_desktop(request, desktop_id):
-    desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
-    equipment_package = desktop_details.equipment_package
-    user_details = UserDetails.objects.filter(equipment_package=equipment_package).first()
+    try:
+        desktop_details = get_object_or_404(DesktopDetails, id=desktop_id)
+        equipment_package = desktop_details.equipment_package
+        user_details = UserDetails.objects.filter(equipment_package=equipment_package).first()
 
-    reason = request.POST.get("reason", "")
+        reason = request.POST.get("reason", "")
 
-    # --- Create a DisposedDesktopDetail (main record) ---
-    disposed_desktop = DisposedDesktopDetail.objects.create(
-        desktop=desktop_details,
-        serial_no=desktop_details.serial_no,
-        brand_name=str(desktop_details.brand_name) if desktop_details.brand_name else None,
-        model=desktop_details.model,
-        asset_owner=user_details.user_Assetowner.full_name if user_details and user_details.user_Assetowner else None,
-        reason=reason,
-    )
+        disposed_desktop = DisposedDesktopDetail.objects.create(
+            desktop=desktop_details,
+            serial_no=desktop_details.serial_no,
+            brand_name=str(desktop_details.brand_name) if desktop_details.brand_name else None,
+            model=desktop_details.model,
+            asset_owner=user_details.user_Assetowner.full_name if user_details and user_details.user_Assetowner else None,
+            reason=reason,
+        )
 
-    # --- Handle Monitors ---
-    monitor_action = request.POST.get("monitor")
-    if monitor_action == "dispose":
-        for monitor in MonitorDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            DisposedMonitor.objects.create(
-                monitor_disposed_db=monitor,
-                equipment_package=equipment_package,
-                disposed_under=disposed_desktop,
-                monitor_sn=monitor.monitor_sn_db,
-                monitor_brand=str(monitor.monitor_brand_db) if monitor.monitor_brand_db else None,
-                monitor_model=monitor.monitor_model_db,
-                monitor_size=monitor.monitor_size_db,
-                reason=reason,
-            )
-            monitor.is_disposed = True
-            monitor.save()
-        messages.success(request, "Monitor(s) disposed.")
-    elif monitor_action == "salvage":
-        for monitor in MonitorDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            salvage_monitor_logic(monitor, notes="Salvaged instead of disposed")
-            monitor.is_disposed = True
-            monitor.save()
-        messages.success(request, "Monitor(s) moved to Salvage Area.")
+        # ---------- Monitors ----------
+        monitor_action = request.POST.get("monitor")
+        if monitor_action == "dispose":
+            for m in MonitorDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                DisposedMonitor.objects.create(
+                    monitor_disposed_db=m,
+                    equipment_package=equipment_package,
+                    disposed_under=disposed_desktop,
+                    monitor_sn=m.monitor_sn_db,
+                    monitor_brand=str(m.monitor_brand_db) if m.monitor_brand_db else None,
+                    monitor_model=m.monitor_model_db,
+                    monitor_size=m.monitor_size_db,
+                    reason=reason,
+                )
+                m.is_disposed = True
+                m.save()
+        elif monitor_action == "salvage":
+            for m in MonitorDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                salvage_monitor_logic(m, notes="Salvaged instead of disposed")
+                m.is_disposed = True
+                m.save()
 
-    # --- Handle Keyboards ---
-    keyboard_action = request.POST.get("keyboard")
-    if keyboard_action == "dispose":
-        for kb in KeyboardDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            DisposedKeyboard.objects.create(
-                keyboard_dispose_db=kb,
-                equipment_package=equipment_package,
-                disposed_under=disposed_desktop,
-            )
-            kb.is_disposed = True
-            kb.save()
-        messages.success(request, "Keyboard(s) disposed.")
-    elif keyboard_action == "salvage":
-        for kb in KeyboardDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            salvage_keyboard_logic(kb, notes="Salvaged instead of disposed")
-            kb.is_disposed = True
-            kb.save()
-        messages.success(request, "Keyboard(s) moved to Salvage Area.")
+        # ---------- Keyboards ----------
+        keyboard_action = request.POST.get("keyboard")
+        if keyboard_action == "dispose":
+            for kb in KeyboardDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                DisposedKeyboard.objects.create(
+                    keyboard_dispose_db=kb,
+                    equipment_package=equipment_package,
+                    disposed_under=disposed_desktop,
+                )
+                kb.is_disposed = True
+                kb.save()
+        elif keyboard_action == "salvage":
+            for kb in KeyboardDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                salvage_keyboard_logic(kb, notes="Salvaged instead of disposed")
+                kb.is_disposed = True
+                kb.save()
 
-    # --- Handle Mice ---
-    mouse_action = request.POST.get("mouse")
-    if mouse_action == "dispose":
-        for mouse in MouseDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            DisposedMouse.objects.create(
-                mouse_db=mouse,
-                equipment_package=equipment_package,
-                disposed_under=disposed_desktop,
-            )
-            mouse.is_disposed = True
-            mouse.save()
-        messages.success(request, "Mouse(s) disposed.")
-    elif mouse_action == "salvage":
-        for mouse in MouseDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            salvage_mouse_logic(mouse, notes="Salvaged instead of disposed")
-            mouse.is_disposed = True
-            mouse.save()
-        messages.success(request, "Mouse(s) moved to Salvage Area.")
+        # ---------- Mice ----------
+        mouse_action = request.POST.get("mouse")
+        if mouse_action == "dispose":
+            for mouse in MouseDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                DisposedMouse.objects.create(
+                    mouse_db=mouse,
+                    equipment_package=equipment_package,
+                    disposed_under=disposed_desktop,
+                )
+                mouse.is_disposed = True
+                mouse.save()
+        elif mouse_action == "salvage":
+            for mouse in MouseDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                salvage_mouse_logic(mouse, notes="Salvaged instead of disposed")
+                mouse.is_disposed = True
+                mouse.save()
 
-    # --- Handle UPS ---
-    ups_action = request.POST.get("ups")
-    if ups_action == "dispose":
-        for ups in UPSDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            DisposedUPS.objects.create(
-                ups_db=ups,
-                equipment_package=equipment_package,
-                disposed_under=disposed_desktop,
-            )
-            ups.is_disposed = True
-            ups.save()
-        messages.success(request, "UPS disposed.")
-    elif ups_action == "salvage":
-        for ups in UPSDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
-            salvage_ups_logic(ups, notes="Salvaged instead of disposed")
-            ups.is_disposed = True
-            ups.save()
-        messages.success(request, "UPS moved to Salvage Area.")
+        # ---------- UPS ----------
+        ups_action = request.POST.get("ups")
+        if ups_action == "dispose":
+            for ups in UPSDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                DisposedUPS.objects.create(
+                    ups_db=ups,
+                    equipment_package=equipment_package,
+                    disposed_under=disposed_desktop,
+                )
+                ups.is_disposed = True
+                ups.save()
+        elif ups_action == "salvage":
+            for ups in UPSDetails.objects.filter(equipment_package=equipment_package, is_disposed=False):
+                salvage_ups_logic(ups, notes="Salvaged instead of disposed")
+                ups.is_disposed = True
+                ups.save()
 
-    # --- Mark desktop itself disposed ---
-    desktop_details.is_disposed = True
-    desktop_details.save()
-    equipment_package.is_disposed = True
-    equipment_package.disposal_date = timezone.now()
-    equipment_package.save()
+        # ---------- Desktop itself ----------
+        desktop_details.is_disposed = True
+        desktop_details.save()
+        equipment_package.is_disposed = True
+        equipment_package.disposal_date = timezone.now()
+        equipment_package.save()
 
-    messages.success(request, "Desktop disposal process completed.")
-    return redirect("desktop_details_view", package_id=equipment_package.id)
+        redirect_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.id})
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                'success': True,
+                'message': 'Desktop package disposal completed successfully!',
+                'redirect_url': redirect_url
+            })
+
+        messages.success(request, "Desktop disposal process completed.")
+        return redirect(redirect_url)
+
+    except Exception as e:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({'success': False, 'message': f'Error disposing desktop: {str(e)}'})
+        messages.error(request, f"Error disposing desktop: {str(e)}")
+        return redirect('desktop_list_func')
+
 
 
 

@@ -1,60 +1,65 @@
-<div class="modal fade" id="editDocumentsdModal" tabindex="-1" aria-labelledby="editDocumentsdModal" aria-hidden="true">
+<!-- ==================== Edit Documents Modal ==================== -->
+<div class="modal fade" id="editDocumentsModal" tabindex="-1" aria-labelledby="editDocumentsModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     {% if documents_detailse and documents_detailse.id %}
-    <form method="POST" action="{% url 'update_documents' pk=documents_detailse.id %}">
+    <form method="POST" id="editDocumentsForm" action="{% url 'update_documents' pk=documents_detailse.id %}">
       {% csrf_token %}
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editDocumentdModal">Edit Documents Details</h5>
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="editDocumentsModalLabel">Edit Documents Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <input type="hidden" id="documentsId">
-          
-          <div class="mb-3">
-            <label for="editSN" class="form-label">Document PAR Number</label>
-            <input type="text" class="form-control" id="editSN" name="docs_PAR" required value="{{ documents_detailse.docs_PAR }}" required>
-          </div>
-          <div class="mb-3">
-            <label for="editBrand" class="form-label">Property Number</label>
-            <input type="text" class="form-control" id="editBrand" name="docs_Propertyno" value="{{ documents_detailse.docs_Propertyno }}" required>
-          </div>
-          <div class="mb-3">
-            <label for="editModel" class="form-label">Acuisition Type</label>
-            <input type="text" class="form-control" id="editModel" name="docs_Acquisition_Type" value="{{ documents_detailse.docs_Acquisition_Type }}" required>
-          </div>
-          <div class="mb-3">
-            <label for="editModel" class="form-label">Package Value</label>
-            <input type="text" class="form-control" id="editModel" name="docs_Value" value="{{ documents_detailse.docs_Value }}" required>
-          </div>
-          <div class="mb-3">
-            <label for="editModel" class="form-label">Date Received</label>
-            <input type="text" class="form-control" id="editModel" name="docs_Datereceived" value="{{ documents_detailse.docs_Datereceived }}" required>
-          </div>
-         <div class="mb-3">
-            <label for="editModel" class="form-label">Date Inspected</label>
-            <input type="text" class="form-control" id="editModel" name="docs_Dateinspected" value="{{ documents_detailse.docs_Dateinspected }}" required>
-          </div>
-        <div class="mb-3">
-            <label for="editModel" class="form-label">Supplier</label>
-            <input type="text" class="form-control" id="editModel" name="docs_Supplier" value="{{ documents_detailse.docs_Supplier }}" required>
-          </div>
-        <div class="mb-3">
-            <label for="editModel" class="form-label">Status</label>
-            <input type="text" class="form-control" id="editModel" name="docs_Status" value="{{ documents_detailse.docs_Status }}" required>
-          </div>
 
+        <div class="modal-body">
+          <input type="hidden" id="documentsId" value="{{ documents_detailse.id }}">
+
+          <div class="mb-3">
+            <label class="form-label">Document PAR Number</label>
+            <input type="text" class="form-control" name="docs_PAR" value="{{ documents_detailse.docs_PAR }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Property Number</label>
+            <input type="text" class="form-control" name="docs_Propertyno" value="{{ documents_detailse.docs_Propertyno }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Acquisition Type</label>
+            <input type="text" class="form-control" name="docs_Acquisition_Type" value="{{ documents_detailse.docs_Acquisition_Type }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Package Value</label>
+            <input type="text" class="form-control" name="docs_Value" value="{{ documents_detailse.docs_Value }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date Received</label>
+            <input type="text" class="form-control" name="docs_Datereceived" value="{{ documents_detailse.docs_Datereceived }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date Inspected</label>
+            <input type="text" class="form-control" name="docs_Dateinspected" value="{{ documents_detailse.docs_Dateinspected }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Supplier</label>
+            <input type="text" class="form-control" name="docs_Supplier" value="{{ documents_detailse.docs_Supplier }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <input type="text" class="form-control" name="docs_Status" value="{{ documents_detailse.docs_Status }}" required>
+          </div>
         </div>
+
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Document Details</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm d-none"></span>
+            <span class="button-text">Update Document Details</span>
+          </button>
         </div>
       </div>
     </form>
     {% else %}
-  <div class="alert alert-warning">
-    Cannot update: document details not available.
+    <div class="alert alert-warning m-3">
+      Cannot update: document details not available.
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
-  </div>
-</div>    
+</div>

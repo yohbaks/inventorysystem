@@ -118,15 +118,20 @@
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Desktop Specifications</h2>
                 <div class="d-flex gap-2">
-                  <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDesktopModal">
-                    <i class="fa fa-edit"></i> Edit
-                  </button>
-                  {% if not desktop_detailsx.is_disposed %}
-                  <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#disposeModal">
-                    <i class="fa fa-trash"></i> Dispose
-                  </button>
+                  {% if desktop_detailsx and not desktop_detailsx.is_disposed %}
+                    <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDesktopModal">
+                      <i class="fa fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#disposeModal">
+                      <i class="fa fa-trash"></i> Dispose
+                    </button>
+                  {% else %}
+                    <span class="badge bg-danger rounded-pill p-2 px-3 d-flex align-items-center">
+                      <i class="fas fa-trash-alt me-2"></i> Disposed
+                    </span>
                   {% endif %}
                 </div>
+
               </div>
 
               {% if has_active_desktop %}
@@ -190,473 +195,877 @@
                 </div>
               </div>
               {% endif %}
-            </div>
-          </div>
-
-          <!-- Monitor Tab -->
-          <div class="tab-pane fade" id="pills-monitor" role="tabpanel">
-            <div class="modern-card">
-              <div class="card-header-modern">
-                <h2 class="card-title-modern">Monitor Details</h2>
-                {% if not has_active_monitor and has_active_desktop %}
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addMonitorModal">
-                  <i class="fa fa-plus"></i> Add Monitor
-                </button>
-                {% endif %}
-              </div>
-
-              {% if monitor_detailse %}
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <div class="spec-label">Serial Number</div>
-                  <div class="spec-value">{{ monitor_detailse.monitor_sn_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Brand</div>
-                  <div class="spec-value">{{ monitor_detailse.monitor_brand_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Model</div>
-                  <div class="spec-value">{{ monitor_detailse.monitor_model_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Size</div>
-                  <div class="spec-value">{{ monitor_detailse.monitor_size_db }}</div>
-                </div>
-              </div>
-
-              <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editMonitorModal">
-                  <i class="fa fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal_Monitor">
-                  <i class="fa fa-trash"></i> Dispose
-                </button>
-              </div>
-              {% else %}
-              <div class="alert alert-info" style="border-radius: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                No monitor available for this desktop package.
-              </div>
-              {% endif %}
 
 
-              <!-- ✅ DISPOSED MONITORS HISTORY SECTION -->
-{% if disposed_monitor %}
+             <!-- ✅ DISPOSED DESKTOP HISTORY SECTION -->
+{% if disposed_desktop.exists %}
 <div class="mt-5">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
-      <i class="fas fa-history"></i> Disposed Monitor History
+      <i class="fas fa-desktop"></i> Disposed Desktop History
     </h3>
     <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
-      {{ disposed_monitor.count }} Disposed
+      {{ disposed_desktop.count }} Disposed
     </span>
   </div>
 
   <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
-    {% for monitor in disposed_monitor %}
-    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem; position: relative; overflow: hidden;">
-      <div style="position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: #dc2626;"></div>
-      
-      <div style="padding-left: 0.75rem;">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <div>
-            <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; display: inline-block; margin-bottom: 0.5rem;">
-              <i class="fas fa-trash-alt"></i> DISPOSED
-            </span>
-            <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
-              <i class="far fa-calendar"></i> {{ monitor.disposal_date|date:"F d, Y h:i A" }}
-            </div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ monitor.monitor_sn }}</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-3">
-            <div class="spec-label" style="color: #7f1d1d;">Brand</div>
-            <div class="spec-value" style="color: #991b1b;">{{ monitor.monitor_brand|default:"—" }}</div>
-          </div>
-          <div class="col-md-3">
-            <div class="spec-label" style="color: #7f1d1d;">Model</div>
-            <div class="spec-value" style="color: #991b1b;">{{ monitor.monitor_model|default:"—" }}</div>
-          </div>
-          <div class="col-md-3">
-            <div class="spec-label" style="color: #7f1d1d;">Size</div>
-            <div class="spec-value" style="color: #991b1b;">{{ monitor.monitor_size|default:"—" }}</div>
-          </div>
-          <div class="col-md-3">
-            <div class="spec-label" style="color: #7f1d1d;">Computer</div>
-            <div class="spec-value" style="color: #991b1b; font-size: 0.875rem;">{{ desktop_detailsx.computer_name|default:"—" }}</div>
-          </div>
-        </div>
-
-        {% if monitor.reason %}
-        <div class="mt-3" style="padding: 0.75rem; background: rgba(127, 29, 29, 0.1); border-radius: 0.5rem; border-left: 3px solid #dc2626;">
-          <div style="font-size: 0.75rem; color: #7f1d1d; font-weight: 600; margin-bottom: 0.25rem;">
-            <i class="fas fa-comment-alt"></i> Disposal Reason
-          </div>
-          <div style="font-size: 0.875rem; color: #991b1b;">{{ monitor.reason }}</div>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
-<!-- END ✅ DISPOSED MONITORS HISTORY SECTION -->
-
-            </div>
-          </div>
-
-          <!-- Keyboard Tab -->
-          <div class="tab-pane fade" id="pills-keyboard" role="tabpanel">
-            <div class="modern-card">
-              <div class="card-header-modern">
-                <h2 class="card-title-modern">Keyboard Details</h2>
-                {% if not has_active_keyboards and has_active_desktop %}
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addKeyboardModal">
-                  <i class="fa fa-plus"></i> Add Keyboard
-                </button>
-                {% endif %}
-              </div>
-
-              {% if keyboard_detailse %}
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <div class="spec-label">Serial Number</div>
-                  <div class="spec-value">{{ keyboard_detailse.keyboard_sn_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Brand</div>
-                  <div class="spec-value">{{ keyboard_detailse.keyboard_brand_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Model</div>
-                  <div class="spec-value">{{ keyboard_detailse.keyboard_model_db }}</div>
-                </div>
-              </div>
-              <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">
-                  <i class="fa fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeModalKeyboard">
-                  <i class="fa fa-trash"></i> Dispose
-                </button>
-              </div>
-              {% else %}
-              <div class="alert alert-info" style="border-radius: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                No keyboard available for this desktop package.
-              </div>
-              {% endif %}
-
-<!-- ✅ DISPOSED KEYBOARD HISTORY SECTION -->
-{% if disposed_keyboards.exists %}
-<div class="mt-5">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
-      <i class="fas fa-history"></i> Disposed Keyboard History
-    </h3>
-    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
-      {{ disposed_keyboard.count }} Disposed
-    </span>
-  </div>
-
-  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
-    {% for disposed_keyboard in disposed_keyboards %}
-    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem;">
+    {% for desktop in disposed_desktop %}
+    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem; border-radius: 0.75rem; padding: 1rem;">
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
           <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
             <i class="fas fa-trash-alt"></i> DISPOSED
           </span>
           <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
-            <i class="far fa-calendar"></i> {{ disposed_keyboard.disposal_date|date:"F d, Y" }}
+            <i class="far fa-calendar"></i> {{ desktop.date_disposed|date:"F d, Y" }}
           </div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ disposed_keyboard.keyboard_dispose_db.keyboard_sn_db }}</div>
+          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ desktop.serial_no }}</div>
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-4">
           <div class="spec-label" style="color: #7f1d1d;">Brand</div>
-          <div class="spec-value" style="color: #991b1b;">{{ disposed_keyboard.keyboard_dispose_db.keyboard_brand_db }}</div>
+          <div class="spec-value" style="color: #991b1b;">{{ desktop.brand_name }}</div>
         </div>
         <div class="col-md-4">
           <div class="spec-label" style="color: #7f1d1d;">Model</div>
-          <div class="spec-value" style="color: #991b1b;">{{ disposed_keyboard.keyboard_dispose_db.keyboard_model_db }}</div>
+          <div class="spec-value" style="color: #991b1b;">{{ desktop.model }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="spec-label" style="color: #7f1d1d;">Disposed By</div>
+          <div class="spec-value" style="color: #991b1b;">{{ desktop.asset_owner|default:"N/A" }}</div>
         </div>
       </div>
+
+      {% if desktop.reason %}
+      <div class="mt-3" style="font-size: 0.85rem; color: #7f1d1d;">
+        <strong>Reason:</strong> {{ desktop.reason }}
+      </div>
+      {% endif %}
     </div>
     {% endfor %}
   </div>
 </div>
 {% endif %}
-
-
-
-              
+<!-- END ✅ DISPOSED DESKTOP HISTORY SECTION -->
             </div>
           </div>
 
-          <!-- Mouse Tab -->
-          <div class="tab-pane fade" id="pills-mouse" role="tabpanel">
-            <div class="modern-card">
-              <div class="card-header-modern">
-                <h2 class="card-title-modern">Mouse Details</h2>
-                {% if not has_active_mouse and has_active_desktop %}
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addMouseModal">
-                  <i class="fa fa-plus"></i> Add Mouse
-                </button>
-                {% endif %}
-              </div>
-
-              {% if mouse_detailse %}
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <div class="spec-label">Serial Number</div>
-                  <div class="spec-value">{{ mouse_detailse.mouse_sn_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Brand</div>
-                  <div class="spec-value">{{ mouse_detailse.mouse_brand_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Model</div>
-                  <div class="spec-value">{{ mouse_detailse.mouse_model_db }}</div>
-                </div>
-              </div>
-              <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editMouseModal">
-                  <i class="fa fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeMouseModal">
-                  <i class="fa fa-trash"></i> Dispose
-                </button>
-              </div>
-              {% else %}
-              <div class="alert alert-info" style="border-radius: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                No mouse available for this desktop package.
-              </div>
-              {% endif %}
 
 
-              <!-- ✅ DISPOSED MOUSE HISTORY SECTION -->
-{% if disposed_mouse.exists %}
-<div class="mt-5">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
-      <i class="fas fa-history"></i> Disposed Mouse History
-    </h3>
-    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
-      {{ disposed_mouse.count }} Disposed
-    </span>
-  </div>
 
-  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
-    {% for mouse in disposed_mouse %}
-    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem;">
-      <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-          <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
-            <i class="fas fa-trash-alt"></i> DISPOSED
-          </span>
-          <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
-            <i class="far fa-calendar"></i> {{ mouse.disposal_date|date:"F d, Y" }}
-          </div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ mouse.mouse_db.mouse_sn_db }}</div>
-        </div>
+
+
+
+
+<!-- Monitor Tab -->
+<div class="tab-pane fade" id="pills-monitor" role="tabpanel">
+  <div class="modern-card">
+    <div class="card-header-modern">
+      <h2 class="card-title-modern">Monitor Details</h2>
+      {% if not has_active_monitor and has_active_desktop %}
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addMonitorModal">
+        <i class="fa fa-plus"></i> Add Monitor
+      </button>
+      {% endif %}
+    </div>
+
+    {% if monitor_detailse %}
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Serial Number</div>
+        <div class="spec-value">{{ monitor_detailse.monitor_sn_db }}</div>
       </div>
-
-      <div class="row">
-        <div class="col-md-4">
-          <div class="spec-label" style="color: #7f1d1d;">Brand</div>
-          <div class="spec-value" style="color: #991b1b;">{{ mouse.mouse_db.mouse_brand_db }}</div>
-        </div>
-        <div class="col-md-4">
-          <div class="spec-label" style="color: #7f1d1d;">Model</div>
-          <div class="spec-value" style="color: #991b1b;">{{ mouse.mouse_db.mouse_model_db }}</div>
-        </div>
+      <div class="spec-item">
+        <div class="spec-label">Brand</div>
+        <div class="spec-value">{{ monitor_detailse.monitor_brand_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Model</div>
+        <div class="spec-value">{{ monitor_detailse.monitor_model_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Size</div>
+        <div class="spec-value">{{ monitor_detailse.monitor_size_db }}</div>
       </div>
     </div>
-    {% endfor %}
-  </div>
-</div>
-{% endif %}
-<!-- END ✅ DISPOSED MOUSE HISTORY SECTION -->
 
+    <div class="mt-4 d-flex gap-2">
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editMonitorModal">
+        <i class="fa fa-edit"></i> Edit
+      </button>
+      <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeModal_Monitor">
+        <i class="fa fa-trash"></i> Dispose
+      </button>
+    </div>
+    {% else %}
+    <div class="alert alert-info" style="border-radius: 1rem;">
+      <i class="fas fa-info-circle"></i>
+      No monitor available for this desktop package.
+    </div>
+    {% endif %}
 
-
-
-            </div>
-          </div>
-
-          <!-- UPS Tab -->
-          <div class="tab-pane fade" id="pills-ups" role="tabpanel">
-            <div class="modern-card">
-              <div class="card-header-modern">
-                <h2 class="card-title-modern">UPS Details</h2>
-                {% if not has_active_ups and has_active_desktop %}
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addUPSModal">
-                  <i class="fa fa-plus"></i> Add UPS
-                </button>
-                {% endif %}
-              </div>
-
-              {% if ups_detailse %}
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <div class="spec-label">Serial Number</div>
-                  <div class="spec-value">{{ ups_detailse.ups_sn_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Brand</div>
-                  <div class="spec-value">{{ ups_detailse.ups_brand_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Model</div>
-                  <div class="spec-value">{{ ups_detailse.ups_model_db }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Capacity</div>
-                  <div class="spec-value">{{ ups_detailse.ups_capacity_db }}</div>
-                </div>
-              </div>
-              <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editUpsModal">
-                  <i class="fa fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">
-                  <i class="fa fa-trash"></i> Dispose
-                </button>
-              </div>
-              {% else %}
-              <div class="alert alert-info" style="border-radius: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                No UPS available for this desktop package.
-              </div>
-              {% endif %}
-
-<!-- ✅ DISPOSED UPS HISTORY SECTION -->
-{% if disposed_ups.exists %}
-<div class="mt-5">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
-      <i class="fas fa-history"></i> Disposed UPS History
-    </h3>
-    <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
-      {{ disposed_ups.count }} Disposed
-    </span>
-  </div>
-
-  <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
-    {% for ups in disposed_ups %}
-    <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem;">
-      <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-          <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
-            <i class="fas fa-trash-alt"></i> DISPOSED
-          </span>
-          <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
-            <i class="far fa-calendar"></i> {{ ups.disposal_date|date:"F d, Y" }}
-          </div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ ups.ups_db.ups_sn_db }}</div>
-        </div>
+    <!-- ✅ DISPOSED MONITOR HISTORY -->
+    {% if disposed_monitor.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#dc2626;margin:0;">
+          <i class="fas fa-history"></i> Disposed Monitor History
+        </h3>
+        <span class="badge" style="background:#fee2e2;color:#991b1b;padding:0.5rem 1rem;border-radius:9999px;font-size:0.875rem;">
+          {{ disposed_monitor.count }} Disposed
+        </span>
       </div>
 
-      <div class="row">
-        <div class="col-md-4">
-          <div class="spec-label" style="color: #7f1d1d;">Brand</div>
-          <div class="spec-value" style="color: #991b1b;">{{ ups.ups_db.ups_brand_db }}</div>
+      <div style="border-top:2px solid #fecaca;padding-top:1rem;">
+        {% for monitor in disposed_monitor %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);
+             border:2px solid #dc2626;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#dc2626;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#dc2626;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-trash-alt"></i> DISPOSED
+                </span>
+                <div style="font-size:0.875rem;color:#7f1d1d;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ monitor.disposal_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#991b1b;font-weight:600;">
+                  SN: {{ monitor.monitor_sn }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#7f1d1d;">Brand</div>
+                <div class="spec-value" style="color:#991b1b;">{{ monitor.monitor_brand|default:"—" }}</div>
+              </div>
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#7f1d1d;">Model</div>
+                <div class="spec-value" style="color:#991b1b;">{{ monitor.monitor_model|default:"—" }}</div>
+              </div>
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#7f1d1d;">Size</div>
+                <div class="spec-value" style="color:#991b1b;">{{ monitor.monitor_size|default:"—" }}</div>
+              </div>
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#7f1d1d;">Computer</div>
+                <div class="spec-value" style="color:#991b1b;font-size:0.875rem;">
+                  {{ desktop_detailsx.computer_name|default:"—" }}
+                </div>
+              </div>
+            </div>
+
+            {% if monitor.reason %}
+            <div class="mt-3" style="padding:0.75rem;background:rgba(127,29,29,0.1);
+                 border-radius:0.5rem;border-left:3px solid #dc2626;">
+              <div style="font-size:0.75rem;color:#7f1d1d;font-weight:600;margin-bottom:0.25rem;">
+                <i class="fas fa-comment-alt"></i> Disposal Reason
+              </div>
+              <div style="font-size:0.875rem;color:#991b1b;">{{ monitor.reason }}</div>
+            </div>
+            {% endif %}
+          </div>
         </div>
-        <div class="col-md-4">
-          <div class="spec-label" style="color: #7f1d1d;">Model</div>
-          <div class="spec-value" style="color: #991b1b;">{{ ups.ups_db.ups_model_db }}</div>
-        </div>
-        <div class="col-md-4">
-          <div class="spec-label" style="color: #7f1d1d;">Capacity</div>
-          <div class="spec-value" style="color: #991b1b;">{{ ups.ups_db.ups_capacity_db }}</div>
-        </div>
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
+    {% endif %}
+    <!-- END ✅ DISPOSED MONITOR HISTORY -->
+
+
+    <!-- 💚 SALVAGED MONITOR HISTORY -->
+    {% if salvaged_monitors_view.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#16a34a;margin:0;">
+          <i class="fas fa-recycle"></i> Salvaged Monitor History
+        </h3>
+        <span class="badge" style="background:#d1fae5;color:#065f46;padding:0.5rem 1rem;
+              border-radius:9999px;font-size:0.875rem;">
+          {{ salvaged_monitors_view.count }} Salvaged
+        </span>
+      </div>
+
+      <div style="border-top:2px solid #a7f3d0;padding-top:1rem;">
+        {% for sm in salvaged_monitors_view %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);
+             border:2px solid #16a34a;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;
+             position:relative;overflow:hidden;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#16a34a;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#16a34a;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-recycle"></i> SALVAGED
+                </span>
+                <div style="font-size:0.875rem;color:#065f46;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ sm.salvage_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#065f46;font-weight:600;">
+                  SN: {{ sm.monitor_sn }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#065f46;">Brand</div>
+                <div class="spec-value" style="color:#065f46;">{{ sm.monitor_brand|default:"—" }}</div>
+              </div>
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#065f46;">Model</div>
+                <div class="spec-value" style="color:#065f46;">{{ sm.monitor_model|default:"—" }}</div>
+              </div>
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#065f46;">Size</div>
+                <div class="spec-value" style="color:#065f46;">{{ sm.monitor_size|default:"—" }}</div>
+              </div>
+              <div class="col-md-3">
+                <div class="spec-label" style="color:#065f46;">Computer</div>
+                <div class="spec-value" style="color:#065f46;font-size:0.875rem;">
+                  {{ sm.computer_name|default:"—" }}
+                </div>
+              </div>
+            </div>
+
+            {% if sm.notes %}
+            <div class="mt-3" style="padding:0.75rem;background:rgba(6,95,70,0.08);
+                 border-radius:0.5rem;border-left:3px solid #16a34a;">
+              <div style="font-size:0.75rem;color:#065f46;font-weight:600;margin-bottom:0.25rem;">
+                <i class="fas fa-comment-alt"></i> Salvage Notes
+              </div>
+              <div style="font-size:0.875rem;color:#065f46;">{{ sm.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END 💚 SALVAGED MONITOR HISTORY -->
+
   </div>
 </div>
-{% endif %}
-<!-- END ✅ DISPOSED UPS HISTORY SECTION -->
 
+<!-- Keyboard Tab -->
+<div class="tab-pane fade" id="pills-keyboard" role="tabpanel">
+  <div class="modern-card">
+    <div class="card-header-modern">
+      <h2 class="card-title-modern">Keyboard Details</h2>
+      {% if not has_active_keyboards and has_active_desktop %}
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addKeyboardModal">
+        <i class="fa fa-plus"></i> Add Keyboard
+      </button>
+      {% endif %}
+    </div>
 
+    {% if keyboard_detailse %}
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Serial Number</div>
+        <div class="spec-value">{{ keyboard_detailse.keyboard_sn_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Brand</div>
+        <div class="spec-value">{{ keyboard_detailse.keyboard_brand_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Model</div>
+        <div class="spec-value">{{ keyboard_detailse.keyboard_model_db }}</div>
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editKeyboardModal">
+        <i class="fa fa-edit"></i> Edit
+      </button>
+      <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeModalKeyboard">
+        <i class="fa fa-trash"></i> Dispose
+      </button>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info" style="border-radius: 1rem;">
+      <i class="fas fa-info-circle"></i> No keyboard available for this desktop package.
+    </div>
+    {% endif %}
+
+    <!-- ❤️ DISPOSED KEYBOARD HISTORY -->
+    {% if disposed_keyboards.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#dc2626;margin:0;">
+          <i class="fas fa-history"></i> Disposed Keyboard History
+        </h3>
+        <span class="badge" style="background:#fee2e2;color:#991b1b;padding:0.5rem 1rem;border-radius:9999px;font-size:0.875rem;">
+          {{ disposed_keyboards.count }} Disposed
+        </span>
+      </div>
+
+      <div style="border-top:2px solid #fecaca;padding-top:1rem;">
+        {% for dk in disposed_keyboards %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);
+             border:2px solid #dc2626;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#dc2626;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#dc2626;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-trash-alt"></i> DISPOSED
+                </span>
+                <div style="font-size:0.875rem;color:#7f1d1d;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ dk.disposal_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#991b1b;font-weight:600;">
+                  SN: {{ dk.keyboard_dispose_db.keyboard_sn_db }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Brand</div>
+                <div class="spec-value" style="color:#991b1b;">{{ dk.keyboard_dispose_db.keyboard_brand_db }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Model</div>
+                <div class="spec-value" style="color:#991b1b;">{{ dk.keyboard_dispose_db.keyboard_model_db }}</div>
+              </div>
             </div>
           </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END ❤️ DISPOSED KEYBOARD HISTORY -->
 
-          <!-- User Tab -->
-          <div class="tab-pane fade" id="pills-user" role="tabpanel">
-            <div class="modern-card">
-              <div class="card-header-modern">
-                <h2 class="card-title-modern">User Details</h2>
-              </div>
 
-              {% if user_details %}
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <div class="spec-label">Asset Owner</div>
-                  <div class="spec-value">{{ user_details.user_Assetowner.employee_fname }} {{ user_details.user_Assetowner.employee_lname }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Designation</div>
-                  <div class="spec-value">{{ user_details.user_Assetowner.employee_position }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Office</div>
-                  <div class="spec-value">{{ user_details.user_Assetowner.employee_office_section }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">End User</div>
-                  <div class="spec-value">{{ user_details.user_Enduser.employee_fname }} {{ user_details.user_Enduser.employee_lname }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">End User Designation</div>
-                  <div class="spec-value">{{ user_details.user_Enduser.employee_position }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">End User Office</div>
-                  <div class="spec-value">{{ user_details.user_Enduser.employee_office_section }}</div>
-                </div>
-              </div>
+    <!-- 💚 SALVAGED KEYBOARD HISTORY -->
+    {% if salvaged_keyboards_view.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#16a34a;margin:0;">
+          <i class="fas fa-recycle"></i> Salvaged Keyboard History
+        </h3>
+        <span class="badge" style="background:#d1fae5;color:#065f46;padding:0.5rem 1rem;
+              border-radius:9999px;font-size:0.875rem;">
+          {{ salvaged_keyboards_view.count }} Salvaged
+        </span>
+      </div>
 
-              <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editEndUserModal">
-                  <i class="fa fa-edit"></i> Edit User
-                </button>
-                <button class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#editAssetOwnerModal">
-                  <i class="fa fa-exchange-alt"></i> Transfer Ownership
-                </button>
+      <div style="border-top:2px solid #a7f3d0;padding-top:1rem;">
+        {% for sk in salvaged_keyboards_view %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);
+             border:2px solid #16a34a;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#16a34a;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#16a34a;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-recycle"></i> SALVAGED
+                </span>
+                <div style="font-size:0.875rem;color:#065f46;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ sk.salvage_date|date:"F d, Y h:i A" }}
+                </div>
               </div>
-              {% else %}
-              <div class="alert alert-info" style="border-radius: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                No user details available.
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#065f46;font-weight:600;">
+                  SN: {{ sk.keyboard_sn }}
+                </div>
               </div>
-              {% endif %}
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Brand</div>
+                <div class="spec-value" style="color:#065f46;">{{ sk.keyboard_brand|default:"—" }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Model</div>
+                <div class="spec-value" style="color:#065f46;">{{ sk.keyboard_model|default:"—" }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Computer</div>
+                <div class="spec-value" style="color:#065f46;font-size:0.875rem;">
+                  {{ sk.computer_name|default:"—" }}
+                </div>
+              </div>
+            </div>
+
+            {% if sk.notes %}
+            <div class="mt-3" style="padding:0.75rem;background:rgba(6,95,70,0.08);
+                 border-radius:0.5rem;border-left:3px solid #16a34a;">
+              <div style="font-size:0.75rem;color:#065f46;font-weight:600;margin-bottom:0.25rem;">
+                <i class="fas fa-comment-alt"></i> Salvage Notes
+              </div>
+              <div style="font-size:0.875rem;color:#065f46;">{{ sk.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END 💚 SALVAGED KEYBOARD HISTORY -->
+  </div>
+</div>
+<!-- Mouse Tab -->
+<div class="tab-pane fade" id="pills-mouse" role="tabpanel">
+  <div class="modern-card">
+    <div class="card-header-modern">
+      <h2 class="card-title-modern">Mouse Details</h2>
+      {% if not has_active_mouse and has_active_desktop %}
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addMouseModal">
+        <i class="fa fa-plus"></i> Add Mouse
+      </button>
+      {% endif %}
+    </div>
+
+    {% if mouse_detailse %}
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Serial Number</div>
+        <div class="spec-value">{{ mouse_detailse.mouse_sn_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Brand</div>
+        <div class="spec-value">{{ mouse_detailse.mouse_brand_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Model</div>
+        <div class="spec-value">{{ mouse_detailse.mouse_model_db }}</div>
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editMouseModal">
+        <i class="fa fa-edit"></i> Edit
+      </button>
+      <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeMouseModal">
+        <i class="fa fa-trash"></i> Dispose
+      </button>
+    </div>
+    {% else %}
+    <div class="alert alert-info" style="border-radius: 1rem;">
+      <i class="fas fa-info-circle"></i>
+      No mouse available for this desktop package.
+    </div>
+    {% endif %}
+
+    <!-- ❤️ DISPOSED MOUSE HISTORY -->
+    {% if disposed_mouse.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#dc2626;margin:0;">
+          <i class="fas fa-history"></i> Disposed Mouse History
+        </h3>
+        <span class="badge" style="background:#fee2e2;color:#991b1b;padding:0.5rem 1rem;border-radius:9999px;font-size:0.875rem;">
+          {{ disposed_mouse.count }} Disposed
+        </span>
+      </div>
+
+      <div style="border-top:2px solid #fecaca;padding-top:1rem;">
+        {% for mouse in disposed_mouse %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);
+             border:2px solid #dc2626;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#dc2626;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#dc2626;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-trash-alt"></i> DISPOSED
+                </span>
+                <div style="font-size:0.875rem;color:#7f1d1d;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ mouse.disposal_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#991b1b;font-weight:600;">
+                  SN: {{ mouse.mouse_db.mouse_sn_db }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Brand</div>
+                <div class="spec-value" style="color:#991b1b;">{{ mouse.mouse_db.mouse_brand_db }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Model</div>
+                <div class="spec-value" style="color:#991b1b;">{{ mouse.mouse_db.mouse_model_db }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Computer</div>
+                <div class="spec-value" style="color:#991b1b;">{{ desktop_detailsx.computer_name|default:"—" }}</div>
+              </div>
             </div>
           </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END ❤️ DISPOSED MOUSE HISTORY -->
+
+
+    <!-- 💚 SALVAGED MOUSE HISTORY -->
+    {% if salvaged_mice_view.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#16a34a;margin:0;">
+          <i class="fas fa-recycle"></i> Salvaged Mouse History
+        </h3>
+        <span class="badge" style="background:#d1fae5;color:#065f46;padding:0.5rem 1rem;
+              border-radius:9999px;font-size:0.875rem;">
+          {{ salvaged_mice_view.count }} Salvaged
+        </span>
+      </div>
+
+      <div style="border-top:2px solid #a7f3d0;padding-top:1rem;">
+        {% for sm in salvaged_mice_view %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);
+             border:2px solid #16a34a;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#16a34a;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#16a34a;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-recycle"></i> SALVAGED
+                </span>
+                <div style="font-size:0.875rem;color:#065f46;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ sm.salvage_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#065f46;font-weight:600;">
+                  SN: {{ sm.mouse_sn }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Brand</div>
+                <div class="spec-value" style="color:#065f46;">{{ sm.mouse_brand|default:"—" }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Model</div>
+                <div class="spec-value" style="color:#065f46;">{{ sm.mouse_model|default:"—" }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Computer</div>
+                <div class="spec-value" style="color:#065f46;font-size:0.875rem;">
+                  {{ sm.computer_name|default:"—" }}
+                </div>
+              </div>
+            </div>
+
+            {% if sm.notes %}
+            <div class="mt-3" style="padding:0.75rem;background:rgba(6,95,70,0.08);
+                 border-radius:0.5rem;border-left:3px solid #16a34a;">
+              <div style="font-size:0.75rem;color:#065f46;font-weight:600;margin-bottom:0.25rem;">
+                <i class="fas fa-comment-alt"></i> Salvage Notes
+              </div>
+              <div style="font-size:0.875rem;color:#065f46;">{{ sm.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END 💚 SALVAGED MOUSE HISTORY -->
+  </div>
+</div>
+
+<!-- UPS Tab -->
+<div class="tab-pane fade" id="pills-ups" role="tabpanel">
+  <div class="modern-card">
+    <div class="card-header-modern">
+      <h2 class="card-title-modern">UPS Details</h2>
+      {% if not has_active_ups and has_active_desktop %}
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addUPSModal">
+        <i class="fa fa-plus"></i> Add UPS
+      </button>
+      {% endif %}
+    </div>
+
+    {% if ups_detailse %}
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Serial Number</div>
+        <div class="spec-value">{{ ups_detailse.ups_sn_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Brand</div>
+        <div class="spec-value">{{ ups_detailse.ups_brand_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Model</div>
+        <div class="spec-value">{{ ups_detailse.ups_model_db }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Capacity</div>
+        <div class="spec-value">{{ ups_detailse.ups_capacity_db }}</div>
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editUpsModal">
+        <i class="fa fa-edit"></i> Edit
+      </button>
+      <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#confirmDisposeUpsModal">
+        <i class="fa fa-trash"></i> Dispose
+      </button>
+    </div>
+    {% else %}
+    <div class="alert alert-info" style="border-radius: 1rem;">
+      <i class="fas fa-info-circle"></i> No UPS available for this desktop package.
+    </div>
+    {% endif %}
+
+    <!-- ❤️ DISPOSED UPS HISTORY -->
+    {% if disposed_ups.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#dc2626;margin:0;">
+          <i class="fas fa-history"></i> Disposed UPS History
+        </h3>
+        <span class="badge" style="background:#fee2e2;color:#991b1b;padding:0.5rem 1rem;border-radius:9999px;font-size:0.875rem;">
+          {{ disposed_ups.count }} Disposed
+        </span>
+      </div>
+
+      <div style="border-top:2px solid #fecaca;padding-top:1rem;">
+        {% for ups in disposed_ups %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);
+             border:2px solid #dc2626;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#dc2626;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#dc2626;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-trash-alt"></i> DISPOSED
+                </span>
+                <div style="font-size:0.875rem;color:#7f1d1d;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ ups.disposal_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#991b1b;font-weight:600;">
+                  SN: {{ ups.ups_db.ups_sn_db }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Brand</div>
+                <div class="spec-value" style="color:#991b1b;">{{ ups.ups_db.ups_brand_db }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Model</div>
+                <div class="spec-value" style="color:#991b1b;">{{ ups.ups_db.ups_model_db }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#7f1d1d;">Capacity</div>
+                <div class="spec-value" style="color:#991b1b;">{{ ups.ups_db.ups_capacity_db }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END ❤️ DISPOSED UPS HISTORY -->
+
+
+    <!-- 💚 SALVAGED UPS HISTORY -->
+    {% if salvaged_ups_view.exists %}
+    <div class="mt-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 style="font-weight:700;color:#16a34a;margin:0;">
+          <i class="fas fa-recycle"></i> Salvaged UPS History
+        </h3>
+        <span class="badge" style="background:#d1fae5;color:#065f46;padding:0.5rem 1rem;
+              border-radius:9999px;font-size:0.875rem;">
+          {{ salvaged_ups_view.count }} Salvaged
+        </span>
+      </div>
+
+      <div style="border-top:2px solid #a7f3d0;padding-top:1rem;">
+        {% for su in salvaged_ups_view %}
+        <div class="spec-item" style="background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);
+             border:2px solid #16a34a;margin-bottom:1rem;border-radius:0.75rem;padding:1rem;position:relative;">
+          <div style="position:absolute;top:0;left:0;width:5px;height:100%;background:#16a34a;"></div>
+
+          <div style="padding-left:0.75rem;">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <span style="background:#16a34a;color:white;padding:0.25rem 0.75rem;
+                      border-radius:0.5rem;font-size:0.75rem;font-weight:600;
+                      display:inline-block;margin-bottom:0.5rem;">
+                  <i class="fas fa-recycle"></i> SALVAGED
+                </span>
+                <div style="font-size:0.875rem;color:#065f46;margin-top:0.25rem;">
+                  <i class="far fa-calendar"></i> {{ su.salvage_date|date:"F d, Y h:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.75rem;color:#065f46;font-weight:600;">
+                  SN: {{ su.ups_sn }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Brand</div>
+                <div class="spec-value" style="color:#065f46;">{{ su.ups_brand|default:"—" }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Model</div>
+                <div class="spec-value" style="color:#065f46;">{{ su.ups_model|default:"—" }}</div>
+              </div>
+              <div class="col-md-4">
+                <div class="spec-label" style="color:#065f46;">Computer</div>
+                <div class="spec-value" style="color:#065f46;font-size:0.875rem;">
+                  {{ su.computer_name|default:"—" }}
+                </div>
+              </div>
+            </div>
+
+            {% if su.notes %}
+            <div class="mt-3" style="padding:0.75rem;background:rgba(6,95,70,0.08);
+                 border-radius:0.5rem;border-left:3px solid #16a34a;">
+              <div style="font-size:0.75rem;color:#065f46;font-weight:600;margin-bottom:0.25rem;">
+                <i class="fas fa-comment-alt"></i> Salvage Notes
+              </div>
+              <div style="font-size:0.875rem;color:#065f46;">{{ su.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    <!-- END 💚 SALVAGED UPS HISTORY -->
+  </div>
+</div>
+
+
+         <!-- User Tab -->
+<div class="tab-pane fade" id="pills-user" role="tabpanel">
+  <div class="modern-card">
+    <div class="card-header-modern">
+      <h2 class="card-title-modern">User Details</h2>
+    </div>
+
+    {% if user_details %}
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Asset Owner</div>
+        <div class="spec-value">{{ user_details.user_Assetowner.employee_fname }} {{ user_details.user_Assetowner.employee_lname }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Designation</div>
+        <div class="spec-value">{{ user_details.user_Assetowner.employee_position }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Office</div>
+        <div class="spec-value">{{ user_details.user_Assetowner.employee_office_section }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">End User</div>
+        <div class="spec-value">{{ user_details.user_Enduser.employee_fname }} {{ user_details.user_Enduser.employee_lname }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">End User Designation</div>
+        <div class="spec-value">{{ user_details.user_Enduser.employee_position }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">End User Office</div>
+        <div class="spec-value">{{ user_details.user_Enduser.employee_office_section }}</div>
+      </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+      {% if desktop_detailsx.is_disposed %}
+        <!-- 🔒 Disabled buttons when disposed -->
+        <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Editing not allowed — this package is disposed.">
+          <i class="fa fa-edit"></i> Edit User
+        </button>
+        <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Ownership transfer disabled for disposed equipment.">
+          <i class="fa fa-lock"></i> Transfer Ownership
+        </button>
+      {% else %}
+        <!-- ✅ Active buttons when operational -->
+        <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editEndUserModal">
+          <i class="fa fa-edit"></i> Edit User
+        </button>
+        <button class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#editAssetOwnerModal">
+          <i class="fa fa-exchange-alt"></i> Transfer Ownership
+        </button>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-info" style="border-radius: 1rem;">
+      <i class="fas fa-info-circle"></i>
+      No user details available.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
 
           <!-- Documents Tab -->
           <div class="tab-pane fade" id="pills-documents" role="tabpanel">
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Documents Details</h2>
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsdModal">
+                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">
                   <i class="fa fa-edit"></i> Edit
                 </button>
               </div>
@@ -815,6 +1224,7 @@
           </p>
         </div>
 
+        
       </div>
     </div>
   </div>
@@ -1245,6 +1655,435 @@ $(document).ready(function() {
   handleKeyboardForm('#disposeKeyboardForm', '#confirmDisposeModalKeyboard', 'Keyboard disposed successfully!', 'Confirm Dispose');
 })();
 </script>
+
+<!-- ==================== DESKTOP PACKAGE DISPOSAL SCRIPT ==================== -->
+<script>
+(function() {
+  // --- CSRF helper ---
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  const form = document.getElementById('disposeDesktopForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const url = form.getAttribute('action');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const btnText = submitBtn.querySelector('.button-text');
+
+    submitBtn.disabled = true;
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Processing...';
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: $(form).serialize(),
+      success: function(resp) {
+        if (resp.success) {
+          $('#disposeModal').modal('hide');
+          $.notify({
+            title: "✅ Success",
+            message: resp.message || "Desktop disposed successfully!",
+            icon: "fa fa-check-circle"
+          }, {
+            type: "success",
+            placement: { from: "bottom", align: "right" },
+            delay: 3000,
+            z_index: 9999
+          });
+
+          // Reload to same page after success
+          setTimeout(() => {
+            const redirect = resp.redirect_url || window.location.pathname;
+            window.location.href = redirect;
+            location.reload();
+          }, 1200);
+        } else {
+          $.notify({
+            title: "⚠️ Failed",
+            message: resp.message || "Something went wrong during disposal.",
+            icon: "fa fa-exclamation-triangle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000
+          });
+        }
+      },
+      error: function(xhr) {
+        $.notify({
+          title: "❌ Server Error",
+          message: xhr.responseJSON?.error || "Unexpected error occurred.",
+          icon: "fa fa-times-circle"
+        }, {
+          type: "danger",
+          placement: { from: "bottom", align: "right" },
+          delay: 4000
+        });
+      },
+      complete: function() {
+        submitBtn.disabled = false;
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Dispose';
+      }
+    });
+  });
+})();
+</script>
+
+
+
+
+
+
+
+<!-- ==================== MOUSE ACTION SCRIPT (Add + Edit + Dispose combined) ==================== -->
+<script>
+(function() {
+  // 🔹 CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  // 🔹 Generic handler for mouse modals
+  function handleMouseForm(formSelector, modalSelector, successMessage, btnDefaultText) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const url = form.getAttribute('action');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const spinner = submitBtn.querySelector('.spinner-border');
+      const btnText = submitBtn.querySelector('.button-text');
+
+      submitBtn.disabled = true;
+      spinner && spinner.classList.remove('d-none');
+      btnText && (btnText.textContent = 'Processing...');
+
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: $(form).serialize(),
+        success: function(resp) {
+          if (resp.success) {
+            if (modalSelector) $(modalSelector).modal('hide');
+
+            $.notify({
+              title: "✅ Success",
+              message: resp.message || successMessage,
+              icon: "fa fa-check-circle"
+            }, {
+              type: "success",
+              placement: { from: "bottom", align: "right" },
+              delay: 2500,
+              z_index: 9999
+            });
+
+            setTimeout(() => {
+              const reloadUrl = resp.redirect_url || (window.location.pathname + "#pills-mouse");
+              window.location.href = reloadUrl;
+              location.reload();
+            }, 1000);
+          } else {
+            $.notify({
+              title: "⚠️ Failed",
+              message: resp.message || "Something went wrong.",
+              icon: "fa fa-exclamation-triangle"
+            }, {
+              type: "danger",
+              placement: { from: "bottom", align: "right" },
+              delay: 4000,
+              z_index: 9999
+            });
+          }
+        },
+        error: function(xhr) {
+          $.notify({
+            title: "❌ Server Error",
+            message: xhr.responseJSON?.error || "Unexpected error occurred.",
+            icon: "fa fa-times-circle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000,
+            z_index: 9999
+          });
+        },
+        complete: function() {
+          submitBtn.disabled = false;
+          spinner && spinner.classList.add('d-none');
+          btnText && (btnText.textContent = btnDefaultText);
+        }
+      });
+    });
+  }
+
+  // 🔹 Initialize for all Mouse modals
+  handleMouseForm('#addMouseForm', '#addMouseModal', 'Mouse added successfully!', 'Add Mouse');
+  handleMouseForm('#editMouseForm', '#editMouseModal', 'Mouse updated successfully!', 'Update Mouse');
+  handleMouseForm('#disposeMouseForm', '#confirmDisposeMouseModal', 'Mouse disposed successfully!', 'Confirm Dispose');
+})();
+</script>
+
+
+<!-- ==================== UPS ACTION SCRIPT (Add + Edit + Dispose) ==================== -->
+<script>
+(function() {
+  // 🔹 CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  // 🔹 Generic handler for UPS modals
+  function handleUPSForm(formSelector, modalSelector, successMessage, btnDefaultText) {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const url = form.getAttribute('action');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const spinner = submitBtn.querySelector('.spinner-border');
+      const btnText = submitBtn.querySelector('.button-text');
+
+      submitBtn.disabled = true;
+      spinner && spinner.classList.remove('d-none');
+      btnText && (btnText.textContent = 'Processing...');
+
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: $(form).serialize(),
+        success: function(resp) {
+          if (resp.success) {
+            if (modalSelector) $(modalSelector).modal('hide');
+
+            $.notify({
+              title: "✅ Success",
+              message: resp.message || successMessage,
+              icon: "fa fa-check-circle"
+            }, {
+              type: "success",
+              placement: { from: "bottom", align: "right" },
+              delay: 2500,
+              z_index: 9999
+            });
+
+            setTimeout(() => {
+              const reloadUrl = resp.redirect_url || (window.location.pathname + "#pills-ups");
+              window.location.href = reloadUrl;
+              location.reload();
+            }, 1000);
+          } else {
+            $.notify({
+              title: "⚠️ Failed",
+              message: resp.message || "Something went wrong.",
+              icon: "fa fa-exclamation-triangle"
+            }, {
+              type: "danger",
+              placement: { from: "bottom", align: "right" },
+              delay: 4000,
+              z_index: 9999
+            });
+          }
+        },
+        error: function(xhr) {
+          $.notify({
+            title: "❌ Server Error",
+            message: xhr.responseJSON?.error || "Unexpected error occurred.",
+            icon: "fa fa-times-circle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000,
+            z_index: 9999
+          });
+        },
+        complete: function() {
+          submitBtn.disabled = false;
+          spinner && spinner.classList.add('d-none');
+          btnText && (btnText.textContent = btnDefaultText);
+        }
+      });
+    });
+  }
+
+  // 🔹 Initialize UPS modals
+  handleUPSForm('#addUPSForm', '#addUPSModal', 'UPS added successfully!', 'Add UPS');
+  handleUPSForm('#editUPSForm', '#editUpsModal', 'UPS updated successfully!', 'Update UPS');
+  handleUPSForm('#disposeUPSForm', '#confirmDisposeUpsModal', 'UPS disposed successfully!', 'Confirm Dispose');
+})();
+</script>
+
+<!-- ==================== DOCUMENT UPDATE SCRIPT ==================== -->
+<script>
+(function() {
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  const form = document.getElementById('editDocumentsForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const url = form.getAttribute('action');
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const btnText = submitBtn.querySelector('.button-text');
+
+    submitBtn.disabled = true;
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Saving...';
+
+    const payload = $(form).serialize();
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: payload,
+      success: function(resp) {
+        if (resp.success) {
+          $('#editDocumentsModal').modal('hide');
+          $.notify({
+            title: "✅ Success",
+            message: resp.message || "Document details updated successfully!",
+            icon: "fa fa-check-circle"
+          }, {
+            type: "success",
+            placement: { from: "bottom", align: "right" },
+            delay: 2500,
+            z_index: 9999
+          });
+
+          setTimeout(() => {
+            const redirect = resp.redirect_url || (window.location.pathname + "#pills-documents");
+            window.location.href = redirect;
+            location.reload();
+          }, 1000);
+        } else {
+          $.notify({
+            title: "⚠️ Failed",
+            message: resp.message || "Update failed. Please try again.",
+            icon: "fa fa-exclamation-triangle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000,
+            z_index: 9999
+          });
+        }
+      },
+      error: function(xhr) {
+        $.notify({
+          title: "❌ Server Error",
+          message: xhr.responseJSON?.error || "An unexpected error occurred.",
+          icon: "fa fa-times-circle"
+        }, {
+          type: "danger",
+          placement: { from: "bottom", align: "right" },
+          delay: 4000,
+          z_index: 9999
+        });
+      },
+      complete: function() {
+        submitBtn.disabled = false;
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Update Document Details';
+      }
+    });
+  });
+})();
+</script>
+
 
 
 

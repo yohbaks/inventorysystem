@@ -23,7 +23,7 @@
 
         {% if ups_detailse %}
         <!-- ✅ Only render form if UPS exists -->
-        <form method="POST" action="{% url 'ups_disposed' ups_detailse.id %}" class="dispose-ups-form d-inline">
+        <form method="POST" id="disposeUPSForm" action="{% url 'ups_disposed' ups_detailse.id %}" class="dispose-ups-form d-inline">
           {% csrf_token %}
           <button type="submit" class="btn btn-danger">
             <i class="fas fa-trash"></i> Confirm Dispose

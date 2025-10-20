@@ -3,7 +3,7 @@
   <div class="modal-dialog">
     
     {% if ups_detailse %}
-    <form method="POST" action="{% url 'update_ups' pk=ups_detailse.id %}">
+    <form method="POST" id="editUPSForm" action="{% url 'update_ups' pk=ups_detailse.id %}">
       {% csrf_token %}
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">

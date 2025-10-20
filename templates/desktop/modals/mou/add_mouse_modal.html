@@ -8,7 +8,7 @@
       </div>
 
       {% if equipment_package and equipment_package.id %}
-      <form method="POST" action="{% url 'add_mouse_to_package' equipment_package.id %}">
+      <form method="POST" id="addMouseForm" action="{% url 'add_mouse_to_package' equipment_package.id %}">
         {% csrf_token %}
         <div class="modal-body">
           <ul class="nav nav-pills mb-3" id="mouseAddTabs" role="tablist">

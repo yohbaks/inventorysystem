@@ -13,7 +13,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <!-- Disposal form inside modal -->
                 {% comment %} <form method="POST" action="{% url 'mouse_disposed' mouse_detailse.id %}" class="dispose-mouse-form d-inline"> {% endcomment %}
-                  <form method="POST" 
+                  <form method="POST" id="disposeMouseForm"
                         action="{% if mouse_detailse %}{% url 'mouse_disposed' mouse_detailse.id %}{% else %}#{% endif %}" 
                         class="dispose-mouse-form d-inline">
                         {% csrf_token %}

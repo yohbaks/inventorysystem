@@ -1,7 +1,7 @@
 <!-- Update Mouse Modal -->
 <div class="modal fade" id="editMouseModal" tabindex="-1" aria-labelledby="editMouseModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST"
+    <form method="POST" id="editMouseForm"
           action="{% if mouse_detailse %}{% url 'update_mouse' pk=mouse_detailse.id %}{% else %}#{% endif %}">
       {% csrf_token %}
       <div class="modal-content">
