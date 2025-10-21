@@ -156,6 +156,7 @@ urlpatterns = [
 
     path('laptop/<int:package_id>/pdf/', views.generate_laptop_pdf, name='generate_laptop_pdf'),
 
+    path("laptops/edit/<int:laptop_id>/", views.edit_laptop, name="edit_laptop"),
     
     path("laptops/dispose/<int:package_id>/", views.dispose_laptop, name="dispose_laptop"),
     path("laptops/disposed/", views.disposed_laptops, name="disposed_laptops"),

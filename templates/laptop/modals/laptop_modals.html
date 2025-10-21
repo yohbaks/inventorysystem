@@ -1,0 +1,211 @@
+
+
+<!-- ==================== 💻 EDIT LAPTOP MODAL ==================== -->
+<div class="modal fade" id="editLaptopModal" tabindex="-1" aria-labelledby="editLaptopModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'edit_laptop' laptop_details.id %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa fa-edit"></i> Edit Laptop Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+  <label class="form-label">Serial Number</label>
+  <input type="text" name="laptop_sn_db" class="form-control"
+         value="{{ laptop_details.laptop_sn_db }}" required>
+</div>
+          <div class="mb-3">
+  <label class="form-label">Brand</label>
+  <select class="form-select" name="brand_name" required>
+    <option value="">-- Select Brand --</option>
+    {% for brand in brands %}
+    <option value="{{ brand.id }}"
+      {% if laptop_details.brand_name and laptop_details.brand_name.id == brand.id %}
+        selected
+      {% endif %}>
+      {{ brand.name }}
+    </option>
+    {% endfor %}
+  </select>
+</div>
+          <div class="mb-3">
+            <label class="form-label">Model</label>
+            <input type="text" name="model" class="form-control" value="{{ laptop_details.model }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Processor</label>
+            <input type="text" name="processor" class="form-control" value="{{ laptop_details.processor }}" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Memory</label>
+              <input type="text" name="memory" class="form-control" value="{{ laptop_details.memory }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Drive</label>
+              <input type="text" name="drive" class="form-control" value="{{ laptop_details.drive }}" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Operating System</label>
+              <input type="text" name="laptop_OS" class="form-control" value="{{ laptop_details.laptop_OS }}">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Office Version</label>
+              <input type="text" name="laptop_Office" class="form-control" value="{{ laptop_details.laptop_Office }}">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-save"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== 👤 EDIT END USER MODAL ==================== -->
+<div class="modal fade" id="editEndUserModal" tabindex="-1" aria-labelledby="editEndUserModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" data-url="{% url 'update_end_user' laptop_package.id %}" id="editEndUserForm">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa fa-user"></i> Edit End User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="enduserError" class="alert alert-danger d-none"></div>
+          <div class="mb-3">
+            <label class="form-label">Select New End User</label>
+            <select class="form-select" name="enduser_input" required>
+              <option value="">-- Select Employee --</option>
+              {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.employee_fname }} {{ emp.employee_lname }} - {{ emp.employee_position }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" id="submitButton" class="btn btn-primary">
+            <span class="button-text"><i class="fa fa-save"></i> Save Changes</span>
+            <span class="spinner-border spinner-border-sm d-none"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== 🔁 TRANSFER OWNERSHIP MODAL ==================== -->
+<div class="modal fade" id="editAssetOwnerModal" tabindex="-1" aria-labelledby="editAssetOwnerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" data-url="{% url 'update_asset_owner' laptop_package.id %}" id="editAssetOwnerForm">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title"><i class="fa fa-exchange-alt"></i> Transfer Ownership</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="assetOwnerError" class="alert alert-danger d-none"></div>
+          <div class="mb-3">
+            <label class="form-label">Select New Asset Owner</label>
+            <select class="form-select" name="assetowner_input" required>
+              <option value="">-- Select Employee --</option>
+              {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.employee_fname }} {{ emp.employee_lname }} - {{ emp.employee_position }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" id="submitButtonAsset" class="btn btn-warning">
+            <span class="button-text"><i class="fa fa-save"></i> Save Changes</span>
+            <span class="spinner-border spinner-border-sm d-none"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== 📄 EDIT DOCUMENTS MODAL ==================== -->
+<div class="modal fade" id="editDocumentsModal" tabindex="-1" aria-labelledby="editDocumentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'update_documents' laptop_package.id %}" id="editDocumentsForm">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fa fa-file-alt"></i> Edit Document Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">PAR Number</label>
+            <input type="text" name="docs_PAR" class="form-control" value="{{ documents_details.docs_PAR }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Property Number</label>
+            <input type="text" name="docs_Propertyno" class="form-control" value="{{ documents_details.docs_Propertyno }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Value</label>
+            <input type="text" name="docs_Value" class="form-control" value="{{ documents_details.docs_Value }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Supplier</label>
+            <input type="text" name="docs_Supplier" class="form-control" value="{{ documents_details.docs_Supplier }}">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="button-text"><i class="fa fa-save"></i> Save Changes</span>
+            <span class="spinner-border spinner-border-sm d-none"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== 🗑 DISPOSE LAPTOP MODAL ==================== -->
+<div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    {% if laptop_details %}
+    <form method="POST" action="{% url 'dispose_laptop' laptop_details.id %}" id="disposeLaptopForm">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title"><i class="fa fa-trash"></i> Dispose Laptop</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">Reason</label>
+          <textarea name="reason" class="form-control" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">
+            <span class="button-text"><i class="fa fa-trash"></i> Dispose</span>
+            <span class="spinner-border spinner-border-sm d-none"></span>
+          </button>
+        </div>
+      </div>
+    </form>
+    {% else %}
+    <div class="alert alert-warning m-0">
+      ⚠ No active laptop to dispose in this package.
+    </div>
+    {% endif %}
+  </div>
+</div>

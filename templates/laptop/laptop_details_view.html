@@ -1,421 +1,978 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
-{% block content %}
 {% load custom_filters %}
 
-<div class="container">
-  <div class="page-inner">
-    <div class="row">
-      <!-- Left Column -->
-      <div class="col-md-8">
-        <div class="card card-round">
-          <div class="card-header">
-            <div class="card-tools">
-              {% if not laptop_details.is_disposed %}
-              <button class="btn btn-label-danger btn-round btn-sm me-2" data-bs-toggle="modal" data-bs-target="#disposeModal">
-                <span class="btn-label"><i class="fa fa-location-arrow"></i></span> Return to Supply
-              </button>
-              {% endif %}
-<a href="{% url 'maintenance_history_laptop' laptop_package.id %}" class="btn btn-label-info btn-round btn-sm">
-  <span class="btn-label"><i class="fa fa-tools"></i></span> Maintenance
-</a>
-              <a href="{% url 'generate_laptop_pdf' laptop_package.id %}" class="btn btn-label-success btn-round btn-sm me-2">
-                <i class="fa fa-file-pdf"></i> Download PDF
-              </a>
-              <button type="button" class="btn btn-label-warning btn-round btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal">
-                <i class="fas fa-qrcode"></i> Generate QR Code
-              </button>
+{% block content %}
+
+{% include 'laptop/modals/laptop_modals.html' %}
+
+{% block extra_css %}
+
+
+<style>
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+
+
+</style>
+{% endblock %}
+
+<div class="modern-container">
+  <div class="container-fluid">
+    <!-- Hero Header -->
+    <div class="hero-header">
+      <div class="hero-content">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+          <div class="flex-grow-1">
+            <div class="hero-badge">
+              <i class="fas fa-laptop"></i>
+              <span>Laptop Package</span>
             </div>
-          </div>
-
-          <!-- QR Modal -->
-          <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Laptop Package QR Code</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                  {% if laptop_package.qr_code %}
-                    <img id="qrImage" src="{{ laptop_package.qr_code.url }}" alt="QR Code for Laptop Package {{ laptop_package.pk }}" width="200">
-                    <p class="mt-2">Scan to view this laptop package</p>
-                    <button class="btn btn-primary mt-3" onclick="printQrCode()">
-                      <i class="fa fa-print"></i> Print Wallet-Size QR
-                    </button>
-                  {% else %}
-                    <p>No QR code available.</p>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <script>
-            function printQrCode() {
-              const qrImage = document.getElementById("qrImage");
-              if (!qrImage) return;
-              const printWindow = window.open("", "_blank", "width=400,height=250");
-              printWindow.document.write(`
-                <html><head><title>Print QR Code</title>
-                <style>
-                  @page { size: 3.5in 2in; margin: 0; }
-                  body { display:flex;align-items:center;justify-content:center;margin:0; }
-                  .card { width:1.8in;height:1.8in;border:2px solid black;border-radius:15px;display:flex;flex-direction:column;align-items:center;justify-content:center; }
-                  img { width:1.1in;height:1.1in; }
-                  .footer { margin-top:6px;font-weight:bold;font-size:14px;text-transform:uppercase; }
-                </style></head>
-                <body>
-                  <div class="card">
-                    <img src="${qrImage.src}" alt="QR Code">
-                    <div class="footer">DPWH PROPERTY</div>
-                  </div>
-                  <script>window.onload=function(){window.print();window.close();}<\/script>
-                </body></html>
-              `);
-              printWindow.document.close();
-            }
-          </script>
-
-          <div class="card-body">
-            <!-- Tabs -->
-            <ul class="nav nav-pills nav-secondary nav-pills-no-bd nav-pills-icons justify-content-center">
-              <li class="nav-item submenu">
-                <a class="nav-link active" data-bs-toggle="pill" href="#tab-laptop"><i class="fas fa-laptop"></i> Laptop Details</a>
-              </li>
-              <li class="nav-item submenu">
-                <a class="nav-link" data-bs-toggle="pill" href="#tab-user"><i class="fas fa-user"></i> User Details</a>
-              </li>
-              <li class="nav-item submenu">
-                <a class="nav-link" data-bs-toggle="pill" href="#tab-docs"><i class="fas fa-file-alt"></i> Documents</a>
-              </li>
-              <li class="nav-item submenu">
-                <a class="nav-link" data-bs-toggle="pill" href="#tab-pm"><i class="fas fa-file-alt"></i> PM Schedule</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column -->
-      <div class="col-md-4">
-        <div class="card card-secondary bg-secondary-gradient">
-          <div class="card-body curves-shadow">
-            <img src="{% static 'img/kaiadmin/logo_light.svg' %}" height="20">
-            <h1 class="py-4 mb-0">{{ laptop_details.computer_name }}</h1>
+            <h1 class="hero-title">{{ laptop_details.computer_name }}</h1>
+            
             {% if user_details %}
-            <div class="row">
-              <div class="col-8 pe-0">
-                <h3 class="fw-bold mb-1">{{ user_details.user_Assetowner.full_name }}</h3>
-                <div class="text-small text-uppercase fw-bold op-8">
-                  {{ user_details.user_Assetowner.employee_position }}
-                </div>
+            <div class="info-cards">
+              <div class="info-card">
+                <div class="info-label">Asset Owner</div>
+                <div class="info-value">{{ user_details.user_Assetowner.full_name }}</div>
+                <small style="opacity: 0.9;">{{ user_details.user_Assetowner.employee_position }}</small>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Office</div>
+                <div class="info-value">{{ user_details.user_Assetowner.employee_office_section }}</div>
+                <small style="opacity: 0.9;">Engineering Department</small>
               </div>
             </div>
+            {% endif %}
+          </div>
+          
+          <div class="action-buttons mt-3 mt-md-0">
+            <a href="{% url 'generate_laptop_pdf' laptop_package.id %}" class="modern-btn btn-primary">
+              <i class="fa fa-file-pdf"></i>
+              PDF
+            </a>
+            <button class="modern-btn btn-secondary" data-bs-toggle="modal" data-bs-target="#qrModal">
+              <i class="fas fa-qrcode"></i>
+              QR
+            </button>
+            {% if not laptop_details.is_disposed %}
+            <button class="modern-btn btn-secondary" data-bs-toggle="modal" data-bs-target="#disposeModal">
+              <i class="fa fa-location-arrow"></i>
+              Return
+            </button>
             {% endif %}
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tab Content -->
-    <div class="tab-content mt-2 mb-3">
-      <!-- Laptop Specs -->
-      <div class="tab-pane fade show active" id="tab-laptop">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Laptop Details</div></div>
-          <div class="card-body">
-            {% if laptop_details %}
-            <table class="table table-head-bg-success table-bordered table-hover">
-              <tbody>
-                <tr><td><strong>Serial Number</strong></td><td>{{ laptop_details.laptop_sn_db }}</td></tr>
-                <tr><td><strong>Brand</strong></td><td>{{ laptop_details.brand_name }}</td></tr>
-                <tr><td><strong>Model</strong></td><td>{{ laptop_details.model }}</td></tr>
-                <tr><td><strong>Processor</strong></td><td>{{ laptop_details.processor }}</td></tr>
-                <tr><td><strong>Memory</strong></td><td>{{ laptop_details.memory }}</td></tr>
-                <tr><td><strong>Drive</strong></td><td>{{ laptop_details.drive }}</td></tr>
-                <tr><td><strong>OS</strong></td><td>{{ laptop_details.laptop_OS }}</td></tr>
-                <tr><td><strong>Office</strong></td><td>{{ laptop_details.laptop_Office }}</td></tr>
-              </tbody>
-            </table>
-            {% else %}
-              <p class="text-muted">No laptop details available.</p>
-            {% endif %}
-          </div>
-        </div>
+    <div class="row">
+      <!-- Main Content -->
+      <div class="col-lg-8">
+        
+        <!-- Modern Tab Navigation -->
+        <ul class="nav nav-pills modern-tabs" id="pills-tab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-laptop-tab" data-bs-toggle="pill" data-bs-target="#pills-laptop" type="button" role="tab">
+              <i class="fas fa-laptop"></i> Laptop
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-user-tab" data-bs-toggle="pill" data-bs-target="#pills-user" type="button" role="tab">
+              <i class="fas fa-user"></i> User
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-documents-tab" data-bs-toggle="pill" data-bs-target="#pills-documents" type="button" role="tab">
+              <i class="fas fa-file-alt"></i> Documents
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-pm-tab" data-bs-toggle="pill" data-bs-target="#pills-pm" type="button" role="tab">
+              <i class="fas fa-wrench"></i> PM Schedule
+            </button>
+          </li>
+        </ul>
 
-        <!-- Disposal History -->
-        <div class="card mt-3">
-          <div class="card-header"><div class="card-title">Disposed History</div></div>
-          <div class="card-body">
-            {% if disposed_laptops %}
-            <table class="table table-head-bg-danger table-bordered table-hover">
-              <thead><tr><th>Serial</th><th>Brand</th><th>Model</th><th>Reason</th><th>Date</th></tr></thead>
-              <tbody>
-                {% for d in disposed_laptops %}
-                <tr class="table-danger">
-                  <td>{{ d.serial_no }}</td>
-                  <td>{{ d.brand_name }}</td>
-                  <td>{{ d.model }}</td>
-                  <td>{{ d.reason }}</td>
-                  <td>{{ d.date_disposed|date:"Y-m-d" }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            {% else %}
-            <p class="text-muted">No disposal records.</p>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+        <!-- Tab Content -->
+        <div class="tab-content" id="pills-tabContent">
+          
+          <!-- Laptop Tab -->
+          <div class="tab-pane fade show active" id="pills-laptop" role="tabpanel">
+            <div class="modern-card">
+              <div class="card-header-modern">
+                <h2 class="card-title-modern">Laptop Specifications</h2>
+                <div class="d-flex gap-2">
+                  {% if laptop_details and not laptop_details.is_disposed %}
+                    <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editLaptopModal">
+                      <i class="fa fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#disposeModal">
+                      <i class="fa fa-trash"></i> Dispose
+                    </button>
+                  {% else %}
+                    <span class="badge bg-danger rounded-pill p-2 px-3 d-flex align-items-center">
+                      <i class="fas fa-trash-alt me-2"></i> Disposed
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
 
-      <!-- User -->
-      <div class="tab-pane fade" id="tab-user">
-        <div class="card">
-          <div class="card-header"><div class="card-title">User Details</div></div>
-          <div class="card-body">
-            {% if user_details %}
-            <table class="table table-head-bg-success table-bordered table-hover">
-              <tbody>
-                <tr>
-                  <td><strong>End User</strong></td>
-                  <td>
-                    {{ user_details.user_Enduser.full_name }}
-                    <br>
-                    <small class="text-muted">{{ user_details.user_Enduser.employee_position }}</small>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Asset Owner</strong></td>
-                  <td>
-                    {{ user_details.user_Assetowner.full_name }}
-                    <br>
-                    <small class="text-muted">{{ user_details.user_Assetowner.employee_position }}</small>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            {% else %}
-              <p class="text-muted">No user assigned.</p>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+              {% if laptop_details %}
+              <div class="spec-grid">
+                <div class="spec-item">
+                  <div class="spec-label">Serial Number</div>
+                  <div class="spec-value">{{ laptop_details.laptop_sn_db }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Brand</div>
+                  <div class="spec-value">{{ laptop_details.brand_name }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Model</div>
+                  <div class="spec-value">{{ laptop_details.model }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Processor</div>
+                  <div class="spec-value">{{ laptop_details.processor }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Memory</div>
+                  <div class="spec-value">{{ laptop_details.memory }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Storage</div>
+                  <div class="spec-value">{{ laptop_details.drive }}</div>
+                </div>
+              </div>
 
-      <!-- Documents -->
-      <div class="tab-pane fade" id="tab-docs">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Documents</div></div>
-          <div class="card-body">
-            {% if documents_details %}
-            <table class="table table-head-bg-success table-bordered table-hover">
-              <tbody>
-                <tr><td><strong>PAR</strong></td><td>{{ documents_details.docs_PAR }}</td></tr>
-                <tr><td><strong>Property No</strong></td><td>{{ documents_details.docs_Propertyno }}</td></tr>
-                <tr><td><strong>Value</strong></td><td>{{ documents_details.docs_Value }}</td></tr>
-                <tr><td><strong>Date Received</strong></td><td>{{ documents_details.docs_Datereceived }}</td></tr>
-                <tr><td><strong>Supplier</strong></td><td>{{ documents_details.docs_Supplier }}</td></tr>
-                <tr><td><strong>Status</strong></td><td>{{ documents_details.docs_Status }}</td></tr>
-              </tbody>
-            </table>
-            {% else %}
-              <p class="text-muted">No documents found.</p>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+              <div class="software-section">
+                <h3 class="software-title">
+                  <i class="fas fa-cog"></i>
+                  Software Details
+                </h3>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="spec-label">Operating System</div>
+                    <div class="spec-value">{{ laptop_details.laptop_OS|default:"—" }}</div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <div class="spec-label">Office Version</div>
+                    <div class="spec-value">{{ laptop_details.laptop_Office|default:"—" }}</div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
 
-      <!-- PM Schedule -->
-      <div class="tab-pane fade" id="tab-pm">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">Preventive Maintenance</div>
-          </div>
-          <div class="card-body">
+              <!-- Disposed Laptop History -->
+              {% if disposed_laptops %}
+              <div class="mt-5">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <h3 style="font-weight: 700; color: #dc2626; margin: 0;">
+                    <i class="fas fa-laptop"></i> Disposed Laptop History
+                  </h3>
+                  <span class="badge" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem;">
+                    {{ disposed_laptops|length }} Disposed
+                  </span>
+                </div>
 
-            <!-- Current PM Schedule -->
-            {% if current_pm_schedule %}
-            <div class="mb-4">
-              <h6 class="text-primary fw-semibold">
-                <i class="fas fa-calendar-check me-2"></i>Current PM Schedule
-              </h6>
-              <div class="table-responsive">
-                <table class="table table-striped table-bordered table-head-bg-info">
-                  <thead class="bg-info text-white">
+                <div style="border-top: 2px solid #fecaca; padding-top: 1rem;">
+                  {% for laptop in disposed_laptops %}
+                  <div class="spec-item" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #dc2626; margin-bottom: 1rem; border-radius: 0.75rem; padding: 1rem;">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                      <div>
+                        <span style="background: #dc2626; color: white; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600;">
+                          <i class="fas fa-trash-alt"></i> DISPOSED
+                        </span>
+                        <div style="font-size: 0.875rem; color: #7f1d1d; margin-top: 0.25rem;">
+                          <i class="far fa-calendar"></i> {{ laptop.date_disposed|date:"F d, Y" }}
+                        </div>
+                      </div>
+                      <div style="text-align: right;">
+                        <div style="font-size: 0.75rem; color: #991b1b; font-weight: 600;">SN: {{ laptop.serial_no }}</div>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="spec-label" style="color: #7f1d1d;">Brand</div>
+                        <div class="spec-value" style="color: #991b1b;">{{ laptop.brand_name }}</div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="spec-label" style="color: #7f1d1d;">Model</div>
+                        <div class="spec-value" style="color: #991b1b;">{{ laptop.model }}</div>
+                      </div>
+                      <div class="col-md-4">
+                        <div class="spec-label" style="color: #7f1d1d;">Disposed By</div>
+                        <div class="spec-value" style="color: #991b1b;">{{ laptop.asset_owner|default:"N/A" }}</div>
+                      </div>
+                    </div>
+
+                    {% if laptop.reason %}
+                    <div class="mt-3" style="font-size: 0.85rem; color: #7f1d1d;">
+                      <strong>Reason:</strong> {{ laptop.reason }}
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- User Tab -->
+          <div class="tab-pane fade" id="pills-user" role="tabpanel">
+            <div class="modern-card">
+              <div class="card-header-modern">
+                <h2 class="card-title-modern">User Details</h2>
+              </div>
+
+              {% if user_details %}
+              <div class="spec-grid">
+                <div class="spec-item">
+                  <div class="spec-label">Asset Owner</div>
+                  <div class="spec-value">{{ user_details.user_Assetowner.full_name }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Designation</div>
+                  <div class="spec-value">{{ user_details.user_Assetowner.employee_position }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Office</div>
+                  <div class="spec-value">{{ user_details.user_Assetowner.employee_office_section }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">End User</div>
+                  <div class="spec-value">{{ user_details.user_Enduser.full_name }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">End User Designation</div>
+                  <div class="spec-value">{{ user_details.user_Enduser.employee_position }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">End User Office</div>
+                  <div class="spec-value">{{ user_details.user_Enduser.employee_office_section }}</div>
+                </div>
+              </div>
+
+              <div class="mt-4 d-flex gap-2">
+                {% if laptop_details.is_disposed %}
+                  <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Editing not allowed — this package is disposed.">
+                    <i class="fa fa-edit"></i> Edit User
+                  </button>
+                  <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Ownership transfer disabled for disposed equipment.">
+                    <i class="fa fa-lock"></i> Transfer Ownership
+                  </button>
+                {% else %}
+                  <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editEndUserModal">
+                    <i class="fa fa-edit"></i> Edit User
+                  </button>
+                  <button class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#editAssetOwnerModal">
+                    <i class="fa fa-exchange-alt"></i> Transfer Ownership
+                  </button>
+                {% endif %}
+              </div>
+
+              {% else %}
+              <div class="alert alert-info" style="border-radius: 1rem;">
+                <i class="fas fa-info-circle"></i>
+                No user details available.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Documents Tab -->
+          <div class="tab-pane fade" id="pills-documents" role="tabpanel">
+            <div class="modern-card">
+              <div class="card-header-modern">
+                <h2 class="card-title-modern">Documents Details</h2>
+                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">
+                  <i class="fa fa-edit"></i> Edit
+                </button>
+              </div>
+
+              {% if documents_details %}
+              <div class="spec-grid">
+                <div class="spec-item">
+                  <div class="spec-label">PAR Number</div>
+                  <div class="spec-value">{{ documents_details.docs_PAR }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Property Number</div>
+                  <div class="spec-value">{{ documents_details.docs_Propertyno }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Package Value</div>
+                  <div class="spec-value">{{ documents_details.docs_Value }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Date Received</div>
+                  <div class="spec-value">{{ documents_details.docs_Datereceived }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Supplier</div>
+                  <div class="spec-value">{{ documents_details.docs_Supplier }}</div>
+                </div>
+                <div class="spec-item">
+                  <div class="spec-label">Status</div>
+                  <div class="spec-value">
+                    {% if laptop_details.is_disposed %}
+                      <span class="badge-modern badge-danger">Disposed</span>
+                    {% else %}
+                      <span class="badge-modern badge-success">Operational</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <div class="alert alert-info" style="border-radius: 1rem;">
+                <i class="fas fa-info-circle"></i>
+                No documents found.
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- PM Schedule Tab -->
+          <div class="tab-pane fade" id="pills-pm" role="tabpanel">
+            <div class="modern-card">
+              <div class="card-header-modern">
+                <h2 class="card-title-modern">Preventive Maintenance</h2>
+              </div>
+
+              <!-- Current PM Schedule -->
+              {% if current_pm_schedule %}
+              <div class="mb-4">
+                <h6 class="text-primary fw-semibold">
+                  <i class="fas fa-calendar-check me-2"></i>Current PM Schedule
+                </h6>
+                <div class="table-responsive">
+                  <table class="table table-striped table-bordered">
+                    <thead class="bg-info text-white">
+                      <tr>
+                        <th>Quarter</th>
+                        <th>Section</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for schedule in current_pm_schedule %}
+                      <tr>
+                        <td>{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</td>
+                        <td>{{ schedule.pm_section_schedule.section.name }}</td>
+                        <td>{{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}</td>
+                        <td>{{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}</td>
+                        <td>
+                          {% if schedule.is_completed %}
+                            <span class="badge bg-success">Completed</span>
+                          {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              {% endif %}
+
+              <!-- Maintenance History -->
+              {% if maintenance_records %}
+              <div class="table-responsive mt-4">
+                <table class="table table-bordered">
+                  <thead class="bg-primary text-white">
                     <tr>
+                      <th>Date Accomplished</th>
+                      <th>Office</th>
                       <th>Quarter</th>
-                      <th>Section</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
-                      <th>Status</th>
+                      <th>Maintenance Tasks</th>
+                      <th class="text-center">PDF</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {% for schedule in current_pm_schedule %}
+                    {% for record in maintenance_records %}
                     <tr>
-                      <td>{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</td>
-                      <td>{{ schedule.pm_section_schedule.section.name }}</td>
-                      <td>{{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}</td>
-                      <td>{{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}</td>
+                      <td>{{ record.date_accomplished|date:"M d, Y" }}</td>
+                      <td>{{ record.office }}</td>
                       <td>
-                        {% if schedule.is_completed %}
-                          <span class="badge bg-success">Completed</span>
+                        {% if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule %}
+                          {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
+                          {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.year }}
                         {% else %}
-                          <span class="badge bg-warning text-dark">Pending</span>
+                          —
                         {% endif %}
+                      </td>
+                      <td>
+                        <ul class="list-unstyled mb-0 ps-2">
+                          {% for i in "123456789"|make_list %}
+                            {% with task_field="task_"|add:i note_field="note_"|add:i %}
+                            <li>
+                              {% if record|get_attr:task_field %}
+                                <span class="badge bg-success mb-1">✅ Task {{ i }} - Done</span>
+                              {% else %}
+                                <span class="badge bg-secondary mb-1">❌ Task {{ i }} - Not Done</span>
+                              {% endif %}
+
+                              {% with note=record|get_attr:note_field %}
+                                {% if note %}
+                                  <br><small class="text-muted ps-2">📝 {{ note }}</small>
+                                {% endif %}
+                              {% endwith %}
+                            </li>
+                            {% endwith %}
+                          {% endfor %}
+                        </ul>
+                      </td>
+                      <td class="text-center">
+                        <a href="{% url 'generate_pm_pdf' record.id %}" class="btn btn-sm btn-outline-danger" title="Download PDF">
+                          <i class="fas fa-file-pdf"></i>
+                        </a>
                       </td>
                     </tr>
                     {% endfor %}
                   </tbody>
                 </table>
               </div>
-            </div>
-            {% endif %}
-
-            <!-- Maintenance History -->
-            {% if maintenance_records %}
-            <div class="table-responsive mt-4">
-              <table class="table table-bordered table-head-bg-info table-bordered-bd-info mt-4">
-                <thead class="bg-primary text-white">
-                  <tr>
-                    <th>Date Accomplished</th>
-                    <th>Office</th>
-                    <th>Quarter</th>
-                    <th>Maintenance Tasks</th>
-                    <th class="text-center">PDF</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for record in maintenance_records %}
-                  <tr>
-                    <td>{{ record.date_accomplished|date:"M d, Y" }}</td>
-                    <td>{{ record.office }}</td>
-                    <td>
-                      {% if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule %}
-                        {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
-                        {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.year }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </td>
-                    <td>
-                      <ul class="list-unstyled mb-0 ps-2">
-                        {% for i in "123456789"|make_list %}
-                          {% with task_field="task_"|add:i note_field="note_"|add:i %}
-                          <li>
-                            {% if record|get_attr:task_field %}
-                              <span class="badge bg-success mb-1">✅ Task {{ i }} - Done</span>
-                            {% else %}
-                              <span class="badge bg-secondary mb-1">❌ Task {{ i }} - Not Done</span>
-                            {% endif %}
-
-                            {% with note=record|get_attr:note_field %}
-                              {% if note %}
-                                <br><small class="text-muted ps-2">📝 {{ note }}</small>
-                              {% endif %}
-                            {% endwith %}
-                          </li>
-                          {% endwith %}
-                        {% endfor %}
-                      </ul>
-                    </td>
-                    <td class="text-center">
-                      <a href="{% url 'generate_pm_pdf' record.id %}" class="btn btn-sm btn-outline-danger" title="Download PDF">
-                        <i class="fas fa-file-pdf"></i>
-                      </a>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-           {% else %}
-              {% if current_pm_schedule %}
-                <div class="alert alert-info mt-4">
-                  ✅ This laptop has a schedule assigned, but no maintenance has been conducted yet.
-                </div>
               {% else %}
-                <div class="alert alert-warning mt-4">
-                  ⚠ No preventive maintenance schedule or history records found for this laptop.
-                </div>
-                <div class="text-center mt-3">
-                  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
-                    + Assign Schedule for this Laptop
-                  </button>
-                </div>
+                {% if current_pm_schedule %}
+                  <div class="alert alert-info mt-4">
+                    ✅ This laptop has a schedule assigned, but no maintenance has been conducted yet.
+                  </div>
+                {% else %}
+                  <div class="alert alert-warning mt-4">
+                    ⚠ No preventive maintenance schedule or history records found for this laptop.
+                  </div>
+                  <div class="text-center mt-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                      + Assign Schedule for this Laptop
+                    </button>
+                  </div>
+                {% endif %}
               {% endif %}
-            {% endif %}
+            </div>
           </div>
+
         </div>
       </div>
 
-      <!-- Add Schedule Modal -->
-      <div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <form method="POST" action="{% url 'assign_pm_schedule' %}">
-            {% csrf_token %}
-            <div class="modal-content">
-              <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Assign Laptop to Schedule</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <input type="hidden" name="device_type" value="laptop">
-                <input type="hidden" name="laptop_package_id" value="{{ laptop_package.id }}">
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        
+        <!-- PM Schedule Card -->
+        <div class="pm-schedule-card">
+          <div class="pm-header">
+            <div class="pm-icon">
+              <i class="fas fa-wrench fa-lg"></i>
+            </div>
+            <div>
+              <h3 style="font-weight: 700; margin: 0; color: #1f2937;">PM Schedule</h3>
+              <small style="color: #6b7280;">Maintenance Status</small>
+            </div>
+          </div>
 
-                <!-- Schedule -->
-                <div class="mb-3">
-                  <label class="form-label">Schedule</label>
-                  <select id="scheduleSelect" class="form-select" name="schedule_id" required>
-                    <option value="">-- Select Schedule --</option>
-                    {% for s in schedules %}
-                      <option value="{{ s.id }}">
-                        {{ s.section.name }} — {{ s.quarter_schedule.get_quarter_display }} {{ s.quarter_schedule.year }} - (PM Schedule)
-                      </option>
-                    {% endfor %}
-                  </select>
+          {% if current_pm_schedule %}
+          <div>
+            {% for assignment in current_pm_schedule %}
+            <div class="pm-item">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  {% if assignment.is_completed %}
+                  <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                  {% else %}
+                  <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                  {% endif %}
+                  <strong>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</strong>
                 </div>
+                <span class="pm-status {% if assignment.is_completed %}status-completed{% else %}status-pending{% endif %}">
+                  {% if assignment.is_completed %}Completed{% else %}Pending{% endif %}
+                </span>
               </div>
-              <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Assign</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Dispose Modal -->
-      <div class="modal fade" id="disposeModal" tabindex="-1">
-        <div class="modal-dialog">
-          {% if laptop_details %}
-          <form method="POST" action="{% url 'dispose_laptop' laptop_details.id %}">
-            {% csrf_token %}
-            <div class="modal-content">
-              <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Dispose Laptop</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                <label class="form-label">Reason</label>
-                <textarea name="reason" class="form-control" required></textarea>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger">Dispose</button>
+              <div style="color: #6b7280; font-size: 0.875rem;">{{ assignment.pm_section_schedule.section.name }}</div>
+              <div style="color: #9ca3af; font-size: 0.75rem; margin-top: 0.5rem;">
+                <i class="far fa-calendar"></i>
+                {{ assignment.pm_section_schedule.start_date }} - {{ assignment.pm_section_schedule.end_date }}
               </div>
             </div>
-          </form>
-          {% else %}
-          <div class="alert alert-warning m-0">
-            ⚠ No active laptop to dispose in this package.
+            {% endfor %}
           </div>
+
+          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}" class="btn w-100 rounded-pill mt-3" style="background: var(--gradient-success); color: white; font-weight: 600;">
+            <i class="fas fa-wrench"></i> Conduct PM
+          </a>
+          {% else %}
+          <p style="color: #6b7280; margin: 0;">No PM schedule found for this laptop.</p>
           {% endif %}
         </div>
-      </div>
 
+        <!-- Quick Actions -->
+        <div class="quick-actions mt-4">
+          <h4 style="font-weight: 700; margin-bottom: 1rem; color: #1f2937;">Quick Actions</h4>
+          
+          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}" class="action-item">
+            <div class="d-flex align-items-center gap-3">
+              <div style="padding: 0.75rem; background: #dbeafe; color: #2563eb; border-radius: 0.75rem;">
+                <i class="fa fa-history"></i>
+              </div>
+              <span style="font-weight: 600;">Maintenance History</span>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #d1d5db;"></i>
+          </a>
+
+          <a href="{% url 'generate_laptop_pdf' laptop_package.id %}" class="action-item">
+            <div class="d-flex align-items-center gap-3">
+              <div style="padding: 0.75rem; background: #e0e7ff; color: #6366f1; border-radius: 0.75rem;">
+                <i class="fa fa-file-pdf"></i>
+              </div>
+              <span style="font-weight: 600;">Generate Report</span>
+            </div>
+            <i class="fas fa-chevron-right" style="color: #d1d5db;"></i>
+          </a>
+        </div>
+
+        <!-- Status Card -->
+        <div class="{% if laptop_details.is_disposed %}status-card status-disposed{% else %}status-card{% endif %} mt-4">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            {% if laptop_details.is_disposed %}
+            <i class="fas fa-exclamation-triangle fa-2x"></i>
+            {% else %}
+            <i class="fas fa-check-circle fa-2x"></i>
+            {% endif %}
+            <div>
+              <h3 style="font-weight: 700; margin: 0;">
+                {% if laptop_details.is_disposed %}Disposed{% else %}Operational{% endif %}
+              </h3>
+              <small style="opacity: 0.9;">Equipment Status</small>
+            </div>
+          </div>
+          <p style="opacity: 0.95; margin: 0; font-size: 0.875rem;">
+            {% if laptop_details.is_disposed %}
+            This equipment has been disposed and is no longer in active use.
+            {% else %}
+            This equipment is currently operational and assigned to {{ user_details.user_Assetowner.employee_office_section }}.
+            {% endif %}
+          </p>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
+
+<!-- QR Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 1.5rem; border: none;">
+      <div class="modal-header" style="border-bottom: 1px solid #f3f4f6;">
+        <h5 class="modal-title" id="qrModalLabel" style="font-weight: 700;">Laptop Package QR Code</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" style="padding: 2rem;">
+        {% if laptop_package.qr_code %}
+          <div style="background: #f9fafb; padding: 2rem; border-radius: 1rem; display: inline-block;">
+            <img id="qrImage" src="{{ laptop_package.qr_code.url }}" alt="QR Code" width="200" style="border-radius: 0.5rem;">
+          </div>
+          <p class="mt-3" style="color: #6b7280;">Scan to view this laptop package</p>
+          <button class="btn btn-primary rounded-pill mt-3" onclick="printQrCode()" style="padding: 0.75rem 2rem;">
+            <i class="fa fa-print"></i> Print Wallet-Size QR
+          </button>
+        {% else %}
+          <p>No QR code available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function printQrCode() {
+  const qrImage = document.getElementById("qrImage");
+  if (!qrImage) {
+    alert("No QR code to print.");
+    return;
+  }
+  const printWindow = window.open("", "_blank", "width=400,height=250");
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print QR Code</title>
+        <style>
+          @page { size: 3.5in 2in; margin: 0; }
+          body { width: 3.5in; height: 2in; display: flex; align-items: center; justify-content: center; margin: 0; font-family: Arial, sans-serif; }
+          .card { width: 1.8in; height: 1.8in; border: 2px solid black; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+          img { width: 1.1in; height: 1.1in; }
+          .footer { margin-top: 6px; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <img src="${qrImage.src}" alt="QR Code">
+          <div class="footer">DPWH PROPERTY</div>
+        </div>
+        <script>window.onload = function() { window.print(); window.close(); }<\/script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+</script>
+
+<!-- Add Schedule Modal -->
+<div class="modal fade" id="addScheduleModal" tabindex="-1" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'assign_pm_schedule' %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Assign Laptop to Schedule</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="device_type" value="laptop">
+          <input type="hidden" name="laptop_package_id" value="{{ laptop_package.id }}">
+
+          <div class="mb-3">
+            <label class="form-label">Schedule</label>
+            <select id="scheduleSelect" class="form-select" name="schedule_id" required>
+              <option value="">-- Select Schedule --</option>
+              {% for s in schedules %}
+                <option value="{{ s.id }}">
+                  {{ s.section.name }} — {{ s.quarter_schedule.get_quarter_display }} {{ s.quarter_schedule.year }} - (PM Schedule)
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Assign</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+{% block extra_js %}
+<!-- ==================== 💻 LAPTOP MODAL AJAX SCRIPTS ==================== -->
+<script>
+// ✅ CSRF Setup (required for Django POSTs)
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+$.ajaxSetup({
+  beforeSend: function(xhr, settings) {
+    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+      xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    }
+  }
+});
+</script>
+
+<!-- ==================== 🧭 BOOTSTRAP TOOLTIP ENABLE ==================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+});
+</script>
+
+<!-- ==================== 🗑 DISPOSE LAPTOP AJAX ==================== -->
+<script>
+$(document).on("submit", "#disposeLaptopForm", function (e) {
+  e.preventDefault();
+  const form = $(this);
+  const url = form.attr("action");
+  const button = form.find("button[type='submit']");
+  const spinner = button.find(".spinner-border");
+  const btnText = button.find(".button-text");
+
+  button.prop("disabled", true);
+  spinner.removeClass("d-none");
+  btnText.text("Processing...");
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: form.serialize(),
+    success: function (resp) {
+      if (resp.success) {
+        $("#disposeModal").modal("hide");
+        $.notify({
+          title: "✅ Success",
+          message: resp.message || "Laptop disposed successfully!",
+          icon: "fa fa-check-circle"
+        }, {
+          type: "success",
+          placement: { from: "bottom", align: "right" },
+          delay: 3000
+        });
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        $.notify({
+          title: "⚠️ Failed",
+          message: resp.error || "Something went wrong during disposal.",
+          icon: "fa fa-exclamation-triangle"
+        }, { type: "danger", placement: { from: "bottom", align: "right" } });
+      }
+    },
+    error: function () {
+      $.notify({
+        title: "❌ Server Error",
+        message: "Unexpected error occurred.",
+        icon: "fa fa-times-circle"
+      }, { type: "danger", placement: { from: "bottom", align: "right" } });
+    },
+    complete: function () {
+      button.prop("disabled", false);
+      spinner.addClass("d-none");
+      btnText.text("Dispose");
+    }
+  });
+});
+</script>
+
+<!-- ==================== 👤 UPDATE END USER AJAX ==================== -->
+<script>
+$(document).on("submit", "#editEndUserForm", function (e) {
+  e.preventDefault();
+  const form = $(this);
+  const url = form.data("url");
+  const button = form.find("#submitButton");
+  const spinner = button.find(".spinner-border");
+  const btnText = button.find(".button-text");
+
+  button.prop("disabled", true);
+  spinner.removeClass("d-none");
+  btnText.text("Saving...");
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: form.serialize(),
+    success: function (resp) {
+      if (resp.success) {
+        $("#editEndUserModal").modal("hide");
+        $.notify({
+          title: "✅ Success",
+          message: resp.message || "End User updated successfully!",
+          icon: "fa fa-user"
+        }, { type: "success", placement: { from: "bottom", align: "right" }, delay: 3000 });
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        $.notify({
+          title: "⚠️ Error",
+          message: resp.error || "Could not update end user.",
+          icon: "fa fa-exclamation-triangle"
+        }, { type: "danger", placement: { from: "bottom", align: "right" } });
+      }
+    },
+    error: function () {
+      $.notify({
+        title: "❌ Server Error",
+        message: "Something went wrong.",
+        icon: "fa fa-times-circle"
+      }, { type: "danger", placement: { from: "bottom", align: "right" } });
+    },
+    complete: function () {
+      button.prop("disabled", false);
+      spinner.addClass("d-none");
+      btnText.text("Save Changes");
+    }
+  });
+});
+</script>
+
+<!-- ==================== 🔁 UPDATE ASSET OWNER AJAX ==================== -->
+<script>
+$(document).on("submit", "#editAssetOwnerForm", function (e) {
+  e.preventDefault();
+  const form = $(this);
+  const url = form.data("url");
+  const button = form.find("#submitButtonAsset");
+  const spinner = button.find(".spinner-border");
+  const btnText = button.find(".button-text");
+
+  button.prop("disabled", true);
+  spinner.removeClass("d-none");
+  btnText.text("Saving...");
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: form.serialize(),
+    success: function (resp) {
+      if (resp.success) {
+        $("#editAssetOwnerModal").modal("hide");
+        $.notify({
+          title: "✅ Success",
+          message: resp.message || "Asset Owner transferred successfully!",
+          icon: "fa fa-exchange-alt"
+        }, { type: "success", placement: { from: "bottom", align: "right" }, delay: 3000 });
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        $.notify({
+          title: "⚠️ Error",
+          message: resp.error || "Could not transfer ownership.",
+          icon: "fa fa-exclamation-triangle"
+        }, { type: "danger", placement: { from: "bottom", align: "right" } });
+      }
+    },
+    error: function () {
+      $.notify({
+        title: "❌ Server Error",
+        message: "Something went wrong.",
+        icon: "fa fa-times-circle"
+      }, { type: "danger", placement: { from: "bottom", align: "right" } });
+    },
+    complete: function () {
+      button.prop("disabled", false);
+      spinner.addClass("d-none");
+      btnText.text("Save Changes");
+    }
+  });
+});
+</script>
+
+<!-- ==================== 📄 UPDATE DOCUMENTS AJAX ==================== -->
+<script>
+$(document).on("submit", "#editDocumentsForm", function (e) {
+  e.preventDefault();
+  const form = $(this);
+  const url = form.attr("action");
+  const button = form.find("button[type='submit']");
+  const spinner = button.find(".spinner-border");
+  const btnText = button.find(".button-text");
+
+  button.prop("disabled", true);
+  spinner.removeClass("d-none");
+  btnText.text("Saving...");
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: form.serialize(),
+    success: function (resp) {
+      if (resp.success) {
+        $("#editDocumentsModal").modal("hide");
+        $.notify({
+          title: "✅ Success",
+          message: resp.message || "Documents updated successfully!",
+          icon: "fa fa-file-alt"
+        }, { type: "success", placement: { from: "bottom", align: "right" }, delay: 3000 });
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        $.notify({
+          title: "⚠️ Error",
+          message: resp.error || "Could not update documents.",
+          icon: "fa fa-exclamation-triangle"
+        }, { type: "danger", placement: { from: "bottom", align: "right" } });
+      }
+    },
+    error: function () {
+      $.notify({
+        title: "❌ Server Error",
+        message: "Unexpected error occurred.",
+        icon: "fa fa-times-circle"
+      }, { type: "danger", placement: { from: "bottom", align: "right" } });
+    },
+    complete: function () {
+      button.prop("disabled", false);
+      spinner.addClass("d-none");
+      btnText.text("Save Changes");
+    }
+  });
+});
+</script>
+
+<!-- ==================== 💻 EDIT LAPTOP AJAX ==================== -->
+<script>
+$(document).on("submit", "#editLaptopModal form", function (e) {
+  e.preventDefault();
+  const form = $(this);
+  const url = form.attr("action");
+  const button = form.find("button[type='submit']");
+  const spinner = button.find(".spinner-border");
+  const btnText = button.find(".button-text");
+
+  button.prop("disabled", true);
+  spinner.removeClass("d-none");
+  btnText.text("Saving...");
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: form.serialize(),
+    success: function (resp) {
+      if (resp.success) {
+        $("#editLaptopModal").modal("hide");
+        $.notify({
+          title: "✅ Success",
+          message: resp.message || "Laptop details updated successfully!",
+          icon: "fa fa-laptop"
+        }, {
+          type: "success",
+          placement: { from: "bottom", align: "right" },
+          delay: 3000
+        });
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        $.notify({
+          title: "⚠️ Error",
+          message: resp.error || "Could not update laptop details.",
+          icon: "fa fa-exclamation-triangle"
+        }, { type: "danger", placement: { from: "bottom", align: "right" } });
+      }
+    },
+    error: function () {
+      $.notify({
+        title: "❌ Server Error",
+        message: "Unexpected error occurred.",
+        icon: "fa fa-times-circle"
+      }, {
+        type: "danger",
+        placement: { from: "bottom", align: "right" },
+        delay: 3000
+      });
+    },
+    complete: function () {
+      button.prop("disabled", false);
+      spinner.addClass("d-none");
+      btnText.text("Save Changes");
+    }
+  });
+});
+</script>
+{% endblock %}
+
+
+
 {% endblock %}

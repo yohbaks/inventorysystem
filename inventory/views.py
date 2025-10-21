@@ -3966,6 +3966,7 @@ def laptop_details_view(request, package_id):
     user_details = UserDetails.objects.filter(laptop_package=laptop_package).first()
     documents_details = DocumentsDetails.objects.filter(laptop_package=laptop_package).first()
     disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package=laptop_package).order_by('-date_disposed')
+    brands = Brand.objects.all()  # ✅ add this line
 
 
     # PM assignments for this laptop
@@ -4009,6 +4010,7 @@ def laptop_details_view(request, package_id):
         'laptop_package': laptop_package,
         'laptop_details': laptop_details,
         'user_details': user_details,
+        'brands': brands,
         'documents_details': documents_details,
         'disposed_laptops': disposed_laptops,
         'pm_assignments': pm_assignments,
@@ -4017,6 +4019,56 @@ def laptop_details_view(request, package_id):
         'schedules': schedules,
         'section': section,
     })
+
+
+# AJAX handler to edit laptop details
+@transaction.atomic
+def edit_laptop(request, laptop_id):
+    laptop = get_object_or_404(LaptopDetails, pk=laptop_id)
+
+    if request.method == "POST":
+        try:
+            # ✅ Add serial number update
+            laptop.laptop_sn_db = request.POST.get("laptop_sn_db", laptop.laptop_sn_db)
+
+            # ✅ Brand
+            brand_id = request.POST.get("brand_name")
+            if brand_id:
+                brand_instance = Brand.objects.get(pk=brand_id)
+                laptop.brand_name = brand_instance
+
+            # ✅ Other fields
+            laptop.model = request.POST.get("model", laptop.model)
+            laptop.processor = request.POST.get("processor", laptop.processor)
+            laptop.memory = request.POST.get("memory", laptop.memory)
+            laptop.drive = request.POST.get("drive", laptop.drive)
+            laptop.laptop_OS = request.POST.get("laptop_OS", laptop.laptop_OS)
+            laptop.laptop_Office = request.POST.get("laptop_Office", laptop.laptop_Office)
+
+            laptop.save()
+
+            return JsonResponse({
+                "success": True,
+                "message": "Laptop details updated successfully!"
+            })
+
+        except Brand.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "error": "Selected brand does not exist."
+            })
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "error": str(e)
+            })
+
+    return JsonResponse({
+        "success": False,
+        "error": "Invalid request method."
+    })
+
+
 
 @login_required
 def dispose_laptop(request, package_id):
