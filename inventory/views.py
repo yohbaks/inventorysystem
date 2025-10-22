@@ -533,26 +533,69 @@ def keyboard_detailed_view(request, keyboard_id):
 
 
 
-
-
-#update desktop details
 @require_POST
 def update_desktop(request, pk):
-    desktop = get_object_or_404(DesktopDetails, pk=pk)
-    desktop.serial_no = request.POST.get('desktop_sn_form')
-   
-    brand_id = request.POST.get('desktop_brand_form')#check if the brand_id is valid
-    desktop.brand_name = get_object_or_404(Brand, pk=brand_id)#update the brand_name
+    try:
+        desktop = get_object_or_404(DesktopDetails, pk=pk)
 
-    desktop.model = request.POST.get('desktop_model_form')
-    desktop.processor = request.POST.get('desktop_proccessor_form')
-    desktop.memory = request.POST.get('desktop_memory_form')
-    desktop.drive = request.POST.get('desktop_drive_form')
+        # ✅ Basic Info
+        desktop.serial_no = request.POST.get('desktop_sn_form', '').strip()
+        desktop.model = request.POST.get('desktop_model_form', '').strip()
+        desktop.processor = request.POST.get('desktop_proccessor_form', '').strip()
+        desktop.memory = request.POST.get('desktop_memory_form', '').strip()
+        desktop.drive = request.POST.get('desktop_drive_form', '').strip()
+
+        # ✅ Brand Update (validated)
+        brand_id = request.POST.get('desktop_brand_form')
+        if brand_id:
+            try:
+                desktop.brand_name = get_object_or_404(Brand, pk=brand_id)
+            except:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid brand selected.'
+                }, status=400)
+
+        # ✅ OS and Office Versions + Keys
+        desktop.desktop_OS = request.POST.get('desktop_OS', desktop.desktop_OS)
+        desktop.desktop_OS_keys = request.POST.get('desktop_OS_keys', desktop.desktop_OS_keys)
+        desktop.desktop_Office = request.POST.get('desktop_Office', desktop.desktop_Office)
+        desktop.desktop_Office_keys = request.POST.get('desktop_Office_keys', desktop.desktop_Office_keys)
+
+        # ✅ Validate required fields
+        if not desktop.serial_no or not desktop.model:
+            return JsonResponse({
+                'success': False,
+                'error': 'Serial number and model are required.'
+            }, status=400)
+
+        # ✅ Save all updates
+        desktop.save()
+
+        # ✅ Return JSON response for AJAX
+        redirect_url = reverse('desktop_details_view', kwargs={'package_id': desktop.equipment_package.pk})
+        return JsonResponse({
+            'success': True,
+            'message': 'Desktop details updated successfully!',
+            'redirect_url': f'{redirect_url}#pills-desktop'
+        })
+
+    except DesktopDetails.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Desktop not found.'
+        }, status=404)
     
-    desktop.save()
-
-    base_url = reverse('desktop_details_view', kwargs={'package_id': desktop.equipment_package.pk})
-    return redirect(f'{base_url}#pills-desktop')
+    except Exception as e:
+        # Log the error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error updating desktop {pk}: {str(e)}")
+        
+        return JsonResponse({
+            'success': False,
+            'error': f'An error occurred while updating: {str(e)}'
+        }, status=500)
 
 #update monitor details
 @require_POST
@@ -3933,7 +3976,7 @@ def user_assets_public(request, token):
         "assetowner_history": assetowner_history,
     })
 
-
+# =========================================Laptops ========================================
 @login_required
 def laptop_list(request):
     # Grab all LaptopPackages
@@ -3967,6 +4010,7 @@ def laptop_details_view(request, package_id):
     documents_details = DocumentsDetails.objects.filter(laptop_package=laptop_package).first()
     disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package=laptop_package).order_by('-date_disposed')
     brands = Brand.objects.all()  # ✅ add this line
+    employees = Employee.objects.all()
 
 
     # PM assignments for this laptop
@@ -4018,8 +4062,8 @@ def laptop_details_view(request, package_id):
         'maintenance_records': maintenance_history,   # ✅ now available in template
         'schedules': schedules,
         'section': section,
+        'employees': employees,
     })
-
 
 # AJAX handler to edit laptop details
 @transaction.atomic
@@ -4028,7 +4072,7 @@ def edit_laptop(request, laptop_id):
 
     if request.method == "POST":
         try:
-            # ✅ Add serial number update
+            # ✅ Serial Number
             laptop.laptop_sn_db = request.POST.get("laptop_sn_db", laptop.laptop_sn_db)
 
             # ✅ Brand
@@ -4037,19 +4081,26 @@ def edit_laptop(request, laptop_id):
                 brand_instance = Brand.objects.get(pk=brand_id)
                 laptop.brand_name = brand_instance
 
-            # ✅ Other fields
+            # ✅ Other basic fields
             laptop.model = request.POST.get("model", laptop.model)
             laptop.processor = request.POST.get("processor", laptop.processor)
             laptop.memory = request.POST.get("memory", laptop.memory)
             laptop.drive = request.POST.get("drive", laptop.drive)
+
+            # ✅ Software details
             laptop.laptop_OS = request.POST.get("laptop_OS", laptop.laptop_OS)
             laptop.laptop_Office = request.POST.get("laptop_Office", laptop.laptop_Office)
 
+            # ✅ NEW: Product keys
+            laptop.laptop_OS_keys = request.POST.get("laptop_OS_keys", laptop.laptop_OS_keys)
+            laptop.laptop_Office_keys = request.POST.get("laptop_Office_keys", laptop.laptop_Office_keys)
+
+            # ✅ Save updates
             laptop.save()
 
             return JsonResponse({
                 "success": True,
-                "message": "Laptop details updated successfully!"
+                "message": "Laptop details updated successfully, including software keys!"
             })
 
         except Brand.DoesNotExist:
@@ -4067,8 +4118,6 @@ def edit_laptop(request, laptop_id):
         "success": False,
         "error": "Invalid request method."
     })
-
-
 
 @login_required
 def dispose_laptop(request, package_id):
@@ -4296,6 +4345,116 @@ def checklist_laptop(request, package_id):
         "section_id": section_id,
     })
 
+
+    @require_POST
+    def update_end_user_laptop(request, package_id):
+        """AJAX: Update End User for Laptop Package"""
+        if request.method != 'POST':
+            return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)
+
+        try:
+            with transaction.atomic():
+                new_enduser_id = request.POST.get('enduser_input')
+                
+                if not new_enduser_id:
+                    return JsonResponse({'success': False, 'error': 'Please select an end user.'}, status=400)
+
+                new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+                user_details = get_object_or_404(UserDetails, laptop_package__id=package_id)
+                old_enduser = user_details.user_Enduser
+
+                user_details.user_Enduser = new_enduser
+                user_details.save()
+
+                # Log history (optional - you may need to create this model for laptops)
+                # EndUserChangeHistory.objects.create(...)
+
+                return JsonResponse({'success': True, 'message': 'End user updated successfully.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f"Error updating End User: {str(e)}"}, status=500)
+
+@require_POST
+def update_end_user_laptop(request, package_id):
+    """AJAX: Update End User for Laptop Package"""
+    try:
+        with transaction.atomic():
+            new_enduser_id = request.POST.get('enduser_input')
+            if not new_enduser_id:
+                return JsonResponse({'success': False, 'error': 'Please select an end user.'}, status=400)
+
+            new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+            user_details = get_object_or_404(UserDetails, laptop_package__id=package_id)
+            user_details.user_Enduser = new_enduser
+            user_details.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'End user updated successfully!',
+                'tab': 'user'
+            })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f"Error updating End User: {str(e)}"}, status=500)
+
+
+@require_POST
+def update_asset_owner_laptop(request, package_id):
+    """AJAX: Update Asset Owner for Laptop Package"""
+    try:
+        with transaction.atomic():
+            new_assetowner_id = request.POST.get('assetowner_input')
+            if not new_assetowner_id:
+                return JsonResponse({'success': False, 'error': 'Please select an asset owner.'}, status=400)
+
+            new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
+            user_details = get_object_or_404(UserDetails, laptop_package__id=package_id)
+            user_details.user_Assetowner = new_assetowner
+            user_details.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Asset owner updated successfully!',
+                'tab': 'user'
+            })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': f"Error updating Asset Owner: {str(e)}"}, status=500)
+
+@require_POST
+def update_documents_laptop(request, package_id):
+    """AJAX: Update Documents for Laptop Package"""
+    try:
+        with transaction.atomic():
+            documents = get_object_or_404(DocumentsDetails, laptop_package__id=package_id)
+
+            # Update all fields
+            fields = [
+                "docs_PAR", "docs_Propertyno", "docs_Acquisition_Type", "docs_Value",
+                "docs_Datereceived", "docs_Dateinspected", "docs_Supplier", "docs_Status"
+            ]
+            for f in fields:
+                setattr(documents, f, request.POST.get(f))
+            documents.save()
+
+            return JsonResponse({
+                "success": True,
+                "message": "Documents updated successfully!",
+                "tab": "documents"
+            })
+
+    except DocumentsDetails.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "error": "Documents record not found for this laptop.",
+            "tab": "documents"
+        })
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": f"Error updating documents: {str(e)}",
+            "tab": "documents"
+        })
 
 # ================================
 # PRINTER VIEWS

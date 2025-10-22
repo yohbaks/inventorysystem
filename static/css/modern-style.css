@@ -19,6 +19,33 @@
   padding-top: 6rem;
 }
 
+/* Rainbow animation for license keys */
+.license-key-rainbow {
+  font-family: "Courier New", monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  background: linear-gradient(90deg,
+    #ef4444,
+    #f97316,
+    #eab308,
+    #22c55e,
+    #3b82f6,
+    #a855f7,
+    #ec4899) !important;
+  background-size: 400% !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: rainbowFlow 5s linear infinite !important;
+}
+
+@keyframes rainbowFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+
 /* Hero Header Card */
 .hero-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%);

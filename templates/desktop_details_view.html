@@ -15,6 +15,36 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
+
+
+
+
+/* 🌈 Rainbow animation for license keys */
+.license-key-rainbow {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg,
+    #ef4444,
+    #f97316,
+    #eab308,
+    #22c55e,
+    #3b82f6,
+    #a855f7,
+    #ec4899);
+  background-size: 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbowFlow 5s linear infinite;
+}
+
+/* Smooth flowing gradient */
+@keyframes rainbowFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 </style>
 {% endblock %}
 
@@ -71,39 +101,39 @@
       <div class="col-lg-8">
         
         <!-- Modern Tab Navigation -->
-        <ul class="nav nav-pills modern-tabs" id="pills-tab" role="tablist">
+        <ul class="nav nav-pills nav-secondary nav-pills-no-bd modern-tabs" id="pills-tab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active " id="pills-desktop-tab" data-bs-toggle="pill" data-bs-target="#pills-desktop" type="button" role="tab">
+            <button class="nav-link active modern-btn" id="pills-desktop-tab" data-bs-toggle="pill" data-bs-target="#pills-desktop" type="button" role="tab">
               <i class="fas fa-desktop"></i> Desktop
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-monitor-tab" data-bs-toggle="pill" data-bs-target="#pills-monitor" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-monitor-tab" data-bs-toggle="pill" data-bs-target="#pills-monitor" type="button" role="tab">
               <i class="fas fa-tv"></i> Monitor
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-keyboard-tab" data-bs-toggle="pill" data-bs-target="#pills-keyboard" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-keyboard-tab" data-bs-toggle="pill" data-bs-target="#pills-keyboard" type="button" role="tab">
               <i class="fas fa-keyboard"></i> Keyboard
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-mouse-tab" data-bs-toggle="pill" data-bs-target="#pills-mouse" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-mouse-tab" data-bs-toggle="pill" data-bs-target="#pills-mouse" type="button" role="tab">
               <i class="fas fa-mouse-pointer"></i> Mouse
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-ups-tab" data-bs-toggle="pill" data-bs-target="#pills-ups" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-ups-tab" data-bs-toggle="pill" data-bs-target="#pills-ups" type="button" role="tab">
               <i class="fas fa-battery-full"></i> UPS
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-user-tab" data-bs-toggle="pill" data-bs-target="#pills-user" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-user-tab" data-bs-toggle="pill" data-bs-target="#pills-user" type="button" role="tab">
               <i class="fas fa-user"></i> User
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-documents-tab" data-bs-toggle="pill" data-bs-target="#pills-documents" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-documents-tab" data-bs-toggle="pill" data-bs-target="#pills-documents" type="button" role="tab">
               <i class="fas fa-file-alt"></i> Documents
             </button>
           </li>
@@ -170,30 +200,34 @@
                 </div>
               </div>
 
-              <div class="software-section">
-                <h3 class="software-title">
-                  <i class="fas fa-cog"></i>
-                  Software Details
-                </h3>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <div class="spec-label">Operating System</div>
-                    <div class="spec-value">{{ desktop_detailsx.desktop_OS|default:"—" }}</div>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <div class="spec-label">Office Version</div>
-                    <div class="spec-value">{{ desktop_detailsx.desktop_Office|default:"—" }}</div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="spec-label">OS Key</div>
-                    <div class="spec-value" style="font-size: 0.875rem;">{{ desktop_detailsx.desktop_OS_keys|default:"—" }}</div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="spec-label">Office Key</div>
-                    <div class="spec-value" style="font-size: 0.875rem;">{{ desktop_detailsx.desktop_Office_keys|default:"—" }}</div>
+              <div class="software-section mt-4">
+                  <h3 class="software-title">
+                    <i class="fas fa-cog"></i>
+                    Software Details
+                  </h3>
+
+                  <div class="row">
+                    <!-- Operating System -->
+                    <div class="col-md-6 mb-3">
+                      <div class="spec-label">Operating System</div>
+                      <div class="spec-value">{{ desktop_detailsx.desktop_OS|default:"—" }}</div>
+                      <div class="spec-sub">
+                        <small class="text-muted">License Key:</small><br>
+                        <code class="license-key-rainbow">{{ desktop_detailsx.desktop_OS_keys|default:"—" }}</code>
+                      </div>
+                    </div>
+
+                    <!-- Microsoft Office -->
+                    <div class="col-md-6 mb-3">
+                      <div class="spec-label">Microsoft Office</div>
+                      <div class="spec-value">{{ desktop_detailsx.desktop_Office|default:"—" }}</div>
+                      <div class="spec-sub">
+                        <small class="text-muted">License Key:</small><br>
+                        <code class="license-key-rainbow">{{ desktop_detailsx.desktop_Office_keys|default:"—" }}</code>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
               {% endif %}
 
 
@@ -1435,6 +1469,132 @@ $(document).ready(function() {
 });
 </script>
 
+
+<!-- ==================== DESKTOP ACTION SCRIPT (Edit + Dispose combined) ==================== -->  
+<script>
+(function() {
+  // 🔹 CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const csrftoken = getCookie('csrftoken');
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  // 🔹 Generic AJAX handler (Edit + Dispose)
+  function handleDesktopForm(formSelector, modalSelector, successMessage, btnDefaultText, redirectHash = "#pills-desktop") {
+    const form = document.querySelector(formSelector);
+    if (!form) return;
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const url = form.getAttribute("action");
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const spinner = submitBtn.querySelector(".spinner-border");
+      const btnText = submitBtn.querySelector(".button-text");
+
+      submitBtn.disabled = true;
+      spinner && spinner.classList.remove("d-none");
+      btnText && (btnText.textContent = "Processing...");
+
+      $.ajax({
+        url: url,
+        type: "POST",
+        data: $(form).serialize(),
+        success: function(resp) {
+          if (resp.success) {
+            if (modalSelector) $(modalSelector).modal("hide");
+
+            $.notify({
+              title: "✅ Success",
+              message: resp.message || successMessage,
+              icon: "fa fa-check-circle"
+            }, {
+              type: "success",
+              placement: { from: "bottom", align: "right" },
+              delay: 2500,
+              z_index: 9999
+            });
+
+            setTimeout(() => {
+              const reloadUrl = resp.redirect_url || (window.location.pathname + redirectHash);
+              window.location.href = reloadUrl;
+              location.reload();
+            }, 1000);
+          } else {
+            $.notify({
+              title: "⚠️ Failed",
+              message: resp.error || "Something went wrong.",
+              icon: "fa fa-exclamation-triangle"
+            }, {
+              type: "danger",
+              placement: { from: "bottom", align: "right" },
+              delay: 4000,
+              z_index: 9999
+            });
+          }
+        },
+        error: function(xhr) {
+          $.notify({
+            title: "❌ Server Error",
+            message: xhr.responseJSON?.error || "Unexpected error occurred.",
+            icon: "fa fa-times-circle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000,
+            z_index: 9999
+          });
+        },
+        complete: function() {
+          submitBtn.disabled = false;
+          spinner && spinner.classList.add("d-none");
+          btnText && (btnText.textContent = btnDefaultText);
+        }
+      });
+    });
+  }
+
+  // ✅ Edit Desktop Modal
+  handleDesktopForm(
+    "#editDesktopForm", 
+    "#editDesktopModal", 
+    "Desktop details updated successfully!", 
+    "Save Changes"
+  );
+
+  // ✅ Dispose Desktop Modal
+  handleDesktopForm(
+    "#disposeDesktopForm", 
+    "#disposeModal", 
+    "Desktop disposed successfully!", 
+    "Confirm Dispose"
+  );
+})();
+</script>
+
+
+
+
+
 <!-- ==================== MONITOR ACTION SCRIPT (Add + Edit + Dispose combined) ==================== -->
 <script>
 (function() {
@@ -1657,104 +1817,6 @@ $(document).ready(function() {
 })();
 </script>
 
-<!-- ==================== DESKTOP PACKAGE DISPOSAL SCRIPT ==================== -->
-<script>
-(function() {
-  // --- CSRF helper ---
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-  const csrftoken = getCookie('csrftoken');
-  $.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-      if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)) {
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      }
-    }
-  });
-
-  const form = document.getElementById('disposeDesktopForm');
-  if (!form) return;
-
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const url = form.getAttribute('action');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const spinner = submitBtn.querySelector('.spinner-border');
-    const btnText = submitBtn.querySelector('.button-text');
-
-    submitBtn.disabled = true;
-    spinner.classList.remove('d-none');
-    btnText.textContent = 'Processing...';
-
-    $.ajax({
-      url: url,
-      type: 'POST',
-      data: $(form).serialize(),
-      success: function(resp) {
-        if (resp.success) {
-          $('#disposeModal').modal('hide');
-          $.notify({
-            title: "✅ Success",
-            message: resp.message || "Desktop disposed successfully!",
-            icon: "fa fa-check-circle"
-          }, {
-            type: "success",
-            placement: { from: "bottom", align: "right" },
-            delay: 3000,
-            z_index: 9999
-          });
-
-          // Reload to same page after success
-          setTimeout(() => {
-            const redirect = resp.redirect_url || window.location.pathname;
-            window.location.href = redirect;
-            location.reload();
-          }, 1200);
-        } else {
-          $.notify({
-            title: "⚠️ Failed",
-            message: resp.message || "Something went wrong during disposal.",
-            icon: "fa fa-exclamation-triangle"
-          }, {
-            type: "danger",
-            placement: { from: "bottom", align: "right" },
-            delay: 4000
-          });
-        }
-      },
-      error: function(xhr) {
-        $.notify({
-          title: "❌ Server Error",
-          message: xhr.responseJSON?.error || "Unexpected error occurred.",
-          icon: "fa fa-times-circle"
-        }, {
-          type: "danger",
-          placement: { from: "bottom", align: "right" },
-          delay: 4000
-        });
-      },
-      complete: function() {
-        submitBtn.disabled = false;
-        spinner.classList.add('d-none');
-        btnText.textContent = 'Dispose';
-      }
-    });
-  });
-})();
-</script>
 
 
 
@@ -2291,6 +2353,14 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+<script>
+  // ✅ Formats both OS and Office keys — adds dashes every 5 characters
+  function formatProductKey(input) {
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    input.value = value.match(/.{1,5}/g)?.join('-') || '';
+  }
+</script>
 {% endblock %}
 
 

@@ -157,6 +157,10 @@ urlpatterns = [
     path('laptop/<int:package_id>/pdf/', views.generate_laptop_pdf, name='generate_laptop_pdf'),
 
     path("laptops/edit/<int:laptop_id>/", views.edit_laptop, name="edit_laptop"),
+    # Laptop User & Document Management
+    path('laptop/<int:package_id>/update-enduser/', views.update_end_user_laptop, name='update_end_user_laptop'),
+    path('laptop/<int:package_id>/update-assetowner/', views.update_asset_owner_laptop, name='update_asset_owner_laptop'),
+    path('laptop/<int:package_id>/update-documents/', views.update_documents_laptop, name='update_documents_laptop'),
     
     path("laptops/dispose/<int:package_id>/", views.dispose_laptop, name="dispose_laptop"),
     path("laptops/disposed/", views.disposed_laptops, name="disposed_laptops"),
@@ -167,7 +171,7 @@ urlpatterns = [
     
     path("maintenance/checklist/laptop/<int:package_id>/", views.checklist_laptop, name="checklist_laptop"),
 
-
+    
 
     # ================================
     # PRINTER ROUTES

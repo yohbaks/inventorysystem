@@ -1,18 +1,19 @@
 <div class="modal fade" id="editDesktopModal" tabindex="-1" aria-labelledby="editDesktopModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST"
+    <form id="editDesktopForm" method="POST"
       action="{% if desktop_detailsx %}{% url 'update_desktop' pk=desktop_detailsx.id %}{% else %}#{% endif %}">
       {% csrf_token %}
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="editDesktopModalLabel">Edit Desktop</h5>
+          <h5 class="modal-title" id="editDesktopModalLabel"><i class="fa fa-edit"></i> Edit Desktop</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body">
-          <!-- ✅ FIXED: Hidden field matches your JS (exclude_id) -->
+          <!-- Hidden Desktop ID -->
           <input type="hidden" id="editDesktopID" value="{{ desktop_detailsx.id }}">
 
+          <!-- Serial Number -->
           <div class="mb-3">
             <label for="editDesktopSN" class="form-label">Serial Number</label>
             <input 
@@ -24,24 +25,26 @@
               required>
           </div>
 
+          <!-- Brand -->
           <div class="mb-3">
             <label for="desktop_brand_form" class="form-label">Brand</label>
             <select class="form-select form-control" id="desktop_brand_form" name="desktop_brand_form" required>
               <option value="" disabled>Select Brand</option>
               {% for brandD in desktop_brands %}
-                <option value="{{ brandD.id }}"
-                        {% if desktop_detailsx.brand_name.id == brandD.id %}selected{% endif %}>
+                <option value="{{ brandD.id }}" {% if desktop_detailsx.brand_name.id == brandD.id %}selected{% endif %}>
                   {{ brandD.name }}
                 </option>
               {% endfor %}
             </select>
           </div>
 
+          <!-- Model -->
           <div class="mb-3">
             <label for="desktop_model_form" class="form-label">Model</label>
             <input type="text" class="form-control" id="desktop_model_form" name="desktop_model_form" value="{{ desktop_detailsx.model }}" required>
           </div>
 
+          <!-- Processor -->
           <div class="mb-3">
             <label for="desktop_proccessor_form" class="form-label">Processor</label>
             <select class="form-select form-control" id="desktop_proccessor_form" name="desktop_proccessor_form" required>
@@ -52,14 +55,12 @@
                 <option value="i9-11900K" {% if desktop_detailsx.processor == 'i9-11900K' %}selected{% endif %}>Core i9-11900K (11th Gen)</option>
                 <option value="i9-10900K" {% if desktop_detailsx.processor == 'i9-10900K' %}selected{% endif %}>Core i9-10900K (10th Gen)</option>
               </optgroup>
-
               <optgroup label="Core i7 (Desktop)">
                 <option value="i7-14700K" {% if desktop_detailsx.processor == 'i7-14700K' %}selected{% endif %}>Core i7-14700K (14th Gen)</option>
                 <option value="i7-13700K" {% if desktop_detailsx.processor == 'i7-13700K' %}selected{% endif %}>Core i7-13700K (13th Gen)</option>
                 <option value="i7-12700K" {% if desktop_detailsx.processor == 'i7-12700K' %}selected{% endif %}>Core i7-12700K (12th Gen)</option>
                 <option value="i7-11700K" {% if desktop_detailsx.processor == 'i7-11700K' %}selected{% endif %}>Core i7-11700K (11th Gen)</option>
               </optgroup>
-
               <optgroup label="Core i5 (Desktop)">
                 <option value="i5-14600K" {% if desktop_detailsx.processor == 'i5-14600K' %}selected{% endif %}>Core i5-14600K (14th Gen)</option>
                 <option value="i5-13600K" {% if desktop_detailsx.processor == 'i5-13600K' %}selected{% endif %}>Core i5-13600K (13th Gen)</option>
@@ -69,28 +70,103 @@
             </select>
           </div>
 
+          <!-- Memory -->
           <div class="mb-3">
             <label for="desktop_memory_form" class="form-label">Memory</label>
             <select class="form-select form-control mt-2" id="desktop_memory_form" name="desktop_memory_form">
-            <option value="{{ desktop_detailsx.memory }}" disabled selected>{{ desktop_detailsx.memory }}</option>
-            <option value="4GB">4GB</option>
-            <option value="8GB">8GB</option>
-            <option value="16GB">16GB</option>
-            <option value="32GB">32GB</option>
-            <option value="64GB">64GB</option>
-            <option value="128GB">128GB</option>
+              <option value="" disabled {% if not desktop_detailsx.memory %}selected{% endif %}>Select Memory</option>
+              <option value="4GB" {% if desktop_detailsx.memory == '4GB' %}selected{% endif %}>4GB</option>
+              <option value="8GB" {% if desktop_detailsx.memory == '8GB' %}selected{% endif %}>8GB</option>
+              <option value="16GB" {% if desktop_detailsx.memory == '16GB' %}selected{% endif %}>16GB</option>
+              <option value="32GB" {% if desktop_detailsx.memory == '32GB' %}selected{% endif %}>32GB</option>
+              <option value="64GB" {% if desktop_detailsx.memory == '64GB' %}selected{% endif %}>64GB</option>
+              <option value="128GB" {% if desktop_detailsx.memory == '128GB' %}selected{% endif %}>128GB</option>
             </select>
           </div>
 
+          <!-- Drive -->
           <div class="mb-3">
             <label for="desktop_drive_form" class="form-label">Drive</label>
             <input type="text" class="form-control" id="desktop_drive_form" name="desktop_drive_form" value="{{ desktop_detailsx.drive }}" required>
           </div>
+
+          <!-- 🪟 Operating System (SELECT preserved) -->
+          <div class="mb-3">
+            <label class="form-label">Operating System</label>
+            <select name="desktop_OS" id="desktop_OS" class="form-select form-control" required>
+              <option value="" disabled {% if not desktop_detailsx.desktop_OS %}selected{% endif %}>Select OS</option>
+              <option value="Windows 11 Pro" {% if desktop_detailsx.desktop_OS == "Windows 11 Pro" %}selected{% endif %}>Windows 11 Pro</option>
+              <option value="Windows 11 Home" {% if desktop_detailsx.desktop_OS == "Windows 11 Home" %}selected{% endif %}>Windows 11 Home</option>
+              <option value="Windows 11 Enterprise" {% if desktop_detailsx.desktop_OS == "Windows 11 Enterprise" %}selected{% endif %}>Windows 11 Enterprise</option>
+              <option value="Windows 10 Pro" {% if desktop_detailsx.desktop_OS == "Windows 10 Pro" %}selected{% endif %}>Windows 10 Pro</option>
+              <option value="Windows 10 Home" {% if desktop_detailsx.desktop_OS == "Windows 10 Home" %}selected{% endif %}>Windows 10 Home</option>
+              <option value="Windows 10 Enterprise" {% if desktop_detailsx.desktop_OS == "Windows 10 Enterprise" %}selected{% endif %}>Windows 10 Enterprise</option>
+              <option value="Windows 8.1 Pro" {% if desktop_detailsx.desktop_OS == "Windows 8.1 Pro" %}selected{% endif %}>Windows 8.1 Pro</option>
+              <option value="Windows 8 Pro" {% if desktop_detailsx.desktop_OS == "Windows 8 Pro" %}selected{% endif %}>Windows 8 Pro</option>
+              <option value="Windows 7 Ultimate" {% if desktop_detailsx.desktop_OS == "Windows 7 Ultimate" %}selected{% endif %}>Windows 7 Ultimate</option>
+              <option value="Windows 7 Professional" {% if desktop_detailsx.desktop_OS == "Windows 7 Professional" %}selected{% endif %}>Windows 7 Professional</option>
+              <option value="Windows Server 2022" {% if desktop_detailsx.desktop_OS == "Windows Server 2022" %}selected{% endif %}>Windows Server 2022</option>
+              <option value="Windows Server 2019" {% if desktop_detailsx.desktop_OS == "Windows Server 2019" %}selected{% endif %}>Windows Server 2019</option>
+              <option value="Windows Server 2016" {% if desktop_detailsx.desktop_OS == "Windows Server 2016" %}selected{% endif %}>Windows Server 2016</option>
+              <option value="Windows Server 2012 R2" {% if desktop_detailsx.desktop_OS == "Windows Server 2012 R2" %}selected{% endif %}>Windows Server 2012 R2</option>
+              <option value="Other" {% if desktop_detailsx.desktop_OS == "Other" %}selected{% endif %}>Other</option>
+            </select>
+
+            <!-- 🔑 OS Product Key (input stays as input) -->
+            <label class="form-label mt-2">Operating System Key</label>
+            <input type="text"
+                   name="desktop_OS_keys"
+                   class="form-control kai-safe-key-input"
+                   maxlength="29"
+                   oninput="formatProductKey(this)"
+                   value="{{ desktop_detailsx.desktop_OS_keys|default:'' }}"
+                   placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
+          </div>
+
+          <!-- 🧩 Microsoft Office (SELECT preserved) -->
+          <div class="mb-3">
+            <label class="form-label">Microsoft Office Version</label>
+            <select name="desktop_Office" id="desktop_Office" class="form-select form-control" required>
+              <option value="" disabled {% if not desktop_detailsx.desktop_Office %}selected{% endif %}>Select Office Version</option>
+              <option value="Microsoft Office 2024 Professional Plus" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2024 Professional Plus" %}selected{% endif %}>Microsoft Office 2024 Professional Plus</option>
+              <option value="Microsoft Office 2024 Standard" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2024 Standard" %}selected{% endif %}>Microsoft Office 2024 Standard</option>
+              <option value="Microsoft Office 2021 Professional Plus" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2021 Professional Plus" %}selected{% endif %}>Microsoft Office 2021 Professional Plus</option>
+              <option value="Microsoft Office 2021 Standard" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2021 Standard" %}selected{% endif %}>Microsoft Office 2021 Standard</option>
+              <option value="Microsoft Office 2019 Professional Plus" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2019 Professional Plus" %}selected{% endif %}>Microsoft Office 2019 Professional Plus</option>
+              <option value="Microsoft Office 2019 Standard" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2019 Standard" %}selected{% endif %}>Microsoft Office 2019 Standard</option>
+              <option value="Microsoft Office 2016 Professional Plus" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2016 Professional Plus" %}selected{% endif %}>Microsoft Office 2016 Professional Plus</option>
+              <option value="Microsoft Office 2016 Standard" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2016 Standard" %}selected{% endif %}>Microsoft Office 2016 Standard</option>
+              <option value="Microsoft Office 2013 Professional Plus" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2013 Professional Plus" %}selected{% endif %}>Microsoft Office 2013 Professional Plus</option>
+              <option value="Microsoft Office 2013 Standard" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2013 Standard" %}selected{% endif %}>Microsoft Office 2013 Standard</option>
+              <option value="Microsoft Office 2021 Home and Business" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2021 Home and Business" %}selected{% endif %}>Microsoft Office 2021 Home and Business</option>
+              <option value="Microsoft Office 2019 Home and Business" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2019 Home and Business" %}selected{% endif %}>Microsoft Office 2019 Home and Business</option>
+              <option value="Microsoft Office 2016 Home and Business" {% if desktop_detailsx.desktop_Office == "Microsoft Office 2016 Home and Business" %}selected{% endif %}>Microsoft Office 2016 Home and Business</option>
+              <option value="Office 365 (Microsoft 365)" {% if desktop_detailsx.desktop_Office == "Office 365 (Microsoft 365)" %}selected{% endif %}>Office 365 (Microsoft 365)</option>
+              <option value="LibreOffice" {% if desktop_detailsx.desktop_Office == "LibreOffice" %}selected{% endif %}>LibreOffice</option>
+              <option value="WPS Office" {% if desktop_detailsx.desktop_Office == "WPS Office" %}selected{% endif %}>WPS Office</option>
+              <option value="OpenOffice" {% if desktop_detailsx.desktop_Office == "OpenOffice" %}selected{% endif %}>OpenOffice</option>
+              <option value="Other" {% if desktop_detailsx.desktop_Office == "Other" %}selected{% endif %}>Other</option>
+            </select>
+
+            <!-- 🔑 Office Product Key (input stays as input) -->
+            <label class="form-label mt-2">Microsoft Office Key</label>
+            <input type="text"
+                   name="desktop_Office_keys"
+                   class="form-control kai-safe-key-input"
+                   maxlength="29"
+                   oninput="formatProductKey(this)"
+                   value="{{ desktop_detailsx.desktop_Office_keys|default:'' }}"
+                   placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
+          </div>
+
         </div>
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Desktop Package</button>
+          <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm d-none me-2"></span>
+            <span class="button-text">Save Changes</span>
+          </button>
         </div>
       </div>
     </form>

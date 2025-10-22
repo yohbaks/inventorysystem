@@ -84,6 +84,10 @@ warning-color : #ffa534
 danger-color : #f3545d
 
 -------------------------------------------------------------------*/
+
+
+
+
 /*   Typography    */
 body, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6, p, .navbar, .brand, .btn-simple, .alert, a, .td-name, td, button.close {
   -moz-osx-font-smoothing: grayscale;
@@ -6915,4 +6919,31 @@ body {
 .table-header-blue th {
   background-color: #007bff; /* Bootstrap blue color */
   color: white; /* Set text color to white for better visibility */
+}
+
+
+/* ======================================================
+   🌈 Custom Patch — License Key Rainbow Text (safe scope)
+   ====================================================== */
+.software-section code.license-key-rainbow {
+  display: inline-block;                     /* required for gradient clipping */
+  font-family: "Courier New", monospace;     
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg,
+    #ef4444, #f97316, #eab308,
+    #22c55e, #3b82f6, #a855f7, #ec4899);
+  background-size: 400% 100%;
+  animation: rainbowFlow 5s linear infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-color: transparent;             /* override any <code> bg color */
+}
+
+@keyframes rainbowFlow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

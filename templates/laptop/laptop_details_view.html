@@ -9,7 +9,10 @@
 {% block extra_css %}
 
 
+
 <style>
+
+/* Custom CSS Variables */
 :root {
   --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -21,7 +24,31 @@
 }
 
 
+/* Rainbow animation for license keys */
+.license-key-rainbow {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg,
+    #ef4444,
+    #f97316,
+    #eab308,
+    #22c55e,
+    #3b82f6,
+    #a855f7,
+    #ec4899);
+  background-size: 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbowFlow 5s linear infinite;
+}
 
+/* Smooth flowing gradient */
+@keyframes rainbowFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 </style>
 {% endblock %}
 
@@ -79,24 +106,24 @@
       <div class="col-lg-8">
         
         <!-- Modern Tab Navigation -->
-        <ul class="nav nav-pills modern-tabs" id="pills-tab" role="tablist">
+        <ul class="nav nav-pills nav-secondary nav-pills-no-bd modern-tabs" id="pills-tab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="pills-laptop-tab" data-bs-toggle="pill" data-bs-target="#pills-laptop" type="button" role="tab">
+            <button class="nav-link active modern-btn " id="pills-laptop-tab" data-bs-toggle="pill" data-bs-target="#pills-laptop" type="button" role="tab">
               <i class="fas fa-laptop"></i> Laptop
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-user-tab" data-bs-toggle="pill" data-bs-target="#pills-user" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-user-tab" data-bs-toggle="pill" data-bs-target="#pills-user" type="button" role="tab">
               <i class="fas fa-user"></i> User
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-documents-tab" data-bs-toggle="pill" data-bs-target="#pills-documents" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-documents-tab" data-bs-toggle="pill" data-bs-target="#pills-documents" type="button" role="tab">
               <i class="fas fa-file-alt"></i> Documents
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-pm-tab" data-bs-toggle="pill" data-bs-target="#pills-pm" type="button" role="tab">
+            <button class="nav-link modern-btn" id="pills-pm-tab" data-bs-toggle="pill" data-bs-target="#pills-pm" type="button" role="tab">
               <i class="fas fa-wrench"></i> PM Schedule
             </button>
           </li>
@@ -159,14 +186,26 @@
                   <i class="fas fa-cog"></i>
                   Software Details
                 </h3>
+
                 <div class="row">
+                  <!-- Operating System -->
                   <div class="col-md-6 mb-3">
                     <div class="spec-label">Operating System</div>
                     <div class="spec-value">{{ laptop_details.laptop_OS|default:"—" }}</div>
+                    <div class="spec-sub">
+  <small class="text-muted">License Key:</small><br>
+  <code class="license-key-rainbow">{{ laptop_details.laptop_OS_keys|default:"—" }}</code>
+</div>
                   </div>
+
+                  <!-- Office Version -->
                   <div class="col-md-6 mb-3">
                     <div class="spec-label">Office Version</div>
                     <div class="spec-value">{{ laptop_details.laptop_Office|default:"—" }}</div>
+                    <div class="spec-sub">
+                      <small class="text-muted">License Key:</small><br>
+                      <code  class="license-key-rainbow">{{ laptop_details.laptop_Office_keys|default:"—" }}</code>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -760,158 +799,9 @@ $(document).on("submit", "#disposeLaptopForm", function (e) {
 });
 </script>
 
-<!-- ==================== 👤 UPDATE END USER AJAX ==================== -->
-<script>
-$(document).on("submit", "#editEndUserForm", function (e) {
-  e.preventDefault();
-  const form = $(this);
-  const url = form.data("url");
-  const button = form.find("#submitButton");
-  const spinner = button.find(".spinner-border");
-  const btnText = button.find(".button-text");
 
-  button.prop("disabled", true);
-  spinner.removeClass("d-none");
-  btnText.text("Saving...");
 
-  $.ajax({
-    url: url,
-    type: "POST",
-    data: form.serialize(),
-    success: function (resp) {
-      if (resp.success) {
-        $("#editEndUserModal").modal("hide");
-        $.notify({
-          title: "✅ Success",
-          message: resp.message || "End User updated successfully!",
-          icon: "fa fa-user"
-        }, { type: "success", placement: { from: "bottom", align: "right" }, delay: 3000 });
-        setTimeout(() => location.reload(), 1000);
-      } else {
-        $.notify({
-          title: "⚠️ Error",
-          message: resp.error || "Could not update end user.",
-          icon: "fa fa-exclamation-triangle"
-        }, { type: "danger", placement: { from: "bottom", align: "right" } });
-      }
-    },
-    error: function () {
-      $.notify({
-        title: "❌ Server Error",
-        message: "Something went wrong.",
-        icon: "fa fa-times-circle"
-      }, { type: "danger", placement: { from: "bottom", align: "right" } });
-    },
-    complete: function () {
-      button.prop("disabled", false);
-      spinner.addClass("d-none");
-      btnText.text("Save Changes");
-    }
-  });
-});
-</script>
 
-<!-- ==================== 🔁 UPDATE ASSET OWNER AJAX ==================== -->
-<script>
-$(document).on("submit", "#editAssetOwnerForm", function (e) {
-  e.preventDefault();
-  const form = $(this);
-  const url = form.data("url");
-  const button = form.find("#submitButtonAsset");
-  const spinner = button.find(".spinner-border");
-  const btnText = button.find(".button-text");
-
-  button.prop("disabled", true);
-  spinner.removeClass("d-none");
-  btnText.text("Saving...");
-
-  $.ajax({
-    url: url,
-    type: "POST",
-    data: form.serialize(),
-    success: function (resp) {
-      if (resp.success) {
-        $("#editAssetOwnerModal").modal("hide");
-        $.notify({
-          title: "✅ Success",
-          message: resp.message || "Asset Owner transferred successfully!",
-          icon: "fa fa-exchange-alt"
-        }, { type: "success", placement: { from: "bottom", align: "right" }, delay: 3000 });
-        setTimeout(() => location.reload(), 1000);
-      } else {
-        $.notify({
-          title: "⚠️ Error",
-          message: resp.error || "Could not transfer ownership.",
-          icon: "fa fa-exclamation-triangle"
-        }, { type: "danger", placement: { from: "bottom", align: "right" } });
-      }
-    },
-    error: function () {
-      $.notify({
-        title: "❌ Server Error",
-        message: "Something went wrong.",
-        icon: "fa fa-times-circle"
-      }, { type: "danger", placement: { from: "bottom", align: "right" } });
-    },
-    complete: function () {
-      button.prop("disabled", false);
-      spinner.addClass("d-none");
-      btnText.text("Save Changes");
-    }
-  });
-});
-</script>
-
-<!-- ==================== 📄 UPDATE DOCUMENTS AJAX ==================== -->
-<script>
-$(document).on("submit", "#editDocumentsForm", function (e) {
-  e.preventDefault();
-  const form = $(this);
-  const url = form.attr("action");
-  const button = form.find("button[type='submit']");
-  const spinner = button.find(".spinner-border");
-  const btnText = button.find(".button-text");
-
-  button.prop("disabled", true);
-  spinner.removeClass("d-none");
-  btnText.text("Saving...");
-
-  $.ajax({
-    url: url,
-    type: "POST",
-    data: form.serialize(),
-    success: function (resp) {
-      if (resp.success) {
-        $("#editDocumentsModal").modal("hide");
-        $.notify({
-          title: "✅ Success",
-          message: resp.message || "Documents updated successfully!",
-          icon: "fa fa-file-alt"
-        }, { type: "success", placement: { from: "bottom", align: "right" }, delay: 3000 });
-        setTimeout(() => location.reload(), 1000);
-      } else {
-        $.notify({
-          title: "⚠️ Error",
-          message: resp.error || "Could not update documents.",
-          icon: "fa fa-exclamation-triangle"
-        }, { type: "danger", placement: { from: "bottom", align: "right" } });
-      }
-    },
-    error: function () {
-      $.notify({
-        title: "❌ Server Error",
-        message: "Unexpected error occurred.",
-        icon: "fa fa-times-circle"
-      }, { type: "danger", placement: { from: "bottom", align: "right" } });
-    },
-    complete: function () {
-      button.prop("disabled", false);
-      spinner.addClass("d-none");
-      btnText.text("Save Changes");
-    }
-  });
-});
-</script>
 
 <!-- ==================== 💻 EDIT LAPTOP AJAX ==================== -->
 <script>
@@ -971,6 +861,100 @@ $(document).on("submit", "#editLaptopModal form", function (e) {
   });
 });
 </script>
+
+
+<!-- ==================== 🧭 LAPTOP TABS & EDIT USER/OWNER/DOCS AJAX ==================== -->
+
+<script>
+function reloadToTab(tabId) {
+  localStorage.setItem('activeLaptopTab', tabId);
+  location.reload();
+}
+
+$(document).ready(function() {
+  const activeTab = localStorage.getItem('activeLaptopTab');
+  if (activeTab) {
+    const tabButton = document.querySelector(`[data-bs-target="#pills-${activeTab}"]`);
+    if (tabButton) {
+      const tab = new bootstrap.Tab(tabButton);
+      tab.show();
+    }
+    localStorage.removeItem('activeLaptopTab');
+  }
+});
+
+// 🔹 Handle AJAX for End User, Asset Owner, Documents (Laptop)
+$(document).on("submit", "#editEndUserForm, #editAssetOwnerForm, #editDocumentsForm", function(e) {
+  e.preventDefault();
+
+  const form = $(this);
+  const url = form.data("url");
+  const button = form.find("button[type='submit']");
+  const spinner = button.find(".spinner-border");
+  const btnText = button.find(".button-text");
+
+  button.prop("disabled", true);
+  spinner.removeClass("d-none");
+  btnText.text("Saving...");
+
+  $.ajax({
+    url: url,
+    type: "POST",
+    data: form.serialize(),
+    success: function(resp) {
+      if (resp.success) {
+        form.closest(".modal").modal("hide");
+        $.notify({
+          title: "✅ Success",
+          message: resp.message,
+          icon: "fa fa-check-circle"
+        }, {
+          type: "success",
+          placement: { from: "bottom", align: "right" },
+          delay: 2000
+        });
+        // ✅ Stay on the same pill
+        setTimeout(() => reloadToTab(resp.tab), 1000);
+      } else {
+        $.notify({
+          title: "⚠️ Failed",
+          message: resp.error,
+          icon: "fa fa-exclamation-triangle"
+        }, {
+          type: "danger",
+          placement: { from: "bottom", align: "right" },
+          delay: 2000
+        });
+      }
+    },
+    error: function() {
+      $.notify({
+        title: "❌ Server Error",
+        message: "Unexpected error occurred.",
+        icon: "fa fa-times-circle"
+      }, {
+        type: "danger",
+        placement: { from: "bottom", align: "right" },
+        delay: 2000
+      });
+    },
+    complete: function() {
+      button.prop("disabled", false);
+      spinner.addClass("d-none");
+      btnText.text("Save Changes");
+    }
+  });
+});
+</script>
+
+<script>
+  // ✅ Formats both OS and Office keysm, adding dashes every 5 characters in editing forms
+  function formatProductKey(input) {
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    input.value = value.match(/.{1,5}/g)?.join('-') || '';
+  }
+</script>
+
 {% endblock %}
 
 
