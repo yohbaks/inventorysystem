@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 import uuid
 from django.conf import settings
-from django.core.exceptions import ValidationError
+
 
 # Create your models here.
 
@@ -568,11 +568,13 @@ class AssetOwnerChangeHistory(models.Model):
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
+# PreventiveMaintenance
 class PreventiveMaintenance(models.Model):
     equipment_package = models.ForeignKey(
         'Equipment_Package', related_name='maintenances',
         on_delete=models.CASCADE, null=True, blank=True
     )
+    # 👉 Add this (nullable so desktop rows still work)
     laptop_package = models.ForeignKey(
         'LaptopPackage', related_name='maintenances',
         on_delete=models.CASCADE, null=True, blank=True
@@ -581,6 +583,7 @@ class PreventiveMaintenance(models.Model):
         'PMScheduleAssignment', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='maintenances'
     )
+    
     maintenance_date = models.DateField(null=True, blank=True)
     next_schedule = models.DateField(blank=True, null=True)
     performed_by = models.CharField(max_length=255, blank=True, null=True)
@@ -590,7 +593,9 @@ class PreventiveMaintenance(models.Model):
     date_accomplished = models.DateField(null=True, blank=True)
     office = models.CharField(max_length=255, blank=True, null=True)
     end_user = models.CharField(max_length=255, blank=True, null=True)
+    # task_1..task_9 and note_1..note_9 unchanged
 
+    # Task fields
     task_1 = models.BooleanField(default=False)
     note_1 = models.TextField(blank=True, null=True)
     task_2 = models.BooleanField(default=False)
@@ -614,8 +619,6 @@ class PreventiveMaintenance(models.Model):
         device = self.equipment_package or self.laptop_package
         return f"PM for {device} on {self.date_accomplished or 'N/A'}"
 
-
-
 class MaintenanceChecklistItem(models.Model):
     maintenance = models.ForeignKey(PreventiveMaintenance, on_delete=models.CASCADE, related_name='items')
     item_text = models.CharField(max_length=255)
@@ -626,17 +629,14 @@ class MaintenanceChecklistItem(models.Model):
 
 
 
-# ==========================
-# 🧭 OFFICE & QUARTER MODELS
-# ==========================
-
 class OfficeSection(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
+    
 
-
+    
 class QuarterSchedule(models.Model):
     QUARTERS = [
         ('Q1', '1st Quarter'),
@@ -646,13 +646,9 @@ class QuarterSchedule(models.Model):
     ]
     year = models.IntegerField()
     quarter = models.CharField(max_length=2, choices=QUARTERS)
-
-    class Meta:
-        unique_together = ('year', 'quarter')
-
-    def __str__(self):
-        return f"{self.get_quarter_display()} {self.year}"  
     
+    def __str__(self):
+        return f"{self.get_quarter_display()} {self.year}"
     
 class PMSectionSchedule(models.Model):
     quarter_schedule = models.ForeignKey(QuarterSchedule, on_delete=models.CASCADE, related_name='schedules')
@@ -661,25 +657,21 @@ class PMSectionSchedule(models.Model):
     end_date = models.DateField()
     notes = models.TextField(blank=True, null=True)
 
-    class Meta:
-        unique_together = ('quarter_schedule', 'section')
-
     def __str__(self):
-        return f"{self.section.name} – {self.quarter_schedule}"
+        return f"{self.section.name} | {self.start_date} to {self.end_date} ({self.quarter_schedule})"
     
-
 class PMScheduleAssignment(models.Model):
     equipment_package = models.ForeignKey(
         Equipment_Package, on_delete=models.CASCADE,
         related_name='pm_assignments', null=True, blank=True
     )
     laptop_package = models.ForeignKey(
-        'LaptopPackage', on_delete=models.CASCADE,
+        'LaptopPackage', on_delete=models.CASCADE,   # ✅ now consistent
         related_name='pm_assignments', null=True, blank=True
     )
     pm_section_schedule = models.ForeignKey(
         'PMSectionSchedule', on_delete=models.CASCADE,
-        related_name='schedule_assignments', 
+        related_name='schedule_assignments'
     )
     assigned_date = models.DateField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
@@ -688,14 +680,6 @@ class PMScheduleAssignment(models.Model):
     def __str__(self):
         target = self.equipment_package or self.laptop_package
         return f"{target} -> {self.pm_section_schedule}"
-
-    # ✅ Validation logic goes here
-    def clean(self):
-        if not self.equipment_package and not self.laptop_package:
-            raise ValidationError("Either equipment_package or laptop_package must be set.")
-        if self.equipment_package and self.laptop_package:
-            raise ValidationError("Only one of equipment_package or laptop_package can be set.")
-
 #END - Preventivemaintenance REAL - END
 
 
