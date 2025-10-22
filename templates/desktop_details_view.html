@@ -1166,38 +1166,64 @@
             </div>
           </div>
 
-          {% if pm_assignments %}
-          <div>
-            {% for assignment in pm_assignments %}
-            <div class="pm-item">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="d-flex align-items-center gap-2">
-                  {% if assignment.is_completed %}
-                  <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                  {% else %}
-                  <i class="fas fa-clock" style="color: #f59e0b;"></i>
-                  {% endif %}
-                  <strong>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</strong>
-                </div>
-                <span class="pm-status {% if assignment.is_completed %}status-completed{% else %}status-pending{% endif %}">
-                  {% if assignment.is_completed %}Completed{% else %}Pending{% endif %}
-                </span>
-              </div>
-              <div style="color: #6b7280; font-size: 0.875rem;">{{ assignment.pm_section_schedule.section.name }}</div>
-              <div style="color: #9ca3af; font-size: 0.75rem; margin-top: 0.5rem;">
-                <i class="far fa-calendar"></i>
-                {{ assignment.pm_section_schedule.start_date }} - {{ assignment.pm_section_schedule.end_date }}
-              </div>
-            </div>
-            {% endfor %}
+         {% if pm_assignments %}
+  <div>
+    {% for assignment in pm_assignments %}
+      <div class="pm-item mb-3 p-3 rounded shadow-sm" style="background-color: #fff; border: 1px solid #f1f1f1;">
+        
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center gap-2">
+            {% if assignment.is_completed %}
+              <i class="fas fa-check-circle text-success"></i>
+              <strong style="color:#059669;">
+                {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
+                {{ assignment.pm_section_schedule.quarter_schedule.year }}
+              </strong>
+            {% else %}
+              <i class="fas fa-clock text-warning"></i>
+              <strong style="color:#92400e;">
+                {{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
+                {{ assignment.pm_section_schedule.quarter_schedule.year }}
+              </strong>
+            {% endif %}
           </div>
 
-          <a href="{% url 'checklist' equipment_package.id %}" class="btn w-100 rounded-pill mt-3" style="background: var(--gradient-success); color: white; font-weight: 600;">
-            <i class="fas fa-wrench"></i> Conduct PM
-          </a>
-          {% else %}
-          <p style="color: #6b7280; margin: 0;">No PM schedule found for this desktop.</p>
-          {% endif %}
+          <span class="pm-status {% if assignment.is_completed %}status-completed{% else %}status-pending{% endif %}">
+            {% if assignment.is_completed %}
+              Completed
+            {% else %}
+              Pending
+            {% endif %}
+          </span>
+        </div>
+
+        {% if assignment.is_completed %}
+          <div class="text-success small fw-bold">
+            Completed under {{ assignment.pm_section_schedule.section.name }}
+          </div>
+        {% else %}
+          <div class="text-secondary small">
+            Pending under {{ assignment.pm_section_schedule.section.name }}
+          </div>
+        {% endif %}
+
+        <div class="text-muted small mt-1">
+          <i class="far fa-calendar"></i>
+          {{ assignment.pm_section_schedule.start_date }} – {{ assignment.pm_section_schedule.end_date }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <a href="{% url 'checklist' equipment_package.id %}"
+     class="btn w-100 rounded-pill mt-3"
+     style="background: var(--gradient-success); color: white; font-weight: 600;">
+    <i class="fas fa-wrench"></i> Conduct PM
+  </a>
+{% else %}
+  <p class="text-muted mb-0">No PM schedule found for this desktop.</p>
+{% endif %}
+
         </div>
 
         <!-- Quick Actions -->

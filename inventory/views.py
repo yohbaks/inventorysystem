@@ -62,6 +62,67 @@ from django.shortcuts import render
 from django.db.models import F, Value
 from django.db.models.functions import Upper, Trim
 
+# ✅ Robust, idempotent PM auto-transfer
+def auto_transfer_pm_schedule(equipment_package, new_enduser):
+    """
+    Auto-transfer PM schedule to the new End User's section.
+    Keeps completed PMs intact but reassigns pending/future schedules
+    to the new section (Desktop or Laptop).
+    Always regenerates Q1–Q4 for the new section.
+    """
+    from inventory.models import PMScheduleAssignment, PMSectionSchedule, PreventiveMaintenance
+    from django.db import transaction
+
+    try:
+        if not new_enduser or not new_enduser.employee_office_section:
+            return "End user has no assigned office section."
+
+        new_section = new_enduser.employee_office_section
+
+        # 🔹 1. Delete only pending assignments for this equipment
+        pending_assignments = PMScheduleAssignment.objects.filter(
+            equipment_package=equipment_package,
+            is_completed=False
+        )
+        deleted_count = pending_assignments.count()
+        pending_assignments.delete()
+
+        # 🔹 2. Keep completed PMs (history stays)
+        completed_quarters = set()
+        completed_records = PreventiveMaintenance.objects.filter(
+            equipment_package=equipment_package,
+            is_completed=True
+        ).select_related('pm_schedule_assignment__pm_section_schedule__quarter_schedule')
+
+        for record in completed_records:
+            if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule:
+                qs = record.pm_schedule_assignment.pm_section_schedule.quarter_schedule
+                completed_quarters.add((qs.year, qs.quarter))
+
+        # 🔹 3. Fetch all 4 quarter schedules for the new section
+        new_section_schedules = PMSectionSchedule.objects.filter(section=new_section).select_related('quarter_schedule')
+
+        if not new_section_schedules.exists():
+            return f"No PM schedules found for {new_section.name} section."
+
+        # 🔹 4. Recreate all 4 quarters, but mark as completed if already done before
+        created_count = 0
+        for sched in new_section_schedules:
+            key = (sched.quarter_schedule.year, sched.quarter_schedule.quarter)
+            PMScheduleAssignment.objects.get_or_create(
+                equipment_package=equipment_package,
+                pm_section_schedule=sched,
+                defaults={'is_completed': key in completed_quarters}
+            )
+            created_count += 1
+
+        return (
+            f"PM schedule reassigned to {new_section.name}. "
+            f"Deleted {deleted_count} old pending, created {created_count} new schedule(s)."
+        )
+
+    except Exception as e:
+        return f"PM transfer error: {e}"
 
 
 
@@ -2047,7 +2108,7 @@ def update_asset_owner(request, desktop_id):
     }, status=405)
     
 def update_end_user(request, desktop_id):
-    """AJAX: Update End User assignment for a Desktop Package"""
+    """AJAX: Update End User assignment for a Desktop Package + Auto-transfer PM Schedule"""
     if request.method != 'POST':
         return JsonResponse({
             'success': False,
@@ -2068,10 +2129,9 @@ def update_end_user(request, desktop_id):
             # ✅ Fetch relevant records
             new_enduser = get_object_or_404(Employee, id=new_enduser_id)
             user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
-
             old_enduser = user_details.user_Enduser
 
-            # ✅ Update
+            # ✅ Update end user
             user_details.user_Enduser = new_enduser
             user_details.save()
 
@@ -2084,9 +2144,40 @@ def update_end_user(request, desktop_id):
                 changed_at=timezone.now()
             )
 
+            # ✅ AUTO-TRANSFER PM SCHEDULE TO NEW SECTION
+            try:
+                from inventory.models import PMScheduleAssignment, PMSectionSchedule
+
+                if new_enduser.employee_office_section:
+                    new_section = new_enduser.employee_office_section
+                    current_assignments = PMScheduleAssignment.objects.filter(
+                        equipment_package=user_details.equipment_package
+                    )
+
+                    latest_pm_section = (
+                        PMSectionSchedule.objects
+                        .filter(section=new_section)
+                        .order_by('-quarter_schedule__year', '-quarter_schedule__quarter')
+                        .first()
+                    )
+
+                    if latest_pm_section:
+                        for assignment in current_assignments:
+                            assignment.pm_section_schedule = latest_pm_section
+                            assignment.save(update_fields=["pm_section_schedule"])
+                        pm_message = f"PM schedule automatically moved to {new_section.name} section."
+                    else:
+                        pm_message = f"No active PM schedule found for {new_section.name}."
+                else:
+                    pm_message = "End user has no assigned office section."
+
+            except Exception as pm_err:
+                pm_message = f"PM transfer error: {pm_err}"
+
+            # ✅ Final response
             return JsonResponse({
                 'success': True,
-                'message': 'End user updated successfully.'
+                'message': f'End user updated successfully. {pm_message}'
             })
 
     except Exception as e:
