@@ -12,6 +12,8 @@ from django.db.models.signals import post_save
 import uuid
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 # Create your models here.
 
@@ -554,19 +556,7 @@ class Employee(models.Model):
 
 #This tracks which user changed the End User and when.
    
-class EndUserChangeHistory(models.Model):
-    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE)
-    old_enduser = models.ForeignKey(Employee, related_name="old_enduser", on_delete=models.SET_NULL, null=True, blank=True)
-    new_enduser = models.ForeignKey(Employee, related_name="new_enduser", on_delete=models.CASCADE, null=True)
-    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
-class AssetOwnerChangeHistory(models.Model):
-    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE)
-    old_assetowner = models.ForeignKey(Employee, related_name="old_assetowner", on_delete=models.SET_NULL, null=True, blank=True)
-    new_assetowner = models.ForeignKey(Employee, related_name="new_assetowner", on_delete=models.CASCADE, null=True)
-    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
 class PreventiveMaintenance(models.Model):
     equipment_package = models.ForeignKey(
@@ -821,6 +811,99 @@ class DisposedLaptop(models.Model):
     def __str__(self):
         return f"Disposed Laptop : {self.laptop.computer_name if self.laptop else self.serial_no}"
     
+
+#==========================
+# CHANGE HISTORY MODELS
+class EndUserChangeHistory(models.Model):
+    """
+    Tracks end user changes for ANY device type (Desktop, Laptop, Printer, etc.)
+    Uses GenericForeignKey for flexibility and scalability.
+    """
+    # Generic relation to any device package
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    device = GenericForeignKey('content_type', 'object_id')
+    
+    # Change details
+    old_enduser = models.ForeignKey(
+        Employee, 
+        related_name="old_enduser_history", 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    new_enduser = models.ForeignKey(
+        Employee, 
+        related_name="new_enduser_history", 
+        on_delete=models.CASCADE, 
+        null=True
+    )
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-changed_at']
+        verbose_name = "End User Change History"
+        verbose_name_plural = "End User Change Histories"
+
+    def __str__(self):
+        device_name = f"{self.content_type.model.capitalize()} #{self.object_id}"
+        return f"End User Change: {device_name} on {self.changed_at}"
+
+    @property
+    def device_display(self):
+        """Returns a readable device name"""
+        if hasattr(self.device, 'computer_name'):
+            return self.device.computer_name
+        elif hasattr(self.device, 'printer_name'):
+            return self.device.printer_name
+        return f"{self.content_type.model.capitalize()} #{self.object_id}"
+
+
+class AssetOwnerChangeHistory(models.Model):
+    """
+    Tracks asset owner changes for ANY device type (Desktop, Laptop, Printer, etc.)
+    Uses GenericForeignKey for flexibility and scalability.
+    """
+    # Generic relation to any device package
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    device = GenericForeignKey('content_type', 'object_id')
+    
+    # Change details
+    old_assetowner = models.ForeignKey(
+        Employee, 
+        related_name="old_assetowner_history", 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    new_assetowner = models.ForeignKey(
+        Employee, 
+        related_name="new_assetowner_history", 
+        on_delete=models.CASCADE, 
+        null=True
+    )
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-changed_at']
+        verbose_name = "Asset Owner Change History"
+        verbose_name_plural = "Asset Owner Change Histories"
+
+    def __str__(self):
+        device_name = f"{self.content_type.model.capitalize()} #{self.object_id}"
+        return f"Asset Owner Change: {device_name} on {self.changed_at}"
+
+    @property
+    def device_display(self):
+        """Returns a readable device name"""
+        if hasattr(self.device, 'computer_name'):
+            return self.device.computer_name
+        elif hasattr(self.device, 'printer_name'):
+            return self.device.printer_name
+        return f"{self.content_type.model.capitalize()} #{self.object_id}"
 
 ################################################## PRINTER MODELS
 

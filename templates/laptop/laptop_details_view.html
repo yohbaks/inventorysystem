@@ -268,67 +268,208 @@
             </div>
           </div>
 
-          <!-- User Tab -->
-          <div class="tab-pane fade" id="pills-user" role="tabpanel">
-            <div class="modern-card">
-              <div class="card-header-modern">
-                <h2 class="card-title-modern">User Details</h2>
-              </div>
+<!-- User Tab -->
+<div class="tab-pane fade" id="pills-user" role="tabpanel">
+  <div class="modern-card">
+    <div class="card-header-modern">
+      <h2 class="card-title-modern">User Details</h2>
+    </div>
 
-              {% if user_details %}
-              <div class="spec-grid">
-                <div class="spec-item">
-                  <div class="spec-label">Asset Owner</div>
-                  <div class="spec-value">{{ user_details.user_Assetowner.full_name }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Designation</div>
-                  <div class="spec-value">{{ user_details.user_Assetowner.employee_position }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">Office</div>
-                  <div class="spec-value">{{ user_details.user_Assetowner.employee_office_section }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">End User</div>
-                  <div class="spec-value">{{ user_details.user_Enduser.full_name }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">End User Designation</div>
-                  <div class="spec-value">{{ user_details.user_Enduser.employee_position }}</div>
-                </div>
-                <div class="spec-item">
-                  <div class="spec-label">End User Office</div>
-                  <div class="spec-value">{{ user_details.user_Enduser.employee_office_section }}</div>
-                </div>
-              </div>
+    {% if user_details %}
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Asset Owner</div>
+        <div class="spec-value">{{ user_details.user_Assetowner.full_name }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Designation</div>
+        <div class="spec-value">{{ user_details.user_Assetowner.employee_position }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Office</div>
+        <div class="spec-value">{{ user_details.user_Assetowner.employee_office_section }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">End User</div>
+        <div class="spec-value">{{ user_details.user_Enduser.full_name }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">End User Designation</div>
+        <div class="spec-value">{{ user_details.user_Enduser.employee_position }}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">End User Office</div>
+        <div class="spec-value">{{ user_details.user_Enduser.employee_office_section }}</div>
+      </div>
+    </div>
 
-              <div class="mt-4 d-flex gap-2">
-                {% if laptop_details.is_disposed %}
-                  <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Editing not allowed — this package is disposed.">
-                    <i class="fa fa-edit"></i> Edit User
-                  </button>
-                  <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Ownership transfer disabled for disposed equipment.">
-                    <i class="fa fa-lock"></i> Transfer Ownership
-                  </button>
-                {% else %}
-                  <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editEndUserModal">
-                    <i class="fa fa-edit"></i> Edit User
-                  </button>
-                  <button class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#editAssetOwnerModal">
-                    <i class="fa fa-exchange-alt"></i> Transfer Ownership
-                  </button>
-                {% endif %}
-              </div>
+    <div class="mt-4 d-flex gap-2">
+      {% if laptop_details.is_disposed %}
+        <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Editing not allowed — this laptop is disposed.">
+          <i class="fa fa-edit"></i> Edit User
+        </button>
+        <button type="button" class="btn btn-secondary rounded-pill" disabled data-bs-toggle="tooltip" title="Ownership transfer disabled for disposed equipment.">
+          <i class="fa fa-lock"></i> Transfer Ownership
+        </button>
+      {% else %}
+        <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editEndUserModal">
+          <i class="fa fa-edit"></i> Edit User
+        </button>
+        <button class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#editAssetOwnerModal">
+          <i class="fa fa-exchange-alt"></i> Transfer Ownership
+        </button>
+      {% endif %}
+    </div>
 
-              {% else %}
-              <div class="alert alert-info" style="border-radius: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                No user details available.
-              </div>
-              {% endif %}
-            </div>
-          </div>
+    <!-- ✅ MODERN CHANGE HISTORY SECTION -->
+    {% if enduser_history or assetowner_history %}
+    <div class="mt-5">
+      
+      <!-- End User History -->
+      {% if enduser_history %}
+      <div class="mb-4 software-section">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h3 style="font-weight: 700; color: #1f2937; margin: 0;">
+            <i class="fas fa-user-clock"></i> End User Change History
+          </h3>
+          <span class="badge-modern badge-success">
+            {{ enduser_history|length }} Change{{ enduser_history|length|pluralize }}
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table-modern table-bordered table-head-bg-primary table-bordered-bd-info mt-4">
+            <thead >
+              <tr>
+                <th style="width: 20%;">Date & Time</th>
+                <th style="width: 35%;">Previous End User</th>
+                <th style="width: 35%;">New End User</th>
+                <th style="width: 10%;">Changed By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for history in enduser_history %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; color: #1f2937;">
+                    {{ history.changed_at|date:"M d, Y" }}
+                  </div>
+                  <small style="color: #6b7280;">{{ history.changed_at|date:"h:i A" }}</small>
+                </td>
+                <td>
+                  {% if history.old_enduser %}
+                    <div style="font-weight: 600; color: #6b7280;">
+                      {{ history.old_enduser.full_name }}
+                    </div>
+                    <small style="color: #9ca3af;">{{ history.old_enduser.employee_position }}</small>
+                  {% else %}
+                    <span style="color: #d1d5db;">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="font-weight: 700; color: #059669;">
+                    <i class="fas fa-arrow-right" style="color: #10b981; margin-right: 0.5rem;"></i>
+                    {{ history.new_enduser.full_name }}
+                  </div>
+                  <small style="color: #6b7280;">{{ history.new_enduser.employee_position }}</small>
+                </td>
+                <td>
+                  {% if history.changed_by %}
+                    <div style="font-weight: 600; color: #667eea; font-size: 0.875rem;">
+                      {{ history.changed_by.get_full_name|default:history.changed_by.username }}
+                    </div>
+                  {% else %}
+                    <span class="badge-modern" style="background: #f3f4f6; color: #6b7280;">
+                      System
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Asset Owner History -->
+      {% if assetowner_history %}
+      <div class="mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h3 style="font-weight: 700; color: #1f2937; margin: 0;">
+            <i class="fas fa-exchange-alt"></i> Asset Owner Transfer History
+          </h3>
+          <span class="badge-modern" style="background: #fef3c7; color: #92400e;">
+            {{ assetowner_history|length }} Transfer{{ assetowner_history|length|pluralize }}
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table-modern">
+            <thead>
+              <tr>
+                <th style="width: 20%;">Date & Time</th>
+                <th style="width: 35%;">Previous Owner</th>
+                <th style="width: 35%;">New Owner</th>
+                <th style="width: 10%;">Changed By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for history in assetowner_history %}
+              <tr>
+                <td>
+                  <div style="font-weight: 600; color: #1f2937;">
+                    {{ history.changed_at|date:"M d, Y" }}
+                  </div>
+                  <small style="color: #6b7280;">{{ history.changed_at|date:"h:i A" }}</small>
+                </td>
+                <td>
+                  {% if history.old_assetowner %}
+                    <div style="font-weight: 600; color: #6b7280;">
+                      {{ history.old_assetowner.full_name }}
+                    </div>
+                    <small style="color: #9ca3af;">{{ history.old_assetowner.employee_position }}</small>
+                  {% else %}
+                    <span style="color: #d1d5db;">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div style="font-weight: 700; color: #d97706;">
+                    <i class="fas fa-arrow-right" style="color: #f59e0b; margin-right: 0.5rem;"></i>
+                    {{ history.new_assetowner.full_name }}
+                  </div>
+                  <small style="color: #6b7280;">{{ history.new_assetowner.employee_position }}</small>
+                </td>
+                <td>
+                  {% if history.changed_by %}
+                    <div style="font-weight: 600; color: #667eea; font-size: 0.875rem;">
+                      {{ history.changed_by.get_full_name|default:history.changed_by.username }}
+                    </div>
+                  {% else %}
+                    <span class="badge-modern" style="background: #f3f4f6; color: #6b7280;">
+                      System
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info" style="border-radius: 1rem;">
+      <i class="fas fa-info-circle"></i>
+      No user details available.
+    </div>
+    {% endif %}
+  </div>
+</div>
 
           <!-- Documents Tab -->
           <div class="tab-pane fade" id="pills-documents" role="tabpanel">

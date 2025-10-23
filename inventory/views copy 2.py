@@ -65,33 +65,8 @@ from django.db.models.functions import Upper, Trim
 
 from inventory.utils.pm_helpers import transfer_pm_schedule_on_user_change
 
-from django.contrib.contenttypes.models import ContentType
-
-
-# ==========================================
-# HELPER FUNCTIONS FOR CHANGE HISTORY
-# ==========================================
-
-def get_asset_owner_history(package):
-    """Get asset owner change history for any package type (Desktop, Laptop, Printer, etc.)"""
-    from django.contrib.contenttypes.models import ContentType
-    content_type = ContentType.objects.get_for_model(package)
-    return AssetOwnerChangeHistory.objects.filter(
-        content_type=content_type,
-        object_id=package.id
-    ).select_related('old_assetowner', 'new_assetowner', 'changed_by').order_by('-changed_at')
-
-
-def get_end_user_history(package):
-    """Get end user change history for any package type (Desktop, Laptop, Printer, etc.)"""
-    from django.contrib.contenttypes.models import ContentType
-    content_type = ContentType.objects.get_for_model(package)
-    return EndUserChangeHistory.objects.filter(
-        content_type=content_type,
-        object_id=package.id
-    ).select_related('old_enduser', 'new_enduser', 'changed_by').order_by('-changed_at')
-
-
+# ✅ Robust, idempotent PM auto-transfer
+# ✅ Robust, idempotent PM auto-transfer with section-specific history preservation
 def auto_transfer_pm_schedule(equipment_package, new_enduser):
     """
     Auto-transfer PM schedule to the new End User's section.
@@ -658,8 +633,8 @@ def desktop_details_view(request, package_id):
     )
 
     # Change history
-    enduser_history = get_end_user_history(equipment_package)
-    assetowner_history = get_asset_owner_history(equipment_package)
+    enduser_history = EndUserChangeHistory.objects.filter(equipment_package=equipment_package)
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(equipment_package=equipment_package)
 
     # Employees for dropdowns
     employees = Employee.objects.all()
@@ -2219,58 +2194,70 @@ def delete_employee(request, employee_id):
         'the_messages': the_messages
     })
 
-##update asset owner for desktop
+##update asset owner
 
 
-@require_POST
 def update_asset_owner(request, desktop_id):
-    """AJAX: Update Asset Owner for Desktop Package"""
-    try:
-        with transaction.atomic():
-            new_assetowner_id = request.POST.get('assetowner_input')
-            if not new_assetowner_id:
-                return JsonResponse({'success': False, 'error': 'Please select an asset owner.'}, status=400)
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                new_assetowner_id = request.POST.get('assetowner_input')
+                if not new_assetowner_id:
+                    return JsonResponse({'success': False, 'error': 'Please select an asset owner.'}, status=400)
 
-            new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
-            user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
-            old_assetowner = user_details.user_Assetowner
+                new_assetowner = get_object_or_404(Employee, id=new_assetowner_id)
+                user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
+                old_assetowner = user_details.user_Assetowner
 
-            # ✅ Update asset owner
-            user_details.user_Assetowner = new_assetowner
-            user_details.save()
+                # ✅ Update asset owner
+                user_details.user_Assetowner = new_assetowner
+                user_details.save()
 
-            # ✅ LOG HISTORY using GenericForeignKey
-            AssetOwnerChangeHistory.objects.create(
-                device=user_details.equipment_package,  # ✅ Works with any model!
-                old_assetowner=old_assetowner,
-                new_assetowner=new_assetowner,
-                changed_by=request.user if request.user.is_authenticated else None
-            )
+                # ✅ Log change
+                AssetOwnerChangeHistory.objects.create(
+                    equipment_package=user_details.equipment_package,
+                    old_assetowner=old_assetowner,
+                    new_assetowner=new_assetowner,
+                    changed_by=request.user,
+                    changed_at=timezone.now()
+                )
 
+            # ✅ Always return *after* leaving transaction.atomic() block
+            return JsonResponse({'success': True, 'message': 'Asset Owner updated successfully!'}, status=200)
+
+        except Exception as e:
+            print("Error updating Asset Owner:", e)
             return JsonResponse({
-                'success': True,
-                'message': 'Asset owner updated successfully!',
-                'tab': 'user'
-            })
+                'success': False,
+                'error': f"Error updating Asset Owner: {str(e)}"
+            }, status=500)
 
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({
-            'success': False, 
-            'error': f"Error updating Asset Owner: {str(e)}"
-        }, status=500)
-
-#update end user for desktop    
-@require_POST
+    # ❌ Invalid request method
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method.'
+    }, status=405)
+    
 def update_end_user(request, desktop_id):
-    """AJAX: Update End User for Desktop Package"""
+    """AJAX: Update End User assignment for a Desktop Package + Auto-transfer PM Schedule"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid request method.'
+        }, status=405)
+
     try:
         with transaction.atomic():
             new_enduser_id = request.POST.get('enduser_input')
-            if not new_enduser_id:
-                return JsonResponse({'success': False, 'error': 'Please select an end user.'}, status=400)
 
+            # ✅ Validate selection
+            if not new_enduser_id:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Please select an end user.'
+                }, status=400)
+
+            # ✅ Fetch relevant records
             new_enduser = get_object_or_404(Employee, id=new_enduser_id)
             user_details = get_object_or_404(UserDetails, equipment_package__id=desktop_id)
             old_enduser = user_details.user_Enduser
@@ -2279,34 +2266,33 @@ def update_end_user(request, desktop_id):
             user_details.user_Enduser = new_enduser
             user_details.save()
 
-            # ✅ LOG HISTORY using GenericForeignKey
+            # ✅ Log history
             EndUserChangeHistory.objects.create(
-                device=user_details.equipment_package,  # ✅ Works with any model!
+                laptop_package=user_details.laptop_package,
+                equipment_package=user_details.equipment_package,
                 old_enduser=old_enduser,
                 new_enduser=new_enduser,
-                changed_by=request.user if request.user.is_authenticated else None
+                changed_by=request.user if request.user.is_authenticated else None,
+                changed_at=timezone.now()
             )
 
-            # ✅ AUTO-TRANSFER PM SCHEDULE
+            # ✅ AUTO-TRANSFER PM SCHEDULE TO NEW SECTION
             pm_message = auto_transfer_pm_schedule(
                 user_details.equipment_package, 
                 new_enduser
             )
 
+            # ✅ Final response
             return JsonResponse({
                 'success': True,
-                'message': f'End user updated successfully. {pm_message}',
-                'tab': 'user'
+                'message': f'End user updated successfully. {pm_message}'
             })
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return JsonResponse({
-            'success': False, 
+            'success': False,
             'error': f"Error updating End User: {str(e)}"
         }, status=500)
-
 
 @require_POST
 def dispose_desktop(request, desktop_id):
@@ -3688,26 +3674,16 @@ from collections import defaultdict
 
 @login_required
 def dashboard_pro(request):
-    """
-    Dashboard with KPIs, charts, recent items, and audit trail.
-    Updated to work with GenericForeignKey for change history.
-    """
-    
-    # ===================== KPIs =====================
+    """Enhanced Dashboard with expanded KPIs, lifecycle insights, and trends."""
+    today = timezone.now().date()
+    next_week = today + timedelta(days=7)
+    months = 3  # disposal trend range
+
+    # ===================== KPI COUNTS =====================
     total_packages = Equipment_Package.objects.count()
     active_packages = Equipment_Package.objects.filter(is_disposed=False).count()
-    disposed_all = (
-        DisposedDesktopDetail.objects.count() +
-        DisposedKeyboard.objects.count() +
-        DisposedMouse.objects.count() +
-        DisposedMonitor.objects.count() +
-        DisposedUPS.objects.count() +
-        DisposedLaptop.objects.count() +
-        DisposedPrinter.objects.count()
-    )
-    pm_pending = PMScheduleAssignment.objects.filter(is_completed=False).count()
 
-    # Individual device counts
+    # Equipment type breakdown (Active only)
     total_desktops = DesktopDetails.objects.filter(is_disposed=False).count()
     total_monitors = MonitorDetails.objects.filter(is_disposed=False).count()
     total_keyboards = KeyboardDetails.objects.filter(is_disposed=False).count()
@@ -3716,248 +3692,175 @@ def dashboard_pro(request):
     total_laptops = LaptopDetails.objects.filter(is_disposed=False).count()
     total_printers = PrinterDetails.objects.filter(is_disposed=False).count()
 
-    # Health score (simple calculation)
-    health_score = 100
+    # Disposed counts
+    disposed_desktops = DisposedDesktopDetail.objects.count()
+    disposed_monitors = DisposedMonitor.objects.count()
+    disposed_keyboards = DisposedKeyboard.objects.count()
+    disposed_mice = DisposedMouse.objects.count()
+    disposed_ups = DisposedUPS.objects.count()
+    disposed_laptops = DisposedLaptop.objects.count()
+    disposed_printers = DisposedPrinter.objects.count()
+
+    disposed_all = (
+        disposed_desktops
+        + disposed_monitors
+        + disposed_keyboards
+        + disposed_mice
+        + disposed_ups
+        + disposed_laptops
+        + disposed_printers
+    )
+
+    pm_pending = PMScheduleAssignment.objects.filter(is_completed=False).count()
+
+    # Health score: % active – penalty for disposed ratio
     if total_packages > 0:
-        health_score = int((active_packages / total_packages) * 100)
+        health_score = round(
+            ((active_packages / total_packages) * 100) - ((disposed_all / (total_packages + disposed_all)) * 10), 
+            2
+        )
+        health_score = max(0, min(100, health_score))  # Clamp between 0-100
+    else:
+        health_score = 0
 
-    # ===================== CHARTS DATA =====================
-    # Disposal trend - last 6 months
-    from datetime import datetime, timedelta
-    from django.db.models import Count
-    from django.db.models.functions import TruncMonth
+    # ===================== DISPOSAL TRENDS =====================
 
-    months = 6
-    today = timezone.now()
-    start = today - timedelta(days=30 * months)
+    lbls, desktop_series = _monthly_counts_qs(DisposedDesktopDetail.objects.all(), months=months)
+    _, mouse_series = _monthly_counts_qs(DisposedMouse.objects.all(), months=months)
+    _, keyboard_series = _monthly_counts_qs(DisposedKeyboard.objects.all(), months=months)
+    _, ups_series = _monthly_counts_qs(DisposedUPS.objects.all(), months=months)
 
-    # ✅ FIXED: Each model uses its correct field name
-    # DisposedDesktopDetail uses 'date_disposed'
-    desktop_disp = (
-        DisposedDesktopDetail.objects.filter(date_disposed__gte=start)
-        .annotate(month=TruncMonth("date_disposed"))
-        .values("month")
-        .annotate(cnt=Count("id"))
-        .order_by("month")
-    )
-    
-    # DisposedMouse uses 'disposal_date'
-    mouse_disp = (
-        DisposedMouse.objects.filter(disposal_date__gte=start)
-        .annotate(month=TruncMonth("disposal_date"))
-        .values("month")
-        .annotate(cnt=Count("id"))
-        .order_by("month")
-    )
-    
-    # DisposedKeyboard uses 'disposal_date'
-    keyboard_disp = (
-        DisposedKeyboard.objects.filter(disposal_date__gte=start)
-        .annotate(month=TruncMonth("disposal_date"))
-        .values("month")
-        .annotate(cnt=Count("id"))
-        .order_by("month")
-    )
-    
-    # DisposedUPS uses 'disposal_date'
-    ups_disp = (
-        DisposedUPS.objects.filter(disposal_date__gte=start)
-        .annotate(month=TruncMonth("disposal_date"))
-        .values("month")
-        .annotate(cnt=Count("id"))
-        .order_by("month")
-    )
-
-    # Build labels
-    lbls = []
-    month_keys = []
-    for i in range(months, 0, -1):
-        dt = today - timedelta(days=30 * i)
-        lbls.append(dt.strftime("%b %Y"))
-        month_keys.append(dt.replace(day=1, hour=0, minute=0, second=0, microsecond=0))
-
-    # Build series
-    def build_series(queryset, month_keys):
-        data_dict = {d["month"]: d["cnt"] for d in queryset}
-        return [data_dict.get(mk, 0) for mk in month_keys]
-
-    desktop_series = build_series(desktop_disp, month_keys)
-    mouse_series = build_series(mouse_disp, month_keys)
-    keyboard_series = build_series(keyboard_disp, month_keys)
-    ups_series = build_series(ups_disp, month_keys)
-
-    # Disposed by category (pie chart)
-    disposed_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS"]
+    # Disposed by Category (Pie/Donut chart)
+    disposed_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS", "Laptop", "Printer"]
     disposed_data = [
-        DisposedDesktopDetail.objects.count(),
-        DisposedMonitor.objects.count(),
-        DisposedKeyboard.objects.count(),
-        DisposedMouse.objects.count(),
-        DisposedUPS.objects.count(),
+        disposed_desktops,
+        disposed_monitors,
+        disposed_keyboards,
+        disposed_mice,
+        disposed_ups,
+        disposed_laptops,
+        disposed_printers,
     ]
 
-    # Active vs Disposed stacked bar
-    stack_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS"]
+    # Active vs Disposed Stacked Bar
+    stack_labels = ["Desktop", "Monitor", "Keyboard", "Mouse", "UPS", "Laptop", "Printer"]
     active_counts = [
         total_desktops,
         total_monitors,
         total_keyboards,
         total_mice,
         total_ups,
+        total_laptops,
+        total_printers,
     ]
     disposed_counts = [
-        DisposedDesktopDetail.objects.count(),
-        DisposedMonitor.objects.count(),
-        DisposedKeyboard.objects.count(),
-        DisposedMouse.objects.count(),
-        DisposedUPS.objects.count(),
+        disposed_desktops,
+        disposed_monitors,
+        disposed_keyboards,
+        disposed_mice,
+        disposed_ups,
+        disposed_laptops,
+        disposed_printers,
     ]
 
-    # Top 5 brands
-    brand_counts = {}
-    for desktop in DesktopDetails.objects.filter(is_disposed=False).select_related("brand_name"):
-        if desktop.brand_name:
-            brand_counts[desktop.brand_name.name] = brand_counts.get(desktop.brand_name.name, 0) + 1
-    for laptop in LaptopDetails.objects.filter(is_disposed=False).select_related("brand_name"):
-        if laptop.brand_name:
-            brand_counts[laptop.brand_name.name] = brand_counts.get(laptop.brand_name.name, 0) + 1
+    # ===================== TOP 5 BRANDS =====================
+    # Count desktops + laptops by brand
+    brand_counts = defaultdict(int)
     
+    for desktop in DesktopDetails.objects.filter(is_disposed=False).select_related('brand_name'):
+        if desktop.brand_name:
+            brand_counts[desktop.brand_name.name] += 1
+    
+    for laptop in LaptopDetails.objects.filter(is_disposed=False).select_related('brand_name'):
+        if laptop.brand_name:
+            brand_counts[laptop.brand_name.name] += 1
+    
+    # Sort and get top 5
     top_brands = sorted(brand_counts.items(), key=lambda x: x[1], reverse=True)[:5]
     brand_labels = [b[0] for b in top_brands]
     brand_data = [b[1] for b in top_brands]
 
-    # Assets by section
-    section_counts = {}
-    for user in UserDetails.objects.select_related("user_Enduser__employee_office_section"):
-        if user.user_Enduser and user.user_Enduser.employee_office_section:
-            sec_name = str(user.user_Enduser.employee_office_section)
-            section_counts[sec_name] = section_counts.get(sec_name, 0) + 1
+    # ===================== ASSETS BY OFFICE SECTION =====================
+    section_counts = defaultdict(int)
+    
+    # Count from UserDetails for Equipment_Package (Desktops)
+    for ud in UserDetails.objects.filter(
+        equipment_package__isnull=False,
+        equipment_package__is_disposed=False
+    ).select_related('user_Assetowner__employee_office_section'):
+        if ud.user_Assetowner and ud.user_Assetowner.employee_office_section:
+            section_counts[ud.user_Assetowner.employee_office_section.name] += 1
+    
+    # Count from UserDetails for LaptopPackage
+    for ud in UserDetails.objects.filter(
+        laptop_package__isnull=False,
+        laptop_package__is_disposed=False
+    ).select_related('user_Assetowner__employee_office_section'):
+        if ud.user_Assetowner and ud.user_Assetowner.employee_office_section:
+            section_counts[ud.user_Assetowner.employee_office_section.name] += 1
+    
+    # Sort sections
+    sorted_sections = sorted(section_counts.items(), key=lambda x: x[1], reverse=True)
+    section_labels = [s[0] for s in sorted_sections]
+    section_data = [s[1] for s in sorted_sections]
 
-    section_labels = list(section_counts.keys())
-    section_data = list(section_counts.values())
-
-    # ===================== RECENT ITEMS (FIXED) =====================
-    recent = []
-    
-    # Get recent Desktop packages
-    recent_desktops = Equipment_Package.objects.filter(
-        is_disposed=False
-    ).prefetch_related('desktop_details__brand_name').order_by("-created_at")[:10]
-    
-    for pkg in recent_desktops:
-        desktop = pkg.desktop_details.first()
-        if desktop:
-            recent.append({
-                'id': pkg.id,
-                'computer_name': desktop.computer_name or 'N/A',
-                'serial_no': desktop.serial_no or 'N/A',
-                'brand_name': desktop.brand_name.name if desktop.brand_name else 'N/A',
-                'model': desktop.model or 'N/A',
-                'created_at': pkg.created_at,
-                'type': 'Desktop',
-                'url_name': 'desktop_details_view'
-            })
-    
-    # Get recent Laptop packages
-    recent_laptops = LaptopPackage.objects.filter(
-        is_disposed=False
-    ).prefetch_related('laptop_details__brand_name').order_by("-created_at")[:10]
-    
-    for pkg in recent_laptops:
-        laptop = pkg.laptop_details.first()
-        if laptop:
-            recent.append({
-                'id': pkg.id,
-                'computer_name': laptop.computer_name or 'N/A',
-                'serial_no': laptop.laptop_sn_db or 'N/A',
-                'brand_name': laptop.brand_name.name if laptop.brand_name else 'N/A',
-                'model': laptop.model or 'N/A',
-                'created_at': pkg.created_at,
-                'type': 'Laptop',
-                'url_name': 'laptop_details_view'
-            })
-    
-    # Sort combined list by created_at (most recent first) and take top 10
-    recent = sorted(recent, key=lambda x: x['created_at'], reverse=True)[:10]
+    # ===================== RECENT ITEMS =====================
+    recent = DesktopDetails.objects.filter(is_disposed=False).order_by("-created_at")[:10]
 
     # ===================== UPCOMING PM =====================
-    pm_upcoming = PMScheduleAssignment.objects.filter(
-        is_completed=False
-    ).select_related(
-        "pm_section_schedule__section",
-        "pm_section_schedule__quarter_schedule",
-        "equipment_package"
-    ).order_by("pm_section_schedule__quarter_schedule__year", "pm_section_schedule__quarter_schedule__quarter")[:5]
+    upcoming = PMSectionSchedule.objects.filter(
+        start_date__lte=next_week, end_date__gte=today
+    ).select_related("section")
+    pm_upcoming = []
+    for s in upcoming:
+        assignment = PMScheduleAssignment.objects.filter(
+            pm_section_schedule=s
+        ).select_related('equipment_package', 'laptop_package').first()
+        
+        comp = "—"
+        if assignment:
+            if assignment.equipment_package_id:
+                dd = DesktopDetails.objects.filter(
+                    equipment_package=assignment.equipment_package
+                ).first()
+                comp = dd.computer_name if dd else "—"
+            elif assignment.laptop_package_id:
+                ld = LaptopDetails.objects.filter(
+                    laptop_package=assignment.laptop_package
+                ).first()
+                comp = ld.computer_name if ld else "—"
+        
+        pm_upcoming.append({
+            "section": s.section.name if getattr(s, "section", None) else "—",
+            "range": f"{s.start_date} – {s.end_date}",
+            "computer_name": comp,
+        })
 
-    # ===================== AUDIT TRAIL (FIXED FOR GenericForeignKey) =====================
-    from django.contrib.contenttypes.models import ContentType
-    
-    # Get content types for Equipment_Package and LaptopPackage
-    equipment_ct = ContentType.objects.get_for_model(Equipment_Package)
-    laptop_ct = ContentType.objects.get_for_model(LaptopPackage)
-
-    # ✅ FIXED: Only get records with content_type (skip old broken records)
-    enduser = EndUserChangeHistory.objects.filter(
-        content_type__isnull=False
-    ).select_related(
-        "new_enduser", "old_enduser", "changed_by", "content_type"
+    # ===================== AUDIT TRAIL =====================
+    enduser = EndUserChangeHistory.objects.select_related(
+        "equipment_package", "new_enduser", "old_enduser"
     ).order_by("-changed_at")[:5]
-
-    assetowner = AssetOwnerChangeHistory.objects.filter(
-        content_type__isnull=False
-    ).select_related(
-        "new_assetowner", "old_assetowner", "changed_by", "content_type"
+    assetown = AssetOwnerChangeHistory.objects.select_related(
+        "equipment_package", "new_assetowner", "old_assetowner"
     ).order_by("-changed_at")[:5]
 
     audit = []
-    
-    # Process End User changes
     for e in enduser:
         old_name = e.old_enduser.full_name if e.old_enduser else 'None'
         new_name = e.new_enduser.full_name if e.new_enduser else 'None'
-        
-        # ✅ Safety check for content_type
-        if not e.content_type:
-            continue
-        
-        # Determine device type
-        if e.content_type == equipment_ct:
-            device_type = "Desktop"
-        elif e.content_type == laptop_ct:
-            device_type = "Laptop"
-        else:
-            device_type = e.content_type.model.capitalize()
-        
         audit.append({
             "type": "End User",
             "when": e.changed_at.strftime("%Y-%m-%d %H:%M"),
-            "text": f"{device_type} Package #{e.object_id}: <strong>{old_name}</strong> → <strong>{new_name}</strong>",
+            "text": f"Desktop Package #{e.equipment_package_id}: <strong>{old_name}</strong> → <strong>{new_name}</strong>",
         })
-    
-    # Process Asset Owner changes
-    for a in assetowner:
+    for a in assetown:
         old_name = a.old_assetowner.full_name if a.old_assetowner else 'None'
         new_name = a.new_assetowner.full_name if a.new_assetowner else 'None'
-        
-        # ✅ Safety check for content_type
-        if not a.content_type:
-            continue
-        
-        # Determine device type
-        if a.content_type == equipment_ct:
-            device_type = "Desktop"
-        elif a.content_type == laptop_ct:
-            device_type = "Laptop"
-        else:
-            device_type = a.content_type.model.capitalize()
-        
         audit.append({
             "type": "Asset Owner",
             "when": a.changed_at.strftime("%Y-%m-%d %H:%M"),
-            "text": f"{device_type} Package #{a.object_id}: <strong>{old_name}</strong> → <strong>{new_name}</strong>",
+            "text": f"Desktop Package #{a.equipment_package_id}: <strong>{old_name}</strong> → <strong>{new_name}</strong>",
         })
-    
-    # Sort by time and limit to 10 most recent
     audit = sorted(audit, key=lambda x: x["when"], reverse=True)[:10]
 
     # ===================== CONTEXT =====================
@@ -3999,6 +3902,68 @@ def dashboard_pro(request):
     }
 
     return render(request, "dashboard.html", context)
+
+
+# ===================== HELPER FUNCTION =====================
+def _monthly_counts_qs(queryset, date_field=None, months=3):
+    """
+    Auto-detects which date field to use ('date_disposed' or 'disposal_date')
+    and returns (labels, data) for the last N months of disposal counts.
+    Handles both DateField and DateTimeField gracefully.
+    """
+    from datetime import datetime, timedelta
+    from dateutil.relativedelta import relativedelta
+    from django.utils import timezone
+    from django.db.models import DateField, DateTimeField
+
+    today = timezone.now().date()
+    labels = []
+    data = []
+
+    # ---------- Auto-detect date field ----------
+    model = queryset.model
+    model_fields = [f.name for f in model._meta.fields]
+    if not date_field:
+        if "date_disposed" in model_fields:
+            date_field = "date_disposed"
+        elif "disposal_date" in model_fields:
+            date_field = "disposal_date"
+        else:
+            raise ValueError(
+                f"{model.__name__} has no valid date field "
+                "(expected 'date_disposed' or 'disposal_date')."
+            )
+
+    field_obj = model._meta.get_field(date_field)
+    is_datetime = isinstance(field_obj, DateTimeField)
+
+    # ---------- Build monthly counts ----------
+    for i in range(months - 1, -1, -1):
+        month_date = today - relativedelta(months=i)
+        month_start_naive = datetime(month_date.year, month_date.month, 1)
+        if month_date.month == 12:
+            month_end_naive = datetime(month_date.year, 12, 31, 23, 59, 59)
+        else:
+            next_month = month_start_naive + relativedelta(months=1)
+            month_end_naive = next_month - timedelta(seconds=1)
+
+        # ✅ If the field is datetime → make timezone-aware
+        if is_datetime:
+            month_start = timezone.make_aware(month_start_naive)
+            month_end = timezone.make_aware(month_end_naive)
+        else:
+            # If DateField, just use date objects (avoid tz mismatch)
+            month_start = month_start_naive.date()
+            month_end = month_end_naive.date()
+
+        count = queryset.filter(
+            **{f"{date_field}__gte": month_start, f"{date_field}__lte": month_end}
+        ).count()
+
+        labels.append(month_start.strftime("%b %Y"))
+        data.append(count)
+
+    return labels, data
 
 
 #end all for dashboard
@@ -4247,9 +4212,8 @@ def laptop_details_view(request, package_id):
     employees = Employee.objects.all()
 
     # ✅ ADD CHANGE HISTORY (like desktop)
-   
-    enduser_history = get_end_user_history(laptop_package)
-    assetowner_history = get_asset_owner_history(laptop_package)
+    enduser_history = EndUserChangeHistory.objects.filter(laptop_package=laptop_package).order_by('-changed_at')
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(laptop_package=laptop_package).order_by('-changed_at')
 
     # PM assignments for this laptop
     pm_assignments = PMScheduleAssignment.objects.filter(laptop_package=laptop_package).select_related(
@@ -4584,11 +4548,64 @@ def checklist_laptop(request, package_id):
         "section_id": section_id,
     })
 
+@require_POST
+def update_end_user_laptop(request, package_id):
+    """AJAX: Update End User for Laptop Package + Auto-transfer PM Schedule"""
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid request method.'
+        }, status=405)
 
+    try:
+        with transaction.atomic():
+            new_enduser_id = request.POST.get('enduser_input')
 
-# ==========================================
-# STEP 3: Update views.py - Laptop Functions
-# ==========================================
+            # ✅ Validate selection
+            if not new_enduser_id:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Please select an end user.'
+                }, status=400)
+
+            # ✅ Fetch relevant records
+            new_enduser = get_object_or_404(Employee, id=new_enduser_id)
+            user_details = get_object_or_404(UserDetails, laptop_package__id=package_id)
+            old_enduser = user_details.user_Enduser
+
+            # ✅ Update end user
+            user_details.user_Enduser = new_enduser
+            user_details.save()
+
+            # ✅ LOG HISTORY
+            EndUserChangeHistory.objects.create(
+                laptop_package=user_details.laptop_package,
+                old_enduser=old_enduser,
+                new_enduser=new_enduser,
+                changed_by=request.user if request.user.is_authenticated else None,
+                changed_at=timezone.now()
+            )
+
+            # ✅ AUTO-TRANSFER PM SCHEDULE TO NEW SECTION
+            pm_message = auto_transfer_pm_schedule_laptop(
+                user_details.laptop_package, 
+                new_enduser
+            )
+
+            # ✅ Final response
+            return JsonResponse({
+                'success': True,
+                'message': f'End user updated successfully. {pm_message}',
+                'tab': 'user'
+            })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f"Error updating End User: {str(e)}",
+            'tab': 'user'
+        }, status=500)
+
 
 @require_POST
 def update_asset_owner_laptop(request, package_id):
@@ -4607,12 +4624,13 @@ def update_asset_owner_laptop(request, package_id):
             user_details.user_Assetowner = new_assetowner
             user_details.save()
 
-            # ✅ LOG HISTORY using GenericForeignKey
+            # ✅ LOG HISTORY
             AssetOwnerChangeHistory.objects.create(
-                device=user_details.laptop_package,  # ✅ Works with any model!
+                laptop_package=user_details.laptop_package,
                 old_assetowner=old_assetowner,
                 new_assetowner=new_assetowner,
-                changed_by=request.user if request.user.is_authenticated else None
+                changed_by=request.user if request.user.is_authenticated else None,
+                changed_at=timezone.now()
             )
 
             return JsonResponse({
@@ -4622,59 +4640,7 @@ def update_asset_owner_laptop(request, package_id):
             })
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({
-            'success': False, 
-            'error': f"Error updating Asset Owner: {str(e)}"
-        }, status=500)
-
-
-@require_POST
-def update_end_user_laptop(request, package_id):
-    """AJAX: Update End User for Laptop Package"""
-    try:
-        with transaction.atomic():
-            new_enduser_id = request.POST.get('enduser_input')
-            if not new_enduser_id:
-                return JsonResponse({'success': False, 'error': 'Please select an end user.'}, status=400)
-
-            new_enduser = get_object_or_404(Employee, id=new_enduser_id)
-            user_details = get_object_or_404(UserDetails, laptop_package__id=package_id)
-            old_enduser = user_details.user_Enduser
-
-            # ✅ Update end user
-            user_details.user_Enduser = new_enduser
-            user_details.save()
-
-            # ✅ LOG HISTORY using GenericForeignKey
-            EndUserChangeHistory.objects.create(
-                device=user_details.laptop_package,  # ✅ Works with any model!
-                old_enduser=old_enduser,
-                new_enduser=new_enduser,
-                changed_by=request.user if request.user.is_authenticated else None
-            )
-
-            # ✅ AUTO-TRANSFER PM SCHEDULE
-            pm_message = auto_transfer_pm_schedule_laptop(
-                user_details.laptop_package, 
-                new_enduser
-            )
-
-            return JsonResponse({
-                'success': True,
-                'message': f'End user updated successfully. {pm_message}',
-                'tab': 'user'
-            })
-
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({
-            'success': False, 
-            'error': f"Error updating End User: {str(e)}"
-        }, status=500)
-    
+        return JsonResponse({'success': False, 'error': f"Error updating Asset Owner: {str(e)}"}, status=500)
 @require_POST
 def update_documents_laptop(request, package_id):
     """AJAX: Update Documents for Laptop Package"""

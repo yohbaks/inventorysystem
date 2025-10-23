@@ -160,6 +160,8 @@ urlpatterns = [
     # Laptop User & Document Management
     path('laptop/<int:package_id>/update-enduser/', views.update_end_user_laptop, name='update_end_user_laptop'),
     path('laptop/<int:package_id>/update-assetowner/', views.update_asset_owner_laptop, name='update_asset_owner_laptop'),
+    
+
     path('laptop/<int:package_id>/update-documents/', views.update_documents_laptop, name='update_documents_laptop'),
     
     path("laptops/dispose/<int:package_id>/", views.dispose_laptop, name="dispose_laptop"),

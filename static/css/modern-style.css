@@ -284,6 +284,11 @@
   margin-bottom: 1rem;
 }
 
+
+
+
+
+
 /* PM Schedule Sidebar */
 .pm-schedule-card {
   background: white;
@@ -469,4 +474,98 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+
+/* Enhanced Styles & Animations , this was used on the dashboard Activity Timeline */
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* Timeline Card Hover */
+.timeline-card:hover {
+  transform: translateX(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+  border-color: #667eea !important;
+}
+
+/* Timeline Icon Hover */
+.timeline-icon {
+  transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Scrollbar Styling */
+.audit-timeline-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.audit-timeline-body::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.audit-timeline-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.audit-timeline-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Fade In Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-item {
+  animation: fadeInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+{% for ev in audit %}
+.timeline-item:nth-child({{ forloop.counter }}) {
+  animation-delay: {{ forloop.counter0|add:"0.1" }}s;
+}
+{% endfor %}
+
+/* Badge Hover Effects */
+.badge {
+  transition: all 0.2s ease;
+}
+
+.badge:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* Button Hover */
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5) !important;
+}
+
+
+/*end enhanced styles  */
 </style>
