@@ -249,70 +249,182 @@
 
 <!-- Recent Activity & Audit Trail -->
 <div class="row g-3 mb-3">
-  <!-- Recently Added -->
-  <div class="col-xl-6">
-    <div class="card shadow-sm">
-      <div class="card-header">
-        <h5 class="card-title mb-0">Recently Added IT Equipment</h5>
+  <!-- ==================== PREMIUM RECENTLY ADDED IT EQUIPMENT ==================== -->
+
+<div class="col-xl-6">
+  <div class="card shadow-lg border-0 recent-equipment-card">
+    
+    <!-- Premium Header with Gradient -->
+    <div class="recent-equipment-header">
+      <!-- Animated Background Elements -->
+      <div style="position: absolute; top: -50%; right: -10%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite;"></div>
+      <div style="position: absolute; bottom: -30%; left: -5%; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+      
+      <!-- Header Content -->
+      <div style="position: relative; z-index: 1;">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div class="d-flex align-items-center">
+            <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+              <i class="fas fa-box-open text-white" style="font-size: 24px;"></i>
+            </div>
+            <div>
+              <h5 class="text-white fw-bold mb-1">Recently Added</h5>
+              <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">Latest equipment entries</p>
+            </div>
+          </div>
+          <div>
+            <span class="badge bg-white text-success px-3 py-2 rounded-pill fw-semibold" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+              <span class="equipment-timeline-dot"></span>
+              {{ recent|length }} New
+            </span>
+          </div>
+        </div>
+
+        <!-- Quick Stats Bar -->
+        <div class="row g-2 mt-3">
+          <div class="col-6">
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+              <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">This Week</div>
+              <div class="text-white fw-bold" style="font-size: 1.5rem;">{{ recent|length }}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+              <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Last Added</div>
+              <div class="text-white fw-bold" style="font-size: 1.5rem;">
+                {% if recent %}{{ recent.0.created_at|date:"H:i" }}{% else %}--:--{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card-body">
+    </div>
+
+    <!-- Equipment List Body -->
+    <div class="card-body p-0" style="max-height: 600px; overflow-y: auto; background: #fafbfc;">
+      {% if recent %}
         <div class="table-responsive">
-          <table class="table table-hover align-items-center mb-0">
-            <thead class="thead-light">
+          <table class="table-responsive table-hover mb-0" style="border-collapse: separate; border-spacing: 0;">
+            <thead style="background: #f9fafb; position: sticky; top: 0; z-index: 10;">
               <tr>
-                <th>Type</th>
-                <th>Computer Name</th>
-                <th>Serial</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Created</th>
-                <th class="text-center">Actions</th>
+                <th style="padding: 1rem 1.5rem; font-weight: 600; font-size: 0.813rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb;">Type</th>
+                <th style="padding: 1rem 1.5rem; font-weight: 600; font-size: 0.813rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb;">Computer Name</th>
+                <th style="padding: 1rem 1.5rem; font-weight: 600; font-size: 0.813rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb;">Serial</th>
+                <th style="padding: 1rem 1.5rem; font-weight: 600; font-size: 0.813rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb;">Brand</th>
+
+                <th style="padding: 1rem 1.5rem; font-weight: 600; font-size: 0.813rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb;">Created</th>
+                <th class="text-center" style="padding: 1rem 1.5rem; font-weight: 600; font-size: 0.813rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb;">Actions</th>
               </tr>
             </thead>
             <tbody>
               {% for item in recent %}
-              <tr>
-                <td>
+              <tr class="equipment-item-row">
+                <td style="padding: 1rem 1.5rem; vertical-align: middle;">
                   {% if item.type == 'Desktop' %}
-                    <span class="badge bg-primary">
-                      <i class="fas fa-desktop"></i> Desktop
+                    <span class="equipment-type-badge desktop">
+                      <i class="fas fa-desktop"></i>
+                      Desktop
                     </span>
                   {% elif item.type == 'Laptop' %}
-                    <span class="badge bg-info">
-                      <i class="fas fa-laptop"></i> Laptop
+                    <span class="equipment-type-badge laptop">
+                      <i class="fas fa-laptop"></i>
+                      Laptop
                     </span>
                   {% else %}
-                    <span class="badge bg-secondary">{{ item.type }}</span>
+                    <span class="equipment-type-badge" style="background: #e5e7eb; color: #6b7280;">
+                      {{ item.type }}
+                    </span>
                   {% endif %}
                 </td>
-                <td class="fw-bold">{{ item.computer_name }}</td>
-                <td>{{ item.serial_no }}</td>
-                <td>{{ item.brand_name }}</td>
-                <td>{{ item.model }}</td>
-                <td>{{ item.created_at|date:"M d, Y" }}</td>
-                <td class="text-center">
+                <td style="padding: 1rem 1.5rem; vertical-align: middle;">
+                  <div class="fw-bold text-dark" style="font-size: 0.938rem;">{{ item.computer_name }}</div>
+                </td>
+                <td style="padding: 1rem 1.5rem; vertical-align: middle;">
+                  <span class="text-muted" style="font-size: 0.875rem; font-family: monospace;">{{ item.serial_no }}</span>
+                </td>
+                <td style="padding: 1rem 1.5rem; vertical-align: middle;">
+                  <span class="text-muted" style="font-size: 0.875rem;">{{ item.brand_name }}</span>
+                </td>
+
+                <td style="padding: 1rem 1.5rem; vertical-align: middle;">
+                  <div class="d-flex flex-column">
+                    <span class="text-dark fw-semibold" style="font-size: 0.875rem;">{{ item.created_at|date:"M d, Y" }}</span>
+                    <span class="text-muted" style="font-size: 0.75rem;">{{ item.created_at|date:"h:i A" }}</span>
+                  </div>
+                </td>
+                <td class="text-center" style="padding: 1rem 1.5rem; vertical-align: middle;">
                   {% if item.url_name %}
-                    <a href="{% url item.url_name item.id %}" class="btn btn-sm btn-outline-primary">
-                      <i class="fa fa-eye"></i> View
+                    <a href="{% url item.url_name item.id %}" class="equipment-view-btn">
+                      <i class="fas fa-eye"></i>
+                      View
                     </a>
                   {% else %}
-                    <a href="{% url 'desktop_details_view' item.id %}" class="btn btn-sm btn-outline-primary">
-                      <i class="fa fa-eye"></i> View
+                    <a href="{% url 'desktop_details_view' item.id %}" class="equipment-view-btn">
+                      <i class="fas fa-eye"></i>
+                      View
                     </a>
                   {% endif %}
                 </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="7" class="text-muted text-center py-4">No recent items</td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
+
+      {% else %}
+        <!-- Empty State -->
+        <div class="equipment-empty-state">
+          <div class="equipment-empty-icon">
+            <i class="fas fa-box-open" style="font-size: 42px; color: #9ca3af; position: relative; z-index: 1;"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-2">No Equipment Added Yet</h5>
+          <p class="text-muted mb-4" style="font-size: 0.938rem; max-width: 300px; margin: 0 auto;">
+            Recently added equipment will appear here
+          </p>
+          <a href="{% url 'add_equipment_package_with_details' %}" class="btn btn-sm rounded-pill text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 0.625rem 1.5rem; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+            <i class="fas fa-plus me-2"></i>Add New Equipment
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Card Footer with Action Button -->
+    <div class="card-footer bg-white border-0" style="padding: 1.25rem 1.5rem;">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center text-muted" style="font-size: 0.875rem;">
+          <i class="fas fa-info-circle me-2"></i>
+          <span>Showing last 10 items</span>
+        </div>
+        <a href="#" class="btn btn-sm rounded-pill text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+          <i class="fas fa-list me-2"></i>View All
+        </a>
       </div>
     </div>
+
   </div>
+</div>
+
+<!-- Scrollbar Styling for Equipment Table -->
+<style>
+.card-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.card-body::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.card-body::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  border-radius: 4px;
+}
+
+.card-body::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #059669 0%, #10b981 100%);
+}
+</style>
   
 
   <!-- ==================== PREMIUM ENHANCED AUDIT TRAIL ==================== -->
