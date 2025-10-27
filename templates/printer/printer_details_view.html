@@ -2,240 +2,855 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
-  <div class="page-inner py-4">
-    <div class="card card-round shadow-sm animated fadeIn border-0">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-          <i class="fa fa-print me-2 fs-4"></i>
-          <h4 class="card-title mb-0 fw-semibold">Printer Details</h4>
-        </div>
-        <div>
-          <a href="{% url 'printer_list' %}" class="btn btn-light btn-sm shadow-sm">
-            <i class="fa fa-arrow-left me-1"></i> Back to List
-          </a>
-        </div>
-      </div>
+<style>
+    /* Premium Page Styling */
+    .premium-page {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 5rem 0 3rem;
+    }
 
-      <div class="card-body">
-        <div class="row g-3">
-          <!-- LEFT COLUMN -->
-          <div class="col-md-7">
+    /* Premium Card */
+    .premium-detail-card {
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border: none;
+        overflow: hidden;
+        background: white;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-            <!-- Printer Info -->
-            <div class="card border-0 shadow-sm mb-3">
-              <div class="card-header bg-light border-bottom">
-                <h5 class="fw-bold text-primary mb-0">
-                  <i class="fa fa-info-circle me-2 text-primary"></i> Printer Information
-                </h5>
-              </div>
-              <div class="card-body">
-                <table class="table table-borderless mb-0">
-                  <tbody>
-                    <tr><th style="width:35%">Serial Number</th><td><span class="badge bg-secondary">{{ printer.printer_sn_db }}</span></td></tr>
-                    <tr><th>Brand</th><td>{{ printer.printer_brand_db|default:"—" }}</td></tr>
-                    <tr><th>Model</th><td>{{ printer.printer_model_db|default:"—" }}</td></tr>
-                    <tr><th>Type</th><td>{{ printer.printer_type|default:"—" }}</td></tr>
-                    <tr><th>Resolution</th><td>{{ printer.printer_resolution|default:"—" }}</td></tr>
-                    <tr><th>Monthly Duty</th><td>{{ printer.printer_monthly_duty|default:"—" }}</td></tr>
-                    <tr>
-                      <th>Color</th>
-                      <td>
-                        {% if printer.printer_color %}
-                          <span class="badge bg-success">Color</span>
-                        {% else %}
-                          <span class="badge bg-dark">Monochrome</span>
-                        {% endif %}
-                      </td>
-                    </tr>
-                    <tr>
-                      <th>Duplex</th>
-                      <td>
-                        {% if printer.printer_duplex %}
-                          <i class="fa fa-check-circle text-success"></i> Supported
-                        {% else %}
-                          <i class="fa fa-times-circle text-danger"></i> Not Supported
-                        {% endif %}
-                      </td>
-                    </tr>
-                    <tr><th>Package</th><td>{{ printer.equipment_package.id }}</td></tr>
-                  </tbody>
-                </table>
-              </div>
+    .premium-detail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Premium Header with Gradient */
+    .premium-detail-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-detail-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .premium-detail-header h4 {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Section Cards */
+    .section-card {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        background: white;
+    }
+
+    .section-card:hover {
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transform: translateY(-3px);
+    }
+
+    .section-card-header {
+        background: linear-gradient(135deg, #f8f9fe 0%, #f0f2ff 100%);
+        border-bottom: 3px solid #667eea;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .section-card-header h5 {
+        font-weight: 700;
+        color: #667eea;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-card-header .icon-badge {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .section-card-body {
+        padding: 2rem 1.5rem;
+    }
+
+    /* Premium Table */
+    .premium-info-table {
+        margin: 0;
+    }
+
+    .premium-info-table tbody tr {
+        border-bottom: 1px solid #f0f2ff;
+        transition: background 0.2s ease;
+    }
+
+    .premium-info-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .premium-info-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9fe 0%, #fef5ff 100%);
+    }
+
+    .premium-info-table th {
+        font-weight: 700;
+        color: #4a5568;
+        padding: 1rem 0;
+        width: 40%;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .premium-info-table td {
+        padding: 1rem 0;
+        color: #2d3748;
+        font-weight: 500;
+    }
+
+    /* Premium Badges */
+    .badge-premium {
+        padding: 0.5rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .badge-premium-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .badge-premium-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .badge-premium-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .badge-premium-dark {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        color: white;
+    }
+
+    .badge-premium-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+    }
+
+    .badge-premium-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .badge-premium-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    /* Status Alert Cards */
+    .status-card {
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        border: none;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .status-card-active {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+    }
+
+    .status-card-disposed {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+    }
+
+    /* Premium Buttons */
+    .btn-premium {
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-premium::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.5s, height 0.5s;
+    }
+
+    .btn-premium:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-premium:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-premium-light {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        color: #667eea;
+    }
+
+    .btn-premium-light:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #764ba2;
+    }
+
+    .btn-premium-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .btn-premium-danger:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+
+    /* Icon Wrappers */
+    .icon-wrapper-large {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        color: #667eea;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    /* Check Icons */
+    .check-icon-success {
+        color: #10b981;
+        font-size: 1.25rem;
+        margin-right: 0.5rem;
+    }
+
+    .times-icon-danger {
+        color: #ef4444;
+        font-size: 1.25rem;
+        margin-right: 0.5rem;
+    }
+
+    /* Empty State */
+    .empty-state-card {
+        background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        border: 2px dashed #f59e0b;
+        color: #92400e;
+        font-weight: 600;
+    }
+
+    /* Disposal History Table */
+    .history-table {
+        margin: 0;
+    }
+
+    .history-table thead th {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem;
+        border: none;
+    }
+
+    .history-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #fee2e2;
+    }
+
+    .history-table tbody tr:hover {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        transform: scale(1.01);
+    }
+
+    .history-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    /* Modal Styling */
+    .modal-premium .modal-content {
+        border-radius: 20px;
+        border: none;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-premium .modal-header {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border: none;
+        padding: 2rem;
+    }
+
+    .modal-premium .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-premium .modal-footer {
+        border: none;
+        padding: 1.5rem 2rem;
+        background: #f8f9fa;
+    }
+
+    .form-control-premium {
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        padding: 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-premium:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    /* Toast Styling */
+    .toast-premium {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        min-width: 350px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .premium-page {
+            padding: 3rem 0 2rem;
+        }
+
+        .premium-detail-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .section-card-body {
+            padding: 1.5rem 1rem;
+        }
+
+        .premium-info-table th,
+        .premium-info-table td {
+            padding: 0.75rem 0;
+            font-size: 0.875rem;
+        }
+    }
+
+    /* Glassmorphism effect for back button */
+    .glass-btn {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-weight: 600;
+    }
+
+    .glass-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    /* Package ID Badge */
+    .package-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border-radius: 10px;
+        font-weight: 700;
+        color: #667eea;
+        border: 2px solid #667eea30;
+    }
+
+    /* Animated Icon */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .float-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+</style>
+
+<div class="premium-page">
+    <div class="container">
+        <div class="page-inner">
+            
+            <!-- Main Card -->
+            <div class="premium-detail-card animated fadeIn">
+                
+                <!-- Header -->
+                <div class="premium-detail-header">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-wrapper-large text-white float-icon me-3" style="background: rgba(255, 255, 255, 0.2);">
+                                <i class="fa fa-print"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-1 text-white">Printer Details</h4>
+                                <p class="mb-0 text-white-50" style="font-size: 0.95rem;">
+                                    <i class="fa fa-barcode me-1"></i> Serial: <strong>{{ printer.printer_sn_db }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{% url 'printer_list' %}" class="btn btn-premium glass-btn">
+                                <i class="fa fa-arrow-left me-2"></i> Back to List
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        
+                        <!-- LEFT COLUMN -->
+                        <div class="col-lg-8">
+
+                            <!-- Printer Information -->
+                            <div class="section-card mb-4">
+                                <div class="section-card-header">
+                                    <h5>
+                                        <span class="icon-badge">
+                                            <i class="fa fa-info-circle"></i>
+                                        </span>
+                                        Printer Information
+                                    </h5>
+                                </div>
+                                <div class="section-card-body">
+                                    <table class="table premium-info-table">
+                                        <tbody>
+                                            <tr>
+                                                <th><i class="fa fa-barcode me-2 text-muted"></i>Serial Number</th>
+                                                <td>
+                                                    <span class="badge-premium badge-premium-secondary">
+                                                        <i class="fa fa-hashtag"></i>
+                                                        {{ printer.printer_sn_db }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-building me-2 text-muted"></i>Brand</th>
+                                                <td><strong>{{ printer.printer_brand_db|default:"Not specified" }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-tag me-2 text-muted"></i>Model</th>
+                                                <td><strong>{{ printer.printer_model_db|default:"Not specified" }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-cube me-2 text-muted"></i>Type</th>
+                                                <td>
+                                                    <span class="badge-premium badge-premium-info">
+                                                        {{ printer.printer_type|default:"Not specified" }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-image me-2 text-muted"></i>Resolution</th>
+                                                <td>{{ printer.printer_resolution|default:"Not specified" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-calendar-alt me-2 text-muted"></i>Monthly Duty</th>
+                                                <td>{{ printer.printer_monthly_duty|default:"Not specified" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-palette me-2 text-muted"></i>Color Support</th>
+                                                <td>
+                                                    {% if printer.printer_color %}
+                                                    <span class="badge-premium badge-premium-success">
+                                                        <i class="fa fa-check-circle"></i> Color Printing
+                                                    </span>
+                                                    {% else %}
+                                                    <span class="badge-premium badge-premium-dark">
+                                                        <i class="fa fa-circle"></i> Monochrome
+                                                    </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-clone me-2 text-muted"></i>Duplex Printing</th>
+                                                <td>
+                                                    {% if printer.printer_duplex %}
+                                                    <span class="check-icon-success">
+                                                        <i class="fa fa-check-circle"></i>
+                                                    </span>
+                                                    <strong class="text-success">Supported</strong>
+                                                    {% else %}
+                                                    <span class="times-icon-danger">
+                                                        <i class="fa fa-times-circle"></i>
+                                                    </span>
+                                                    <strong class="text-danger">Not Supported</strong>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-box me-2 text-muted"></i>Package ID</th>
+                                                <td>
+                                                    <span class="package-badge">
+                                                        <i class="fa fa-cube"></i>
+                                                        Package #{{ printer.printer_package.id }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Documents Details -->
+                            <div class="section-card mb-4">
+                                <div class="section-card-header">
+                                    <h5>
+                                        <span class="icon-badge">
+                                            <i class="fa fa-file-alt"></i>
+                                        </span>
+                                        Documents & Records
+                                    </h5>
+                                </div>
+                                <div class="section-card-body">
+                                    {% if docs_details %}
+                                    <table class="table premium-info-table">
+                                        <tbody>
+                                            <tr>
+                                                <th><i class="fa fa-file-invoice me-2 text-muted"></i>PAR</th>
+                                                <td><strong>{{ docs_details.docs_PAR|default:"Not specified" }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-hashtag me-2 text-muted"></i>Property No.</th>
+                                                <td><strong>{{ docs_details.docs_Propertyno|default:"Not specified" }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-shopping-cart me-2 text-muted"></i>Acquisition Type</th>
+                                                <td>
+                                                    <span class="badge-premium badge-premium-info">
+                                                        {{ docs_details.docs_Acquisition_Type|default:"Not specified" }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-dollar-sign me-2 text-muted"></i>Value</th>
+                                                <td>
+                                                    <strong class="text-success" style="font-size: 1.1rem;">
+                                                        ₱ {{ docs_details.docs_Value|default:"0.00" }}
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-calendar-check me-2 text-muted"></i>Date Received</th>
+                                                <td>{{ docs_details.docs_Datereceived|default:"Not specified" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-calendar-check me-2 text-muted"></i>Date Inspected</th>
+                                                <td>{{ docs_details.docs_Dateinspected|default:"Not specified" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-truck me-2 text-muted"></i>Supplier</th>
+                                                <td>{{ docs_details.docs_Supplier|default:"Not specified" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-info-circle me-2 text-muted"></i>Status</th>
+                                                <td>
+                                                    <span class="badge-premium badge-premium-success">
+                                                        {{ docs_details.docs_Status|default:"Active" }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <div class="empty-state-card">
+                                        <i class="fa fa-folder-open fa-3x mb-3" style="opacity: 0.5;"></i>
+                                        <p class="mb-0"><strong>No document details found</strong> for this printer package.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- RIGHT COLUMN -->
+                        <div class="col-lg-4">
+
+                            <!-- Status & Actions -->
+                            <div class="section-card mb-4">
+                                <div class="section-card-header">
+                                    <h5>
+                                        <span class="icon-badge">
+                                            <i class="fa fa-cogs"></i>
+                                        </span>
+                                        Status & Actions
+                                    </h5>
+                                </div>
+                                <div class="section-card-body">
+                                    {% if printer.is_disposed %}
+                                    <div class="status-card status-card-disposed">
+                                        <i class="fa fa-ban fa-2x mb-2"></i>
+                                        <p class="mb-0"><strong>DISPOSED</strong></p>
+                                        <small>This printer has been disposed</small>
+                                    </div>
+                                    {% else %}
+                                    <div class="status-card status-card-active">
+                                        <i class="fa fa-check-circle fa-2x mb-2"></i>
+                                        <p class="mb-0"><strong>ACTIVE</strong></p>
+                                        <small>Printer is currently in use</small>
+                                    </div>
+                                    <button
+                                        class="btn btn-premium btn-premium-danger w-100"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#disposePrinterModal">
+                                        <i class="fa fa-trash me-2"></i> Dispose Printer
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- User Assignment -->
+                            <div class="section-card mb-4">
+                                <div class="section-card-header">
+                                    <h5>
+                                        <span class="icon-badge">
+                                            <i class="fa fa-users"></i>
+                                        </span>
+                                        User Assignment
+                                    </h5>
+                                </div>
+                                <div class="section-card-body">
+                                    {% if user_details %}
+                                    <table class="table premium-info-table">
+                                        <tbody>
+                                            <tr>
+                                                <th><i class="fa fa-user me-2 text-muted"></i>End User</th>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-wrapper-large me-2" style="width: 40px; height: 40px; font-size: 1rem;">
+                                                            <i class="fa fa-user"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong>{{ user_details.user_Enduser.full_name|default:"Not assigned" }}</strong>
+                                                            {% if user_details.user_Enduser.employee_office_section %}
+                                                            <br><small class="text-muted">{{ user_details.user_Enduser.employee_office_section }}</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><i class="fa fa-user-tie me-2 text-muted"></i>Asset Owner</th>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="icon-wrapper-large me-2" style="width: 40px; height: 40px; font-size: 1rem;">
+                                                            <i class="fa fa-user-tie"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong>{{ user_details.user_Assetowner.full_name|default:"Not assigned" }}</strong>
+                                                            {% if user_details.user_Assetowner.employee_office_section %}
+                                                            <br><small class="text-muted">{{ user_details.user_Assetowner.employee_office_section }}</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <div class="empty-state-card">
+                                        <i class="fa fa-user-slash fa-3x mb-3" style="opacity: 0.5;"></i>
+                                        <p class="mb-0"><strong>No user assignment</strong> found for this printer.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Documents Details -->
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-light border-bottom">
-                    <h5 class="fw-bold text-primary mb-0">
-                    <i class="fa fa-file-alt me-2 text-primary"></i> Documents
+            <!-- Disposal History -->
+            {% if disposed_printers %}
+            <div class="section-card mt-4 animated fadeIn" style="animation-delay: 0.2s;">
+                <div class="section-card-header" style="border-bottom-color: #ef4444;">
+                    <h5 style="color: #ef4444;">
+                        <span class="icon-badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="fa fa-history"></i>
+                        </span>
+                        Disposal History
                     </h5>
                 </div>
-                <div class="card-body">
-                    {% if docs_details %}
-                    <table class="table table-borderless mb-0">
-                    <tbody>
-                        <tr><th style="width:35%">PAR</th><td>{{ docs_details.docs_PAR|default:"—" }}</td></tr>
-                        <tr><th>Property No.</th><td>{{ docs_details.docs_Propertyno|default:"—" }}</td></tr>
-                        <tr><th>Acquisition Type</th><td>{{ docs_details.docs_Acquisition_Type|default:"—" }}</td></tr>
-                        <tr><th>Value</th><td>₱ {{ docs_details.docs_Value|default:"—" }}</td></tr>
-                        <tr><th>Date Received</th><td>{{ docs_details.docs_Datereceived|default:"—" }}</td></tr>
-                        <tr><th>Date Inspected</th><td>{{ docs_details.docs_Dateinspected|default:"—" }}</td></tr>
-                        <tr><th>Supplier</th><td>{{ docs_details.docs_Supplier|default:"—" }}</td></tr>
-                        <tr><th>Status</th><td>{{ docs_details.docs_Status|default:"—" }}</td></tr>
-                    </tbody>
-                    </table>
-                    {% else %}
-                    <div class="alert alert-warning mb-0 text-center">No document details found for this package.</div>
-                    {% endif %}
+                <div class="section-card-body">
+                    <div class="table-responsive">
+                        <table class="table history-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fa fa-calendar me-1"></i>Date</th>
+                                    <th><i class="fa fa-barcode me-1"></i>Serial</th>
+                                    <th><i class="fa fa-building me-1"></i>Brand</th>
+                                    <th><i class="fa fa-tag me-1"></i>Model</th>
+                                    <th><i class="fa fa-cube me-1"></i>Type</th>
+                                    <th><i class="fa fa-comment me-1"></i>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for disposed in disposed_printers %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ disposed.disposal_date|date:"M d, Y" }}</strong>
+                                        <br><small class="text-muted">{{ disposed.disposal_date|date:"h:i A" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge-premium badge-premium-secondary">
+                                            {{ disposed.printer_sn }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ disposed.printer_brand|default:"—" }}</strong></td>
+                                    <td>{{ disposed.printer_model|default:"—" }}</td>
+                                    <td>
+                                        <span class="badge-premium badge-premium-info">
+                                            {{ disposed.printer_type|default:"—" }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>{{ disposed.reason|truncatewords:15 }}</small>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+            {% endif %}
 
-          </div>
-
-          <!-- RIGHT COLUMN -->
-          <div class="col-md-5">
-
-            <!-- User Assignment -->
-            <div class="card border-0 shadow-sm mb-3">
-            <div class="card-header bg-light border-bottom">
-                <h5 class="fw-bold text-primary mb-0">
-                <i class="fa fa-user me-2 text-primary"></i> User Assignment
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if user_details %}
-                <table class="table table-borderless mb-0">
-                <tbody>
-                    <tr>
-                    <th style="width:40%">End User</th>
-                    <td>{{ user_details.user_Enduser.full_name|default:"—" }}</td>
-                    </tr>
-                    <tr>
-                    <th>Asset Owner</th>
-                    <td>{{ user_details.user_Assetowner.full_name|default:"—" }}</td>
-                    </tr>
-                </tbody>
-                </table>
-                {% else %}
-                <div class="alert alert-warning mb-0 text-center">No user assignment found for this package.</div>
-                {% endif %}
-            </div>
-            </div>
-
-            <!-- Status & Actions -->
-            <div class="card border-0 shadow-sm mb-3">
-              <div class="card-header bg-light border-bottom">
-                <h5 class="fw-bold text-primary mb-0">
-                  <i class="fa fa-cogs me-2 text-primary"></i> Status & Actions
-                </h5>
-              </div>
-              <div class="card-body">
-                {% if printer.is_disposed %}
-                  <div class="alert alert-danger text-center">
-                    <i class="fa fa-ban me-1"></i> This printer has been <strong>disposed</strong>.
-                  </div>
-                {% else %}
-                  <div class="alert alert-info text-center">
-                    <i class="fa fa-info-circle me-1"></i> This printer is currently active.
-                  </div>
-                  <button
-                    class="btn btn-danger w-100 mt-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#disposePrinterModal">
-                    <i class="fa fa-trash me-1"></i> Dispose Printer
-                  </button>
-                {% endif %}
-              </div>
-            </div>
-
-          </div>
         </div>
-      </div>
     </div>
-
-    <!-- Disposal History -->
-    {% if disposed_printers %}
-    <div class="row mt-3">
-      <div class="col-12">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-light border-bottom">
-            <h5 class="fw-bold text-danger mb-0">
-              <i class="fa fa-history me-2"></i> Disposal History
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-sm table-hover">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Serial</th>
-                    <th>Brand</th>
-                    <th>Model</th>
-                    <th>Type</th>
-                    <th>Reason</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for disposed in disposed_printers %}
-                  <tr>
-                    <td>{{ disposed.disposal_date|date:"Y-m-d H:i" }}</td>
-                    <td><span class="badge bg-secondary">{{ disposed.printer_sn }}</span></td>
-                    <td>{{ disposed.printer_brand|default:"—" }}</td>
-                    <td>{{ disposed.printer_model|default:"—" }}</td>
-                    <td>{{ disposed.printer_type|default:"—" }}</td>
-                    <td>{{ disposed.reason|truncatewords:15 }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endif %}
-
-  </div>
 </div>
 
-<!-- Dispose Modal -->
-<div class="modal fade" id="disposePrinterModal" tabindex="-1" aria-labelledby="disposePrinterModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow-lg border-0 rounded-3">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-semibold"><i class="fa fa-trash me-2"></i>Dispose Printer</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p id="disposeMessage" class="mb-3"></p>
-        <form id="disposePrinterForm">
-          {% csrf_token %}
-          <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Reason for Disposal</label>
-            <textarea name="reason" id="reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDisposeBtn">
-          <i class="fa fa-check me-1"></i> Confirm Dispose
-        </button>
-      </div>
+<!-- Premium Dispose Modal -->
+<div class="modal fade modal-premium" id="disposePrinterModal" tabindex="-1" aria-labelledby="disposePrinterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class="fa fa-exclamation-triangle me-2"></i> Dispose Printer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning border-0 mb-3" style="border-radius: 12px; background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); color: #92400e;">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p id="disposeMessage" class="mb-3 fw-semibold text-center" style="font-size: 1.05rem;"></p>
+                <form id="disposePrinterForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label fw-bold mb-2">
+                            <i class="fa fa-clipboard-list me-2"></i>Reason for Disposal
+                        </label>
+                        <textarea 
+                            name="reason" 
+                            id="reason" 
+                            class="form-control form-control-premium" 
+                            rows="4"
+                            placeholder="Please provide a detailed reason for disposing this printer..."
+                            required></textarea>
+                        <small class="text-muted mt-2 d-block">
+                            <i class="fa fa-info-circle me-1"></i>
+                            This information will be saved in the disposal records.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-premium btn-premium-light" data-bs-dismiss="modal">
+                    <i class="fa fa-times me-1"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-premium btn-premium-danger" id="confirmDisposeBtn">
+                    <i class="fa fa-check me-1"></i> Confirm Dispose
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- Toast -->
+<!-- Premium Toast -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-  <div id="disposeToast" class="toast align-items-center text-bg-success border-0 shadow" role="alert">
-    <div class="d-flex">
-      <div class="toast-body" id="toastMessage">Printer disposed successfully.</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    <div id="disposeToast" class="toast toast-premium align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastMessage">
+                <i class="fa fa-check-circle me-2"></i>
+                Printer disposed successfully.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
     </div>
-  </div>
 </div>
 
 {% endblock %}
@@ -244,99 +859,94 @@
 {{ block.super }}
 <script>
 $(document).ready(function() {
-  const modalEl = document.getElementById("disposePrinterModal");
-  const messageEl = document.getElementById("disposeMessage");
-  const confirmBtn = document.getElementById("confirmDisposeBtn");
-  const toastEl = document.getElementById("disposeToast");
-  const toastMsg = document.getElementById("toastMessage");
+    const modalEl = document.getElementById("disposePrinterModal");
+    const messageEl = document.getElementById("disposeMessage");
+    const confirmBtn = document.getElementById("confirmDisposeBtn");
+    const toastEl = document.getElementById("disposeToast");
+    const toastMsg = document.getElementById("toastMessage");
 
-  // Show modal message
-  $(modalEl).on('show.bs.modal', function () {
-    const brand = "{{ printer.printer_brand_db|default:'Unknown' }}";
-    const model = "{{ printer.printer_model_db|default:'' }}";
-    messageEl.innerHTML = `Are you sure you want to dispose <strong>${brand} ${model}</strong>?`;
-  });
-
-  // Confirm disposal
-  confirmBtn.addEventListener("click", function() {
-    const reason = document.getElementById("reason").value.trim();
-    
-    if (!reason) {
-      alert("Please enter a reason for disposal.");
-      return;
-    }
-
-    // Disable button to prevent double clicks
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Processing...';
-
-    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-    
-    console.log("Sending disposal request for printer ID: {{ printer.id }}");
-    
-    fetch("/printers/dispose/{{ printer.id }}/", {
-      method: "POST",
-      headers: { 
-        "X-CSRFToken": csrfToken,
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({ reason: reason })
-    })
-    .then(response => {
-      console.log("Response status:", response.status);
-      if (!response.ok) {
-        throw new Error('Network response was not ok: ' + response.status);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log("Response data:", data);
-      
-      if (data.status === "success") {
-        // Show success toast
-        toastMsg.textContent = data.message;
-        toastEl.classList.remove("text-bg-danger");
-        toastEl.classList.add("text-bg-success");
-        
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-        
-        // Close modal
-        $(modalEl).modal('hide');
-        
-        // Reload page after delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        // Show error
-        toastMsg.textContent = data.message || "Failed to dispose printer.";
-        toastEl.classList.remove("text-bg-success");
-        toastEl.classList.add("text-bg-danger");
-        
-        const toast = new bootstrap.Toast(toastEl);
-        toast.show();
-        
-        // Re-enable button
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '<i class="fa fa-check me-1"></i> Confirm Dispose';
-      }
-    })
-    .catch(err => {
-      console.error("Fetch error:", err);
-      
-      toastMsg.textContent = "An error occurred: " + err.message;
-      toastEl.classList.remove("text-bg-success");
-      toastEl.classList.add("text-bg-danger");
-      
-      const toast = new bootstrap.Toast(toastEl);
-      toast.show();
-      
-      // Re-enable button
-      confirmBtn.disabled = false;
-      confirmBtn.innerHTML = '<i class="fa fa-check me-1"></i> Confirm Dispose';
+    // Show modal message
+    $(modalEl).on('show.bs.modal', function () {
+        const brand = "{{ printer.printer_brand_db|default:'Unknown' }}";
+        const model = "{{ printer.printer_model_db|default:'' }}";
+        messageEl.innerHTML = `Are you sure you want to dispose <span style="color: #dc2626; font-weight: 700;">${brand} ${model}</span>?`;
     });
-  });
+
+    // Confirm disposal
+    confirmBtn.addEventListener("click", function() {
+        const reason = document.getElementById("reason").value.trim();
+        
+        if (!reason) {
+            alert("Please enter a reason for disposal.");
+            return;
+        }
+
+        // Disable button to prevent double clicks
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Processing...';
+
+        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+        
+        fetch("/printers/dispose/{{ printer.id }}/", {
+            method: "POST",
+            headers: { 
+                "X-CSRFToken": csrfToken,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({ reason: reason })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === "success") {
+                // Show success toast
+                toastMsg.innerHTML = '<i class="fa fa-check-circle me-2"></i>' + data.message;
+                toastEl.classList.remove("text-bg-danger");
+                toastEl.classList.add("text-bg-success");
+                
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+                
+                // Close modal
+                bootstrap.Modal.getInstance(modalEl).hide();
+                
+                // Reload page after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                // Show error
+                toastMsg.innerHTML = '<i class="fa fa-exclamation-circle me-2"></i>' + (data.message || "Failed to dispose printer.");
+                toastEl.classList.remove("text-bg-success");
+                toastEl.classList.add("text-bg-danger");
+                
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+                
+                // Re-enable button
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fa fa-check me-1"></i> Confirm Dispose';
+            }
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+            
+            toastMsg.innerHTML = '<i class="fa fa-exclamation-circle me-2"></i>An error occurred: ' + err.message;
+            toastEl.classList.remove("text-bg-success");
+            toastEl.classList.add("text-bg-danger");
+            
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+            
+            // Re-enable button
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fa fa-check me-1"></i> Confirm Dispose';
+        });
+    });
 });
 </script>
 {% endblock %}

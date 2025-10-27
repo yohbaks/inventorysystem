@@ -2,205 +2,772 @@
 {% load static %}
 
 {% block content %}
-<!-- ✅ Added overall top padding to push card lower -->
-<div class="container-fluid px-4" style="padding-top: 4.5rem;">  
-  <div class="page-inner mb-5"><!-- ✅ mb-5 for nice bottom space -->
-    <div class="card card-round shadow border-0 mt-3"><!-- ✅ mt-3 for extra separation -->
-      <div class="card-header py-4 d-flex justify-content-between align-items-center"
-           style="background: linear-gradient(135deg, #4e73df, #224abe); color: white;">
-        <div class="d-flex align-items-center">
-          <i class="fa fa-print me-2 fs-4"></i>
-          <h4 class="card-title mb-0 fw-semibold">Printer Inventory</h4>
+<style>
+    /* Premium Card Styling */
+    .premium-card {
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: none;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Premium Header Gradient */
+    .premium-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 2rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.4;
+    }
+
+    .premium-header h4 {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Premium Buttons */
+    .btn-premium {
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-premium-light {
+        background: rgba(255, 255, 255, 0.95);
+        color: #667eea;
+        border: none;
+    }
+
+    .btn-premium-light:hover {
+        background: white;
+        color: #764ba2;
+    }
+
+    /* Premium Table Styling */
+    .premium-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .premium-table thead th {
+        background: linear-gradient(135deg, #f8f9fe 0%, #f0f2ff 100%);
+        color: #4a5568;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.75rem;
+        border: none;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .premium-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .premium-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9fe 0%, #fef5ff 100%);
+        transform: scale(1.01);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.08);
+    }
+
+    .premium-table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    /* Premium Badges */
+    .badge-premium {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.3px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .badge-premium-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-premium-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-premium-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+    }
+
+    .badge-premium-dark {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(31, 41, 55, 0.3);
+    }
+
+    .badge-premium-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Action Button Group */
+    .action-btn-group {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .action-btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .action-btn-danger:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .action-btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .action-btn-success:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Premium Modal */
+    .modal-premium .modal-content {
+        border-radius: 20px;
+        border: none;
+        overflow: hidden;
+    }
+
+    .modal-premium .modal-header {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .modal-premium .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-premium .modal-footer {
+        border: none;
+        padding: 1.5rem 2rem;
+        background: #f8f9fa;
+    }
+
+    /* Premium Form Controls */
+    .form-control-premium {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-premium:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Stats Cards */
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        border-left: 4px solid;
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-card-primary { border-left-color: #667eea; }
+    .stats-card-success { border-left-color: #10b981; }
+    .stats-card-danger { border-left-color: #ef4444; }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    }
+
+    /* DataTable Customization */
+    .dataTables_wrapper .dataTables_filter input {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 0.5rem 1rem;
+        padding-left: 2.5rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 0.75rem center;
+        background-size: 16px;
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* ✅ Add spacing between controls and table */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+    }
+
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ✅ Align search to the right */
+    .dataTables_wrapper .dataTables_filter {
+        text-align: right;
+    }
+
+    .dataTables_wrapper .dataTables_filter label {
+        justify-content: flex-end;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+        padding: 0.4rem 2rem 0.4rem 0.75rem;
+        font-weight: 500;
+        background-position: right 0.5rem center;
+    }
+
+    .dataTables_wrapper .dataTables_length select:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Add space before table */
+    .dataTables_wrapper .table {
+        margin-top: 1rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .premium-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .action-btn-group {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stats-card {
+            margin-bottom: 1rem;
+        }
+    }
+
+    /* Icon enhancements */
+    .icon-wrapper {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        margin-right: 0.75rem;
+    }
+
+    /* Disposed row styling */
+    tr.disposed-row {
+        opacity: 0.6;
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    }
+
+    tr.disposed-row:hover {
+        opacity: 0.8;
+    }
+
+    /* Toast Styling */
+    .toast-premium {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+</style>
+
+<div class="container-fluid px-4" style="padding-top: 5rem; padding-bottom: 3rem;">
+    <div class="page-inner">
+        
+        <!-- Stats Cards Row -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stats-card stats-card-primary">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fa fa-print text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1 fw-semibold" style="font-size: 0.75rem;">TOTAL PRINTERS</h6>
+                            <h3 class="mb-0 fw-bold">{{ printers.count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card stats-card-success">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fa fa-check-circle text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1 fw-semibold" style="font-size: 0.75rem;">ACTIVE PRINTERS</h6>
+                            <h3 class="mb-0 fw-bold">{{ printers|length|add:"-0" }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card stats-card-danger">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-wrapper" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="fa fa-trash-alt text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-1 fw-semibold" style="font-size: 0.75rem;">DISPOSED</h6>
+                            <h3 class="mb-0 fw-bold">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="premium-card">
+            <!-- Premium Header -->
+            <div class="premium-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-wrapper">
+                            <i class="fa fa-print fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 text-white">Printer Inventory</h4>
+                            <p class="mb-0 text-white-50" style="font-size: 0.875rem;">Manage and track all printers</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'disposed_printers' %}" class="btn btn-premium btn-premium-light">
+                            <i class="fa fa-trash-alt me-2"></i> View Disposed
+                        </a>
+                        <a href="#" class="btn btn-premium btn-premium-light">
+                            <i class="fa fa-plus me-2"></i> Add Printer
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-0">
+                {% if printers %}
+                <div class="table-responsive">
+                    <table id="printerTable" class="table premium-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Brand & Model</th>
+                                <th>Serial Number</th>
+                                <th>Type</th>
+                                <th>Capabilities</th>
+                                <th>End-User</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center" style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for printer in printers %}
+                            <tr id="printer-row-{{ printer.id }}" class="{% if printer.is_disposed %}disposed-row{% endif %}">
+                                <td>
+                                    <div class="text-center">
+                                        <span class="badge badge-premium badge-premium-secondary" style="font-size: 0.7rem;">
+                                            {{ forloop.counter }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-wrapper me-2" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); width: 36px; height: 36px;">
+                                            <i class="fa fa-print" style="color: #667eea;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ printer.printer_brand_db|default:"Unknown Brand" }}</div>
+                                            <small class="text-muted">{{ printer.printer_model_db|default:"—" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-premium badge-premium-secondary">
+                                        <i class="fa fa-barcode me-1"></i>
+                                        {{ printer.printer_sn_db }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-premium badge-premium-info">
+                                        {{ printer.printer_type|default:"—" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        {% if printer.printer_color %}
+                                        <span class="badge badge-premium badge-premium-success">
+                                            <i class="fa fa-palette me-1"></i> Color
+                                        </span>
+                                        {% else %}
+                                        <span class="badge badge-premium badge-premium-dark">
+                                            <i class="fa fa-circle me-1"></i> Mono
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if printer.printer_duplex %}
+                                        <span class="badge badge-premium badge-premium-info">
+                                            <i class="fa fa-clone me-1"></i> Duplex
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                               <td>
+    {% if printer.end_user %}
+    <div class="d-flex align-items-center">
+        <div class="icon-wrapper me-2" style="background: linear-gradient(135deg, #10b98115 0%, #05966915 100%); width: 36px; height: 36px;">
+            <i class="fa fa-user" style="color: #10b981;"></i>
         </div>
         <div>
-          <a href="{% url 'disposed_printers' %}" class="btn btn-light btn-sm shadow-sm">
-            <i class="fa fa-trash-alt me-1"></i> Disposed Printers
-          </a>
+            <div class="fw-semibold text-dark">{{ printer.end_user.full_name }}</div>
+            <small class="text-muted">{{ printer.end_user.employee_office_section|default:"—" }}</small>
         </div>
-      </div>
-
-      <div class="card-body py-4"><!-- ✅ more padding inside the card -->
-        {% if printers %}
-        <div class="table-responsive">
-          <table id="printerTable" class="table table-hover table-striped align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>#</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Serial No.</th>
-                <th>Type</th>
-                <th>Color</th>
-                <th>Duplex</th>
-                <th>Resolution</th>
-                <th>Monthly Duty</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-                <tbody>
-                {% for printer in printers %}
-                <tr id="printer-row-{{ printer.id }}" class="{% if printer.is_disposed %}table-danger{% endif %}">
-                    <td>{{ forloop.counter }}</td>
-                    <td class="fw-semibold">{{ printer.printer_brand_db|default:"—" }}</td>
-                    <td>{{ printer.printer_model_db|default:"—" }}</td>
-                    <td><span class="badge bg-secondary">{{ printer.printer_sn_db }}</span></td>
-                    <td>{{ printer.printer_type|default:"—" }}</td>
-                    <td>
-                    {% if printer.printer_color %}
-                        <span class="badge bg-success">Color</span>
-                    {% else %}
-                        <span class="badge bg-dark">Mono</span>
-                    {% endif %}
-                    </td>
-                    <td>
-                    {% if printer.printer_duplex %}
-                        <i class="fa fa-check-circle text-success"></i>
-                    {% else %}
-                        <i class="fa fa-times-circle text-danger"></i>
-                    {% endif %}
-                    </td>
-                    <td>{{ printer.printer_resolution|default:"—" }}</td>
-                    <td>{{ printer.printer_monthly_duty|default:"—" }}</td>
-
-                    <!-- 🟩 NEW STATUS BADGE -->
-                    <td class="text-center">
-                    {% if printer.is_disposed %}
-                        <span class="badge bg-danger"><i class="fa fa-trash me-1"></i> Disposed</span>
-                    {% else %}
-                        <span class="badge bg-success"><i class="fa fa-check me-1"></i> Active</span>
-                    {% endif %}
-                    </td>
-
-                    <!-- 🛠️ ACTIONS -->
-                    <td class="text-center">
-                    <div class="btn-group">
-                        <a href="{% url 'printer_details_view' printer.id %}"
-                        class="btn btn-sm btn-outline-primary" title="View Details">
-                        <i class="fa fa-eye"></i>
-                        </a>
-                        {% if not printer.is_disposed %}
-                        <button
-                        class="btn btn-sm btn-outline-danger"
-                        data-bs-toggle="modal"
-                        data-bs-target="#disposePrinterModal"
-                        data-id="{{ printer.id }}"
-                        data-brand="{{ printer.printer_brand_db }}"
-                        data-model="{{ printer.printer_model_db }}">
-                        <i class="fa fa-trash"></i>
-                        </button>
-                        {% endif %}
+    </div>
+    {% else %}
+    <span class="text-muted">
+        <i class="fa fa-user-slash me-1"></i> Unassigned
+    </span>
+    {% endif %}
+</td>
+                                <td class="text-center">
+                                    {% if printer.is_disposed %}
+                                    <span class="badge badge-premium badge-premium-danger">
+                                        <i class="fa fa-trash me-1"></i> Disposed
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-premium badge-premium-success">
+                                        <i class="fa fa-check-circle me-1"></i> Active
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-btn-group">
+                                        <a href="{% url 'printer_details_view' printer.id %}"
+                                           class="action-btn action-btn-primary"
+                                           title="View Details"
+                                           data-bs-toggle="tooltip">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        {% if not printer.is_disposed %}
+                                        <button class="action-btn action-btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#disposePrinterModal"
+                                                data-id="{{ printer.id }}"
+                                                data-brand="{{ printer.printer_brand_db }}"
+                                                data-model="{{ printer.printer_model_db }}"
+                                                title="Dispose Printer">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- Empty State -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fa fa-print"></i>
                     </div>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-          </table>
+                    <h4 class="fw-bold text-dark mb-2">No Printers Found</h4>
+                    <p class="text-muted mb-4">Start by adding your first printer to the inventory.</p>
+                    <a href="#" class="btn btn-premium" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <i class="fa fa-plus me-2"></i> Add Your First Printer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
         </div>
-        {% else %}
-        <div class="alert alert-info text-center py-4 mt-3">
-          <i class="fa fa-info-circle me-2"></i> No printers found in the inventory.
-        </div>
-        {% endif %}
-      </div>
     </div>
-  </div>
 </div>
 
-<!-- 🗑️ Dispose Modal -->
-<div class="modal fade" id="disposePrinterModal" tabindex="-1" aria-labelledby="disposePrinterModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content shadow-lg border-0 rounded-3">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-semibold"><i class="fa fa-trash me-2"></i> Dispose Printer</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p id="disposeMessage" class="mb-3"></p>
-        <form id="disposePrinterForm">
-          {% csrf_token %}
-          <input type="hidden" id="disposePrinterId" name="printer_id">
-          <div class="form-group mb-3">
-            <label class="form-label fw-semibold">Reason for Disposal</label>
-            <textarea name="reason" id="reason" class="form-control" rows="3"
-                      placeholder="Enter reason..." required></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" id="confirmDisposeBtn">
-          <i class="fa fa-check me-1"></i> Confirm Dispose
-        </button>
-      </div>
+<!-- Premium Dispose Modal -->
+<div class="modal fade modal-premium" id="disposePrinterModal" tabindex="-1" aria-labelledby="disposePrinterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class="fa fa-trash me-2"></i> Dispose Printer
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning border-0 mb-3" style="border-radius: 10px;">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p id="disposeMessage" class="mb-3 fw-semibold"></p>
+                <form id="disposePrinterForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="disposePrinterId" name="printer_id">
+                    <div class="form-group mb-3">
+                        <label class="form-label fw-bold mb-2">
+                            <i class="fa fa-clipboard-list me-2"></i>Reason for Disposal
+                        </label>
+                        <textarea name="reason" 
+                                  id="reason" 
+                                  class="form-control form-control-premium" 
+                                  rows="4"
+                                  placeholder="Please provide a detailed reason for disposing this printer..."
+                                  required></textarea>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fa fa-info-circle me-1"></i>
+                            This information will be saved in the disposal records.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px;">
+                    <i class="fa fa-times me-1"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDisposeBtn" style="border-radius: 10px;">
+                    <i class="fa fa-check me-1"></i> Confirm Dispose
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- ✅ Toast -->
+<!-- Premium Toast -->
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-  <div id="disposeToast" class="toast align-items-center text-bg-success border-0 shadow" role="alert">
-    <div class="d-flex">
-      <div class="toast-body" id="toastMessage">Printer disposed successfully.</div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    <div id="disposeToast" class="toast toast-premium align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body fw-semibold" id="toastMessage">
+                <i class="fa fa-check-circle me-2"></i>
+                Printer disposed successfully.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
     </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("disposePrinterModal");
-  const messageEl = document.getElementById("disposeMessage");
-  const printerIdInput = document.getElementById("disposePrinterId");
-  const confirmBtn = document.getElementById("confirmDisposeBtn");
-  const toast = new bootstrap.Toast(document.getElementById("disposeToast"));
-  const toastMsg = document.getElementById("toastMessage");
-
-  modal.addEventListener("show.bs.modal", event => {
-    const button = event.relatedTarget;
-    const id = button.getAttribute("data-id");
-    const brand = button.getAttribute("data-brand");
-    const model = button.getAttribute("data-model");
-    printerIdInput.value = id;
-    messageEl.innerHTML = `Are you sure you want to dispose <strong>${brand || 'Unknown'} ${model || ''}</strong>?`;
-  });
-
-  confirmBtn.addEventListener("click", () => {
-    const printerId = printerIdInput.value;
-    const reason = document.getElementById("reason").value.trim();
-    if (!reason) return alert("Please enter a reason for disposal.");
-
-    fetch(`/printers/dispose/${printerId}/`, {
-      method: "POST",
-      headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
-      body: new URLSearchParams({ reason })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === "success") {
-        toastMsg.textContent = data.message;
-        toast.show();
-        modal.querySelector("button.btn-close").click();
-        const row = document.getElementById(`printer-row-${printerId}`);
-        row.classList.add("table-danger");
-        row.querySelector("td:last-child").innerHTML = `<span class='badge bg-danger'>Disposed</span>`;
-      } else {
-        alert(data.message);
-      }
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-  });
 
-  // DataTable setup
-  $('#printerTable').DataTable({
-    responsive: true,
-    pageLength: 10,
-    order: [[1, "asc"]],
-    language: {
-      search: "_INPUT_",
-      searchPlaceholder: "Search printer..."
-    }
-  });
+    // Modal and Toast elements
+    const modal = document.getElementById("disposePrinterModal");
+    const messageEl = document.getElementById("disposeMessage");
+    const printerIdInput = document.getElementById("disposePrinterId");
+    const confirmBtn = document.getElementById("confirmDisposeBtn");
+    const toast = new bootstrap.Toast(document.getElementById("disposeToast"));
+    const toastMsg = document.getElementById("toastMessage");
+
+    // Modal show event
+    modal.addEventListener("show.bs.modal", event => {
+        const button = event.relatedTarget;
+        const id = button.getAttribute("data-id");
+        const brand = button.getAttribute("data-brand");
+        const model = button.getAttribute("data-model");
+        printerIdInput.value = id;
+        messageEl.innerHTML = `Are you sure you want to dispose <strong class="text-danger">${brand || 'Unknown'} ${model || ''}</strong>?`;
+    });
+
+    // Confirm dispose button
+    confirmBtn.addEventListener("click", () => {
+        const printerId = printerIdInput.value;
+        const reason = document.getElementById("reason").value.trim();
+        
+        if (!reason) {
+            alert("Please enter a reason for disposal.");
+            return;
+        }
+
+        // Show loading state
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Processing...';
+
+        fetch(`/printers/dispose/${printerId}/`, {
+            method: "POST",
+            headers: { 
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({ reason })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                toastMsg.innerHTML = '<i class="fa fa-check-circle me-2"></i>' + data.message;
+                toast.show();
+                
+                // Close modal
+                bootstrap.Modal.getInstance(modal).hide();
+                
+                // Update row
+                const row = document.getElementById(`printer-row-${printerId}`);
+                if (row) {
+                    row.classList.add("disposed-row");
+                    const statusCell = row.querySelector("td:nth-last-child(2)");
+                    if (statusCell) {
+                        statusCell.innerHTML = '<span class="badge badge-premium badge-premium-danger"><i class="fa fa-trash me-1"></i> Disposed</span>';
+                    }
+                    const actionsCell = row.querySelector("td:last-child");
+                    if (actionsCell) {
+                        actionsCell.innerHTML = '<span class="text-muted small">—</span>';
+                    }
+                }
+                
+                // Reset form
+                document.getElementById("reason").value = "";
+            } else {
+                alert(data.message || "An error occurred while disposing the printer.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+        })
+        .finally(() => {
+            // Reset button state
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fa fa-check me-1"></i> Confirm Dispose';
+        });
+    });
+
+    // DataTable initialization
+    $('#printerTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        order: [[1, "asc"]],
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Search printers...",
+            lengthMenu: "Show _MENU_ printers",
+            info: "Showing _START_ to _END_ of _TOTAL_ printers",
+            infoEmpty: "No printers available",
+            infoFiltered: "(filtered from _MAX_ total printers)",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: '<i class="fa fa-chevron-right"></i>',
+                previous: '<i class="fa fa-chevron-left"></i>'
+            }
+        },
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 text-end"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+    });
 });
 </script>
 {% endblock %}

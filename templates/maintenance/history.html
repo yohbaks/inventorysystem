@@ -4,196 +4,209 @@
 
 {% block content %}
 {% now "Y-m-d" as today %}
-<br><br><br><br>
-<div class="page-inner py-4">
 
-<!-- Header Section -->
-<!-- Header Section -->
-<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div>
-        <h3 class="fw-bold mb-1">Workstation Preventive Maintenance</h3>
-        <p class="text-muted mb-0">Comprehensive maintenance tracking and schedule management</p>
-      </div>
-      <div class="ms-md-auto py-2 py-md-0">
-        <a href="{% url 'checklist' desktop.id %}" class="btn btn-primary btn-round">
-          <i class="fas fa-plus me-1"></i> Conduct Maintenance
-        </a>
+<div class="container">
+  <div class="page-inner py-4">
+
+    <!-- ==================== PREMIUM DETAIL PAGE HEADER ==================== -->
+    <div class="premium-page-header">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+          <div class="premium-detail-icon">
+            <i class="fas fa-wrench"></i>
+          </div>
+          <div class="ms-3">
+            <h3 class="premium-detail-title mb-1">Workstation Preventive Maintenance</h3>
+            <p class="premium-detail-subtitle mb-0 text-white">Comprehensive maintenance tracking and schedule management</p>
+          </div>
+        </div>
+        <div class="mt-3 mt-md-0">
+          <a href="{% url 'checklist' desktop.id %}" class="premium-detail-btn primary">
+            <i class="fa fa-plus me-1"></i> Conduct Maintenance
+          </a>
+        </div>
       </div>
     </div>
-  
 
-  <!-- Workstation Info Card -->
-  {% if desktop_details %}
-  <div class="card border-0 shadow-sm rounded-4 mb-4">
-    <div class="card-body p-4">
-      <div class="d-flex align-items-center mb-4">
-        <div class="stamp stamp-md bg-primary bg-opacity-10 rounded-3 p-3 me-3" style="width: 56px; height: 56px;">
-          <i class="fas fa-desktop text-primary fs-4"></i>
+    <!-- ==================== WORKSTATION INFO CARD ==================== -->
+    {% if desktop_details %}
+    <div class="premium-info-card gradient-primary">
+      <div class="premium-info-header">
+        <div class="premium-info-icon-badge">
+          <i class="fa fa-desktop"></i>
         </div>
         <div>
-          <h4 class="fw-bold mb-1">{{ desktop_details.computer_name }}</h4>
-          <p class="text-muted mb-0 small">Workstation Details</p>
+          <h4 class="premium-info-title">{{ desktop_details.computer_name }}</h4>
+          <p class="premium-info-subtitle">Workstation Details</p>
         </div>
       </div>
 
-      <div class="row g-4">
+      <div class="row g-4 mt-2">
         <div class="col-md-4 col-lg-3">
-          <div class="d-flex flex-column">
-            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Brand</span>
-            <span class="fw-semibold">{{ desktop_details.brand_name }}</span>
+          <div class="premium-info-item">
+            <span class="premium-info-label">Brand</span>
+            <span class="premium-info-value">{{ desktop_details.brand_name }}</span>
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
-          <div class="d-flex flex-column">
-            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Model</span>
-            <span class="fw-semibold">{{ desktop_details.model }}</span>
+          <div class="premium-info-item">
+            <span class="premium-info-label">Model</span>
+            <span class="premium-info-value">{{ desktop_details.model }}</span>
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
-          <div class="d-flex flex-column">
-            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Serial Number</span>
-            <span class="fw-semibold font-monospace small">{{ desktop_details.serial_no }}</span>
+          <div class="premium-info-item">
+            <span class="premium-info-label">Serial Number</span>
+            <span class="premium-info-value monospace">{{ desktop_details.serial_no }}</span>
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
-          <div class="d-flex flex-column">
-            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Processor</span>
-            <span class="fw-semibold">{{ desktop_details.processor }}</span>
+          <div class="premium-info-item">
+            <span class="premium-info-label">Processor</span>
+            <span class="premium-info-value">{{ desktop_details.processor }}</span>
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
-          <div class="d-flex flex-column">
-            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Memory</span>
-            <span class="fw-semibold">{{ desktop_details.memory }}</span>
+          <div class="premium-info-item">
+            <span class="premium-info-label">Memory</span>
+            <span class="premium-info-value">{{ desktop_details.memory }}</span>
           </div>
         </div>
         <div class="col-md-4 col-lg-3">
-          <div class="d-flex flex-column">
-            <span class="text-muted small text-uppercase mb-1 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Storage Drive</span>
-            <span class="fw-semibold">{{ desktop_details.drive }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="row g-4">
-    <!-- User Information Card -->
-    {% if user_details %}
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-body p-4">
-          <div class="d-flex align-items-center mb-4">
-            
-            <div class="stamp stamp-md bg-success bg-opacity-10 me-3 rounded-3 p-3" style="width: 56px; height: 56px;">
-              <i class="fas fa-user-circle text-info fs-3"></i>
-            </div>
-            <h5 class="fw-bold mb-0">User Information</h5>
-          </div>
-          <div class="d-flex flex-column gap-3">
-            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
-              <div>
-                <span class="text-muted small d-block mb-1">End User</span>
-                <span class="fw-semibold">{{ user_details.user_Enduser.full_name|default:"Not Assigned" }}</span>
-              </div>
-              <i class="fas fa-user text-muted"></i>
-            </div>
-            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
-              <div>
-                <span class="text-muted small d-block mb-1">Asset Owner</span>
-                <span class="fw-semibold">{{ user_details.user_Assetowner.full_name|default:"Not Assigned" }}</span>
-              </div>
-              <i class="fas fa-user-tie text-muted"></i>
-            </div>
+          <div class="premium-info-item">
+            <span class="premium-info-label">Storage Drive</span>
+            <span class="premium-info-value">{{ desktop_details.drive }}</span>
           </div>
         </div>
       </div>
     </div>
     {% endif %}
 
-    <!-- Current Schedule Card -->
-    {% if current_pm_schedule %}
-    <div class="col-lg-6">
-      <div class="card border-0 shadow-sm rounded-4 h-100">
-        <div class="card-body p-4">
-          <div class="d-flex align-items-center mb-4">
-            <div class="stamp stamp-md bg-warning bg-opacity-10 me-3 rounded-3 p-3" style="width: 56px; height: 56px;">
-              <i class="fas fa-calendar-check text-warning fs-3"></i>
-            </div>  
-  
-            </span>
-            <h5 class="fw-bold mb-0">Current PM Schedule</h5>
+    <div class="row g-4 mt-2">
+      <!-- ==================== USER INFORMATION CARD ==================== -->
+      {% if user_details %}
+      <div class="col-lg-6">
+        <div class="premium-info-card gradient-success h-100">
+          <div class="premium-info-header">
+            <div class="premium-info-icon-badge success">
+              <i class="fa fa-user-circle"></i>
+            </div>
+            <h5 class="premium-info-title">User Information</h5>
           </div>
-          <div class="d-flex flex-column gap-2">
+
+          <div class="premium-user-items">
+            <div class="premium-user-item">
+              <div>
+                <span class="premium-user-label">End User</span>
+                <span class="premium-user-value">{{ user_details.user_Enduser.full_name|default:"Not Assigned" }}</span>
+              </div>
+              <i class="fa fa-user"></i>
+            </div>
+            <div class="premium-user-item">
+              <div>
+                <span class="premium-user-label">Asset Owner</span>
+                <span class="premium-user-value">{{ user_details.user_Assetowner.full_name|default:"Not Assigned" }}</span>
+              </div>
+              <i class="fa fa-user-tie"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ==================== CURRENT SCHEDULE CARD ==================== -->
+      {% if current_pm_schedule %}
+      <div class="col-lg-6">
+        <div class="premium-info-card gradient-warning h-100">
+          <div class="premium-info-header">
+            <div class="premium-info-icon-badge warning">
+              <i class="fa fa-calendar-check"></i>
+            </div>
+            <h5 class="premium-info-title">Current PM Schedule</h5>
+          </div>
+
+          <div class="premium-schedule-list">
             {% for schedule in current_pm_schedule %}
-            <div class="p-3 border border-2 rounded-3 {% if schedule.is_completed %}border-success{% elif schedule.is_overdue %}border-danger{% else %}border-warning{% endif %}">
+            <div class="premium-schedule-item {% if schedule.is_completed %}completed{% elif schedule.is_overdue %}overdue{% else %}pending{% endif %}">
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
-                  <h6 class="fw-bold mb-1">{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</h6>
-                  <p class="text-muted small mb-0">{{ schedule.pm_section_schedule.section.name }}</p>
+                  <h6 class="premium-schedule-title">{{ schedule.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ schedule.pm_section_schedule.quarter_schedule.year }}</h6>
+                  <p class="premium-schedule-section">{{ schedule.pm_section_schedule.section.name }}</p>
                 </div>
                 {% if schedule.is_completed %}
-                  <span class="badge bg-success rounded-pill px-3">Completed</span>
+                  <span class="premium-schedule-badge completed">
+                    <i class="fa fa-check-circle me-1"></i>Completed
+                  </span>
                 {% elif schedule.is_overdue %}
-                  <span class="badge bg-danger rounded-pill px-3">Overdue</span>
+                  <span class="premium-schedule-badge overdue">
+                    <i class="fa fa-exclamation-circle me-1"></i>Overdue
+                  </span>
                 {% else %}
-                  <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                  <span class="premium-schedule-badge pending">
+                    <i class="fa fa-clock me-1"></i>Pending
+                  </span>
                 {% endif %}
               </div>
-              <div class="d-flex gap-3 text-muted small">
-                <span><i class="fas fa-calendar-day me-1"></i>{{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}</span>
-                <span><i class="fas fa-calendar-times me-1"></i>{{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}</span>
+              <div class="premium-schedule-dates">
+                <span>
+                  <i class="fa fa-calendar-check me-1"></i>
+                  {{ schedule.pm_section_schedule.start_date|date:"M d, Y" }}
+                </span>
+                <span>
+                  <i class="fa fa fa-calendar-check me-1"></i>
+                  {{ schedule.pm_section_schedule.end_date|date:"M d, Y" }}
+                </span>
               </div>
             </div>
             {% endfor %}
           </div>
         </div>
       </div>
+      {% endif %}
     </div>
-    {% endif %}
-  </div>
 
-  <!-- Maintenance History -->
-  <div class="card border-0 shadow-sm rounded-4 mt-4">
-    <div class="card-body p-4">
-      <div class="d-flex align-items-center mb-4">
-        <div class="stamp stamp-md bg-secondary bg-opacity-10 me-3 rounded-3 p-3" style="width: 56px; height: 56px;">
-              <i class="fas fa-heading text-warning fs-3"></i>
-            </div>     
+    <!-- ==================== MAINTENANCE HISTORY TABLE ==================== -->
+    <div class="premium-info-card gradient-secondary mt-4">
+      <div class="premium-info-header">
+        <div class="premium-info-icon-badge secondary">
+          <i class="fa fa-history"></i>
+        </div>
         <div>
-          <h5 class="fw-bold mb-0">Maintenance History</h5>
-          <p class="text-muted small mb-0">Complete record of all maintenance activities</p>
+          <h5 class="premium-info-title">Maintenance History</h5>
+          <p class="premium-info-subtitle">Complete record of all maintenance activities</p>
         </div>
       </div>
 
       {% if maintenance_records %}
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
+      <div class="table-responsive mt-3">
+        <table class="premium-history-table">
           <thead>
-            <tr class="border-bottom border-2">
-              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Date</th>
-              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Office</th>
-              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Quarter</th>
-              <th class="text-muted text-uppercase small fw-semibold py-3" style="font-size: 0.75rem;">Tasks Completed</th>
-              <th class="text-muted text-uppercase small fw-semibold py-3 text-center" style="font-size: 0.75rem;">Report</th>
+            <tr>
+              <th>Date</th>
+              <th>Office</th>
+              <th>Quarter</th>
+              <th>Tasks Completed</th>
+              <th class="text-center">Report</th>
             </tr>
           </thead>
           <tbody>
             {% for record in maintenance_records %}
-            <tr class="border-bottom">
-              <td class="py-3">
-                <div class="d-flex align-items-center">
-                  <div class="bg-primary bg-opacity-10 rounded-2 p-2 me-2">
-                    <i class="fas fa-calendar-day text-primary small"></i>
+            <tr>
+              <td>
+                <div class="premium-history-date">
+                  <div class="premium-history-date-icon">
+                    <i class="far fa-calendar-alt"></i>
                   </div>
-                  <span class="fw-semibold">{{ record.date_accomplished|date:"M d, Y" }}</span>
+                  <span>{{ record.date_accomplished|date:"M d, Y" }}</span>
                 </div>
               </td>
-              <td class="py-3">{{ record.office }}</td>
-              <td class="py-3">
+              <td>
+                <span class="premium-history-office">{{ record.office }}</span>
+              </td>
+              <td>
                 {% if record.pm_schedule_assignment and record.pm_schedule_assignment.pm_section_schedule %}
-                  <span class="badge bg-light text-dark border px-3 py-2">
+                  <span class="premium-history-quarter">
+                    <i class="fa fa-calendar-check me-1"></i>
                     {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}
                     {{ record.pm_schedule_assignment.pm_section_schedule.quarter_schedule.year }}
                   </span>
@@ -201,33 +214,33 @@
                   <span class="text-muted">—</span>
                 {% endif %}
               </td>
-              <td class="py-3">
-                <div class="d-flex flex-wrap gap-2">
+              <td>
+                <div class="premium-task-badges">
                   {% for i in "123456789"|make_list %}
                     {% with task_field="task_"|add:i note_field="note_"|add:i %}
                       {% if record|get_attr:task_field %}
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1" 
+                        <span class="premium-task-badge completed" 
                               data-bs-toggle="tooltip" 
                               {% with note=record|get_attr:note_field %}
                                 {% if note %}title="{{ note }}"{% endif %}
                               {% endwith %}>
-                          <i class="fas fa-check-circle me-1"></i>Task {{ i }}
+                          <i class="fa fa-check-circle me-1"></i>Task {{ i }}
                         </span>
                       {% else %}
-                        <span class="badge bg-light text-muted border px-2 py-1">
-                          <i class="fas fa-times-circle me-1"></i>Task {{ i }}
+                        <span class="premium-task-badge incomplete">
+                          <i class="fa fa-times-circle me-1"></i>Task {{ i }}
                         </span>
                       {% endif %}
                     {% endwith %}
                   {% endfor %}
                 </div>
               </td>
-              <td class="py-3 text-center">
+              <td class="text-center">
                 <a href="{% url 'generate_pm_pdf' record.id %}" 
-                   class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                   class="premium-pdf-btn"
                    data-bs-toggle="tooltip" 
                    title="Download PDF Report">
-                  <i class="fas fa-file-pdf me-1"></i>PDF
+                  <i class="fa fa-file-pdf me-1"></i>PDF
                 </a>
               </td>
             </tr>
@@ -236,61 +249,20 @@
         </table>
       </div>
       {% else %}
-      <div class="alert alert-warning border-0 rounded-3 d-flex align-items-center mb-0" role="alert">
-          <span class="stamp stamp-md bg-warning me-3">
-                      <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
-                    </span>
-           <div>
-          <h6 class="fw-bold mb-1">No Maintenance Records</h6>
-          <p class="mb-0 small">No preventive maintenance history has been recorded for this workstation yet.</p>
+      <div class="premium-alert warning">
+        <div class="premium-alert-icon">
+          <i class="fa fa-exclamation-triangle"></i>
+        </div>
+        <div>
+          <h6 class="premium-alert-title">No Maintenance Records</h6>
+          <p class="premium-alert-text">No preventive maintenance history has been recorded for this workstation yet.</p>
         </div>
       </div>
       {% endif %}
     </div>
+
   </div>
-
 </div>
-
-<style>
-  /* Custom styling optimized for Bootstrap 5.3.2 */
-  .card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .badge {
-    font-weight: 500;
-    letter-spacing: 0.3px;
-  }
-  
-  .table tbody tr {
-    transition: background-color 0.2s ease;
-  }
-  
-  .table tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.03);
-  }
-  
-  .btn {
-    transition: all 0.2s ease;
-  }
-  
-  .btn:hover {
-    transform: translateY(-1px);
-  }
-
-  .gap-2 {
-    gap: 0.5rem !important;
-  }
-
-  .gap-3 {
-    gap: 1rem !important;
-  }
-</style>
 
 <script>
   // Initialize Bootstrap tooltips

@@ -24,15 +24,36 @@
 
           <div class="card-body">
             <div class="table-responsive">
-              <table class="table table-bordered table-striped">
+              <table class="table table-bordered table-striped align-middle">
                 <tbody>
-                  <tr><th class="bg-light text-end" style="width: 30%;">Serial Number</th><td>{{ mouse.mouse_sn }}</td></tr>
-                  <tr><th class="bg-light text-end">Brand</th><td>{{ mouse.mouse_brand }}</td></tr>
-                  <tr><th class="bg-light text-end">Model</th><td>{{ mouse.mouse_model }}</td></tr>
-                  <tr><th class="bg-light text-end">Computer Name</th><td>{{ mouse.computer_name|default:"—" }}</td></tr>
-                  <tr><th class="bg-light text-end">Asset Owner</th><td>{{ mouse.asset_owner|default:"—" }}</td></tr>
-                  <tr><th class="bg-light text-end">Date Salvaged</th><td>{{ mouse.salvage_date|date:"Y-m-d H:i" }}</td></tr>
-                  <tr><th class="bg-light text-end">Notes</th><td>{{ mouse.notes|default:"—" }}</td></tr>
+                  <tr>
+                    <th class="bg-light text-end" style="width: 30%;">Serial Number</th>
+                    <td>{{ mouse.mouse_sn|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th class="bg-light text-end">Brand</th>
+                    <td>{{ mouse.mouse_brand|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th class="bg-light text-end">Model</th>
+                    <td>{{ mouse.mouse_model|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th class="bg-light text-end">Computer Name</th>
+                    <td>{{ mouse.computer_name|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th class="bg-light text-end">Asset Owner</th>
+                    <td>{{ mouse.asset_owner|default:"—" }}</td>
+                  </tr>
+                  <tr>
+                    <th class="bg-light text-end">Date Salvaged</th>
+                    <td>{{ mouse.salvage_date|date:"Y-m-d H:i" }}</td>
+                  </tr>
+                  <tr>
+                    <th class="bg-light text-end">Notes</th>
+                    <td>{{ mouse.notes|default:"—" }}</td>
+                  </tr>
                   <!-- ✅ Status row -->
                   <tr>
                     <th class="bg-light text-end">Status</th>
@@ -54,8 +75,8 @@
       </div>
     </div>
 
-    <!-- Timeline / History Section -->
-    <div class="card mt-3">
+    <!-- 🔄 Reassignment History -->
+    <div class="card mt-3 shadow-sm">
       <div class="card-header bg-light">
         <h5 class="mb-0">🔄 Reassignment History</h5>
       </div>
@@ -72,20 +93,21 @@
             {% if history %}
               {% for entry in history %}
                 <tr>
-                  <td>{{ entry.reassigned_to }}</td>
-                  <td>{{ entry.reassigned_computer_name }}</td>
+                  <td>{{ entry.reassigned_to|default:"—" }}</td>
+                  <td>{{ entry.reassigned_to.computer_name|default:"—" }}</td>
                   <td>{{ entry.reassigned_at|date:"Y-m-d H:i" }}</td>
                 </tr>
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="3" class="text-center text-muted">No reassignment history</td>
+                <td colspan="3" class="text-center text-muted">No reassignment history found.</td>
               </tr>
             {% endif %}
           </tbody>
         </table>
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}

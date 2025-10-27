@@ -925,7 +925,6 @@ class PrinterPackage(models.Model):
     def __str__(self):
         return f"Printer Package {self.pk}"
 
-
 class PrinterDetails(models.Model):
     printer_package = models.ForeignKey(
         PrinterPackage, related_name='printers',
@@ -953,6 +952,35 @@ class PrinterDetails(models.Model):
 
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
+
+    @property
+    def end_user(self):
+        """Get the end user (Employee) assigned to this printer's package."""
+        if self.printer_package:
+            # ✅ Use .all() to leverage prefetched data instead of .filter() which causes new query
+            user_details = self.printer_package.user_details.all()
+            if user_details:
+                return user_details[0].user_Enduser if user_details[0].user_Enduser else None
+        return None
+    
+    @property
+    def asset_owner(self):
+        """Get the asset owner (Employee) assigned to this printer's package."""
+        if self.printer_package:
+            # ✅ Use .all() to leverage prefetched data
+            user_details = self.printer_package.user_details.all()
+            if user_details:
+                return user_details[0].user_Assetowner if user_details[0].user_Assetowner else None
+        return None
+    
+    @property
+    def user_assignment(self):
+        """Get the full UserDetails object for this printer."""
+        if self.printer_package:
+            # ✅ Use .all() to leverage prefetched data
+            user_details = self.printer_package.user_details.all()
+            return user_details[0] if user_details else None
+        return None
 
     def __str__(self):
         return f"{self.printer_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"

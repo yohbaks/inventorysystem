@@ -22,7 +22,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
-from django.db.models import Count, F, Prefetch, Max
+from django.db.models import Count, F, Prefetch, Max, Q
 from django.db.models.functions import TruncDay, TruncMonth, Upper, Trim
 from django.http import FileResponse, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -2676,6 +2676,7 @@ def edit_brand(request):
 
 #print
 from django.templatetags.static import static
+from django.contrib.contenttypes.models import ContentType
 
 def generate_desktop_pdf(request, package_id):
     # ✅ Use Equipment_Package instead of DesktopDetails
@@ -2705,12 +2706,17 @@ def generate_desktop_pdf(request, package_id):
     # Current user assignment
     user_details = UserDetails.objects.filter(equipment_package=equipment_package).first()
 
-    # ✅ History data
+    # ✅ FIXED: History data using GenericForeignKey pattern
+    equipment_package_ct = ContentType.objects.get_for_model(Equipment_Package)
+    
     asset_owner_history = AssetOwnerChangeHistory.objects.filter(
-        equipment_package=equipment_package
+        content_type=equipment_package_ct,
+        object_id=equipment_package.id
     ).order_by("-changed_at")
+    
     enduser_history = EndUserChangeHistory.objects.filter(
-        equipment_package=equipment_package
+        content_type=equipment_package_ct,
+        object_id=equipment_package.id
     ).order_by("-changed_at")
 
     disposed_desktops = DisposedDesktopDetail.objects.filter(
@@ -2751,7 +2757,7 @@ def generate_desktop_pdf(request, package_id):
         'user_details': user_details,
         'documents_detailse': documents_details,
         'qr_code_url': qr_code_url,
-        'logo_url': logo_url,  # ✅ pass logo to template
+        'logo_url': logo_url,
 
         # ✅ Added history
         'asset_owner_history': asset_owner_history,
@@ -2768,7 +2774,6 @@ def generate_desktop_pdf(request, package_id):
     HTML(string=html_string).write_pdf(response)
 
     return response
-
 #export to excel
 def export_equipment_packages_excel(request):
     template_path = 'static/excel_template/3f2e3faf-8c25-426f-b673-a2b5fb38e34a.xlsx'
@@ -4189,10 +4194,30 @@ def user_assets_public(request, token):
     disposed_keyboards = DisposedKeyboard.objects.filter(keyboard_dispose_db__equipment_package__in=packages)
     disposed_mice = DisposedMouse.objects.filter(mouse_db__equipment_package__in=packages)
     disposed_ups = DisposedUPS.objects.filter(ups_db__equipment_package__in=packages)
+    
+    # 🗑 Laptop disposals
+    disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package__in=laptops)
 
-    # 🕒 Change history
-    enduser_history = EndUserChangeHistory.objects.filter(equipment_package__in=packages).order_by('-changed_at')
-    assetowner_history = AssetOwnerChangeHistory.objects.filter(equipment_package__in=packages).order_by('-changed_at')
+    # 🕒 Change history - using GenericForeignKey filtering
+    # Get ContentType for Equipment_Package and LaptopPackage
+    desktop_ct = ContentType.objects.get_for_model(Equipment_Package)
+    laptop_ct = ContentType.objects.get_for_model(LaptopPackage)
+    
+    # Get package IDs
+    desktop_ids = list(packages.values_list('id', flat=True))
+    laptop_ids = list(laptops.values_list('id', flat=True))
+    
+    # Filter EndUserChangeHistory for both desktops and laptops
+    enduser_history = EndUserChangeHistory.objects.filter(
+        Q(content_type=desktop_ct, object_id__in=desktop_ids) |
+        Q(content_type=laptop_ct, object_id__in=laptop_ids)
+    ).order_by('-changed_at')
+    
+    # Filter AssetOwnerChangeHistory for both desktops and laptops
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(
+        Q(content_type=desktop_ct, object_id__in=desktop_ids) |
+        Q(content_type=laptop_ct, object_id__in=laptop_ids)
+    ).order_by('-changed_at')
 
     return render(request, "account/user_assets_public.html", {
         "profile_owner": profile,
@@ -4206,6 +4231,7 @@ def user_assets_public(request, token):
         "disposed_keyboards": disposed_keyboards,
         "disposed_mice": disposed_mice,
         "disposed_ups": disposed_ups,
+        "disposed_laptops": disposed_laptops,
         "enduser_history": enduser_history,
         "assetowner_history": assetowner_history,
     })
@@ -4717,7 +4743,15 @@ def update_documents_laptop(request, package_id):
 def printer_list(request):
     """List all printers, both active and disposed, with status badges."""
     
-    printers = PrinterDetails.objects.select_related('printer_package', 'printer_brand_db')
+    printers = PrinterDetails.objects.select_related(
+        'printer_package', 
+        'printer_brand_db'
+    ).prefetch_related(
+        'printer_package__user_details',  # Prefetch UserDetails
+        'printer_package__user_details__user_Enduser',  # Prefetch End User Employee
+        'printer_package__user_details__user_Assetowner'  # Prefetch Asset Owner Employee
+    )
+    
     print("🖨️ VIEW CALLED — TOTAL PRINTER COUNT:", printers.count())
     return render(request, 'printer/printer_list.html', {'printers': printers})
 

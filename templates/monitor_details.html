@@ -4,30 +4,50 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-center">
-              <h4 class="card-title">🖥️ Monitor Details</h4>
-              <div class="ms-auto">
-                <a href="#" class="btn btn-danger btn-sm me-2">
-                  <i class="fa fa-arrow-left me-1"></i> Return to Supply
-                </a>
-                <a href="#" class="btn btn-success btn-sm me-2">
-                  <i class="fa fa-download me-1"></i> Export
-                </a>
-                <a href="#" class="btn btn-info btn-sm">
-                  <i class="fa fa-print me-1"></i> Print
-                </a>
-              </div>
-            </div>
+    
+    <!-- ==================== PREMIUM PAGE HEADER - GREEN THEME ==================== -->
+    <div class="premium-page-header theme-success">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+          <div class="premium-page-icon">
+            <i class="fas fa-tv"></i>
           </div>
+          <div class="ms-3">
+            <h4 class="premium-page-title mb-0">Monitor Inventory</h4>
+            <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">
+              Manage and view all monitor displays
+            </p>
+          </div>
+        </div>
+        
+        <div class="premium-action-buttons mt-3 mt-md-0">
+          <a href="#" class="premium-btn premium-btn-return">
+            <i class="fas fa-arrow-left"></i>
+            Return to Supply
+          </a>
+          <a href="#" class="premium-btn premium-btn-export">
+            <i class="fas fa-download"></i>
+            Export Excel
+          </a>
+          <a href="#" class="premium-btn premium-btn-print" onclick="window.print(); return false;">
+            <i class="fas fa-print"></i>
+            Print
+          </a>
+        </div>
+      </div>
+    </div>
 
-          <div class="card-body">
-            <div class="table-responsive table-head-bg-primary">
-              <table id="monitor-table" class="display table table-striped table-hover" style="width:100%">
+    <!-- ==================== PREMIUM TABLE CARD ==================== -->
+    <div class="row">
+      <div class="col-12">
+        <div class="premium-table-card">
+          <div class="premium-table-wrapper">
+            
+            <!-- DataTable -->
+            <div class="table-responsive">
+              <table id="monitor-table" class="premium-datatable display" style="width:100%">
                 <thead>
+                  <!-- Header Row -->
                   <tr>
                     <th>Serial Number</th>
                     <th>Brand</th>
@@ -37,15 +57,43 @@
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
+                  
+                  <!-- Filter Row -->
                   <tr class="filters">
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Serial" data-column="0" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-column="1" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-column="2" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Size" data-column="3" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search User" data-column="4" /></th>
                     <th>
-                      <select class="form-select form-select-sm column-search" data-column="5">
-                        <option value="">All</option>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Serial" 
+                             data-column="0" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Brand" 
+                             data-column="1" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Model" 
+                             data-column="2" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Size" 
+                             data-column="3" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search User" 
+                             data-column="4" />
+                    </th>
+                    <th>
+                      <select class="form-select form-select-sm column-search" 
+                              data-column="5">
+                        <option value="">All Status</option>
                         <option value="Active">Active</option>
                         <option value="Reassigned">Reassigned</option>
                       </select>
@@ -53,39 +101,74 @@
                     <th></th>
                   </tr>
                 </thead>
+                
                 <tbody>
                   {% for monitor in monitors %}
                   <tr>
-                    <td>{{ monitor.monitor_sn_db }}</td>
-                    <td>{{ monitor.monitor_brand_db }}</td>
-                    <td>{{ monitor.monitor_model_db }}</td>
-                    <td>{{ monitor.monitor_size_db }}</td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                          <i class="fas fa-tv text-white" style="font-size: 16px;"></i>
+                        </div>
+                        <div>
+                          <span class="text-muted" style="font-family: monospace; font-size: 0.875rem;">
+                            {{ monitor.monitor_sn_db }}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="fw-semibold text-dark">{{ monitor.monitor_brand_db }}</span>
+                    </td>
+                    <td>
+                      <span class="text-dark">{{ monitor.monitor_model_db }}</span>
+                    </td>
+                    <td>
+                      <span class="badge" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; font-weight: 600;">
+                        <i class="fas fa-expand-arrows-alt me-1" style="font-size: 10px;"></i>
+                        {{ monitor.monitor_size_db }}
+                      </span>
+                    </td>
                     <td>
                       {% if monitor.equipment_package and monitor.equipment_package.user_details.first %}
                         {% with user_detail=monitor.equipment_package.user_details.first %}
-                          {{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}
+                          <div class="mb-1">
+                            <i class="fas fa-user text-success me-1" style="font-size: 12px;"></i>
+                            <span>{{ user_detail.user_Enduser.employee_fname }} {{ user_detail.user_Enduser.employee_lname }}</span>
+                          </div>
                         {% endwith %}
                       {% else %}
-                        N/A
+                        <span class="text-muted">
+                          <i class="fas fa-user-slash me-1" style="font-size: 12px;"></i>
+                          N/A
+                        </span>
                       {% endif %}
                     </td>
                     <td>
                       {% if monitor.status == "active" %}
-                        <span class="badge bg-success">Active</span>
+                        <span class="premium-status-badge active">
+                          <i class="fas fa-check-circle"></i>
+                          Active
+                        </span>
                       {% elif monitor.status == "reassigned" %}
-                        <span class="badge bg-secondary">Reassigned</span>
+                        <span class="premium-status-badge reassigned">
+                          <i class="fas fa-exchange-alt"></i>
+                          Reassigned
+                        </span>
                       {% endif %}
                     </td>
                     <td>
                       {% if monitor.status == "active" and monitor.equipment_package %}
-                        <a href="{% url 'desktop_details_view' monitor.equipment_package.id %}#pills-monitor"
-                           class="btn btn-primary btn-xs">
-                          <i class="fa fa-eye"></i> View
+                        <a href="{% url 'desktop_details_view' monitor.equipment_package.id %}#pills-monitor" 
+                           class="premium-view-btn theme-success">
+                          <i class="fas fa-eye"></i>
+                          View
                         </a>
                       {% elif monitor.status == "reassigned" and monitor.salvaged_id %}
-                        <a href="{% url 'salvaged_monitor_detail' monitor.salvaged_id %}"
-                           class="btn btn-secondary btn-xs">
-                          <i class="fa fa-history"></i> History
+                        <a href="{% url 'salvaged_monitor_detail' monitor.salvaged_id %}" 
+                           class="premium-history-btn" >
+                          <i class="fas fa-history"></i>
+                          History
                         </a>
                       {% else %}
                         <span class="text-muted">—</span>
@@ -94,16 +177,23 @@
                   </tr>
                   {% empty %}
                   <tr>
-                    <td colspan="7" class="text-center text-muted">No monitor records available</td>
+                    <td colspan="7" class="text-center py-5">
+                      <div style="opacity: 0.5;">
+                        <i class="fas fa-tv fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">No monitor records available</p>
+                      </div>
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>
               </table>
             </div>
+            
           </div>
         </div>
       </div>
     </div>
+    
   </div>
 </div>
 {% endblock %}
@@ -112,7 +202,7 @@
 {{ block.super }}
 <script>
 $(document).ready(function() {
-  console.log('Initializing DataTable...');
+  console.log('Initializing Premium Monitor DataTable...');
   
   // Initialize DataTable
   var table = $('#monitor-table').DataTable({
@@ -124,11 +214,35 @@ $(document).ready(function() {
       lengthMenu: "Show _MENU_ entries",
       info: "Showing _START_ to _END_ of _TOTAL_ monitors",
       infoEmpty: "Showing 0 to 0 of 0 monitors",
-      infoFiltered: "(filtered from _MAX_ total monitors)"
+      infoFiltered: "(filtered from _MAX_ total monitors)",
+      zeroRecords: "No matching monitors found",
+      emptyTable: "No monitor data available",
+      paginate: {
+        first: '<i class="fas fa-angle-double-left"></i>',
+        last: '<i class="fas fa-angle-double-right"></i>',
+        next: '<i class="fas fa-angle-right"></i>',
+        previous: '<i class="fas fa-angle-left"></i>'
+      }
+    },
+    columnDefs: [
+      { orderable: false, targets: [5, 6] }
+    ],
+    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    initComplete: function() {
+      console.log('Premium Monitor DataTable initialized successfully');
+      
+      // Add animation to rows
+      $('#monitor-table tbody tr').each(function(index) {
+        $(this).css({
+          'animation': 'fadeInUp 0.5s ease-out',
+          'animation-delay': (index * 0.05) + 's',
+          'animation-fill-mode': 'both'
+        });
+      });
     }
   });
   
-  console.log('DataTable initialized');
+  console.log('Monitor DataTable initialized');
   
   // Apply the search using data-column attribute
   $('.column-search').on('keyup change', function() {
@@ -140,7 +254,39 @@ $(document).ready(function() {
     table.column(columnIndex).search(searchValue).draw();
   });
   
-  console.log('Filter handlers attached');
+  // Add clear filters button functionality
+  $('.premium-action-buttons').append(
+    '<button class="premium-btn" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.3);" id="clearFilters">' +
+    '<i class="fas fa-times"></i> Clear Filters' +
+    '</button>'
+  );
+  
+  $('#clearFilters').on('click', function() {
+    $('.column-search').val('');
+    table.columns().search('').draw();
+    console.log('All filters cleared');
+  });
+  
+  console.log('Monitor filter handlers attached');
 });
+
+// Add fade-in animation keyframes
+if (!document.querySelector('#fadeInUpKeyframes')) {
+  var style = document.createElement('style');
+  style.id = 'fadeInUpKeyframes';
+  style.textContent = `
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
 </script>
 {% endblock %}

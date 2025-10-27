@@ -1,169 +1,626 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container">
-  <div class="page-inner">
+<style>
+  .profile-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+  
+  .profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  /* Profile Header Card */
+  .profile-header-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #f8f9fa;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+  
+  .profile-info h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+  }
+  
+  .profile-subtitle {
+    color: #718096;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  /* Premium Cards */
+  .premium-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .premium-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  }
+  
+  .premium-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+    border: none;
+  }
+  
+  .premium-card-header h5 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .premium-card-body {
+    padding: 30px;
+  }
+  
+  /* Table Styling */
+  .premium-table {
+    margin: 0;
+    border: none;
+  }
+  
+  .premium-table thead {
+    background: #f7fafc;
+  }
+  
+  .premium-table thead th {
+    border: none;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .premium-table tbody tr {
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  
+  .premium-table tbody tr:hover {
+    background-color: #f8fafc;
+  }
+  
+  .premium-table tbody td {
+    padding: 18px 20px;
+    color: #2d3748;
+    font-size: 15px;
+    border: none;
+    vertical-align: middle;
+  }
+  
+  .premium-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  
+  /* Premium Badges */
+  .premium-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .premium-badge.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  
+  .premium-badge.disposed {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+  
+  /* Package ID Styling */
+  .package-id {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 16px;
+  }
+  
+  /* History Card Styling */
+  .history-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    overflow: hidden;
+    height: 100%;
+  }
+  
+  .history-card-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 18px 24px;
+    border: none;
+  }
+  
+  .history-card-header h6 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .disposal-card-header {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  }
+  
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+  }
+  
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  
+  /* Status Icons */
+  .status-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 2px;
+  }
+  
+  .status-icon.active {
+    background: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  }
+  
+  .status-icon.disposed {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  }
+  
+  /* Change Type Badge */
+  .change-type {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .change-type.enduser {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .change-type.assetowner {
+    background: #fce7f3;
+    color: #9f1239;
+  }
+  
+  /* Category Badge */
+  .category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .profile-header-card {
+      padding: 30px 20px;
+    }
+    
+    .profile-info h2 {
+      font-size: 24px;
+    }
+    
+    .premium-card-body {
+      padding: 20px;
+    }
+    
+    .premium-table thead th,
+    .premium-table tbody td {
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+  }
+  
+  /* Animation */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .premium-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .premium-card:nth-child(1) { animation-delay: 0.1s; }
+  .premium-card:nth-child(2) { animation-delay: 0.2s; }
+  .premium-card:nth-child(3) { animation-delay: 0.3s; }
+  .premium-card:nth-child(4) { animation-delay: 0.4s; }
+</style>
+
+<div class="modern-container">
+  <div class="profile-container">
     <!-- Profile Header -->
-    <div class="card shadow-sm mb-3">
-      <div class="card-body d-flex align-items-center gap-3">
-        <img src="{{ profile_owner.avatar_url }}" alt="" class="rounded-circle" width="64" height="64" style="object-fit:cover;">
-        <div>
-          <h5 class="mb-0">{{ profile_owner.user.get_full_name|default:profile_owner.user.username }}</h5>
+    <div class="profile-header-card">
+      <div class="d-flex align-items-center gap-4">
+        <img src="{{ profile_owner.avatar_url }}" alt="Profile Avatar" class="profile-avatar">
+        <div class="profile-info flex-grow-1">
+          <h2>{{ profile_owner.user.get_full_name|default:profile_owner.user.username }}</h2>
           {% if employee %}
-            <div class="text-muted small">Employee: {{ employee.full_name }}</div>
+            <div class="profile-subtitle">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+              </svg>
+              <span>{{ employee.full_name }}</span>
+            </div>
           {% endif %}
         </div>
       </div>
     </div>
 
     <!-- 🖥 Assigned Desktop Packages -->
-    <div class="card shadow-sm mb-4">
-      <div class="card-header"><h5 class="mb-0">🖥 Assigned Desktop Packages</h5></div>
-      <div class="card-body table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead><tr><th>Package</th><th>Computer Name</th><th>Status</th></tr></thead>
-          <tbody>
-            {% for dp in packages %}
-            {% with dd=dp.desktop_details.first %}
-              <tr>
-                <td>#{{ dp.id }}</td>
-                <td>{% if dd %}{{ dd.computer_name }}{% else %}—{% endif %}</td>
-                <td>
-                  {% if dd and not dd.is_disposed %}
-                    <span class="badge bg-success">Active</span>
-                  {% else %}
-                    <span class="badge bg-danger">Disposed</span>
-                  {% endif %}
-                </td>
-              </tr>
-            {% endwith %}
-            {% empty %}
-              <tr><td colspan="3" class="text-muted">No assigned desktop equipment.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5>
+          <span>🖥</span>
+          Assigned Desktop Packages
+        </h5>
+      </div>
+      <div class="premium-card-body">
+        {% if packages %}
+          <div class="table-responsive">
+            <table class="table premium-table">
+              <thead>
+                <tr>
+                  <th>Package ID</th>
+                  <th>Computer Name</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for dp in packages %}
+                {% with dd=dp.desktop_details.first %}
+                  <tr>
+                    <td><span class="package-id">#{{ dp.id }}</span></td>
+                    <td>
+                      {% if dd %}
+                        <strong>{{ dd.computer_name }}</strong>
+                      {% else %}
+                        <span style="color: #94a3b8;">—</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if dd and not dd.is_disposed %}
+                        <span class="premium-badge active">
+                          <span class="status-icon active"></span>
+                          Active
+                        </span>
+                      {% else %}
+                        <span class="premium-badge disposed">
+                          <span class="status-icon disposed"></span>
+                          Disposed
+                        </span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endwith %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-state-icon">🖥️</div>
+            <p>No assigned desktop equipment</p>
+          </div>
+        {% endif %}
       </div>
     </div>
 
     <!-- 💻 Assigned Laptop Packages -->
     {% if laptops %}
-    <div class="card shadow-sm mb-4">
-      <div class="card-header"><h5 class="mb-0">💻 Assigned Laptop Packages</h5></div>
-      <div class="card-body table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead><tr><th>Package</th><th>Computer Name</th><th>Status</th></tr></thead>
-          <tbody>
-            {% for lp in laptops %}
-              {% with ld=lp.laptop_details.first %}
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5>
+          <span>💻</span>
+          Assigned Laptop Packages
+        </h5>
+      </div>
+      <div class="premium-card-body">
+        <div class="table-responsive">
+          <table class="table premium-table">
+            <thead>
               <tr>
-                <td>#{{ lp.id }}</td>
-                <td>{{ ld.computer_name|default:"—" }}</td>
-                <td>
-                  {% if ld and not ld.is_disposed %}
-                    <span class="badge bg-success">Active</span>
-                  {% else %}
-                    <span class="badge bg-danger">Disposed</span>
-                  {% endif %}
-                </td>
+                <th>Package ID</th>
+                <th>Computer Name</th>
+                <th>Status</th>
               </tr>
-              {% endwith %}
-            {% empty %}
-              <tr><td colspan="3" class="text-muted">No assigned laptops.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for lp in laptops %}
+                {% with ld=lp.laptop_details.first %}
+                <tr>
+                  <td><span class="package-id">#{{ lp.id }}</span></td>
+                  <td>
+                    {% if ld %}
+                      <strong>{{ ld.computer_name }}</strong>
+                    {% else %}
+                      <span style="color: #94a3b8;">—</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if ld and not ld.is_disposed %}
+                      <span class="premium-badge active">
+                        <span class="status-icon active"></span>
+                        Active
+                      </span>
+                    {% else %}
+                      <span class="premium-badge disposed">
+                        <span class="status-icon disposed"></span>
+                        Disposed
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endwith %}
+              {% empty %}
+                <tr>
+                  <td colspan="3">
+                    <div class="empty-state">
+                      <div class="empty-state-icon">💻</div>
+                      <p>No assigned laptops</p>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     {% endif %}
 
     <!-- 🖨 Assigned Printers -->
     {% if printers %}
-    <div class="card shadow-sm mb-4">
-      <div class="card-header"><h5 class="mb-0">🖨 Assigned Printers</h5></div>
-      <div class="card-body table-responsive">
-        <table class="table table-bordered table-hover">
-          <thead><tr><th>Serial No</th><th>Brand</th><th>Model</th><th>Status</th></tr></thead>
-          <tbody>
-            {% for p in printers %}
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5>
+          <span>🖨</span>
+          Assigned Printers
+        </h5>
+      </div>
+      <div class="premium-card-body">
+        <div class="table-responsive">
+          <table class="table premium-table">
+            <thead>
               <tr>
-                <td>{{ p.printer_sn_db }}</td>
-                <td>{{ p.printer_brand_db.name|default:"—" }}</td>
-                <td>{{ p.printer_model_db|default:"—" }}</td>
-                <td>
-                  {% if not p.is_disposed %}
-                    <span class="badge bg-success">Active</span>
-                  {% else %}
-                    <span class="badge bg-danger">Disposed</span>
-                  {% endif %}
-                </td>
+                <th>Serial Number</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Status</th>
               </tr>
-            {% empty %}
-              <tr><td colspan="4" class="text-muted">No assigned printers.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for p in printers %}
+                <tr>
+                  <td><code style="color: #667eea; background: #f7fafc; padding: 4px 8px; border-radius: 6px;">{{ p.printer_sn_db }}</code></td>
+                  <td>{{ p.printer_brand_db.name|default:"—" }}</td>
+                  <td>{{ p.printer_model_db|default:"—" }}</td>
+                  <td>
+                    {% if not p.is_disposed %}
+                      <span class="premium-badge active">
+                        <span class="status-icon active"></span>
+                        Active
+                      </span>
+                    {% else %}
+                      <span class="premium-badge disposed">
+                        <span class="status-icon disposed"></span>
+                        Disposed
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4">
+                    <div class="empty-state">
+                      <div class="empty-state-icon">🖨️</div>
+                      <p>No assigned printers</p>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
     {% endif %}
 
     <div class="row">
       <!-- 📜 Change History -->
-      <div class="col-md-6">
-        <div class="card shadow-sm mb-4">
-          <div class="card-header"><h6 class="mb-0">Change History (End User / Asset Owner)</h6></div>
-          <div class="card-body table-responsive">
-            <table class="table table-sm table-bordered">
-              <thead><tr><th>When</th><th>Type</th><th>From</th><th>To</th></tr></thead>
-              <tbody>
-                {% for h in enduser_history %}
-                  <tr><td>{{ h.changed_at|date:"Y-m-d H:i" }}</td><td>End User</td><td>{{ h.old_enduser }}</td><td>{{ h.new_enduser }}</td></tr>
-                {% empty %}
-                {% endfor %}
-                {% for h in assetowner_history %}
-                  <tr><td>{{ h.changed_at|date:"Y-m-d H:i" }}</td><td>Asset Owner</td><td>{{ h.old_assetowner }}</td><td>{{ h.new_assetowner }}</td></tr>
-                {% empty %}
-                  {% if not enduser_history %}
-                    <tr><td colspan="4" class="text-muted">No history.</td></tr>
-                  {% endif %}
-                {% endfor %}
-              </tbody>
-            </table>
+      <div class="col-lg-6">
+        <div class="history-card">
+          <div class="history-card-header">
+            <h6>📜 Change History</h6>
+          </div>
+          <div class="premium-card-body">
+            {% if enduser_history or assetowner_history %}
+              <div class="table-responsive">
+                <table class="table premium-table table-sm">
+                  <thead>
+                    <tr>
+                      <th style="width: 30%;">Date & Time</th>
+                      <th style="width: 20%;">Type</th>
+                      <th style="width: 25%;">From</th>
+                      <th style="width: 25%;">To</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for h in enduser_history %}
+                      <tr>
+                        <td style="font-size: 13px; color: #64748b;">{{ h.changed_at|date:"M d, Y H:i" }}</td>
+                        <td><span class="change-type enduser">End User</span></td>
+                        <td style="font-size: 14px;">{{ h.old_enduser|default:"—" }}</td>
+                        <td style="font-size: 14px;"><strong>{{ h.new_enduser }}</strong></td>
+                      </tr>
+                    {% endfor %}
+                    {% for h in assetowner_history %}
+                      <tr>
+                        <td style="font-size: 13px; color: #64748b;">{{ h.changed_at|date:"M d, Y H:i" }}</td>
+                        <td><span class="change-type assetowner">Asset Owner</span></td>
+                        <td style="font-size: 14px;">{{ h.old_assetowner|default:"—" }}</td>
+                        <td style="font-size: 14px;"><strong>{{ h.new_assetowner }}</strong></td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="empty-state">
+                <div class="empty-state-icon">📜</div>
+                <p>No change history</p>
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>
 
       <!-- 🗑 Disposal Logs -->
-      <div class="col-md-6">
-        <div class="card shadow-sm mb-4">
-          <div class="card-header"><h6 class="mb-0">Disposal Logs</h6></div>
-          <div class="card-body table-responsive">
-            <table class="table table-sm table-bordered">
-              <thead><tr><th>Category</th><th>Details</th><th>When</th></tr></thead>
-              <tbody>
-                {% for d in disposed_desktops %}
-                  <tr><td>Desktop</td><td>{{ d.serial_no }} {{ d.model }}</td><td>{{ d.date_disposed|date:"Y-m-d" }}</td></tr>
-                {% endfor %}
-                {% for d in disposed_monitors %}
-                  <tr><td>Monitor</td><td>{{ d.monitor_sn }} {{ d.monitor_model }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
-                {% endfor %}
-                {% for d in disposed_keyboards %}
-                  <tr><td>Keyboard</td><td>{{ d.keyboard_dispose_db.keyboard_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
-                {% endfor %}
-                {% for d in disposed_mice %}
-                  <tr><td>Mouse</td><td>{{ d.mouse_db.mouse_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
-                {% endfor %}
-                {% for d in disposed_ups %}
-                  <tr><td>UPS</td><td>{{ d.ups_db.ups_sn_db }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
-                {% endfor %}
-                {% for d in disposed_laptops %}
-                  <tr><td>Laptop</td><td>{{ d.serial_no }} {{ d.model }}</td><td>{{ d.date_disposed|date:"Y-m-d" }}</td></tr>
-                {% endfor %}
-                {% for d in disposed_printers %}
-                  <tr><td>Printer</td><td>{{ d.printer_sn }} {{ d.printer_model }}</td><td>{{ d.disposal_date|date:"Y-m-d" }}</td></tr>
-                {% empty %}
-                  <tr><td colspan="3" class="text-muted">No disposals.</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
+      <div class="col-lg-6">
+        <div class="history-card">
+          <div class="history-card-header disposal-card-header">
+            <h6>🗑️ Disposal Logs</h6>
+          </div>
+          <div class="premium-card-body">
+            {% if disposed_desktops or disposed_monitors or disposed_keyboards or disposed_mice or disposed_ups or disposed_laptops or disposed_printers %}
+              <div class="table-responsive">
+                <table class="table premium-table table-sm">
+                  <thead>
+                    <tr>
+                      <th style="width: 25%;">Category</th>
+                      <th style="width: 45%;">Details</th>
+                      <th style="width: 30%;">Disposal Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for d in disposed_desktops %}
+                      <tr>
+                        <td><span class="category-badge">Desktop</span></td>
+                        <td style="font-size: 14px;">{{ d.serial_no }} {{ d.model }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.date_disposed|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                    {% for d in disposed_monitors %}
+                      <tr>
+                        <td><span class="category-badge">Monitor</span></td>
+                        <td style="font-size: 14px;">{{ d.monitor_sn }} {{ d.monitor_model }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.disposal_date|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                    {% for d in disposed_keyboards %}
+                      <tr>
+                        <td><span class="category-badge">Keyboard</span></td>
+                        <td style="font-size: 14px;">{{ d.keyboard_dispose_db.keyboard_sn_db }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.disposal_date|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                    {% for d in disposed_mice %}
+                      <tr>
+                        <td><span class="category-badge">Mouse</span></td>
+                        <td style="font-size: 14px;">{{ d.mouse_db.mouse_sn_db }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.disposal_date|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                    {% for d in disposed_ups %}
+                      <tr>
+                        <td><span class="category-badge">UPS</span></td>
+                        <td style="font-size: 14px;">{{ d.ups_db.ups_sn_db }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.disposal_date|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                    {% for d in disposed_laptops %}
+                      <tr>
+                        <td><span class="category-badge">Laptop</span></td>
+                        <td style="font-size: 14px;">{{ d.serial_no }} {{ d.model }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.date_disposed|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                    {% for d in disposed_printers %}
+                      <tr>
+                        <td><span class="category-badge">Printer</span></td>
+                        <td style="font-size: 14px;">{{ d.printer_sn }} {{ d.printer_model }}</td>
+                        <td style="font-size: 13px; color: #64748b;">{{ d.disposal_date|date:"M d, Y" }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="empty-state">
+                <div class="empty-state-icon">🗑️</div>
+                <p>No disposal records</p>
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>

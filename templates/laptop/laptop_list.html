@@ -4,33 +4,55 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-center">
-              <h4 class="card-title">💻 Laptop Details</h4>
-              <div class="ms-auto">
-                <a href="{% url 'add_equipment_package_with_details' %}?type=laptop" class="btn btn-success btn-sm me-2">
-                  <i class="fa fa-plus-circle me-1"></i> Add Laptop
-                </a>
-                <a href="#" class="btn btn-danger btn-sm me-2">
-                  <i class="fa fa-arrow-left me-1"></i> Return to Supply
-                </a>
-                <a href="#" class="btn btn-success btn-sm me-2">
-                  <i class="fa fa-download me-1"></i> Export
-                </a>
-                <a href="#" class="btn btn-info btn-sm">
-                  <i class="fa fa-print me-1"></i> Print
-                </a>
-              </div>
-            </div>
+    
+    <!-- ==================== PREMIUM PAGE HEADER ==================== -->
+    <div class="premium-page-header">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+          <div class="premium-page-icon">
+            <i class="fas fa-laptop"></i>
           </div>
+          <div class="ms-3">
+            <h4 class="premium-page-title mb-0">Laptop Inventory</h4>
+            <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">
+              Manage and view all laptop computers
+            </p>
+          </div>
+        </div>
+        
+        <div class="premium-action-buttons mt-3 mt-md-0">
+           <a href="#" class="premium-btn premium-btn-return">
+            <i class="fas fa-arrow-left"></i>
+            Return to Supply
+          </a>
+          <a href="{% url 'add_equipment_package_with_details' %}?type=laptop" class="premium-view-btn">
+            <i class="fas fa-plus-circle"></i>
+            Add Laptop
+          </a>
+         
+          <a href="#" class="premium-btn premium-btn-export">
+            <i class="fas fa-download"></i>
+            Export Excel
+          </a>
+          <a href="#" class="premium-btn premium-btn-print" onclick="window.print(); return false;">
+            <i class="fas fa-print"></i>
+            Print
+          </a>
+        </div>
+      </div>
+    </div>
 
-          <div class="card-body">
-            <div class="table-responsive table-head-bg-primary">
-              <table id="laptop-table" class="display table table-striped table-hover" style="width:100%">
+    <!-- ==================== PREMIUM TABLE CARD ==================== -->
+    <div class="row">
+      <div class="col-12">
+        <div class="premium-table-card">
+          <div class="premium-table-wrapper">
+            
+            <!-- DataTable -->
+            <div class="table-responsive">
+              <table id="laptop-table" class="premium-datatable display" style="width:100%">
                 <thead>
+                  <!-- Header Row -->
                   <tr>
                     <th>Computer Name</th>
                     <th>Serial Number</th>
@@ -40,15 +62,43 @@
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
+                  
+                  <!-- Filter Row -->
                   <tr class="filters">
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Name" data-column="0" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Serial" data-column="1" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-column="2" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-column="3" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search End User" data-column="4" /></th>
                     <th>
-                      <select class="form-select form-select-sm column-search" data-column="5">
-                        <option value="">All</option>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Name" 
+                             data-column="0" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Serial" 
+                             data-column="1" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Brand" 
+                             data-column="2" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search Model" 
+                             data-column="3" />
+                    </th>
+                    <th>
+                      <input type="text" 
+                             class="form-control form-control-sm column-search" 
+                             placeholder="Search End User" 
+                             data-column="4" />
+                    </th>
+                    <th>
+                      <select class="form-select form-select-sm column-search" 
+                              data-column="5">
+                        <option value="">All Status</option>
                         <option value="Active">Active</option>
                         <option value="Disposed">Disposed</option>
                       </select>
@@ -56,76 +106,109 @@
                     <th></th>
                   </tr>
                 </thead>
+                
                 <tbody>
                   {% for item in laptops %}
-                  <tr class="{% if item.details and item.details.is_disposed %}table-danger{% endif %}">
+                  <tr>
                     <td>
-                      {% if item.details %}
-                        {{ item.details.computer_name }}
-                      {% else %}
-                        N/A
-                      {% endif %}
+                      <div class="d-flex align-items-center">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                          <i class="fas fa-laptop text-white" style="font-size: 16px;"></i>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark">
+                            {% if item.details %}
+                              {{ item.details.computer_name }}
+                            {% else %}
+                              <span class="text-muted">N/A</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      {% if item.details %}
-                        {{ item.details.laptop_sn_db }}
-                      {% else %}
-                        N/A
-                      {% endif %}
+                      <span class="text-muted" style="font-family: monospace; font-size: 0.875rem;">
+                        {% if item.details %}
+                          {{ item.details.laptop_sn_db }}
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </span>
                     </td>
                     <td>
-                      {% if item.details %}
-                        {{ item.details.brand_name }}
-                      {% else %}
-                        N/A
-                      {% endif %}
+                      <span class="fw-semibold text-dark">
+                        {% if item.details %}
+                          {{ item.details.brand_name }}
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </span>
                     </td>
                     <td>
-                      {% if item.details %}
-                        {{ item.details.model }}
-                      {% else %}
-                        N/A
-                      {% endif %}
+                      <span class="text-dark">
+                        {% if item.details %}
+                          {{ item.details.model }}
+                        {% else %}
+                          N/A
+                        {% endif %}
+                      </span>
                     </td>
                     <td>
                       {% if item.end_user %}
-                        {{ item.end_user }}
+                        <div class="mb-1">
+                          <i class="fas fa-user text-primary me-1" style="font-size: 12px;"></i>
+                          <span>{{ item.end_user }}</span>
+                        </div>
                       {% else %}
-                        <span class="text-muted">Unassigned</span>
+                        <span class="text-muted">
+                          <i class="fas fa-user-slash me-1" style="font-size: 12px;"></i>
+                          Unassigned
+                        </span>
                       {% endif %}
                     </td>
                     <td>
                       {% if item.details and item.details.is_disposed %}
-                        <span class="badge bg-danger">Disposed</span>
+                        <span class="premium-status-badge disposed">
+                          <i class="fas fa-times-circle"></i>
+                          Disposed
+                        </span>
                       {% else %}
-                        <span class="badge bg-success">Active</span>
+                        <span class="premium-status-badge active">
+                          <i class="fas fa-check-circle"></i>
+                          Active
+                        </span>
                       {% endif %}
                     </td>
                     <td>
-                      <a href="{% url 'laptop_details_view' item.package.id %}" class="btn btn-primary btn-xs">
-                        <i class="fa fa-eye"></i> View
-                      </a>
-
-                      {% if item.details and not item.details.is_disposed %}
-                        <a href="{% url 'dispose_laptop' item.details.id %}" class="btn btn-danger btn-xs">
-                          <i class="fa fa-trash-alt"></i> Dispose
+                      <div class="d-flex gap-1">
+                        <a href="{% url 'laptop_details_view' item.package.id %}" 
+                           class="premium-view-btn">
+                          <i class="fas fa-eye"></i>
+                          View
                         </a>
-                      {% endif %}
+
+                      </div>
                     </td>
                   </tr>
                   {% empty %}
                   <tr>
-                    <td colspan="7" class="text-center text-muted">No laptop records available</td>
+                    <td colspan="7" class="text-center py-5">
+                      <div style="opacity: 0.5;">
+                        <i class="fas fa-laptop fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">No laptop records available</p>
+                      </div>
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>
               </table>
             </div>
+            
           </div>
-
         </div>
       </div>
     </div>
+    
   </div>
 </div>
 {% endblock %}
@@ -134,8 +217,8 @@
 {{ block.super }}
 <script>
 $(document).ready(function() {
-  console.log('Initializing Laptop DataTable...');
-
+  console.log('Initializing Premium Laptop DataTable...');
+  
   // Initialize DataTable
   var table = $('#laptop-table').DataTable({
     orderCellsTop: true,
@@ -147,31 +230,78 @@ $(document).ready(function() {
       info: "Showing _START_ to _END_ of _TOTAL_ laptops",
       infoEmpty: "Showing 0 to 0 of 0 laptops",
       infoFiltered: "(filtered from _MAX_ total laptops)",
+      zeroRecords: "No matching laptops found",
+      emptyTable: "No laptop data available",
       paginate: {
-        first: "First",
-        last: "Last",
-        next: "Next",
-        previous: "Previous"
+        first: '<i class="fas fa-angle-double-left"></i>',
+        last: '<i class="fas fa-angle-double-right"></i>',
+        next: '<i class="fas fa-angle-right"></i>',
+        previous: '<i class="fas fa-angle-left"></i>'
       }
     },
     columnDefs: [
       { orderable: false, targets: [5, 6] }
-    ]
+    ],
+    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    initComplete: function() {
+      console.log('Premium Laptop DataTable initialized successfully');
+      
+      // Add animation to rows
+      $('#laptop-table tbody tr').each(function(index) {
+        $(this).css({
+          'animation': 'fadeInUp 0.5s ease-out',
+          'animation-delay': (index * 0.05) + 's',
+          'animation-fill-mode': 'both'
+        });
+      });
+    }
   });
-
+  
   console.log('Laptop DataTable initialized');
-
+  
   // Apply the search using data-column attribute
   $('.column-search').on('keyup change', function() {
     var columnIndex = $(this).data('column');
     var searchValue = this.value;
-
+    
     console.log('Searching column ' + columnIndex + ' for: ' + searchValue);
-
+    
     table.column(columnIndex).search(searchValue).draw();
   });
-
+  
+  // Add clear filters button functionality
+  $('.premium-action-buttons').append(
+    '<button class="premium-btn" style="background: rgba(255, 255, 255, 0.15); color: white; border: 1px solid rgba(255, 255, 255, 0.3);" id="clearFilters">' +
+    '<i class="fas fa-times"></i> Clear Filters' +
+    '</button>'
+  );
+  
+  $('#clearFilters').on('click', function() {
+    $('.column-search').val('');
+    table.columns().search('').draw();
+    console.log('All filters cleared');
+  });
+  
   console.log('Laptop filter handlers attached');
 });
+
+// Add fade-in animation keyframes
+if (!document.querySelector('#fadeInUpKeyframes')) {
+  var style = document.createElement('style');
+  style.id = 'fadeInUpKeyframes';
+  style.textContent = `
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
 </script>
 {% endblock %}

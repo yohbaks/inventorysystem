@@ -4,116 +4,177 @@
 
 {% block content %}
 <div class="container">
-  <div class="page-inner">
+  <div class="page-inner py-4">
+
+    <!-- ==================== PREMIUM CHECKLIST HEADER ==================== -->
+    <div class="premium-checklist-header">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+          <div class="premium-checklist-icon">
+            <i class="fa fa-clipboard-check"></i>
+          </div>
+          <div class="ms-3">
+            <h3 class="premium-checklist-title mb-1">Preventive Maintenance Checklist</h3>
+            <p class="premium-checklist-subtitle mb-0">Complete the maintenance tasks and record your activities</p>
+          </div>
+        </div>
+        <div class="mt-3 mt-md-0">
+          <a href="{% url 'maintenance_history' desktop.id %}" class="premium-checklist-back-btn">
+            <i class="fa fa-arrow-left me-1"></i> Back to History
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PREMIUM CHECKLIST FORM ==================== -->
     <div class="row justify-content-center">
-      <div class="col-md-10">
-        <div class="card shadow-lg animate__animated animate__fadeIn">
-          <div class="card-header bg-primary text-white">
-            <div class="card-head-row">
-              <div class="card-title">🛠 Preventive Maintenance Checklist</div>
-              <div class="card-tools">
-                <a href="{% url 'maintenance_history' desktop.id %}" class="btn btn-label-light btn-round btn-sm">
-                  <span class="btn-label">
-                    <i class="fa fa-arrow-left"></i>
-                  </span>
-                  Back to History
-                </a>
+      <div class="col-lg-10">
+        <form method="POST" id="checklistForm">
+          {% csrf_token %}
+          
+          <!-- Schedule & Date Section -->
+          <div class="premium-checklist-card">
+            <div class="premium-checklist-card-header">
+              <i class="fa fa-calendar-alt me-2"></i>
+              <span>Schedule Information</span>
+            </div>
+            <div class="premium-checklist-card-body">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <div class="premium-form-group">
+                    <label class="premium-form-label">
+                      <i class="fa fa-calendar-check me-1 text-primary"></i>
+                      Select Quarter Schedule
+                    </label>
+                    <select name="quarter_schedule_id" class="premium-form-select" required id="quarter_schedule">
+                      <option value="" disabled selected>Select a quarter</option>
+                      {% for quarter in quarter_schedules %}
+                        <option value="{{ quarter.id }}">
+                          {{ quarter.get_quarter_display }} {{ quarter.year }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="premium-form-group">
+                    <label class="premium-form-label">
+                      <i class="fa fa-calendar-day me-1 text-success"></i>
+                      Date Accomplished
+                    </label>
+                    <input type="date" name="date_accomplished" class="premium-form-input" id="date_accomplished" required>
+                    <small class="premium-form-hint" id="date-range-info"></small>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <form method="POST">
-            {% csrf_token %}
-            <div class="card-body">
-              <div class="row mb-4">
+          <!-- User & Office Section -->
+          <div class="premium-checklist-card">
+            <div class="premium-checklist-card-header">
+              <i class="fa fa-users me-2"></i>
+              <span>User & Office Information</span>
+            </div>
+            <div class="premium-checklist-card-body">
+              <div class="row g-4">
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Select Quarter Schedule:</label>
-                  <select name="quarter_schedule_id" class="form-select" required id="quarter_schedule">
-                    <option value="" disabled selected>Select a quarter</option>
-                    {% for quarter in quarter_schedules %}
-                      <option value="{{ quarter.id }}">
-                        {{ quarter.get_quarter_display }} {{ quarter.year }}
-                      </option>
-                    {% endfor %}
-                  </select>
+                  <div class="premium-form-group">
+                    <label class="premium-form-label">
+                      <i class="fa fa-building me-1 text-info"></i>
+                      Office
+                    </label>
+                    <input type="text" name="office" class="premium-form-input readonly" value="{{ office }}" readonly>
+                  </div>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Date Accomplished:</label>
-                  <input type="date" name="date_accomplished" class="form-control" id="date_accomplished" required>
-                  <small class="text-muted" id="date-range-info"></small>
-                </div>
-              </div>
-
-              <div class="row mb-4">
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">Office:</label>
-                  <input type="text" name="office" class="form-control" value="{{ office }}" readonly>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label fw-semibold">End User:</label>
-                  <input type="text" name="end_user" class="form-control" value="{{ end_user }}" readonly>
+                  <div class="premium-form-group">
+                    <label class="premium-form-label">
+                      <i class="fa fa-user me-1 text-info"></i>
+                      End User
+                    </label>
+                    <input type="text" name="end_user" class="premium-form-input readonly" value="{{ end_user }}" readonly>
+                  </div>
                 </div>
               </div>
-
-              <div class="mb-4">
-                <label class="form-label fw-semibold">Performed By:</label>
-                <input type="text" name="performed_by" class="form-control" placeholder="Enter technician's name" required>
+              <div class="premium-form-group mt-3">
+                <label class="premium-form-label">
+                  <i class="fa fa-user-cog me-1 text-warning"></i>
+                  Performed By (Technician)
+                </label>
+                <input type="text" name="performed_by" class="premium-form-input" placeholder="Enter technician's name" required>
               </div>
+            </div>
+          </div>
 
-              <hr>
-              <h5 class="text-primary fw-semibold mb-3">Checklist Items</h5>
-              <div class="row">
+          <!-- Checklist Tasks Section -->
+          <div class="premium-checklist-card">
+            <div class="premium-checklist-card-header">
+              <div class="d-flex align-items-center justify-content-between w-100">
+                <div>
+                  <i class="fa fa-tasks me-2"></i>
+                  <span>Maintenance Tasks</span>
+                </div>
+                <div class="premium-task-counter">
+                  <span id="completedCount">0</span>/<span id="totalCount">{{ range|length }}</span> Completed
+                </div>
+              </div>
+            </div>
+            <div class="premium-checklist-card-body">
+              <div class="row g-3">
                 {% for i in range %}
-                  <div class="col-md-6 mb-4">
-                    <div class="d-flex align-items-start hover-shadow p-2 rounded border">
-                      <div class="form-check me-2 pt-1">
-                        <input class="form-check-input" type="checkbox" name="task_{{ i }}">
+                  <div class="col-md-6">
+                    <div class="premium-task-item" data-task="{{ i }}">
+                      <div class="premium-task-checkbox-wrapper">
+                        <input class="premium-task-checkbox" type="checkbox" name="task_{{ i }}" id="task_{{ i }}" onchange="updateTaskCounter()">
+                        <label for="task_{{ i }}" class="premium-task-checkmark"></label>
                       </div>
-                      <div class="flex-grow-1">
-                        <label class="fw-bold">Task {{ i }}:</label>
-                        <p class="mb-1">{{ checklist_labels|get_item:i }}</p>
-                        <textarea name="note_{{ i }}" class="form-control" rows="3" placeholder="Notes or actions taken"></textarea>
+                      <div class="premium-task-content">
+                        <div class="premium-task-header">
+                          <span class="premium-task-number">Task {{ i }}</span>
+                          <span class="premium-task-status" id="status_{{ i }}">Pending</span>
+                        </div>
+                        <p class="premium-task-description">{{ checklist_labels|get_item:i }}</p>
+                        <div class="premium-task-notes">
+                          <textarea name="note_{{ i }}" class="premium-task-textarea" rows="3" placeholder="Add notes or actions taken..."></textarea>
+                        </div>
                       </div>
                     </div>
                   </div>
                 {% endfor %}
               </div>
-
-              <div class="d-flex justify-content-end mt-4">
-                <button type="submit" class="btn btn-success px-4">
-                  <i class="fa fa-save"></i> Save Checklist
-                </button>
-              </div>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <!-- Submit Section -->
+          <div class="premium-checklist-actions">
+            <button type="button" class="premium-action-btn secondary" onclick="window.history.back()">
+              <i class="fa fa-times me-1"></i> Cancel
+            </button>
+            <button type="submit" class="premium-action-btn primary">
+              <i class="fa fa-save me-1"></i> Save Checklist
+            </button>
+          </div>
+
+        </form>
       </div>
     </div>
+
   </div>
 </div>
 
-<style>
-  .hover-shadow:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-    transition: 0.3s ease-in-out;
-  }
-  textarea.form-control {
-    font-size: 0.95rem;
-    resize: vertical;
-    margin-top: 5px;
-  }
-  .form-check-input {
-    margin-top: 6px;
-  }
-</style>
 <script>
+  // Quarter Schedule Date Range Logic
   const quarterSelect = document.getElementById("quarter_schedule");
   const dateInput = document.getElementById("date_accomplished");
   const dateRangeInfo = document.getElementById("date-range-info");
 
   quarterSelect.addEventListener("change", function () {
     const quarterId = this.value;
-    const sectionId = "{{ section_id|default:0 }}";  // ✅ Use sectionId passed from view
+    const sectionId = "{{ section_id|default:0 }}";
+
+    // Add loading state
+    dateRangeInfo.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Loading date range...';
 
     fetch(`/maintenance/get_schedule_dates/${quarterId}/${sectionId}/`)
       .then(response => response.json())
@@ -121,23 +182,110 @@
         if (data.start_date && data.end_date) {
           dateInput.min = data.start_date;
           dateInput.max = data.end_date;
-          // ✅ Auto-select the start_date as default
           dateInput.value = data.start_date;
-          dateRangeInfo.innerText = `Allowed range: ${data.start_date} to ${data.end_date}`;
+          dateRangeInfo.innerHTML = `<i class="fa fa-info-circle me-1"></i>Allowed range: ${data.start_date} to ${data.end_date}`;
         } else {
-          // Clear if somehow no schedule is returned
           dateInput.min = "";
           dateInput.max = "";
           dateInput.value = "";
-          dateRangeInfo.innerText = "";
+          dateRangeInfo.innerHTML = '<i class="fa fa-exclamation-triangle me-1"></i>No schedule found';
         }
       })
       .catch(() => {
         dateInput.min = "";
         dateInput.max = "";
         dateInput.value = "";
-        dateRangeInfo.innerText = "Unable to load schedule date range.";
+        dateRangeInfo.innerHTML = '<i class="fa fa-exclamation-triangle me-1"></i>Unable to load schedule date range';
       });
+  });
+
+  // Task Counter Logic
+  function updateTaskCounter() {
+    const checkboxes = document.querySelectorAll('.premium-task-checkbox');
+    const completedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const totalCount = checkboxes.length;
+    
+    document.getElementById('completedCount').textContent = completedCount;
+    document.getElementById('totalCount').textContent = totalCount;
+
+    // Update individual task status
+    checkboxes.forEach((checkbox, index) => {
+      const taskItem = checkbox.closest('.premium-task-item');
+      const statusElement = taskItem.querySelector('.premium-task-status');
+      
+      if (checkbox.checked) {
+        taskItem.classList.add('completed');
+        statusElement.textContent = 'Completed';
+      } else {
+        taskItem.classList.remove('completed');
+        statusElement.textContent = 'Pending';
+      }
+    });
+
+    // Update progress indicator
+    updateProgressBar(completedCount, totalCount);
+  }
+
+  // Progress Bar
+  function updateProgressBar(completed, total) {
+    const percentage = (completed / total) * 100;
+    const counter = document.querySelector('.premium-task-counter');
+    
+    if (percentage === 100) {
+      counter.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+      counter.style.color = 'white';
+    } else if (percentage >= 50) {
+      counter.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+      counter.style.color = 'white';
+    } else {
+      counter.style.background = 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)';
+      counter.style.color = '#374151';
+    }
+  }
+
+  // Initialize counter on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateTaskCounter();
+  });
+
+  // Form Validation with Visual Feedback
+  document.getElementById('checklistForm').addEventListener('submit', function(e) {
+    const quarterSelect = document.getElementById('quarter_schedule');
+    const dateInput = document.getElementById('date_accomplished');
+    const performedBy = document.querySelector('input[name="performed_by"]');
+
+    let isValid = true;
+    let errorMessage = '';
+
+    if (!quarterSelect.value) {
+      isValid = false;
+      errorMessage = 'Please select a quarter schedule';
+      quarterSelect.classList.add('error');
+    }
+
+    if (!dateInput.value) {
+      isValid = false;
+      errorMessage = 'Please select a date accomplished';
+      dateInput.classList.add('error');
+    }
+
+    if (!performedBy.value) {
+      isValid = false;
+      errorMessage = 'Please enter the technician name';
+      performedBy.classList.add('error');
+    }
+
+    if (!isValid) {
+      e.preventDefault();
+      alert(errorMessage);
+    }
+  });
+
+  // Remove error class on input
+  document.querySelectorAll('.premium-form-input, .premium-form-select').forEach(input => {
+    input.addEventListener('input', function() {
+      this.classList.remove('error');
+    });
   });
 </script>
 

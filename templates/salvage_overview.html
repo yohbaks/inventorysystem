@@ -4,297 +4,413 @@
 {% block content %}
 <div class="container">
   <div class="page-inner">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-center">
-              <h4 class="card-title">🛠 Salvage Overview</h4>
-              <div class="ms-auto">
-                <a href="{% url 'export_salvage_excel' %}" class="btn btn-success btn-sm me-2">
-                  <i class="fa fa-download me-1"></i> Export
-                </a>
-                <a href="{% url 'print_salvage_overview' %}" target="_blank" class="btn btn-info btn-sm">
-                  <i class="fa fa-print me-1"></i> Print
-                </a>
-              </div>
-            </div>
+
+    <!-- ==================== PREMIUM PAGE HEADER - SUCCESS THEME (GREEN) ==================== -->
+    <div class="premium-page-header theme-success">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+          <div class="premium-page-icon">
+            <i class="fa fa-recycle"></i>
           </div>
-
-          <div class="card-body">
-            <!-- Nav Pills -->
-            <ul class="nav nav-pills nav-secondary mb-3" id="salvage-tabs" role="tablist">
-              <li class="nav-item submenu"><a class="nav-link active" data-bs-toggle="pill" href="#monitors">Monitors</a></li>
-              <li class="nav-item submenu"><a class="nav-link" data-bs-toggle="pill" href="#keyboards">Keyboards</a></li>
-              <li class="nav-item submenu"><a class="nav-link" data-bs-toggle="pill" href="#mice">Mice</a></li>
-              <li class="nav-item submenu"><a class="nav-link" data-bs-toggle="pill" href="#ups">UPS</a></li>
-            </ul>
-
-            <div class="tab-content mt-2" id="salvage-tabContent">
-
-              <!-- Monitors -->
-              <div class="tab-pane fade show active" id="monitors">
-                <div class="table-responsive table-head-bg-primary">
-                  <table class="display table table-striped table-hover" id="monitor-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>SN</th>
-                        <th>Brand</th>
-                        <th>Model</th>
-                        <th>Size</th>
-                        <th>Computer Name</th>
-                        <th>Asset Owner</th>
-                        <th>Date Salvaged</th>
-                        <th>Notes</th>
-                        <th>Status</th>
-                      </tr>
-                      <tr class="filters">
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="monitor" data-column="0" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="monitor" data-column="1" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="monitor" data-column="2" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Size" data-table="monitor" data-column="3" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="monitor" data-column="4" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="monitor" data-column="5" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="monitor" data-column="6" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="monitor" data-column="7" /></th>
-                        <th>
-                          <select class="form-select form-select-sm column-search" data-table="monitor" data-column="8">
-                            <option value="">All</option>
-                            <option value="Available">Available</option>
-                            <option value="Reassigned">Reassigned</option>
-                            <option value="Disposed">Disposed</option>
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for item in salvaged_monitors %}
-                      <tr>
-                        <td><a href="{% url 'salvaged_monitor_detail' item.id %}">{{ item.monitor_sn }}</a></td>
-                        <td>{{ item.monitor_brand }}</td>
-                        <td>{{ item.monitor_model }}</td>
-                        <td>{{ item.monitor_size }}</td>
-                        <td>{{ item.computer_name }}</td>
-                        <td>{{ item.asset_owner }}</td>
-                        <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ item.notes|default:"—" }}</td>
-                        <td>
-                          {% if item.is_disposed %}
-                            <span class="badge bg-danger">Disposed</span>
-                          {% elif item.is_reassigned %}
-                            <a href="{% url 'salvaged_monitor_detail' item.id %}" class="badge bg-secondary text-decoration-none">
-                              Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                            </a>
-                          {% else %}
-                            <span class="badge bg-success">Available</span>
-                          {% endif %}
-                        </td>
-                      </tr>
-                      {% empty %}
-                      <tr><td colspan="9" class="text-center text-muted">No salvaged monitors</td></tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Keyboards -->
-              <div class="tab-pane fade" id="keyboards">
-                <div class="table-responsive table-head-bg-primary">
-                  <table class="display table table-striped table-hover" id="keyboard-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>SN</th>
-                        <th>Brand</th>
-                        <th>Model</th>
-                        <th>Computer Name</th>
-                        <th>Asset Owner</th>
-                        <th>Date Salvaged</th>
-                        <th>Notes</th>
-                        <th>Status</th>
-                      </tr>
-                      <tr class="filters">
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="keyboard" data-column="0" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="keyboard" data-column="1" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="keyboard" data-column="2" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="keyboard" data-column="3" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="keyboard" data-column="4" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="keyboard" data-column="5" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="keyboard" data-column="6" /></th>
-                        <th>
-                          <select class="form-select form-select-sm column-search" data-table="keyboard" data-column="7">
-                            <option value="">All</option>
-                            <option value="Available">Available</option>
-                            <option value="Reassigned">Reassigned</option>
-                            <option value="Disposed">Disposed</option>
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for item in salvaged_keyboards %}
-                      <tr>
-                        <td><a href="{% url 'salvaged_keyboard_detail' item.id %}">{{ item.keyboard_sn }}</a></td>
-                        <td>{{ item.keyboard_brand }}</td>
-                        <td>{{ item.keyboard_model }}</td>
-                        <td>{{ item.computer_name }}</td>
-                        <td>{{ item.asset_owner }}</td>
-                        <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ item.notes|default:"—" }}</td>
-                        <td>
-                          {% if item.is_disposed %}
-                            <span class="badge bg-danger">Disposed</span>
-                          {% elif item.is_reassigned %}
-                            <a href="{% url 'salvaged_keyboard_detail' item.id %}" class="badge bg-secondary text-decoration-none">
-                              Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                            </a>
-                          {% else %}
-                            <span class="badge bg-success">Available</span>
-                          {% endif %}
-                        </td>
-                      </tr>
-                      {% empty %}
-                      <tr><td colspan="8" class="text-center text-muted">No salvaged keyboards</td></tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Mice -->
-              <div class="tab-pane fade" id="mice">
-                <div class="table-responsive table-head-bg-primary">
-                  <table class="display table table-striped table-hover" id="mouse-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>SN</th>
-                        <th>Brand</th>
-                        <th>Model</th>
-                        <th>Computer Name</th>
-                        <th>Asset Owner</th>
-                        <th>Date Salvaged</th>
-                        <th>Notes</th>
-                        <th>Status</th>
-                      </tr>
-                      <tr class="filters">
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="mouse" data-column="0" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="mouse" data-column="1" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="mouse" data-column="2" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="mouse" data-column="3" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="mouse" data-column="4" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="mouse" data-column="5" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="mouse" data-column="6" /></th>
-                        <th>
-                          <select class="form-select form-select-sm column-search" data-table="mouse" data-column="7">
-                            <option value="">All</option>
-                            <option value="Available">Available</option>
-                            <option value="Reassigned">Reassigned</option>
-                            <option value="Disposed">Disposed</option>
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for item in salvaged_mice %}
-                      <tr>
-                        <td><a href="{% url 'salvaged_mouse_detail' item.id %}">{{ item.mouse_sn }}</a></td>
-                        <td>{{ item.mouse_brand }}</td>
-                        <td>{{ item.mouse_model }}</td>
-                        <td>{{ item.computer_name }}</td>
-                        <td>{{ item.asset_owner }}</td>
-                        <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ item.notes|default:"—" }}</td>
-                        <td>
-                          {% if item.is_disposed %}
-                            <span class="badge bg-danger">Disposed</span>
-                          {% elif item.is_reassigned %}
-                            <a href="{% url 'salvaged_mouse_detail' item.id %}" class="badge bg-secondary text-decoration-none">
-                              Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                            </a>
-                          {% else %}
-                            <span class="badge bg-success">Available</span>
-                          {% endif %}
-                        </td>
-                      </tr>
-                      {% empty %}
-                      <tr><td colspan="8" class="text-center text-muted">No salvaged mice</td></tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- UPS -->
-              <div class="tab-pane fade" id="ups">
-                <div class="table-responsive table-head-bg-primary">
-                  <table class="display table table-striped table-hover" id="ups-table" style="width:100%">
-                    <thead>
-                      <tr>
-                        <th>SN</th>
-                        <th>Brand</th>
-                        <th>Model</th>
-                        <th>Capacity</th>
-                        <th>Computer Name</th>
-                        <th>Asset Owner</th>
-                        <th>Date Salvaged</th>
-                        <th>Notes</th>
-                        <th>Status</th>
-                      </tr>
-                      <tr class="filters">
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="ups" data-column="0" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="ups" data-column="1" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="ups" data-column="2" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Capacity" data-table="ups" data-column="3" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="ups" data-column="4" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="ups" data-column="5" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="ups" data-column="6" /></th>
-                        <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="ups" data-column="7" /></th>
-                        <th>
-                          <select class="form-select form-select-sm column-search" data-table="ups" data-column="8">
-                            <option value="">All</option>
-                            <option value="Available">Available</option>
-                            <option value="Reassigned">Reassigned</option>
-                            <option value="Disposed">Disposed</option>
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for item in salvaged_ups %}
-                      <tr>
-                        <td><a href="{% url 'salvaged_ups_detail' item.id %}">{{ item.ups_sn }}</a></td>
-                        <td>{{ item.ups_brand }}</td>
-                        <td>{{ item.ups_model }}</td>
-                        <td>{{ item.ups_capacity }}</td>
-                        <td>{{ item.computer_name }}</td>
-                        <td>{{ item.asset_owner }}</td>
-                        <td>{{ item.salvage_date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ item.notes|default:"—" }}</td>
-                        <td>
-                          {% if item.is_disposed %}
-                            <span class="badge bg-danger">Disposed</span>
-                          {% elif item.is_reassigned %}
-                            <a href="{% url 'salvaged_ups_detail' item.id %}" class="badge bg-secondary text-decoration-none">
-                              Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
-                            </a>
-                          {% else %}
-                            <span class="badge bg-success">Available</span>
-                          {% endif %}
-                        </td>
-                      </tr>
-                      {% empty %}
-                      <tr><td colspan="9" class="text-center text-muted">No salvaged UPS</td></tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-            </div>
+          <div class="ms-3">
+            <h4 class="premium-page-title mb-0">Salvage Overview</h4>
+            <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">
+              Track and manage salvaged equipment available for reassignment
+            </p>
           </div>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+          <a href="{% url 'export_salvage_excel' %}" class="premium-header-btn success">
+            <i class="fa fa-download me-1"></i> Export
+          </a>
+          <a href="{% url 'print_salvage_overview' %}" target="_blank" class="premium-header-btn info">
+            <i class="fa fa-print me-1"></i> Print
+          </a>
         </div>
       </div>
     </div>
+
+    <!-- ==================== PREMIUM TABS CARD ==================== -->
+    <div class="premium-table-card">
+      
+      <!-- Premium Tabs Navigation -->
+      <div class="premium-tabs-wrapper">
+        <ul class="premium-tabs-nav" id="salvage-tabs" role="tablist">
+          <li class="premium-tab-item">
+            <a class="premium-tab-link active" data-bs-toggle="pill" href="#monitors">
+              <i class="fa fa-tv me-2"></i> Monitors
+            </a>
+          </li>
+          <li class="premium-tab-item">
+            <a class="premium-tab-link" data-bs-toggle="pill" href="#keyboards">
+              <i class="fa fa-keyboard me-2"></i> Keyboards
+            </a>
+          </li>
+          <li class="premium-tab-item">
+            <a class="premium-tab-link" data-bs-toggle="pill" href="#mice">
+              <i class="fa fa-mouse-pointer me-2"></i> Mice
+            </a>
+          </li>
+          <li class="premium-tab-item">
+            <a class="premium-tab-link" data-bs-toggle="pill" href="#ups">
+              <i class="fa fa-plug me-2"></i> UPS
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content premium-table-wrapper" id="salvage-tabContent">
+
+        <!-- ==================== MONITORS TAB ==================== -->
+        <div class="tab-pane fade show active" id="monitors" role="tabpanel">
+          <div class="table-responsive">
+            <table class="premium-datatable display" id="monitor-table" style="width:100%">
+              <thead>
+                <tr>
+                  <th>SN</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Size</th>
+                  <th>Computer Name</th>
+                  <th>Asset Owner</th>
+                  <th>Date Salvaged</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                </tr>
+                <tr class="filters">
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="monitor" data-column="0" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="monitor" data-column="1" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="monitor" data-column="2" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Size" data-table="monitor" data-column="3" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="monitor" data-column="4" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="monitor" data-column="5" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="monitor" data-column="6" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="monitor" data-column="7" /></th>
+                  <th>
+                    <select class="form-select form-select-sm column-search" data-table="monitor" data-column="8">
+                      <option value="">All</option>
+                      <option value="Available">Available</option>
+                      <option value="Reassigned">Reassigned</option>
+                      <option value="Disposed">Disposed</option>
+                    </select>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in salvaged_monitors %}
+                <tr>
+                  <td>
+                    <a href="{% url 'salvaged_monitor_detail' item.id %}" class="premium-link">
+                      {{ item.monitor_sn }}
+                    </a>
+                  </td>
+                  <td><span class="fw-semibold text-dark">{{ item.monitor_brand }}</span></td>
+                  <td>{{ item.monitor_model }}</td>
+                  <td><span class="premium-size-badge">{{ item.monitor_size }}</span></td>
+                  <td>{{ item.computer_name }}</td>
+                  <td>{{ item.asset_owner }}</td>
+                  <td>
+                    <span class="premium-date-badge success">
+                      <i class="fa fa-calendar-check me-1" style="font-size: 11px;"></i>
+                      {{ item.salvage_date|date:"M d, Y" }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="premium-reason-text">{{ item.notes|default:"—" }}</div>
+                  </td>
+                  <td>
+                    {% if item.is_disposed %}
+                      <span class="premium-status-badge disposed">
+                        <i class="fa fa-times-circle me-1"></i>Disposed
+                      </span>
+                    {% elif item.is_reassigned %}
+                      <a href="{% url 'salvaged_monitor_detail' item.id %}" class="premium-status-badge reassigned">
+                        <i class="fa fa-arrow-right me-1"></i>Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                      </a>
+                    {% else %}
+                      <span class="premium-status-badge available">
+                        <i class="fa fa-check-circle me-1"></i>Available
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center py-5">
+                    <div style="opacity: 0.5;">
+                      <i class="fa fa-tv fa-3x text-muted mb-3"></i>
+                      <p class="text-muted mb-0">No salvaged monitors</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== KEYBOARDS TAB ==================== -->
+        <div class="tab-pane fade" id="keyboards" role="tabpanel">
+          <div class="table-responsive">
+            <table class="premium-datatable display" id="keyboard-table" style="width:100%">
+              <thead>
+                <tr>
+                  <th>SN</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Computer Name</th>
+                  <th>Asset Owner</th>
+                  <th>Date Salvaged</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                </tr>
+                <tr class="filters">
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="keyboard" data-column="0" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="keyboard" data-column="1" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="keyboard" data-column="2" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="keyboard" data-column="3" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="keyboard" data-column="4" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="keyboard" data-column="5" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="keyboard" data-column="6" /></th>
+                  <th>
+                    <select class="form-select form-select-sm column-search" data-table="keyboard" data-column="7">
+                      <option value="">All</option>
+                      <option value="Available">Available</option>
+                      <option value="Reassigned">Reassigned</option>
+                      <option value="Disposed">Disposed</option>
+                    </select>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in salvaged_keyboards %}
+                <tr>
+                  <td>
+                    <a href="{% url 'salvaged_keyboard_detail' item.id %}" class="premium-link">
+                      {{ item.keyboard_sn }}
+                    </a>
+                  </td>
+                  <td><span class="fw-semibold text-dark">{{ item.keyboard_brand }}</span></td>
+                  <td>{{ item.keyboard_model }}</td>
+                  <td>{{ item.computer_name }}</td>
+                  <td>{{ item.asset_owner }}</td>
+                  <td>
+                    <span class="premium-date-badge success">
+                      <i class="fa fa-calendar-check me-1" style="font-size: 11px;"></i>
+                      {{ item.salvage_date|date:"M d, Y" }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="premium-reason-text">{{ item.notes|default:"—" }}</div>
+                  </td>
+                  <td>
+                    {% if item.is_disposed %}
+                      <span class="premium-status-badge disposed">
+                        <i class="fa fa-times-circle me-1"></i>Disposed
+                      </span>
+                    {% elif item.is_reassigned %}
+                      <a href="{% url 'salvaged_keyboard_detail' item.id %}" class="premium-status-badge reassigned">
+                        <i class="fa fa-arrow-right me-1"></i>Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                      </a>
+                    {% else %}
+                      <span class="premium-status-badge available">
+                        <i class="fa fa-check-circle me-1"></i>Available
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-5">
+                    <div style="opacity: 0.5;">
+                      <i class="fa fa-keyboard fa-3x text-muted mb-3"></i>
+                      <p class="text-muted mb-0">No salvaged keyboards</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== MICE TAB ==================== -->
+        <div class="tab-pane fade" id="mice" role="tabpanel">
+          <div class="table-responsive">
+            <table class="premium-datatable display" id="mouse-table" style="width:100%">
+              <thead>
+                <tr>
+                  <th>SN</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Computer Name</th>
+                  <th>Asset Owner</th>
+                  <th>Date Salvaged</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                </tr>
+                <tr class="filters">
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="mouse" data-column="0" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="mouse" data-column="1" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="mouse" data-column="2" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="mouse" data-column="3" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="mouse" data-column="4" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="mouse" data-column="5" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="mouse" data-column="6" /></th>
+                  <th>
+                    <select class="form-select form-select-sm column-search" data-table="mouse" data-column="7">
+                      <option value="">All</option>
+                      <option value="Available">Available</option>
+                      <option value="Reassigned">Reassigned</option>
+                      <option value="Disposed">Disposed</option>
+                    </select>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in salvaged_mice %}
+                <tr>
+                  <td>
+                    <a href="{% url 'salvaged_mouse_detail' item.id %}" class="premium-link">
+                      {{ item.mouse_sn }}
+                    </a>
+                  </td>
+                  <td><span class="fw-semibold text-dark">{{ item.mouse_brand }}</span></td>
+                  <td>{{ item.mouse_model }}</td>
+                  <td>{{ item.computer_name }}</td>
+                  <td>{{ item.asset_owner }}</td>
+                  <td>
+                    <span class="premium-date-badge success">
+                      <i class="fa fa-calendar-check me-1" style="font-size: 11px;"></i>
+                      {{ item.salvage_date|date:"M d, Y" }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="premium-reason-text">{{ item.notes|default:"—" }}</div>
+                  </td>
+                  <td>
+                    {% if item.is_disposed %}
+                      <span class="premium-status-badge disposed">
+                        <i class="fa fa-times-circle me-1"></i>Disposed
+                      </span>
+                    {% elif item.is_reassigned %}
+                      <a href="{% url 'salvaged_mouse_detail' item.id %}" class="premium-status-badge reassigned">
+                        <i class="fa fa-arrow-right me-1"></i>Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                      </a>
+                    {% else %}
+                      <span class="premium-status-badge available">
+                        <i class="fa fa-check-circle me-1"></i>Available
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-5">
+                    <div style="opacity: 0.5;">
+                      <i class="fa fa-mouse-pointer fa-3x text-muted mb-3"></i>
+                      <p class="text-muted mb-0">No salvaged mice</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ==================== UPS TAB ==================== -->
+        <div class="tab-pane fade" id="ups" role="tabpanel">
+          <div class="table-responsive">
+            <table class="premium-datatable display" id="ups-table" style="width:100%">
+              <thead>
+                <tr>
+                  <th>SN</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  
+                  <th>Computer Name</th>
+                  <th>Asset Owner</th>
+                  <th>Date Salvaged</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                </tr>
+                <tr class="filters">
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search SN" data-table="ups" data-column="0" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Brand" data-table="ups" data-column="1" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Model" data-table="ups" data-column="2" /></th>
+                 
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Computer" data-table="ups" data-column="4" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Owner" data-table="ups" data-column="5" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Date" data-table="ups" data-column="6" /></th>
+                  <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Notes" data-table="ups" data-column="7" /></th>
+                  <th>
+                    <select class="form-select form-select-sm column-search" data-table="ups" data-column="8">
+                      <option value="">All</option>
+                      <option value="Available">Available</option>
+                      <option value="Reassigned">Reassigned</option>
+                      <option value="Disposed">Disposed</option>
+                    </select>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in salvaged_ups %}
+                <tr>
+                  <td>
+                    <a href="{% url 'salvaged_ups_detail' item.id %}" class="premium-link">
+                      {{ item.ups_sn }}
+                    </a>
+                  </td>
+                  <td><span class="fw-semibold text-dark">{{ item.ups_brand }}</span></td>
+                  <td>{{ item.ups_model }}</td>
+                 
+                  <td>{{ item.computer_name }}</td>
+                  <td>{{ item.asset_owner }}</td>
+                  <td>
+                    <span class="premium-date-badge success">
+                      <i class="fa fa-calendar-check me-1" style="font-size: 11px;"></i>
+                      {{ item.salvage_date|date:"M d, Y" }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="premium-reason-text">{{ item.notes|default:"—" }}</div>
+                  </td>
+                  <td>
+                    {% if item.is_disposed %}
+                      <span class="premium-status-badge disposed">
+                        <i class="fa fa-times-circle me-1"></i>Disposed
+                      </span>
+                    {% elif item.is_reassigned %}
+                      <a href="{% url 'salvaged_ups_detail' item.id %}" class="premium-status-badge reassigned">
+                        <i class="fa fa-arrow-right me-1"></i>Reassigned → {{ item.reassigned_computer_name|default:"Unknown" }}
+                      </a>
+                    {% else %}
+                      <span class="premium-status-badge available">
+                        <i class="fa fa-check-circle me-1"></i>Available
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="9" class="text-center py-5">
+                    <div style="opacity: 0.5;">
+                      <i class="fa fa-plug fa-3x text-muted mb-3"></i>
+                      <p class="text-muted mb-0">No salvaged UPS</p>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
@@ -303,7 +419,7 @@
 {{ block.super }}
 <script>
 $(document).ready(function() {
-  console.log('Initializing Salvage DataTables...');
+  console.log('Initializing Premium Salvage DataTables...');
   
   // Store table instances
   var tables = {};
@@ -318,7 +434,13 @@ $(document).ready(function() {
       lengthMenu: "Show _MENU_ entries",
       info: "Showing _START_ to _END_ of _TOTAL_ monitors",
       infoEmpty: "Showing 0 to 0 of 0 monitors",
-      infoFiltered: "(filtered from _MAX_ total monitors)"
+      infoFiltered: "(filtered from _MAX_ total monitors)",
+      paginate: {
+        first: '<i class="fa fa-angle-double-left"></i>',
+        last: '<i class="fa fa-angle-double-right"></i>',
+        next: '<i class="fa fa-angle-right"></i>',
+        previous: '<i class="fa fa-angle-left"></i>'
+      }
     }
   });
   
@@ -331,7 +453,13 @@ $(document).ready(function() {
       lengthMenu: "Show _MENU_ entries",
       info: "Showing _START_ to _END_ of _TOTAL_ keyboards",
       infoEmpty: "Showing 0 to 0 of 0 keyboards",
-      infoFiltered: "(filtered from _MAX_ total keyboards)"
+      infoFiltered: "(filtered from _MAX_ total keyboards)",
+      paginate: {
+        first: '<i class="fa fa-angle-double-left"></i>',
+        last: '<i class="fa fa-angle-double-right"></i>',
+        next: '<i class="fa fa-angle-right"></i>',
+        previous: '<i class="fa fa-angle-left"></i>'
+      }
     }
   });
   
@@ -344,7 +472,13 @@ $(document).ready(function() {
       lengthMenu: "Show _MENU_ entries",
       info: "Showing _START_ to _END_ of _TOTAL_ mice",
       infoEmpty: "Showing 0 to 0 of 0 mice",
-      infoFiltered: "(filtered from _MAX_ total mice)"
+      infoFiltered: "(filtered from _MAX_ total mice)",
+      paginate: {
+        first: '<i class="fa fa-angle-double-left"></i>',
+        last: '<i class="fa fa-angle-double-right"></i>',
+        next: '<i class="fa fa-angle-right"></i>',
+        previous: '<i class="fa fa-angle-left"></i>'
+      }
     }
   });
   
@@ -357,11 +491,17 @@ $(document).ready(function() {
       lengthMenu: "Show _MENU_ entries",
       info: "Showing _START_ to _END_ of _TOTAL_ UPS",
       infoEmpty: "Showing 0 to 0 of 0 UPS",
-      infoFiltered: "(filtered from _MAX_ total UPS)"
+      infoFiltered: "(filtered from _MAX_ total UPS)",
+      paginate: {
+        first: '<i class="fa fa-angle-double-left"></i>',
+        last: '<i class="fa fa-angle-double-right"></i>',
+        next: '<i class="fa fa-angle-right"></i>',
+        previous: '<i class="fa fa-angle-left"></i>'
+      }
     }
   });
   
-  console.log('DataTables initialized');
+  console.log('All DataTables initialized');
   
   // Apply the search using data-column and data-table attributes
   $('.column-search').on('keyup change', function() {
@@ -376,7 +516,49 @@ $(document).ready(function() {
     }
   });
   
-  console.log('Filter handlers attached');
+  // Recalculate table dimensions when switching tabs (Bootstrap handler)
+  $('[data-bs-toggle="pill"]').on('shown.bs.tab', function(e) {
+    console.log('Tab switched:', e.target);
+    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+  });
+  
+  // Manual tab click handler (backup for Bootstrap conflicts)
+  $('.premium-tab-link').on('click', function(e) {
+    e.preventDefault();
+    
+    var targetId = $(this).attr('href');
+    console.log('Manual tab click:', targetId);
+    
+    // Remove active from all tabs
+    $('.premium-tab-link').removeClass('active');
+    
+    // Add active to clicked tab
+    $(this).addClass('active');
+    
+    // Hide all tab panes
+    $('.tab-pane').removeClass('show active');
+    
+    // Show target pane
+    $(targetId).addClass('show active');
+    
+    // Adjust DataTable columns
+    setTimeout(function() {
+      $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+    }, 100);
+    
+    return false;
+  });
+  
+  console.log('Filter handlers and manual tab handlers attached');
 });
 </script>
+
+<!-- Hide filter row in print -->
+<style>
+  @media print {
+    .filters { display: none !important; }
+    .premium-page-header { display: none !important; }
+    .premium-tabs-wrapper { display: none !important; }
+  }
+</style>
 {% endblock %}

@@ -5,247 +5,344 @@
 <div class="container">
   <div class="page-inner">
     <!-- Header -->
-    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-      <div>
-        <h3 class="fw-bold mb-1">Dashboard</h3>
-        <p class="text-muted mb-0">Asset Sync Inventory System V3</p>
-      </div>
-      <div class="ms-md-auto py-2 py-md-0">
-        <a href="{% url 'add_equipment_package_with_details' %}" class="btn btn-primary btn-round">
-          <i class="fas fa-plus me-1"></i> Add Item
-        </a>
-      </div>
+    <!-- ==================== PREMIUM DASHBOARD HEADER ==================== -->
+<div class="premium-dashboard-header">
+  <div class="d-flex align-items-center justify-content-between flex-wrap">
+    <div>
+      <h3 class="premium-dashboard-title">
+        <i class="fas fa-chart-line" style="color: #667eea;"></i>
+        Dashboard
+      </h3>
+      <p class="premium-dashboard-subtitle mb-0">Asset Sync Inventory System V3</p>
     </div>
-
-    <!-- KPI Row 1 -->
-    <div class="row g-3 mb-3">
-      <!-- Total Packages -->
-      <div class="col-sm-6 col-md-3">
-        <div class="card card-stats card-primary card-round shadow-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-5">
-                <div class="icon-big text-center">
-                  <i class="fas fa-boxes"></i>
-                </div>
-              </div>
-              <div class="col-7 col-stats text-center">
-                <div class="numbers">
-                  <p class="card-category mb-0">Total Packages</p>
-                  <h4 class="card-title mb-0">{{ kpis.total_packages }}</h4>
-                </div>
-              </div>
+    <div class="mt-3 mt-md-0">
+      <a href="{% url 'add_equipment_package_with_details' %}" class="premium-add-btn">
+        <i class="fas fa-plus"></i>
+        <span>Add New Item</span>
+      </a>
+    </div>
+  </div>
+</div>
+ <!-- KPIs -->
+    <div class="row g-3">
+  <!-- Desktop Packages -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-primary card-round shadow-sm premium-kpi-card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+            <div class="icon-big text-center">
+                    <div class="premium-kpi-icon-wrapper ">
+                      <i class="fas fa-boxes"></i>
+                    </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Active Packages -->
-      <div class="col-sm-6 col-md-3">
-        <div class="card card-stats card-success card-round shadow-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-5">
-                <div class="icon-big text-center">
-                  <i class="far fa-check-circle"></i>
-                </div>
-              </div>
-              <div class="col-7 col-stats text-center">
-                <div class="numbers">
-                  <p class="card-category mb-0">Active Packages</p>
-                  <h4 class="card-title mb-0">{{ kpis.active_packages }}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Disposed (All) -->
-      <div class="col-sm-6 col-md-3">
-        <div class="card card-stats card-danger card-round shadow-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-5">
-                <div class="icon-big text-center">
-                  <i class="far fa-trash-alt"></i>
-                </div>
-              </div>
-              <div class="col-7 col-stats text-center">
-                <div class="numbers">
-                  <p class="card-category mb-0">Disposed (All)</p>
-                  <h4 class="card-title mb-0">{{ kpis.disposed_all }}</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pending PM -->
-      <div class="col-sm-6 col-md-3">
-        <div class="card card-stats card-info card-round shadow-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-5">
-                <div class="icon-big text-center">
-                  <i class="far fa-calendar-alt"></i>
-                </div>
-              </div>
-              <div class="col-7 col-stats text-center">
-                <div class="numbers">
-                  <p class="card-category mb-0">Pending PM</p>
-                  <h4 class="card-title mb-0">{{ kpis.pm_pending }}</h4>
-                </div>
-              </div>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Desktop Packages</p>
+              <h4 class="card-title">{{ kpis.total_packages }}</h4>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- KPI Row 2 - Equipment Categories -->
-    <div class="row g-3 mb-3">
-      <!-- Desktops -->
-      <div class="col-sm-6 col-md-2">
-        <div class="card shadow-sm border-0 text-center">
-          <div class="card-body py-3">
-            <i class="fas fa-desktop fa-2x text-primary mb-2"></i>
-            <p class="fw-bold text-muted small mb-1">Desktops</p>
-            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_desktops }}</h5>
-          </div>
-        </div>
+  <!-- Active -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-success card-round shadow-sm premium-kpi-card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+<div class="premium-kpi-icon-wrapper ">
+        <i class="fas fa-check-circle"></i>
       </div>
-
-      <!-- Laptops -->
-      <div class="col-sm-6 col-md-2">
-        <div class="card shadow-sm border-0 text-center">
-          <div class="card-body py-3">
-            <i class="fas fa-laptop fa-2x text-info mb-2"></i>
-            <p class="fw-bold text-muted small mb-1">Laptops</p>
-            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_laptops }}</h5>
           </div>
-        </div>
-      </div>
-
-      <!-- Printers -->
-      <div class="col-sm-6 col-md-2">
-        <div class="card shadow-sm border-0 text-center">
-          <div class="card-body py-3">
-            <i class="fas fa-print fa-2x text-purple mb-2"></i>
-            <p class="fw-bold text-muted small mb-1">Printers</p>
-            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_printers }}</h5>
-          </div>
-        </div>
-      </div>
-
-      <!-- UPS -->
-      <div class="col-sm-6 col-md-2">
-        <div class="card shadow-sm border-0 text-center">
-          <div class="card-body py-3">
-            <i class="fas fa-plug fa-2x text-warning mb-2"></i>
-            <p class="fw-bold text-muted small mb-1">UPS Units</p>
-            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_ups }}</h5>
-          </div>
-        </div>
-      </div>
-
-      <!-- Monitors -->
-      <div class="col-sm-6 col-md-2">
-        <div class="card shadow-sm border-0 text-center">
-          <div class="card-body py-3">
-            <i class="fas fa-tv fa-2x text-secondary mb-2"></i>
-            <p class="fw-bold text-muted small mb-1">Monitors</p>
-            <h5 class="fw-bold text-dark mb-0">{{ kpis.total_monitors|default:"0" }}</h5>
-          </div>
-        </div>
-      </div>
-
-      <!-- Health Score -->
-      <div class="col-sm-6 col-md-2">
-        <div class="card shadow-sm border-0 text-center">
-          <div class="card-body py-3">
-            <i class="fas fa-heartbeat fa-2x text-success mb-2"></i>
-            <p class="fw-bold text-muted small mb-1">Health Score</p>
-            <h5 class="fw-bold text-dark mb-0">{{ kpis.health_score }}%</h5>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts Row 1 -->
-    <div class="row g-3 mb-3">
-      <div class="col-lg-8">
-        <div class="card shadow-sm">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Disposal Trend (Last {{ charts.months }} Months)</h5>
-          </div>
-          <div class="card-body">
-            <div class="chart-container" style="height: 320px;">
-              <canvas id="disposalTrendChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-4">
-        <div class="card shadow-sm">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Disposed by Category</h5>
-          </div>
-          <div class="card-body">
-            <div class="chart-container" style="height: 320px;">
-              <canvas id="disposedByCategoryChart"></canvas>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Active</p>
+              <h4 class="card-title">{{ kpis.active_packages }}</h4>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Charts Row 2 -->
-    <div class="row g-3 mb-3">
-      <div class="col-lg-6">
-        <div class="card shadow-sm">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Active vs Disposed by Category</h5>
-          </div>
-          <div class="card-body">
-            <div class="chart-container" style="height: 300px;">
-              <canvas id="activeDisposedStacked"></canvas>
-            </div>
-          </div>
-        </div>
+  <!-- Disposed (All) -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-danger card-round shadow-sm premium-kpi-card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+      
+      <div class="premium-kpi-icon-wrapper ">
+        <i class="fas fa-trash-alt"></i>
       </div>
-
-      <div class="col-lg-6">
-        <div class="card shadow-sm">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Top 5 Brands</h5>
           </div>
-          <div class="card-body">
-            <div class="chart-container" style="height: 300px;">
-              <canvas id="brandChart"></canvas>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Disposed (All)</p>
+              <h4 class="card-title">{{ kpis.disposed_all }}</h4>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Charts Row 3 -->
-    <div class="row g-3 mb-3">
-      <div class="col-lg-12">
-        <div class="card shadow-sm">
-          <div class="card-header">
-            <h5 class="card-title mb-0">Assets by Office Section</h5>
+  <!-- Pending PM -->
+  <div class="col-sm-6 col-md-3">
+    <div class="card card-stats card-info card-round shadow-sm premium-kpi-card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-5">
+      <div class="premium-kpi-icon-wrapper ">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
           </div>
-          <div class="card-body">
-            <div class="chart-container" style="height: 400px;">
-              <canvas id="sectionChart"></canvas>
+          <div class="col-7 col-stats">
+            <div class="numbers">
+              <p class="card-category">Pending PM</p>
+              <h4 class="card-title">{{ kpis.pm_pending }}</h4>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+
+
+{% comment %} 
+<!-- ==================== PREMIUM KPI CARDS ROW 1 ==================== -->
+<div class="row g-4 mb-4">
+  <!-- Total Packages -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="premium-kpi-card primary">
+      <div class="premium-kpi-icon-wrapper primary">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="premium-kpi-label">Total Packages</div>
+      <div class="premium-kpi-value">{{ kpis.total_packages }}</div>
+    </div>
+  </div>
+
+  <!-- Active Packages -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="premium-kpi-card success">
+      <div class="premium-kpi-icon-wrapper success">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="premium-kpi-label">Active Packages</div>
+      <div class="premium-kpi-value">{{ kpis.active_packages }}</div>
+    </div>
+  </div>
+
+  <!-- Disposed -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="premium-kpi-card danger">
+      <div class="premium-kpi-icon-wrapper danger">
+        <i class="fas fa-trash-alt"></i>
+      </div>
+      <div class="premium-kpi-label">Disposed (All)</div>
+      <div class="premium-kpi-value">{{ kpis.disposed_all }}</div>
+    </div>
+  </div>
+
+  <!-- Pending PM -->
+  <div class="col-sm-6 col-lg-3">
+    <div class="premium-kpi-card info">
+      <div class="premium-kpi-icon-wrapper info">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
+      <div class="premium-kpi-label">Pending PM</div>
+      <div class="premium-kpi-value">{{ kpis.pm_pending }}</div>
+    </div>
+  </div>
+</div> {% endcomment %}
+
+<!-- ==================== PREMIUM EQUIPMENT MINI CARDS ROW 2 ==================== -->
+<div class="premium-equipment-grid">
+  <!-- Desktops -->
+  <div class="premium-equipment-mini desktop">
+    <div class="premium-equipment-icon">
+      <i class="fas fa-desktop"></i>
+    </div>
+    <div class="premium-equipment-label">Desktops</div>
+    <div class="premium-equipment-count">{{ kpis.total_desktops }}</div>
+  </div>
+
+  <!-- Laptops -->
+  <div class="premium-equipment-mini laptop">
+    <div class="premium-equipment-icon">
+      <i class="fas fa-laptop"></i>
+    </div>
+    <div class="premium-equipment-label">Laptops</div>
+    <div class="premium-equipment-count">{{ kpis.total_laptops }}</div>
+  </div>
+
+  <!-- Printers -->
+  <div class="premium-equipment-mini printer">
+    <div class="premium-equipment-icon">
+      <i class="fas fa-print"></i>
+    </div>
+    <div class="premium-equipment-label">Printers</div>
+    <div class="premium-equipment-count">{{ kpis.total_printers }}</div>
+  </div>
+
+  <!-- UPS -->
+  <div class="premium-equipment-mini ups">
+    <div class="premium-equipment-icon">
+      <i class="fas fa-plug"></i>
+    </div>
+    <div class="premium-equipment-label">UPS Units</div>
+    <div class="premium-equipment-count">{{ kpis.total_ups }}</div>
+  </div>
+
+  <!-- Monitors -->
+  <div class="premium-equipment-mini monitor">
+    <div class="premium-equipment-icon">
+      <i class="fas fa-tv"></i>
+    </div>
+    <div class="premium-equipment-label">Monitors</div>
+    <div class="premium-equipment-count">{{ kpis.total_monitors|default:"0" }}</div>
+  </div>
+
+  <!-- Health Score -->
+  <div class="premium-equipment-mini health">
+    <div class="premium-equipment-icon">
+      <i class="fas fa-heartbeat"></i>
+    </div>
+    <div class="premium-equipment-label">Health Score</div>
+    <div class="premium-equipment-count">{{ kpis.health_score }}%</div>
+  </div>
+</div>
+
+<!-- ==================== PREMIUM CHARTS ROW 1 ==================== -->
+<div class="row g-4 mb-4">
+  <!-- Disposal Trend Chart -->
+  <div class="col-lg-8">
+    <div class="premium-chart-card disposal">
+      <div class="premium-chart-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="premium-chart-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <h5 class="premium-chart-title mb-0">Disposal Trend</h5>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">Last {{ charts.months }} Months Performance</p>
+          </div>
+        </div>
+      </div>
+      <div class="premium-chart-body">
+        <div class="premium-chart-container" style="height: 320px;">
+          <canvas id="disposalTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disposed by Category Pie -->
+  <div class="col-lg-4">
+    <div class="premium-chart-card category">
+      <div class="premium-chart-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="premium-chart-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <div>
+            <h5 class="premium-chart-title mb-0">Disposed by Category</h5>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">Distribution Overview</p>
+          </div>
+        </div>
+      </div>
+      <div class="premium-chart-body">
+        <div class="premium-chart-container" style="height: 320px;">
+          <canvas id="disposedByCategoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PREMIUM CHARTS ROW 2 ==================== -->
+<div class="row g-4 mb-4">
+  <!-- Active vs Disposed -->
+  <div class="col-lg-6">
+    <div class="premium-chart-card comparison">
+      <div class="premium-chart-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="premium-chart-icon" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <div>
+            <h5 class="premium-chart-title mb-0">Active vs Disposed</h5>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">Category Comparison</p>
+          </div>
+        </div>
+      </div>
+      <div class="premium-chart-body">
+        <div class="premium-chart-container" style="height: 300px;">
+          <canvas id="activeDisposedStacked"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top 5 Brands -->
+  <div class="col-lg-6">
+    <div class="premium-chart-card brand">
+      <div class="premium-chart-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="premium-chart-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+            <i class="fas fa-star"></i>
+          </div>
+          <div>
+            <h5 class="premium-chart-title mb-0">Top 5 Brands</h5>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">Most Popular Brands</p>
+          </div>
+        </div>
+      </div>
+      <div class="premium-chart-body">
+        <div class="premium-chart-container" style="height: 300px;">
+          <canvas id="brandChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PREMIUM CHARTS ROW 3 ==================== -->
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="premium-chart-card section">
+      <div class="premium-chart-header">
+        <div class="d-flex align-items-center justify-content-between flex-wrap">
+          <div class="d-flex align-items-center gap-3">
+            <div class="premium-chart-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+              <i class="fas fa-building"></i>
+            </div>
+            <div>
+              <h5 class="premium-chart-title mb-0">Assets by Office Section</h5>
+              <p class="text-muted mb-0" style="font-size: 0.875rem;">Department Distribution Analysis</p>
+            </div>
+          </div>
+          <span class="chart-badge">
+            <i class="fas fa-chart-area"></i>
+            Overview
+          </span>
+        </div>
+      </div>
+      <div class="premium-chart-body">
+        <div class="premium-chart-container" style="height: 400px;">
+          <canvas id="sectionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Recent Activity & Audit Trail -->
 <div class="row g-3 mb-3">

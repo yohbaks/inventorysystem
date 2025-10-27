@@ -2,221 +2,410 @@
 {% load static %}
 
 {% block content %}
-<div class="container">
-  <div class="page-inner">
-    <div class="row g-4">
-      <!-- Left: Avatar + quick info -->
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body text-center">
-            <img src="{{ profile.avatar_url }}" alt="avatar" class="rounded-circle mb-3" width="120" height="120" style="object-fit:cover;">
-            <h5 class="mb-0">{{ request.user.get_full_name|default:request.user.username }}</h5>
-            <p class="text-muted mb-2">{{ request.user.email|default:"hello@example.com" }}</p>
+<div class="container profile-premium">
+  <div class="page-inner py-4">
 
-            <form method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data" class="mt-3">
-              {% csrf_token %}
-              <div class="mb-2">
-                <input type="file" name="avatar" accept="image/*" class="form-control">
+    <!-- ==================== STUNNING PROFILE HEADER ==================== -->
+    <div class="profile-header-modern">
+      <!-- Animated Background -->
+      <div class="profile-header-backdrop">
+        <div class="profile-gradient-orb orb-1"></div>
+        <div class="profile-gradient-orb orb-2"></div>
+        <div class="profile-gradient-orb orb-3"></div>
+      </div>
+      
+      <!-- Content Container -->
+      <div class="profile-header-glass">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            
+            <!-- Avatar Section -->
+            <div class="col-auto">
+              <div class="profile-avatar-container">
+                <div class="profile-avatar-glow"></div>
+                <img src="{{ profile.avatar_url }}" alt="avatar" class="profile-avatar-modern">
+                <div class="profile-verified-badge">
+                  <i class="fas fa-check"></i>
+                </div>
+                <form method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data" id="avatarForm">
+                  {% csrf_token %}
+                  <input type="file" name="avatar" accept="image/*" id="avatarInput" hidden>
+                  <label for="avatarInput" class="profile-camera-btn">
+                    <i class="fas fa-camera"></i>
+                  </label>
+                </form>
               </div>
-              <button class="btn btn-outline-primary btn-sm" type="submit">Update Avatar</button>
-            </form>
-
-            <hr>
-            <div class="text-start small">
-              <div><strong>Theme:</strong> {{ profile.theme|title }}</div>
-              <div><strong>Timezone:</strong> {{ profile.timezone_str }}</div>
-              <div><strong>PM Notifications:</strong> {{ profile.notify_pm_due|yesno:"On,Off" }}</div>
-              {% if profile.office_section %}<div><strong>Section:</strong> {{ profile.office_section.name }}</div>{% endif %}
-              {% if profile.employee %}<div><strong>Employee Link:</strong> {{ profile.employee.full_name }}</div>{% endif %}
-              <div><strong>Last login:</strong> {{ request.user.last_login|date:"Y-m-d H:i" }}</div>
-              <div><strong>Joined:</strong> {{ request.user.date_joined|date:"Y-m-d" }}</div>
             </div>
-            <hr>
-            <div class="text-center">
-              <h6 class="mb-2">Scan to view my assets</h6>
-              {% if profile.qr_code %}
-                <img src="{{ profile.qr_code.url }}" alt="User QR" width="180" height="180" class="rounded" />
-              {% else %}
-                <div class="text-muted small">QR will appear after refresh.</div>
-              {% endif %}
-              <div class="mt-2">
-                <a href="{% url 'user_assets_public' profile.qr_token %}" class="btn btn-outline-secondary btn-sm">
-                  Open QR Link
-                </a>
-                <a href="{% url 'regenerate_user_qr' %}" class="btn btn-outline-danger btn-sm ms-1">
-                  Regenerate
-                </a>
+            
+            <!-- Info Section -->
+            <div class="col">
+              <div class="profile-info-modern">
+                <div class="profile-name-section">
+                  <h1 class="profile-display-name">{{ request.user.get_full_name|default:request.user.username }}</h1>
+                  <span class="profile-status-dot"></span>
+                </div>
+                <p class="profile-email-modern">
+                  <i class="fas fa-envelope"></i>
+                  {{ request.user.email|default:"hello@example.com" }}
+                </p>
+                <div class="profile-badges-modern">
+                  {% if profile.position %}
+                  <div class="profile-info-badge">
+                    <i class="fas fa-briefcase"></i>
+                    <span>{{ profile.position }}</span>
+                  </div>
+                  {% endif %}
+                  {% if profile.office_section %}
+                  <div class="profile-info-badge">
+                    <i class="fas fa-building"></i>
+                    <span>{{ profile.office_section.name }}</span>
+                  </div>
+                  {% endif %}
+                  <div class="profile-info-badge">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Joined {{ request.user.date_joined|date:"M Y" }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="col-auto d-none d-lg-block">
+              <div class="profile-quick-stats">
+                <div class="profile-stat-box">
+                  <div class="profile-stat-icon">
+                    <i class="fas fa-desktop"></i>
+                  </div>
+                  <div class="profile-stat-info">
+                    <div class="profile-stat-value">{{ assigned_packages|length }}</div>
+                    <div class="profile-stat-label">Desktop</div>
+                  </div>
+                </div>
+                <div class="profile-stat-box">
+                  <div class="profile-stat-icon">
+                    <i class="fas fa-laptop"></i>
+                  </div>
+                  <div class="profile-stat-info">
+                    <div class="profile-stat-value">{{ assigned_laptops|length }}</div>
+                    <div class="profile-stat-label">Laptop</div>
+                  </div>
+                </div>
               </div>
             </div>
 
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Right: Edit Profile & Security -->
-      <div class="col-md-8">
-        <div class="card shadow-sm mb-4">
-          <div class="card-header"><h5 class="mb-0">Edit Profile</h5></div>
-          <div class="card-body">
+    <!-- ==================== MAIN CONTENT GRID ==================== -->
+    <div class="row g-4 mt-2">
+      
+      <!-- LEFT SIDEBAR -->
+      <div class="col-lg-4">
+        
+        <!-- Quick Info Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-info-circle me-2"></i>
+            <h5>Quick Info</h5>
+          </div>
+          <div class="profile-card-body">
+            <div class="profile-info-item">
+              <span class="profile-info-label">Theme</span>
+              <span class="profile-info-value">
+                <span class="profile-badge {% if profile.theme == 'dark' %}dark{% else %}light{% endif %}">
+                  <i class="fa fa-{% if profile.theme == 'dark' %}moon{% else %}sun{% endif %} me-1"></i>
+                  {{ profile.theme|title }}
+                </span>
+              </span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Timezone</span>
+              <span class="profile-info-value">{{ profile.timezone_str }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">PM Notifications</span>
+              <span class="profile-info-value">
+                <span class="profile-badge {% if profile.notify_pm_due %}success{% else %}secondary{% endif %}">
+                  <i class="fa fa-{% if profile.notify_pm_due %}check{% else %}times{% endif %} me-1"></i>
+                  {{ profile.notify_pm_due|yesno:"Enabled,Disabled" }}
+                </span>
+              </span>
+            </div>
+            {% if profile.phone %}
+            <div class="profile-info-item">
+              <span class="profile-info-label">Phone</span>
+              <span class="profile-info-value">{{ profile.phone }}</span>
+            </div>
+            {% endif %}
+            {% if profile.employee %}
+            <div class="profile-info-item">
+              <span class="profile-info-label">Employee Link</span>
+              <span class="profile-info-value">{{ profile.employee.full_name }}</span>
+            </div>
+            {% endif %}
+            <div class="profile-info-item">
+              <span class="profile-info-label">Last Login</span>
+              <span class="profile-info-value">{{ request.user.last_login|date:"M d, Y H:i" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Code Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-qrcode me-2"></i>
+            <h5>My Assets QR Code</h5>
+          </div>
+          <div class="profile-card-body text-center">
+            <p class="profile-qr-subtitle">Scan to view my assigned assets</p>
+            {% if profile.qr_code %}
+              <div class="profile-qr-wrapper">
+                <img src="{{ profile.qr_code.url }}" alt="User QR" class="profile-qr-image" />
+              </div>
+            {% else %}
+              <div class="profile-qr-placeholder">
+                <i class="fa fa-qrcode fa-3x mb-2 text-muted"></i>
+                <p class="text-muted small">QR code will appear after refresh</p>
+              </div>
+            {% endif %}
+            <div class="profile-qr-actions">
+              <a href="{% url 'user_assets_public' profile.qr_token %}" class="profile-qr-btn primary">
+                <i class="fa fa-external-link-alt me-1"></i> Open Link
+              </a>
+              <a href="{% url 'regenerate_user_qr' %}" class="profile-qr-btn secondary">
+                <i class="fa fa-sync-alt me-1"></i> Regenerate
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT CONTENT -->
+      <div class="col-lg-8">
+        
+        <!-- Edit Profile Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-user-edit me-2"></i>
+            <h5>Edit Profile</h5>
+          </div>
+          <div class="profile-card-body">
             <form method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data">
               {% csrf_token %}
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label">First Name</label>
-                  <input class="form-control" name="first_name" value="{{ request.user.first_name }}">
+                  <label class="profile-form-label">First Name</label>
+                  <input class="profile-form-input" name="first_name" value="{{ request.user.first_name }}">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Last Name</label>
-                  <input class="form-control" name="last_name" value="{{ request.user.last_name }}">
+                  <label class="profile-form-label">Last Name</label>
+                  <input class="profile-form-input" name="last_name" value="{{ request.user.last_name }}">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Email</label>
-                  <input type="email" class="form-control" name="email" value="{{ request.user.email }}">
+                  <label class="profile-form-label">Email</label>
+                  <input type="email" class="profile-form-input" name="email" value="{{ request.user.email }}">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Phone</label>
-                  <input class="form-control" name="phone" value="{{ profile.phone }}">
+                  <label class="profile-form-label">Phone</label>
+                  <input class="profile-form-input" name="phone" value="{{ profile.phone }}" placeholder="Enter phone number">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Position</label>
-                  <input class="form-control" name="position" value="{{ profile.position }}">
+                  <label class="profile-form-label">Position</label>
+                  <input class="profile-form-input" name="position" value="{{ profile.position }}" placeholder="Enter position">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Office Section</label>
-                  <select class="form-select" name="office_section_id">
-                    <option value="">—</option>
+                  <label class="profile-form-label">Office Section</label>
+                  <select class="profile-form-select" name="office_section_id">
+                    <option value="">Select section...</option>
                     {% for s in sections %}
                       <option value="{{ s.id }}" {% if profile.office_section and profile.office_section.id == s.id %}selected{% endif %}>{{ s.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Link to Employee</label>
-                  <select class="form-select" name="employee_id">
-                    <option value="">—</option>
+                  <label class="profile-form-label">Link to Employee</label>
+                  <select class="profile-form-select" name="employee_id">
+                    <option value="">Select employee...</option>
                     {% for e in employees %}
                       <option value="{{ e.id }}" {% if profile.employee and profile.employee.id == e.id %}selected{% endif %}>{{ e.full_name }}</option>
                     {% endfor %}
                   </select>
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">Theme</label>
-                  <select class="form-select" name="theme">
-                    <option value="light" {% if profile.theme == "light" %}selected{% endif %}>Light</option>
-                    <option value="dark" {% if profile.theme == "dark" %}selected{% endif %}>Dark</option>
+                  <label class="profile-form-label">Theme</label>
+                  <select class="profile-form-select" name="theme">
+                    <option value="light" {% if profile.theme == "light" %}selected{% endif %}>☀️ Light</option>
+                    <option value="dark" {% if profile.theme == "dark" %}selected{% endif %}>🌙 Dark</option>
                   </select>
                 </div>
                 <div class="col-md-3">
-                  <label class="form-label">Timezone</label>
-                  <input class="form-control" name="timezone_str" value="{{ profile.timezone_str }}">
+                  <label class="profile-form-label">Timezone</label>
+                  <input class="profile-form-input" name="timezone_str" value="{{ profile.timezone_str }}" placeholder="UTC+8">
                 </div>
                 <div class="col-12">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="notify_pm_due" id="notify" {% if profile.notify_pm_due %}checked{% endif %}>
-                    <label for="notify" class="form-check-label">Email me PM due reminders</label>
+                  <div class="profile-checkbox">
+                    <input class="profile-checkbox-input" type="checkbox" name="notify_pm_due" id="notify" {% if profile.notify_pm_due %}checked{% endif %}>
+                    <label for="notify" class="profile-checkbox-label">
+                      <i class="fa fa-bell me-1"></i> Email me PM due reminders
+                    </label>
                   </div>
                 </div>
               </div>
-              <div class="mt-3 d-flex gap-2">
-                <button class="btn btn-primary" type="submit">Save Changes</button>
-                <a class="btn btn-outline-secondary" href="{% url 'profile' %}">Cancel</a>
+              <div class="profile-form-actions">
+                <button class="profile-btn primary" type="submit">
+                  <i class="fa fa-save me-1"></i> Save Changes
+                </button>
+                <a class="profile-btn secondary" href="{% url 'profile' %}">
+                  <i class="fa fa-times me-1"></i> Cancel
+                </a>
               </div>
             </form>
           </div>
         </div>
 
-        <div class="card shadow-sm">
-          <div class="card-header"><h5 class="mb-0">Security</h5></div>
-          <div class="card-body">
+        <!-- Security Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-shield-alt me-2"></i>
+            <h5>Security Settings</h5>
+          </div>
+          <div class="profile-card-body">
             <form method="post" action="{% url 'change_password' %}">
               {% csrf_token %}
               <div class="row g-3">
                 <div class="col-md-4">
-                  <label class="form-label">Current Password</label>
-                  <input type="password" class="form-control" name="current_password" required>
+                  <label class="profile-form-label">Current Password</label>
+                  <input type="password" class="profile-form-input" name="current_password" required placeholder="Enter current password">
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">New Password</label>
-                  <input type="password" class="form-control" name="new_password1" required>
+                  <label class="profile-form-label">New Password</label>
+                  <input type="password" class="profile-form-input" name="new_password1" required placeholder="Enter new password">
                 </div>
                 <div class="col-md-4">
-                  <label class="form-label">Confirm New Password</label>
-                  <input type="password" class="form-control" name="new_password2" required>
+                  <label class="profile-form-label">Confirm New Password</label>
+                  <input type="password" class="profile-form-input" name="new_password2" required placeholder="Confirm new password">
                 </div>
               </div>
-              <div class="mt-3">
-                <button class="btn btn-warning" type="submit">Change Password</button>
+              <div class="profile-form-actions">
+                <button class="profile-btn warning" type="submit">
+                  <i class="fa fa-key me-1"></i> Change Password
+                </button>
               </div>
             </form>
           </div>
         </div>
-      </div> <!-- end col-md-8 -->
-    </div> <!-- end row g-4 -->
 
-    <!-- Full-width Assigned Assets Section -->
-    <div class="row mt-4">
+      </div>
+    </div>
+
+    <!-- ==================== ASSIGNED ASSETS SECTION ==================== -->
+    {% if assigned_packages or assigned_laptops %}
+    <div class="row g-4 mt-2">
+      
       {% if assigned_packages %}
-      <div class="col-md-12">
-        <div class="card shadow-sm">
-          <div class="card-header"><h5 class="mb-0">My Assigned Desktop</h5></div>
-          <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover">
-              <thead>
-                <tr><th>Package</th><th>Computer Name</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                {% for dp in assigned_packages %}
-                {% with dd=dp.desktop_details.first %}
-                <tr>
-                  <td>#{{ dp.id }}</td>
-                  <td>{% if dd %}{{ dd.computer_name }}{% else %}—{% endif %}</td>
-                  <td>{% if dd and not dd.is_disposed %}
-                        <span class="badge bg-success">Active</span>
-                      {% else %}
-                        <span class="badge bg-danger">Disposed</span>
-                      {% endif %}
-                  </td>
-                </tr>
-                {% endwith %}
-                {% endfor %}
-              </tbody>
-            </table>
+      <div class="col-lg-6">
+        <div class="profile-assets-card">
+          <div class="profile-assets-header">
+            <div class="profile-assets-icon desktop">
+              <i class="fa fa-desktop"></i>
+            </div>
+            <div>
+              <h5 class="profile-assets-title">My Assigned Desktop</h5>
+              <p class="profile-assets-subtitle">{{ assigned_packages|length }} desktop package(s)</p>
+            </div>
+          </div>
+          <div class="profile-assets-list">
+            {% for dp in assigned_packages %}
+            {% with dd=dp.desktop_details.first %}
+            <div class="profile-asset-item">
+              <div class="profile-asset-icon">
+                <i class="fa fa-desktop"></i>
+              </div>
+              <div class="profile-asset-info">
+                <div class="profile-asset-name">Package #{{ dp.id }}</div>
+                <div class="profile-asset-detail">
+                  {% if dd %}{{ dd.computer_name }}{% else %}No computer name{% endif %}
+                </div>
+              </div>
+              <div class="profile-asset-status">
+                {% if dd and not dd.is_disposed %}
+                  <span class="profile-status-badge active">
+                    <i class="fa fa-check-circle"></i> Active
+                  </span>
+                {% else %}
+                  <span class="profile-status-badge disposed">
+                    <i class="fa fa-times-circle"></i> Disposed
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
           </div>
         </div>
       </div>
       {% endif %}
 
       {% if assigned_laptops %}
-      <div class="col-md-12 mt-4">
-        <div class="card shadow-sm">
-          <div class="card-header"><h5 class="mb-0">My Assigned Laptops</h5></div>
-          <div class="card-body table-responsive">
-            <table class="table table-bordered table-hover">
-              <thead>
-                <tr><th>Package</th><th>Computer Name</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                {% for lp in assigned_laptops %}
-                {% with ld=lp.laptop_details.first %}
-                <tr>
-                  <td>#{{ lp.id }}</td>
-                  <td>{% if ld %}{{ ld.computer_name }}{% else %}—{% endif %}</td>
-                  <td>{% if ld and not ld.is_disposed %}
-                        <span class="badge bg-success">Active</span>
-                      {% else %}
-                        <span class="badge bg-danger">Disposed</span>
-                      {% endif %}
-                  </td>
-                </tr>
-                {% endwith %}
-                {% endfor %}
-              </tbody>
-            </table>
+      <div class="col-lg-6">
+        <div class="profile-assets-card">
+          <div class="profile-assets-header">
+            <div class="profile-assets-icon laptop">
+              <i class="fa fa-laptop"></i>
+            </div>
+            <div>
+              <h5 class="profile-assets-title">My Assigned Laptops</h5>
+              <p class="profile-assets-subtitle">{{ assigned_laptops|length }} laptop package(s)</p>
+            </div>
+          </div>
+          <div class="profile-assets-list">
+            {% for lp in assigned_laptops %}
+            {% with ld=lp.laptop_details.first %}
+            <div class="profile-asset-item">
+              <div class="profile-asset-icon">
+                <i class="fa fa-laptop"></i>
+              </div>
+              <div class="profile-asset-info">
+                <div class="profile-asset-name">Package #{{ lp.id }}</div>
+                <div class="profile-asset-detail">
+                  {% if ld %}{{ ld.computer_name }}{% else %}No computer name{% endif %}
+                </div>
+              </div>
+              <div class="profile-asset-status">
+                {% if ld and not ld.is_disposed %}
+                  <span class="profile-status-badge active">
+                    <i class="fa fa-check-circle"></i> Active
+                  </span>
+                {% else %}
+                  <span class="profile-status-badge disposed">
+                    <i class="fa fa-times-circle"></i> Disposed
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
           </div>
         </div>
       </div>
       {% endif %}
-    </div> <!-- end full-width row -->
+
+    </div>
+    {% endif %}
+
   </div>
 </div>
+
+<script>
+// Auto-submit avatar form when file is selected
+document.getElementById('avatarInput').addEventListener('change', function() {
+  if (this.files && this.files[0]) {
+    document.getElementById('avatarForm').submit();
+  }
+});
+</script>
+
 {% endblock %}
