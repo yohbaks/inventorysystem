@@ -689,9 +689,12 @@
             {% endfor %}
           </div>
 
-          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}" class="btn w-100 rounded-pill mt-3" style="background: var(--gradient-success); color: white; font-weight: 600;">
-            <i class="fas fa-wrench"></i> Conduct PM
-          </a>
+<a href="{% url 'maintenance_history_laptop' laptop_package.id %}" 
+   class="btn w-100 rounded-pill mt-3 conduct-pm-btn" 
+   data-disposed="{{ laptop_package.is_disposed|yesno:'true,false' }}"
+   style="background: var(--gradient-success); color: white; font-weight: 600;">
+  <i class="fas fa-wrench"></i> Conduct PM
+</a>
           {% else %}
           <p style="color: #6b7280; margin: 0;">No PM schedule found for this laptop.</p>
           {% endif %}
@@ -701,16 +704,17 @@
         <div class="quick-actions mt-4">
           <h4 style="font-weight: 700; margin-bottom: 1rem; color: #1f2937;">Quick Actions</h4>
           
-          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}" class="action-item">
-            <div class="d-flex align-items-center gap-3">
-              <div style="padding: 0.75rem; background: #dbeafe; color: #2563eb; border-radius: 0.75rem;">
-                <i class="fa fa-history"></i>
-              </div>
-              <span style="font-weight: 600;">Maintenance History</span>
-            </div>
-            <i class="fas fa-chevron-right" style="color: #d1d5db;"></i>
-          </a>
-
+          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}" 
+   class="action-item conduct-pm-link" 
+   data-disposed="{{ laptop_package.is_disposed|yesno:'true,false' }}">
+  <div class="d-flex align-items-center gap-3">
+    <div style="padding: 0.75rem; background: #dbeafe; color: #2563eb; border-radius: 0.75rem;">
+      <i class="fa fa-history"></i>
+    </div>
+    <span style="font-weight: 600;">Maintenance History</span>
+  </div>
+  <i class="fas fa-chevron-right" style="color: #d1d5db;"></i>
+</a>
           <a href="{% url 'generate_laptop_pdf' laptop_package.id %}" class="action-item">
             <div class="d-flex align-items-center gap-3">
               <div style="padding: 0.75rem; background: #e0e7ff; color: #6366f1; border-radius: 0.75rem;">
@@ -1095,7 +1099,30 @@ $(document).on("submit", "#editEndUserForm, #editAssetOwnerForm, #editDocumentsF
     input.value = value.match(/.{1,5}/g)?.join('-') || '';
   }
 </script>
-
+<!-- ==================== 🚫 DISPOSED LAPTOP PM CHECK ==================== -->
+<script>
+$(document).ready(function() {
+  // Handle Conduct PM button clicks
+  $('.conduct-pm-btn, .conduct-pm-link').on('click', function(e) {
+    const isDisposed = $(this).data('disposed');
+    
+    if (isDisposed === true || isDisposed === 'true') {
+      e.preventDefault(); // Stop navigation
+      
+      // Show notification
+      $.notify({
+        title: "⚠️ Laptop Disposed",
+        message: "This laptop has already been disposed. Maintenance cannot be performed.",
+        icon: "fa fa-exclamation-triangle"
+      }, {
+        type: "danger",
+        placement: { from: "top", align: "center" },
+        delay: 4000
+      });
+    }
+  });
+});
+</script>
 {% endblock %}
 
 

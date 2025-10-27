@@ -1,5 +1,6 @@
 
 <!-- ==================== 💻 EDIT LAPTOP MODAL ==================== -->
+{% if laptop_details %}
 <div class="modal fade" id="editLaptopModal" tabindex="-1" aria-labelledby="editLaptopModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="{% url 'edit_laptop' laptop_details.id %}">
@@ -167,7 +168,7 @@
     </form>
   </div>
 </div>
-
+{% endif %}
 
 <!-- ==================== 🗑 DISPOSE LAPTOP MODAL ==================== -->
 <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">

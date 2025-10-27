@@ -21,7 +21,7 @@
         </div>
         
         <div class="premium-action-buttons mt-3 mt-md-0">
-           <a href="#" class="premium-btn premium-btn-return">
+          <a href="#" class="premium-btn premium-btn-return">
             <i class="fas fa-arrow-left"></i>
             Return to Supply
           </a>
@@ -29,7 +29,6 @@
             <i class="fas fa-plus-circle"></i>
             Add Laptop
           </a>
-         
           <a href="#" class="premium-btn premium-btn-export">
             <i class="fas fa-download"></i>
             Export Excel
@@ -56,7 +55,7 @@
                   <tr>
                     <th>Computer Name</th>
                     <th>Serial Number</th>
-                    <th>Brand Name</th>
+                    <th>Brand</th>
                     <th>Model</th>
                     <th>End User</th>
                     <th>Status</th>
@@ -109,10 +108,10 @@
                 
                 <tbody>
                   {% for item in laptops %}
-                  <tr>
+                  <tr {% if item.details and item.details.is_disposed %}style="background-color: #fee2e2;"{% endif %}>
                     <td>
                       <div class="d-flex align-items-center">
-                        <div style="width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: {% if item.details and item.details.is_disposed %}linear-gradient(135deg, #ef4444 0%, #dc2626 100%){% else %}linear-gradient(135deg, #3b82f6 0%, #1e40af 100%){% endif %}; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem;">
                           <i class="fas fa-laptop text-white" style="font-size: 16px;"></i>
                         </div>
                         <div>
@@ -155,7 +154,7 @@
                     </td>
                     <td>
                       {% if item.end_user %}
-                        <div class="mb-1">
+                        <div>
                           <i class="fas fa-user text-primary me-1" style="font-size: 12px;"></i>
                           <span>{{ item.end_user }}</span>
                         </div>
@@ -180,14 +179,12 @@
                       {% endif %}
                     </td>
                     <td>
-                      <div class="d-flex gap-1">
-                        <a href="{% url 'laptop_details_view' item.package.id %}" 
-                           class="premium-view-btn">
-                          <i class="fas fa-eye"></i>
-                          View
-                        </a>
-
-                      </div>
+                      <a href="{% url 'laptop_details_view' item.package.id %}" 
+                         class="premium-view-btn"
+                         title="View Details">
+                        <i class="fas fa-eye"></i>
+                        View
+                      </a>
                     </td>
                   </tr>
                   {% empty %}

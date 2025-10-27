@@ -4696,7 +4696,7 @@ def laptop_list(request):
     laptops = []
     for pkg in packages:
         # Current active details (if any)
-        details = LaptopDetails.objects.filter(laptop_package=pkg, is_disposed=False).first()
+        details = LaptopDetails.objects.filter(laptop_package=pkg).order_by('-created_at').first()
 
         # User assignment
         user = UserDetails.objects.filter(laptop_package=pkg).select_related("user_Enduser").first()
@@ -4835,16 +4835,30 @@ def edit_laptop(request, laptop_id):
         "error": "Invalid request method."
     })
 
-@login_required
+
+@require_POST
 def dispose_laptop(request, package_id):
-    laptop_package = get_object_or_404(LaptopPackage, id=package_id)
-    laptop = LaptopDetails.objects.filter(laptop_package=laptop_package, is_disposed=False).first()
+    """
+    Dispose a laptop via AJAX POST request.
+    Returns JSON response with success/error status.
+    """
+    try:
+        laptop_package = get_object_or_404(LaptopPackage, id=package_id)
+        laptop = LaptopDetails.objects.filter(
+            laptop_package=laptop_package, 
+            is_disposed=False
+        ).first()
 
-    user_details = UserDetails.objects.filter(laptop_package=laptop_package).first()
+        if not laptop:
+            return JsonResponse({
+                'success': False,
+                'error': 'No active laptop found for this package.'
+            }, status=400)
 
-    if request.method == "POST" and laptop:
+        user_details = UserDetails.objects.filter(laptop_package=laptop_package).first()
         reason = request.POST.get("reason", "")
 
+        # Create disposal record
         DisposedLaptop.objects.create(
             laptop=laptop,
             serial_no=laptop.laptop_sn_db,
@@ -4854,17 +4868,26 @@ def dispose_laptop(request, package_id):
             reason=reason,
         )
 
+        # Mark laptop as disposed
         laptop.is_disposed = True
         laptop.save()
 
+        # Mark package as disposed
         laptop_package.is_disposed = True
         laptop_package.disposal_date = timezone.now()
         laptop_package.save()
 
-        messages.success(request, "✅ Laptop disposed successfully.")
-        return redirect("laptop_details_view", package_id=laptop_package.id)
+        return JsonResponse({
+            'success': True,
+            'message': 'Laptop disposed successfully!'
+        })
 
-    return redirect("laptop_details_view", package_id=laptop_package.id)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'An error occurred: {str(e)}'
+        }, status=500)
+
 
 
 def generate_laptop_pdf(request, package_id):
