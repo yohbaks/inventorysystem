@@ -1,92 +1,528 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-  <div class="page-inner">
-    <div class="row">
-      <div class="col-md-8 offset-md-2">
-        <div class="card shadow-sm rounded">
-          <div class="card-header" style="background-color:#6861ce;">
-            <div class="card-head-row d-flex justify-content-between align-items-center">
-              <h4 class="card-title mb-0 text-white">🔌 Salvaged UPS Detail</h4>
-              <div class="card-tools">
-                <a href="{% url 'salvage_overview' %}" class="btn btn-light btn-sm me-2">
-                  <i class="fa fa-arrow-left me-1"></i> Back
-                </a>
-                <a href="#" class="btn btn-success btn-sm me-2">
-                  <i class="fa fa-download me-1"></i> Export
-                </a>
-                <a href="#" class="btn btn-info btn-sm">
-                  <i class="fa fa-print me-1"></i> Print
-                </a>
-              </div>
-            </div>
-          </div>
+  <div class="page-inner py-4">
 
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-bordered table-striped">
-                <tbody>
-                  <tr><th class="bg-light text-end" style="width: 30%;">Serial Number</th><td>{{ ups.ups_sn }}</td></tr>
-                  <tr><th class="bg-light text-end">Brand</th><td>{{ ups.ups_brand }}</td></tr>
-                  <tr><th class="bg-light text-end">Model</th><td>{{ ups.ups_model }}</td></tr>
-                  <tr><th class="bg-light text-end">Capacity</th><td>{{ ups.ups_capacity }}</td></tr>
-                  <tr><th class="bg-light text-end">Computer Name</th><td>{{ ups.computer_name|default:"—" }}</td></tr>
-                  <tr><th class="bg-light text-end">Asset Owner</th><td>{{ ups.asset_owner|default:"—" }}</td></tr>
-                  <tr><th class="bg-light text-end">Date Salvaged</th><td>{{ ups.salvage_date|date:"Y-m-d H:i" }}</td></tr>
-                  <tr><th class="bg-light text-end">Notes</th><td>{{ ups.notes|default:"—" }}</td></tr>
-                  <!-- ✅ Status row -->
-                  <tr>
-                    <th class="bg-light text-end">Status</th>
-                    <td>
-                      <span class="badge bg-{{ status_class }}">{{ status_label }}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+    <!-- ==================== PREMIUM DETAIL HEADER ==================== -->
+    <div class="premium-detail-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+      <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex align-items-center">
+          <div class="premium-detail-icon" style="background: rgba(255, 255, 255, 0.2);">
+            <i class="fa fa-plug"></i>
           </div>
-
-          <div class="card-footer text-end">
-            <a href="{% url 'salvage_overview' %}" class="btn btn-outline-secondary">
-              <i class="fa fa-arrow-left"></i> Back to Salvage Overview
-            </a>
+          <div class="ms-3">
+            <h3 class="premium-detail-title mb-1" style="color: white;">Salvaged UPS Detail</h3>
+            <p class="premium-detail-subtitle mb-0" style="color: rgba(255, 255, 255, 0.9);">
+              Serial: {{ ups.ups_sn }}
+            </p>
           </div>
+        </div>
+        <div class="mt-3 mt-md-0 d-flex gap-2">
+          <a href="{% url 'salvage_overview' %}" class="premium-detail-btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
+            <i class="fa fa-arrow-left me-1"></i> Back
+          </a>
+          <a href="#" class="premium-detail-btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
+            <i class="fa fa-download me-1"></i> Export
+          </a>
+          <a href="#" class="premium-detail-btn" style="background: rgba(255, 255, 255, 0.2); color: white; border: 1px solid rgba(255, 255, 255, 0.3);">
+            <i class="fa fa-print me-1"></i> Print
+          </a>
         </div>
       </div>
     </div>
 
-    <!-- Timeline / History Section -->
-    <div class="card mt-3">
-      <div class="card-header bg-light">
-        <h5 class="mb-0">🔄 Reassignment History</h5>
+    <div class="row">
+      <!-- ==================== LEFT COLUMN: UPS INFO ==================== -->
+      <div class="col-12 col-md-8">
+        <div class="premium-info-card h-100" style="border-top: 4px solid #f59e0b;">
+
+          <!-- Info Header -->
+          <div class="premium-info-header mb-3">
+            <div class="premium-info-icon-badge" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+              <i class="fa fa-info-circle"></i>
+            </div>
+            <div>
+              <h4 class="premium-info-title">Complete UPS Information</h4>
+              <p class="premium-info-subtitle">All details and current status</p>
+            </div>
+          </div>
+
+          <!-- UPS Specs -->
+          <div class="premium-section">
+            <div class="premium-section-header">
+              <i class="fa fa-plug me-2 text-warning"></i>
+              <h6 class="premium-section-title">UPS Specifications</h6>
+            </div>
+            <div class="premium-detail-grid">
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Serial Number</span>
+                <span class="premium-detail-value monospace">{{ ups.ups_sn|default:"—" }}</span>
+              </div>
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Brand</span>
+                <span class="premium-detail-value">{{ ups.ups_brand|default:"—" }}</span>
+              </div>
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Model</span>
+                <span class="premium-detail-value">{{ ups.ups_model|default:"—" }}</span>
+              </div>
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Capacity</span>
+                <span class="premium-detail-value">{{ ups.ups_capacity|default:"—" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="premium-divider">
+
+          <!-- Assignment -->
+          <div class="premium-section">
+            <div class="premium-section-header">
+              <i class="fa fa-user-circle me-2 text-primary"></i>
+              <h6 class="premium-section-title">Original Assignment</h6>
+            </div>
+            <div class="premium-detail-grid">
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Computer Name</span>
+                <span class="premium-detail-value">
+                  {% if ups.computer_name %}
+                    <span class="premium-computer-badge">
+                      <i class="fa fa-desktop me-1"></i>
+                      {{ ups.computer_name }}
+                    </span>
+                  {% else %}
+                    <span class="text-muted">Not Assigned</span>
+                  {% endif %}
+                </span>
+              </div>
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Asset Owner</span>
+                <span class="premium-detail-value">{{ ups.asset_owner|default:"Not Assigned" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="premium-divider">
+
+          <!-- Status & Timeline -->
+          <div class="premium-section">
+            <div class="premium-section-header">
+              <i class="fa fa-flag me-2 text-warning"></i>
+              <h6 class="premium-section-title">Status & Timeline</h6>
+            </div>
+            <div class="premium-detail-grid">
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Current Status</span>
+                <span class="premium-detail-value">
+                  {% if status_class == "danger" %}
+                    <span class="premium-status-badge disposed">
+                      <i class="fa fa-times-circle me-1"></i>{{ status_label }}
+                    </span>
+                  {% elif status_class == "secondary" %}
+                    <span class="premium-status-badge reassigned">
+                      <i class="fa fa-arrow-right me-1"></i>{{ status_label }}
+                    </span>
+                  {% else %}
+                    <span class="premium-status-badge available">
+                      <i class="fa fa-check-circle me-1"></i>{{ status_label }}
+                    </span>
+                  {% endif %}
+                </span>
+              </div>
+              <div class="premium-detail-item">
+                <span class="premium-detail-label">Date Salvaged</span>
+                <span class="premium-detail-value">
+                  <span class="premium-date-badge success">
+                    <i class="fa fa-calendar-check me-1" style="font-size: 11px;"></i>
+                    {{ ups.salvage_date|date:"M d, Y H:i" }}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="premium-divider">
+
+          <!-- Quick Stats -->
+          <div class="premium-section">
+            <div class="premium-section-header">
+              <i class="fa fa-chart-bar me-2 text-warning"></i>
+              <h6 class="premium-section-title">Quick Stats</h6>
+            </div>
+            <div class="premium-stats-grid">
+              <div class="premium-stat-item">
+                <div class="premium-stat-icon" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+                  <i class="fa fa-history"></i>
+                </div>
+                <div class="premium-stat-content">
+                  <span class="premium-stat-value">{{ history|length }}</span>
+                  <span class="premium-stat-label">Reassignments</span>
+                </div>
+              </div>
+              <div class="premium-stat-item">
+                <div class="premium-stat-icon" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); color: #166534;">
+                  <i class="fa fa-check-circle"></i>
+                </div>
+                <div class="premium-stat-content">
+                  <span class="premium-stat-value">
+                    {% if status_class == "success" %}✓{% else %}—{% endif %}
+                  </span>
+                  <span class="premium-stat-label">Available</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="premium-divider">
+
+          <!-- Notes -->
+          <div class="premium-section">
+            <div class="premium-section-header">
+              <i class="fa fa-sticky-note me-2 text-warning"></i>
+              <h6 class="premium-section-title">Notes</h6>
+            </div>
+            <div class="premium-notes-box">
+              {{ ups.notes|default:"No notes available" }}
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card-body">
-        <table class="table table-sm table-bordered">
-          <thead class="table-dark">
-            <tr>
-              <th>Reassigned To</th>
-              <th>Computer Name</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% if history %}
-              {% for entry in history %}
-                <tr>
-                  <td>{{ entry.reassigned_to }}</td>
-                  <td>{{ entry.reassigned_computer_name }}</td>
-                  <td>{{ entry.reassigned_at|date:"Y-m-d H:i" }}</td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="3" class="text-center text-muted">No reassignment history</td>
-              </tr>
-            {% endif %}
-          </tbody>
-        </table>
+
+      <!-- ==================== RIGHT COLUMN: HISTORY ==================== -->
+      <div class="col">
+        <div class="premium-info-card h-100" style="border-top: 4px solid #f59e0b;">
+          <div class="premium-info-header mb-4">
+            <div class="premium-info-icon-badge" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+              <i class="fa fa-history"></i>
+            </div>
+            <div>
+              <h4 class="premium-info-title">Reassignment History</h4>
+              <p class="premium-info-subtitle">Complete timeline of UPS reassignments</p>
+            </div>
+          </div>
+
+          {% if history %}
+          <div class="premium-history-timeline">
+            {% for entry in history %}
+            <div class="premium-timeline-item">
+              <div class="premium-timeline-marker"></div>
+              <div class="premium-timeline-content">
+                <div class="premium-timeline-header">
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="premium-history-icon" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+                      <i class="fa fa-user"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h6 class="premium-timeline-name mb-0">{{ entry.reassigned_to }}</h6>
+                      <span class="premium-timeline-date">
+                        <i class="fa fa-clock me-1" style="font-size: 10px;"></i>
+                        {{ entry.reassigned_at|date:"M d, Y H:i" }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="premium-timeline-body">
+                  <span class="premium-computer-badge">
+                    <i class="fa fa-desktop me-1"></i>
+                    {{ entry.reassigned_computer_name }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="premium-alert warning">
+            <div class="premium-alert-icon">
+              <i class="fa fa-info-circle"></i>
+            </div>
+            <div>
+              <h6 class="premium-alert-title">No Reassignment History</h6>
+              <p class="premium-alert-text">This UPS has not been reassigned yet and is available for use.</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+
+<style>
+  /* Section Styling - More Compact */
+  .premium-section {
+    margin-bottom: 1rem;
+  }
+
+  .premium-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .premium-section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .premium-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  /* Divider - More Compact */
+  .premium-divider {
+    border: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #e2e8f0 20%, #e2e8f0 80%, transparent 100%);
+    margin: 1.25rem 0;
+  }
+
+  /* Detail Grid - 2 Column for Compact Layout */
+  .premium-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 1.5rem;
+  }
+
+  .premium-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .premium-detail-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+  }
+
+  .premium-detail-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .premium-detail-value.monospace {
+    font-family: 'Courier New', monospace;
+    font-size: 0.938rem;
+  }
+
+  /* Notes Box - More Compact */
+  .premium-notes-box {
+    padding: 1rem;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    color: #475569;
+    min-height: 60px;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+  }
+
+  /* Stats Grid - More Compact */
+  .premium-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .premium-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .premium-stat-item:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .premium-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .premium-stat-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .premium-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+  }
+
+  .premium-stat-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+  }
+
+  /* Timeline Styling */
+  .premium-history-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .premium-history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #6366f1 0%, #c7d2fe 100%);
+  }
+
+  .premium-timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .premium-timeline-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .premium-timeline-marker {
+    position: absolute;
+    left: -1.875rem;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border: 3px solid #6366f1;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px #f0f0ff;
+  }
+
+  .premium-timeline-content {
+    background: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border-left: 3px solid #6366f1;
+  }
+
+  .premium-timeline-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .premium-timeline-date {
+    font-size: 0.813rem;
+    color: #64748b;
+  }
+
+  .premium-timeline-body {
+    margin-top: 0.75rem;
+  }
+
+  /* History Icons */
+  .premium-history-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .premium-computer-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.813rem;
+    border: 1px solid #93c5fd;
+  }
+
+  /* Text Color Utilities */
+  .text-purple {
+    color: #8b5cf6;
+  }
+
+  /* Button Hover */
+  .premium-detail-btn:hover {
+    background: white !important;
+    color: #059669 !important;
+    transform: translateY(-2px);
+  }
+
+  /* Bottom Spacing */
+  .mb-5 {
+    margin-bottom: 4rem !important;
+  }
+
+  /* Responsive */
+  @media (max-width: 991px) {
+    .premium-stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .premium-detail-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .premium-divider {
+      margin: 1rem 0;
+    }
+
+    .premium-history-timeline {
+      padding-left: 1.5rem;
+    }
+
+    .premium-timeline-marker {
+      left: -1.375rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .premium-section-header {
+      font-size: 0.875rem;
+    }
+
+    .premium-stat-item {
+      padding: 1rem;
+    }
+
+    .premium-stat-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 18px;
+    }
+
+    .premium-stat-value {
+      font-size: 1.5rem;
+    }
+  }
+</style>
 {% endblock %}

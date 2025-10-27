@@ -1087,42 +1087,39 @@ def disposed_keyboards(request):
 # END ################ (KEYBOARD END)
 
 
-# BEGIN ################ (MOUSE)
-
 #This function retrieves all mouse records and renders them in a similar way as mouse_details.
-
 def monitor_details(request):
     """
-    Show only current state per monitor serial:
-    - Active: MonitorDetails (is_disposed=False) whose serial is NOT in current salvaged-reassigned list
-    - Reassigned: SalvagedMonitor (is_reassigned=True, is_disposed=False)
-    Disposed units never appear here.
+    Show all monitor states per serial:
+    - Active: MonitorDetails (is_disposed=False) whose serial is NOT in salvaged list
+    - Salvaged/Reassigned/Disposed: ALL SalvagedMonitor records (regardless of flags)
     """
-    # 1) Current reassigned (salvaged) monitors
-    reassigned_qs = (
+    # 1) Get ALL salvaged monitors (no filter needed!)
+    salvaged_qs = (
         SalvagedMonitor.objects
-        .filter(is_reassigned=True, is_disposed=False)
+        .all()  # ← Get ALL salvaged monitors including disposed
         .select_related("reassigned_to")
+        .prefetch_related("reassigned_to__user_details__user_Enduser")
     )
 
-    # Normalize serials to avoid duplicates from case/whitespace mismatches
-    reassigned_serials = {
+    # Normalize serials to avoid duplicates
+    salvaged_serials = {
         (s.monitor_sn or "").strip().lower()
-        for s in reassigned_qs
+        for s in salvaged_qs
     }
 
-    # 2) Active monitors EXCLUDING any serial that’s currently reassigned
+    # 2) Active monitors EXCLUDING any serial that's in salvaged table
     active_qs = (
         MonitorDetails.objects
         .filter(is_disposed=False)
         .select_related("equipment_package", "monitor_brand_db")
+        .prefetch_related("equipment_package__user_details__user_Enduser")
     )
 
     active_data = []
     for m in active_qs:
         sn_norm = (m.monitor_sn_db or "").strip().lower()
-        if sn_norm in reassigned_serials:
-            # Skip: there is a more up-to-date reassigned record for this serial
+        if sn_norm in salvaged_serials:
             continue
 
         active_data.append({
@@ -1136,48 +1133,97 @@ def monitor_details(request):
             "salvaged_id": None,
         })
 
-    # 3) Format reassigned rows
-    reassigned_data = []
-    for s in reassigned_qs:
-        reassigned_data.append({
+    # 3) Format salvaged rows - ALL of them!
+    salvaged_data = []
+    for s in salvaged_qs:
+        # ✅ Determine status based on flags
+        if s.is_disposed:
+            status = "disposed"      # 🆕 fixed to show disposed properly
+        elif s.is_reassigned:
+            status = "reassigned"
+        else:
+            status = "salvaged"      # newly salvaged and available
+
+        # Use reassigned_to if available, otherwise original equipment_package
+        display_package = s.reassigned_to if s.reassigned_to else s.equipment_package
+
+        salvaged_data.append({
             "id": s.id,
             "monitor_sn_db": s.monitor_sn,
             "monitor_brand_db": s.monitor_brand,
             "monitor_model_db": s.monitor_model,
             "monitor_size_db": s.monitor_size,
-            "equipment_package": s.reassigned_to,   # last package assigned (can be None)
-            "status": "reassigned",
+            "equipment_package": display_package,
+            "status": status,
             "salvaged_id": s.id,
         })
 
-    monitors = active_data + reassigned_data
+    monitors = active_data + salvaged_data
+
     return render(request, "monitor_details.html", {"monitors": monitors})
 
+
+
 def monitor_timeline_detail(request, salvaged_id):
+    """Detail view for salvaged/reassigned monitor with history"""
     salvaged_monitor = get_object_or_404(SalvagedMonitor, pk=salvaged_id)
     history = salvaged_monitor.history.order_by('-reassigned_at')
+    
+    # Determine status for display
+    if salvaged_monitor.is_disposed:
+        status_label = "Salvaged"
+        status_class = "danger"
+    elif salvaged_monitor.is_reassigned:
+        status_label = "Reassigned"
+        status_class = "secondary"
+    else:
+        status_label = "Available"
+        status_class = "success"
+    
     return render(request, 'salvage/monitor_timeline_detail.html', {
         "monitor": salvaged_monitor,
-        "history": history
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
     })
 
 
+# ==================== KEYBOARD DETAILS ====================
 def keyboard_details(request):
-    # 1) Current reassigned keyboards
-    reassigned_qs = (
+    """
+    Show all keyboard states per serial:
+    - Active: KeyboardDetails (is_disposed=False) whose serial is NOT in salvaged list
+    - Salvaged/Reassigned: ALL SalvagedKeyboard records (regardless of flags)
+    """
+    # 1) Get ALL salvaged keyboards (no filter!)
+    # This includes newly salvaged (available), reassigned, and disposed
+    salvaged_qs = (
         SalvagedKeyboard.objects
-        .filter(is_reassigned=True, is_disposed=False)
+        .all()  # ← FIXED: Get ALL salvaged keyboards
         .select_related("reassigned_to")
+        .prefetch_related("reassigned_to__user_details__user_Enduser")
     )
-    reassigned_serials = {(s.keyboard_sn or "").strip().lower() for s in reassigned_qs}
 
-    # 2) Active keyboards excluding reassigned
-    active_qs = KeyboardDetails.objects.filter(is_disposed=False).select_related("equipment_package")
+    # Normalize serials to avoid duplicates
+    salvaged_serials = {
+        (s.keyboard_sn or "").strip().lower()
+        for s in salvaged_qs
+    }
+
+    # 2) Active keyboards EXCLUDING any serial that's in salvaged table
+    active_qs = (
+        KeyboardDetails.objects
+        .filter(is_disposed=False)
+        .select_related("equipment_package", "keyboard_brand_db")
+        .prefetch_related("equipment_package__user_details__user_Enduser")
+    )
+
     active_data = []
     for k in active_qs:
         sn_norm = (k.keyboard_sn_db or "").strip().lower()
-        if sn_norm in reassigned_serials:
+        if sn_norm in salvaged_serials:
             continue
+
         active_data.append({
             "id": k.id,
             "keyboard_sn_db": k.keyboard_sn_db,
@@ -1188,45 +1234,92 @@ def keyboard_details(request):
             "salvaged_id": None,
         })
 
-    # 3) Reassigned keyboards
-    reassigned_data = []
-    for s in reassigned_qs:
-        reassigned_data.append({
+    # 3) Format salvaged keyboards - ALL of them!
+    salvaged_data = []
+    for s in salvaged_qs:
+        # Determine status
+        if s.is_disposed:
+            status = "disposed"
+        elif s.is_reassigned:
+            status = "reassigned"
+        else:
+            # Newly salvaged (available for reassignment)
+            status = "salvaged"
+        
+        # Use reassigned_to if available, otherwise original equipment_package
+        display_package = s.reassigned_to if s.reassigned_to else s.equipment_package
+        
+        salvaged_data.append({
             "id": s.id,
             "keyboard_sn_db": s.keyboard_sn,
             "keyboard_brand_db": s.keyboard_brand,
             "keyboard_model_db": s.keyboard_model,
-            "equipment_package": s.reassigned_to,
-            "status": "reassigned",
+            "equipment_package": display_package,
+            "status": status,
             "salvaged_id": s.id,
         })
 
-    keyboards = active_data + reassigned_data
+    keyboards = active_data + salvaged_data
     return render(request, "keyboard_details.html", {"keyboards": keyboards})
 
 
-
 def keyboard_timeline_detail(request, salvaged_id):
+    """Detail view for salvaged/reassigned keyboard with history"""
     salvaged_keyboard = get_object_or_404(SalvagedKeyboard, pk=salvaged_id)
     history = salvaged_keyboard.history.order_by('-reassigned_at')
+    
+    # Determine status for display
+    if salvaged_keyboard.is_disposed:
+        status_label = "Salvaged"
+        status_class = "danger"
+    elif salvaged_keyboard.is_reassigned:
+        status_label = "Reassigned"
+        status_class = "secondary"
+    else:
+        status_label = "Available"
+        status_class = "success"
+    
     return render(request, 'salvage/keyboard_timeline_detail.html', {
         "keyboard": salvaged_keyboard,
-        "history": history
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
     })
 
+# ==================== MOUSE DETAILS ====================
+# ==================== MOUSE DETAILS ====================
 def mouse_details(request):
-    reassigned_qs = (
+    """
+    Show all mouse states per serial:
+    - Active: MouseDetails (is_disposed=False) whose serial is NOT in salvaged list
+    - Salvaged/Reassigned/Disposed: ALL SalvagedMouse records (regardless of flags)
+    """
+    # 1) Get ALL salvaged mice (including newly salvaged, reassigned, and disposed)
+    salvaged_qs = (
         SalvagedMouse.objects
-        .filter(is_reassigned=True, is_disposed=False)
+        .all()
         .select_related("reassigned_to")
+        .prefetch_related("reassigned_to__user_details__user_Enduser")
     )
-    reassigned_serials = {(s.mouse_sn or "").strip().lower() for s in reassigned_qs}
 
-    active_qs = MouseDetails.objects.filter(is_disposed=False).select_related("equipment_package")
+    # Normalize serials to avoid duplicates
+    salvaged_serials = {
+        (s.mouse_sn or "").strip().lower()
+        for s in salvaged_qs
+    }
+
+    # 2) Active mice EXCLUDING those already salvaged
+    active_qs = (
+        MouseDetails.objects
+        .filter(is_disposed=False)
+        .select_related("equipment_package", "mouse_brand_db")
+        .prefetch_related("equipment_package__user_details__user_Enduser")
+    )
+
     active_data = []
     for m in active_qs:
         sn_norm = (m.mouse_sn_db or "").strip().lower()
-        if sn_norm in reassigned_serials:
+        if sn_norm in salvaged_serials:
             continue
         active_data.append({
             "id": m.id,
@@ -1238,19 +1331,29 @@ def mouse_details(request):
             "salvaged_id": None,
         })
 
-    reassigned_data = []
-    for s in reassigned_qs:
-        reassigned_data.append({
+    # 3) Salvaged mice records
+    salvaged_data = []
+    for s in salvaged_qs:
+        if s.is_disposed:
+            status = "disposed"
+        elif s.is_reassigned:
+            status = "reassigned"
+        else:
+            status = "salvaged"
+
+        display_package = s.reassigned_to if s.reassigned_to else s.equipment_package
+
+        salvaged_data.append({
             "id": s.id,
             "mouse_sn_db": s.mouse_sn,
             "mouse_brand_db": s.mouse_brand,
             "mouse_model_db": s.mouse_model,
-            "equipment_package": s.reassigned_to,
-            "status": "reassigned",
+            "equipment_package": display_package,
+            "status": status,
             "salvaged_id": s.id,
         })
 
-    mice = active_data + reassigned_data
+    mice = active_data + salvaged_data
     return render(request, "mouse_details.html", {"mice": mice})
 
 
@@ -1258,27 +1361,61 @@ def mouse_details(request):
 def mouse_timeline_detail(request, salvaged_id):
     salvaged_mouse = get_object_or_404(SalvagedMouse, pk=salvaged_id)
     history = salvaged_mouse.history.order_by('-reassigned_at')
+
+    if salvaged_mouse.is_disposed:
+        status_label = "Disposed"
+        status_class = "danger"
+    elif salvaged_mouse.is_reassigned:
+        status_label = "Reassigned"
+        status_class = "secondary"
+    else:
+        status_label = "Salvaged"
+        status_class = "success"
+
     return render(request, 'salvage/mouse_timeline_detail.html', {
         "mouse": salvaged_mouse,
-        "history": history
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
     })
 
 
 
+# ==================== UPS DETAILS ====================
 def ups_details(request):
-    reassigned_qs = (
+    """
+    Show all UPS states per serial:
+    - Active: UPSDetails (is_disposed=False) whose serial is NOT in salvaged list
+    - Salvaged/Reassigned: ALL SalvagedUPS records (regardless of flags)
+    """
+    # 1) Get ALL salvaged UPS units (no filter!)
+    salvaged_qs = (
         SalvagedUPS.objects
-        .filter(is_reassigned=True, is_disposed=False)
+        .all()  # ← FIXED: Get ALL salvaged UPS
         .select_related("reassigned_to")
+        .prefetch_related("reassigned_to__user_details__user_Enduser")
     )
-    reassigned_serials = {(s.ups_sn or "").strip().lower() for s in reassigned_qs}
 
-    active_qs = UPSDetails.objects.filter(is_disposed=False).select_related("equipment_package")
+    # Normalize serials
+    salvaged_serials = {
+        (s.ups_sn or "").strip().lower()
+        for s in salvaged_qs
+    }
+
+    # 2) Active UPS units EXCLUDING salvaged serials
+    active_qs = (
+        UPSDetails.objects
+        .filter(is_disposed=False)
+        .select_related("equipment_package", "ups_brand_db")
+        .prefetch_related("equipment_package__user_details__user_Enduser")
+    )
+
     active_data = []
     for u in active_qs:
         sn_norm = (u.ups_sn_db or "").strip().lower()
-        if sn_norm in reassigned_serials:
+        if sn_norm in salvaged_serials:
             continue
+
         active_data.append({
             "id": u.id,
             "ups_sn_db": u.ups_sn_db,
@@ -1289,29 +1426,54 @@ def ups_details(request):
             "salvaged_id": None,
         })
 
-    reassigned_data = []
-    for s in reassigned_qs:
-        reassigned_data.append({
+    # 3) Format salvaged UPS units
+    salvaged_data = []
+    for s in salvaged_qs:
+        # Determine status
+        if s.is_disposed:
+            status = "disposed"
+        elif s.is_reassigned:
+            status = "reassigned"
+        else:
+            status = "salvaged"
+        
+        display_package = s.reassigned_to if s.reassigned_to else s.equipment_package
+        
+        salvaged_data.append({
             "id": s.id,
             "ups_sn_db": s.ups_sn,
             "ups_brand_db": s.ups_brand,
             "ups_model_db": s.ups_model,
-            "equipment_package": s.reassigned_to,
-            "status": "reassigned",
+            "equipment_package": display_package,
+            "status": status,
             "salvaged_id": s.id,
         })
 
-    ups_list = active_data + reassigned_data
+    ups_list = active_data + salvaged_data
     return render(request, "ups_details.html", {"ups_list": ups_list})
 
 
-
 def ups_timeline_detail(request, salvaged_id):
+    """Detail view for salvaged/reassigned UPS with history"""
     salvaged_ups = get_object_or_404(SalvagedUPS, pk=salvaged_id)
     history = salvaged_ups.history.order_by('-reassigned_at')
+    
+    # Determine status for display
+    if salvaged_ups.is_disposed:
+        status_label = "Salvaged"
+        status_class = "danger"
+    elif salvaged_ups.is_reassigned:
+        status_label = "Reassigned"
+        status_class = "secondary"
+    else:
+        status_label = "Available"
+        status_class = "success"
+    
     return render(request, 'salvage/ups_timeline_detail.html', {
         "ups": salvaged_ups,
-        "history": history
+        "history": history,
+        "status_label": status_label,
+        "status_class": status_class,
     })
 
 
@@ -1362,16 +1524,123 @@ def monitor_disposed(request, monitor_id):
 
 
 
+# def add_monitor_to_package(request, package_id):
+#     equipment_package = get_object_or_404(Equipment_Package, id=package_id)
+
+#     if request.method == "POST":
+#         salvaged_monitor_id = request.POST.get("salvaged_monitor_id")
+
+#         try:
+#             # CASE 1: Salvaged Monitor
+#             if salvaged_monitor_id:
+#                 salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
+#                 if salvaged_monitor.is_reassigned:
+#                     msg = "❌ This salvaged monitor has already been reassigned."
+#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#                         return JsonResponse({'success': False, 'message': msg})
+#                     messages.error(request, msg)
+#                     return redirect("desktop_details_view", package_id=equipment_package.id)
+
+#                 sn_norm = salvaged_monitor.monitor_sn.strip().upper()
+#                 if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
+#                     msg = f"❌ A monitor with serial number '{sn_norm}' already exists."
+#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#                         return JsonResponse({'success': False, 'message': msg})
+#                     messages.error(request, msg)
+#                     return redirect("desktop_details_view", package_id=equipment_package.id)
+
+#                 MonitorDetails.objects.create(
+#                     equipment_package=equipment_package,
+#                     monitor_sn_db=salvaged_monitor.monitor_sn,
+#                     monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
+#                     monitor_model_db=salvaged_monitor.monitor_model,
+#                     monitor_size_db=salvaged_monitor.monitor_size,
+#                     is_disposed=False,
+#                 )
+
+#                 salvaged_monitor.is_reassigned = True
+#                 salvaged_monitor.reassigned_to = equipment_package
+#                 salvaged_monitor.save()
+
+#                 SalvagedMonitorHistory.objects.create(
+#                     salvaged_monitor=salvaged_monitor,
+#                     reassigned_to=equipment_package,
+#                 )
+
+#                 msg = "✅ Salvaged monitor reassigned and logged."
+
+#             # CASE 2: Manual Input
+#             else:
+#                 monitor_sn = request.POST.get("monitor_sn", "").strip()
+#                 monitor_brand_id = request.POST.get("monitor_brand_db")
+#                 monitor_model = request.POST.get("monitor_model")
+#                 monitor_size = request.POST.get("monitor_size")
+
+#                 if not monitor_sn or not monitor_model:
+#                     msg = "❌ Please fill in all required fields."
+#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#                         return JsonResponse({'success': False, 'message': msg})
+#                     messages.error(request, msg)
+#                     return redirect("desktop_details_view", package_id=equipment_package.id)
+
+#                 sn_norm = monitor_sn.upper()
+#                 if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
+#                     msg = f"❌ A monitor with serial number '{monitor_sn}' already exists."
+#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#                         return JsonResponse({'success': False, 'message': msg})
+#                     messages.error(request, msg)
+#                     return redirect("desktop_details_view", package_id=equipment_package.id)
+
+#                 brand_instance = Brand.objects.filter(id=monitor_brand_id).first() if monitor_brand_id else None
+
+#                 MonitorDetails.objects.create(
+#                     equipment_package=equipment_package,
+#                     monitor_sn_db=monitor_sn,
+#                     monitor_brand_db=brand_instance,
+#                     monitor_model_db=monitor_model,
+#                     monitor_size_db=monitor_size,
+#                     is_disposed=False,
+#                 )
+
+#                 msg = "✅ New monitor added successfully."
+
+#             base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
+#             redirect_url = f"{base_url}#pills-monitor"
+
+#             if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#                 return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
+
+#             messages.success(request, msg)
+#             return redirect(redirect_url)
+
+#         except Exception as e:
+#             err = f"❌ Error adding monitor: {str(e)}"
+#             if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#                 return JsonResponse({'success': False, 'message': err})
+#             messages.error(request, err)
+#             return redirect("desktop_details_view", package_id=equipment_package.id)
+
+#     messages.error(request, "❌ Invalid request.")
+#     return redirect("desktop_details_view", package_id=equipment_package.id)
+
+@login_required
 def add_monitor_to_package(request, package_id):
-    equipment_package = get_object_or_404(Equipment_Package, id=package_id)
+    """
+    FIXED: Properly handle salvaged monitor reassignment
+    - Don't create duplicate MonitorDetails
+    - Reactivate existing disposed monitor instead
+    """
+    equipment_package = get_object_or_404(Equipment_Package, pk=package_id)
 
     if request.method == "POST":
         salvaged_monitor_id = request.POST.get("salvaged_monitor_id")
 
         try:
-            # CASE 1: Salvaged Monitor
+            # ==================== CASE 1: SALVAGED MONITOR ====================
             if salvaged_monitor_id:
                 salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
+                
+                # Check if already reassigned
                 if salvaged_monitor.is_reassigned:
                     msg = "❌ This salvaged monitor has already been reassigned."
                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -1380,34 +1649,50 @@ def add_monitor_to_package(request, package_id):
                     return redirect("desktop_details_view", package_id=equipment_package.id)
 
                 sn_norm = salvaged_monitor.monitor_sn.strip().upper()
-                if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
-                    msg = f"❌ A monitor with serial number '{sn_norm}' already exists."
-                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                        return JsonResponse({'success': False, 'message': msg})
-                    messages.error(request, msg)
-                    return redirect("desktop_details_view", package_id=equipment_package.id)
+                
+                # ✅ FIXED: Check if monitor exists (might be disposed)
+                existing_monitor = MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).first()
+                
+                if existing_monitor:
+                    # ✅ REACTIVATE existing monitor instead of creating new one
+                    if existing_monitor.is_disposed:
+                        # Reactivate the disposed monitor
+                        existing_monitor.equipment_package = equipment_package
+                        existing_monitor.is_disposed = False
+                        existing_monitor.save()
+                        
+                        msg = "✅ Salvaged monitor reactivated and reassigned successfully."
+                    else:
+                        # Monitor is already active in another package
+                        msg = f"❌ Monitor '{sn_norm}' is already active in another package."
+                        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                            return JsonResponse({'success': False, 'message': msg})
+                        messages.error(request, msg)
+                        return redirect("desktop_details_view", package_id=equipment_package.id)
+                else:
+                    # ✅ No existing record - create new one
+                    existing_monitor = MonitorDetails.objects.create(
+                        equipment_package=equipment_package,
+                        monitor_sn_db=salvaged_monitor.monitor_sn,
+                        monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
+                        monitor_model_db=salvaged_monitor.monitor_model,
+                        monitor_size_db=salvaged_monitor.monitor_size,
+                        is_disposed=False,
+                    )
+                    msg = "✅ Salvaged monitor reassigned and logged."
 
-                MonitorDetails.objects.create(
-                    equipment_package=equipment_package,
-                    monitor_sn_db=salvaged_monitor.monitor_sn,
-                    monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
-                    monitor_model_db=salvaged_monitor.monitor_model,
-                    monitor_size_db=salvaged_monitor.monitor_size,
-                    is_disposed=False,
-                )
-
+                # Update salvaged monitor record
                 salvaged_monitor.is_reassigned = True
                 salvaged_monitor.reassigned_to = equipment_package
                 salvaged_monitor.save()
 
+                # Log reassignment history
                 SalvagedMonitorHistory.objects.create(
                     salvaged_monitor=salvaged_monitor,
                     reassigned_to=equipment_package,
                 )
 
-                msg = "✅ Salvaged monitor reassigned and logged."
-
-            # CASE 2: Manual Input
+            # ==================== CASE 2: MANUAL INPUT ====================
             else:
                 monitor_sn = request.POST.get("monitor_sn", "").strip()
                 monitor_brand_id = request.POST.get("monitor_brand_db")
@@ -1422,8 +1707,13 @@ def add_monitor_to_package(request, package_id):
                     return redirect("desktop_details_view", package_id=equipment_package.id)
 
                 sn_norm = monitor_sn.upper()
-                if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
-                    msg = f"❌ A monitor with serial number '{monitor_sn}' already exists."
+                
+                # ✅ FIXED: Check for both active and disposed monitors
+                existing_monitor = MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).first()
+                
+                if existing_monitor and not existing_monitor.is_disposed:
+                    # Monitor is already active
+                    msg = f"❌ A monitor with serial number '{monitor_sn}' already exists and is active."
                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
                         return JsonResponse({'success': False, 'message': msg})
                     messages.error(request, msg)
@@ -1431,14 +1721,25 @@ def add_monitor_to_package(request, package_id):
 
                 brand_instance = Brand.objects.filter(id=monitor_brand_id).first() if monitor_brand_id else None
 
-                MonitorDetails.objects.create(
-                    equipment_package=equipment_package,
-                    monitor_sn_db=monitor_sn,
-                    monitor_brand_db=brand_instance,
-                    monitor_model_db=monitor_model,
-                    monitor_size_db=monitor_size,
-                    is_disposed=False,
-                )
+                # Create new monitor (or reactivate if exists but disposed)
+                if existing_monitor and existing_monitor.is_disposed:
+                    # Reactivate disposed monitor
+                    existing_monitor.equipment_package = equipment_package
+                    existing_monitor.monitor_brand_db = brand_instance
+                    existing_monitor.monitor_model_db = monitor_model
+                    existing_monitor.monitor_size_db = monitor_size
+                    existing_monitor.is_disposed = False
+                    existing_monitor.save()
+                else:
+                    # Create new monitor
+                    MonitorDetails.objects.create(
+                        equipment_package=equipment_package,
+                        monitor_sn_db=monitor_sn,
+                        monitor_brand_db=brand_instance,
+                        monitor_model_db=monitor_model,
+                        monitor_size_db=monitor_size,
+                        is_disposed=False,
+                    )
 
                 msg = "✅ New monitor added successfully."
 
@@ -1452,91 +1753,151 @@ def add_monitor_to_package(request, package_id):
             return redirect(redirect_url)
 
         except Exception as e:
-            err = f"❌ Error adding monitor: {str(e)}"
+            msg = f"❌ Error: {str(e)}"
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                return JsonResponse({'success': False, 'message': err})
-            messages.error(request, err)
+                return JsonResponse({'success': False, 'message': msg})
+            messages.error(request, msg)
             return redirect("desktop_details_view", package_id=equipment_package.id)
 
-    messages.error(request, "❌ Invalid request.")
     return redirect("desktop_details_view", package_id=equipment_package.id)
 
 
-
-
+@login_required
 def add_keyboard_to_package(request, package_id):
-    equipment_package = get_object_or_404(Equipment_Package, id=package_id)
+    """Add or reassign keyboard to equipment package"""
+    equipment_package = get_object_or_404(Equipment_Package, pk=package_id)
 
     if request.method == "POST":
         salvaged_keyboard_id = request.POST.get("salvaged_keyboard_id")
 
         try:
+            # CASE 1: Salvaged Keyboard
             if salvaged_keyboard_id:
                 salvaged_keyboard = get_object_or_404(SalvagedKeyboard, id=salvaged_keyboard_id)
+                
                 if salvaged_keyboard.is_reassigned:
                     msg = "❌ This salvaged keyboard has already been reassigned."
-                    return JsonResponse({'success': False, 'message': msg})
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
-                KeyboardDetails.objects.create(
-                    equipment_package=equipment_package,
-                    keyboard_sn_db=salvaged_keyboard.keyboard_sn,
-                    keyboard_brand_db=Brand.objects.filter(name=salvaged_keyboard.keyboard_brand).first(),
-                    keyboard_model_db=salvaged_keyboard.keyboard_model,
-                    is_disposed=False,
-                )
+                sn_norm = salvaged_keyboard.keyboard_sn.strip().upper()
+                existing_keyboard = KeyboardDetails.objects.filter(keyboard_sn_norm=sn_norm).first()
+                
+                if existing_keyboard:
+                    if existing_keyboard.is_disposed:
+                        # ✅ REACTIVATE disposed keyboard
+                        existing_keyboard.equipment_package = equipment_package
+                        existing_keyboard.is_disposed = False
+                        existing_keyboard.save()
+                        msg = "✅ Salvaged keyboard reactivated and reassigned successfully."
+                    else:
+                        msg = f"❌ Keyboard '{sn_norm}' is already active in another package."
+                        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                            return JsonResponse({'success': False, 'message': msg})
+                        messages.error(request, msg)
+                        return redirect("desktop_details_view", package_id=equipment_package.id)
+                else:
+                    # ✅ Create new record
+                    KeyboardDetails.objects.create(
+                        equipment_package=equipment_package,
+                        keyboard_sn_db=salvaged_keyboard.keyboard_sn,
+                        keyboard_brand_db=Brand.objects.filter(name=salvaged_keyboard.keyboard_brand).first(),
+                        keyboard_model_db=salvaged_keyboard.keyboard_model,
+                        is_disposed=False,
+                    )
+                    msg = "✅ Salvaged keyboard reassigned successfully."
 
+                # Update salvaged record
                 salvaged_keyboard.is_reassigned = True
                 salvaged_keyboard.reassigned_to = equipment_package
                 salvaged_keyboard.save()
 
+                # Log history
                 SalvagedKeyboardHistory.objects.create(
                     salvaged_keyboard=salvaged_keyboard,
                     reassigned_to=equipment_package,
                 )
 
-                msg = "✅ Salvaged keyboard reassigned and logged."
+            # CASE 2: Manual Input
             else:
-                keyboard_sn = request.POST.get("keyboard_sn")
+                keyboard_sn = request.POST.get("keyboard_sn", "").strip()
                 keyboard_brand_id = request.POST.get("keyboard_brand_db")
                 keyboard_model = request.POST.get("keyboard_model")
 
                 if not keyboard_sn or not keyboard_model:
                     msg = "❌ Please fill in all required fields."
-                    return JsonResponse({'success': False, 'message': msg})
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
+
+                sn_norm = keyboard_sn.upper()
+                existing_keyboard = KeyboardDetails.objects.filter(keyboard_sn_norm=sn_norm).first()
+                
+                if existing_keyboard and not existing_keyboard.is_disposed:
+                    msg = f"❌ Keyboard '{keyboard_sn}' is already active."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
 
                 brand_instance = Brand.objects.filter(id=keyboard_brand_id).first() if keyboard_brand_id else None
 
-                KeyboardDetails.objects.create(
-                    equipment_package=equipment_package,
-                    keyboard_sn_db=keyboard_sn,
-                    keyboard_brand_db=brand_instance,
-                    keyboard_model_db=keyboard_model,
-                    is_disposed=False,
-                )
+                if existing_keyboard and existing_keyboard.is_disposed:
+                    # ✅ Reactivate
+                    existing_keyboard.equipment_package = equipment_package
+                    existing_keyboard.keyboard_brand_db = brand_instance
+                    existing_keyboard.keyboard_model_db = keyboard_model
+                    existing_keyboard.is_disposed = False
+                    existing_keyboard.save()
+                else:
+                    # Create new
+                    KeyboardDetails.objects.create(
+                        equipment_package=equipment_package,
+                        keyboard_sn_db=keyboard_sn,
+                        keyboard_brand_db=brand_instance,
+                        keyboard_model_db=keyboard_model,
+                        is_disposed=False,
+                    )
 
-                msg = "✅ New keyboard added successfully."
+                msg = "✅ Keyboard added successfully."
 
             base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
             redirect_url = f"{base_url}#pills-keyboard"
-            return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
+
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
+
+            messages.success(request, msg)
+            return redirect(redirect_url)
 
         except Exception as e:
-            return JsonResponse({'success': False, 'message': f'Error adding keyboard: {str(e)}'})
+            msg = f"❌ Error: {str(e)}"
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({'success': False, 'message': msg})
+            messages.error(request, msg)
+            return redirect("desktop_details_view", package_id=equipment_package.id)
 
-    return JsonResponse({'success': False, 'message': 'Invalid request.'})
+    return redirect("desktop_details_view", package_id=equipment_package.id)
 
 
 
 #This function allows adding a new mouse to a specific desktop package, then redirects back to the "Mouse" tab of the desktop details view.
+@login_required
 def add_mouse_to_package(request, package_id):
-    equipment_package = get_object_or_404(Equipment_Package, id=package_id)
+    """Add or reassign mouse to equipment package"""
+    equipment_package = get_object_or_404(Equipment_Package, pk=package_id)
 
     if request.method == "POST":
         salvaged_mouse_id = request.POST.get("salvaged_mouse_id")
+
         try:
-            # 🧩 CASE 1: Salvaged Mouse
+            # CASE 1: Salvaged Mouse
             if salvaged_mouse_id:
                 salvaged_mouse = get_object_or_404(SalvagedMouse, id=salvaged_mouse_id)
+                
                 if salvaged_mouse.is_reassigned:
                     msg = "❌ This salvaged mouse has already been reassigned."
                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -1544,28 +1905,47 @@ def add_mouse_to_package(request, package_id):
                     messages.error(request, msg)
                     return redirect("desktop_details_view", package_id=equipment_package.id)
 
-                MouseDetails.objects.create(
-                    equipment_package=equipment_package,
-                    mouse_sn_db=salvaged_mouse.mouse_sn,
-                    mouse_brand_db=Brand.objects.filter(name=salvaged_mouse.mouse_brand).first(),
-                    mouse_model_db=salvaged_mouse.mouse_model,
-                    is_disposed=False,
-                )
+                sn_norm = salvaged_mouse.mouse_sn.strip().upper()
+                existing_mouse = MouseDetails.objects.filter(mouse_sn_norm=sn_norm).first()
+                
+                if existing_mouse:
+                    if existing_mouse.is_disposed:
+                        # ✅ REACTIVATE
+                        existing_mouse.equipment_package = equipment_package
+                        existing_mouse.is_disposed = False
+                        existing_mouse.save()
+                        msg = "✅ Salvaged mouse reactivated and reassigned successfully."
+                    else:
+                        msg = f"❌ Mouse '{sn_norm}' is already active in another package."
+                        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                            return JsonResponse({'success': False, 'message': msg})
+                        messages.error(request, msg)
+                        return redirect("desktop_details_view", package_id=equipment_package.id)
+                else:
+                    # ✅ Create new
+                    MouseDetails.objects.create(
+                        equipment_package=equipment_package,
+                        mouse_sn_db=salvaged_mouse.mouse_sn,
+                        mouse_brand_db=Brand.objects.filter(name=salvaged_mouse.mouse_brand).first(),
+                        mouse_model_db=salvaged_mouse.mouse_model,
+                        is_disposed=False,
+                    )
+                    msg = "✅ Salvaged mouse reassigned successfully."
 
+                # Update salvaged record
                 salvaged_mouse.is_reassigned = True
                 salvaged_mouse.reassigned_to = equipment_package
                 salvaged_mouse.save()
 
+                # Log history
                 SalvagedMouseHistory.objects.create(
                     salvaged_mouse=salvaged_mouse,
                     reassigned_to=equipment_package,
                 )
 
-                msg = "✅ Salvaged mouse reassigned and logged."
-
-            # 🧩 CASE 2: Manual Input
+            # CASE 2: Manual Input
             else:
-                mouse_sn = request.POST.get("mouse_sn")
+                mouse_sn = request.POST.get("mouse_sn", "").strip()
                 mouse_brand_id = request.POST.get("mouse_brand_db")
                 mouse_model = request.POST.get("mouse_model")
 
@@ -1576,22 +1956,40 @@ def add_mouse_to_package(request, package_id):
                     messages.error(request, msg)
                     return redirect("desktop_details_view", package_id=equipment_package.id)
 
+                sn_norm = mouse_sn.upper()
+                existing_mouse = MouseDetails.objects.filter(mouse_sn_norm=sn_norm).first()
+                
+                if existing_mouse and not existing_mouse.is_disposed:
+                    msg = f"❌ Mouse '{mouse_sn}' is already active."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
+
                 brand_instance = Brand.objects.filter(id=mouse_brand_id).first() if mouse_brand_id else None
 
-                MouseDetails.objects.create(
-                    equipment_package=equipment_package,
-                    mouse_sn_db=mouse_sn,
-                    mouse_brand_db=brand_instance,
-                    mouse_model_db=mouse_model,
-                    is_disposed=False,
-                )
+                if existing_mouse and existing_mouse.is_disposed:
+                    # ✅ Reactivate
+                    existing_mouse.equipment_package = equipment_package
+                    existing_mouse.mouse_brand_db = brand_instance
+                    existing_mouse.mouse_model_db = mouse_model
+                    existing_mouse.is_disposed = False
+                    existing_mouse.save()
+                else:
+                    # Create new
+                    MouseDetails.objects.create(
+                        equipment_package=equipment_package,
+                        mouse_sn_db=mouse_sn,
+                        mouse_brand_db=brand_instance,
+                        mouse_model_db=mouse_model,
+                        is_disposed=False,
+                    )
 
-                msg = "✅ New mouse added successfully."
+                msg = "✅ Mouse added successfully."
 
             base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
             redirect_url = f"{base_url}#pills-mouse"
 
-            # ✅ AJAX Response
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
                 return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
 
@@ -1599,28 +1997,30 @@ def add_mouse_to_package(request, package_id):
             return redirect(redirect_url)
 
         except Exception as e:
-            msg = f"❌ Error adding mouse: {str(e)}"
+            msg = f"❌ Error: {str(e)}"
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
                 return JsonResponse({'success': False, 'message': msg})
             messages.error(request, msg)
             return redirect("desktop_details_view", package_id=equipment_package.id)
 
-    messages.error(request, "❌ Invalid request.")
-    return redirect("desktop_details_view", package_id=package_id)
+    return redirect("desktop_details_view", package_id=equipment_package.id)
 
 
 
 # 🧱 ADD UPS
+@login_required
 def add_ups_to_package(request, package_id):
-    equipment_package = get_object_or_404(Equipment_Package, id=package_id)
+    """Add or reassign UPS to equipment package"""
+    equipment_package = get_object_or_404(Equipment_Package, pk=package_id)
 
     if request.method == "POST":
         salvaged_ups_id = request.POST.get("salvaged_ups_id")
+
         try:
-            # ✅ Case 1: Salvaged UPS
+            # CASE 1: Salvaged UPS
             if salvaged_ups_id:
                 salvaged_ups = get_object_or_404(SalvagedUPS, id=salvaged_ups_id)
-
+                
                 if salvaged_ups.is_reassigned:
                     msg = "❌ This salvaged UPS has already been reassigned."
                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -1628,28 +2028,47 @@ def add_ups_to_package(request, package_id):
                     messages.error(request, msg)
                     return redirect("desktop_details_view", package_id=equipment_package.id)
 
-                UPSDetails.objects.create(
-                    equipment_package=equipment_package,
-                    ups_sn_db=salvaged_ups.ups_sn,
-                    ups_brand_db=Brand.objects.filter(name=salvaged_ups.ups_brand).first(),
-                    ups_model_db=salvaged_ups.ups_model,
-                    is_disposed=False,
-                )
+                sn_norm = salvaged_ups.ups_sn.strip().upper()
+                existing_ups = UPSDetails.objects.filter(ups_sn_norm=sn_norm).first()
+                
+                if existing_ups:
+                    if existing_ups.is_disposed:
+                        # ✅ REACTIVATE
+                        existing_ups.equipment_package = equipment_package
+                        existing_ups.is_disposed = False
+                        existing_ups.save()
+                        msg = "✅ Salvaged UPS reactivated and reassigned successfully."
+                    else:
+                        msg = f"❌ UPS '{sn_norm}' is already active in another package."
+                        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                            return JsonResponse({'success': False, 'message': msg})
+                        messages.error(request, msg)
+                        return redirect("desktop_details_view", package_id=equipment_package.id)
+                else:
+                    # ✅ Create new
+                    UPSDetails.objects.create(
+                        equipment_package=equipment_package,
+                        ups_sn_db=salvaged_ups.ups_sn,
+                        ups_brand_db=Brand.objects.filter(name=salvaged_ups.ups_brand).first(),
+                        ups_model_db=salvaged_ups.ups_model,
+                        is_disposed=False,
+                    )
+                    msg = "✅ Salvaged UPS reassigned successfully."
 
+                # Update salvaged record
                 salvaged_ups.is_reassigned = True
                 salvaged_ups.reassigned_to = equipment_package
                 salvaged_ups.save()
 
+                # Log history
                 SalvagedUPSHistory.objects.create(
                     salvaged_ups=salvaged_ups,
                     reassigned_to=equipment_package,
                 )
 
-                msg = "✅ Salvaged UPS reassigned and logged."
-
-            # ✅ Case 2: Manual Input
+            # CASE 2: Manual Input
             else:
-                ups_sn = request.POST.get("ups_sn")
+                ups_sn = request.POST.get("ups_sn", "").strip()
                 ups_brand_id = request.POST.get("ups_brand_db")
                 ups_model = request.POST.get("ups_model")
 
@@ -1660,16 +2079,36 @@ def add_ups_to_package(request, package_id):
                     messages.error(request, msg)
                     return redirect("desktop_details_view", package_id=equipment_package.id)
 
+                sn_norm = ups_sn.upper()
+                existing_ups = UPSDetails.objects.filter(ups_sn_norm=sn_norm).first()
+                
+                if existing_ups and not existing_ups.is_disposed:
+                    msg = f"❌ UPS '{ups_sn}' is already active."
+                    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                        return JsonResponse({'success': False, 'message': msg})
+                    messages.error(request, msg)
+                    return redirect("desktop_details_view", package_id=equipment_package.id)
+
                 brand_instance = Brand.objects.filter(id=ups_brand_id).first() if ups_brand_id else None
 
-                UPSDetails.objects.create(
-                    equipment_package=equipment_package,
-                    ups_sn_db=ups_sn,
-                    ups_brand_db=brand_instance,
-                    ups_model_db=ups_model,
-                    is_disposed=False,
-                )
-                msg = "✅ New UPS added successfully."
+                if existing_ups and existing_ups.is_disposed:
+                    # ✅ Reactivate
+                    existing_ups.equipment_package = equipment_package
+                    existing_ups.ups_brand_db = brand_instance
+                    existing_ups.ups_model_db = ups_model
+                    existing_ups.is_disposed = False
+                    existing_ups.save()
+                else:
+                    # Create new
+                    UPSDetails.objects.create(
+                        equipment_package=equipment_package,
+                        ups_sn_db=ups_sn,
+                        ups_brand_db=brand_instance,
+                        ups_model_db=ups_model,
+                        is_disposed=False,
+                    )
+
+                msg = "✅ UPS added successfully."
 
             base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
             redirect_url = f"{base_url}#pills-ups"
@@ -1681,14 +2120,13 @@ def add_ups_to_package(request, package_id):
             return redirect(redirect_url)
 
         except Exception as e:
-            msg = f"❌ Error adding UPS: {str(e)}"
+            msg = f"❌ Error: {str(e)}"
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
                 return JsonResponse({'success': False, 'message': msg})
             messages.error(request, msg)
             return redirect("desktop_details_view", package_id=equipment_package.id)
 
-    messages.error(request, "❌ Invalid request.")
-    return redirect("desktop_details_view", package_id=package_id)
+    return redirect("desktop_details_view", package_id=equipment_package.id)
 
 
 #This function lists all disposed mice, assuming you have a DisposedMouse model similar to DisposedKeyboard.

@@ -157,11 +157,9 @@
                       {% endif %}
                     </td>
                     <td>
-                      <a href="{% url 'desktop_details_view' item.desktop.id %}" 
-                         class="premium-view-btn">
-                        <i class="fas fa-eye"></i>
-                        View 
-                      </a>
+                     <a href="{% url 'desktop_details_view' item.desktop.equipment_package.id %}" class="premium-view-btn">
+    <i class="fas fa-eye"></i> View
+</a>
                     </td>
                   </tr>
                   {% endfor %}
