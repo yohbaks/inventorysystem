@@ -117,7 +117,23 @@
         </div>
         <div class="col-md-4">
           <label>Graphics Size</label>
-          <input type="text" name="desktop_Graphics_Size" class="form-control" required>
+          <!-- <input type="text" name="desktop_Graphics_Size" class="form-control" required> -->
+          <div class="mb-3">
+
+  <select class="form-select form-control" id="desktop_Graphics_Siz" name="desktop_Graphics_Siz" required>
+    <option value="" disabled selected>Select Graphics Size</option>
+
+    <option value="Integrated / Shared">Integrated / Shared (uses system RAM)</option>
+    <option value="1 GB">1 GB</option>
+    <option value="2 GB">2 GB</option>
+    <option value="4 GB">4 GB</option>
+    <option value="6 GB">6 GB</option>
+    <option value="8 GB">8 GB</option>
+    <option value="12 GB">12 GB</option>
+    <option value="16 GB">16 GB</option>
+    <option value="24 GB">24 GB</option>
+  </select>
+</div>
         </div>
       </div>
     </div>
@@ -233,7 +249,24 @@
           </select>
         </div>
         <div class="col-md-3"><label>Model</label><input type="text" name="monitor_model" class="form-control" required></div>
-        <div class="col-md-3"><label>Size</label><input type="text" name="monitor_size" class="form-control" required></div>
+       <div class="col-md-3">
+  <label for="monitor_size" class="form-label">Size</label>
+  <select name="monitor_size" id="monitor_size" class="form-select form-control" required>
+    <option value="" disabled selected>-- Select Size --</option>
+    <option value="15 inch">15"</option>
+    <option value="17 inch">17"</option>
+    <option value="19 inch">19"</option>
+    <option value="20 inch">20"</option>
+    <option value="21 inch">21"</option>
+    <option value="22 inch">22"</option>
+    <option value="23 inch">23"</option>
+    <option value="24 inch">24"</option>
+    <option value="25 inch">25"</option>
+    <option value="27 inch">27"</option>
+    <option value="29 inch">29"</option>
+    <option value="32 inch">32"</option>
+  </select>
+</div>
       </div>
     </div>
   </div>
@@ -294,7 +327,21 @@
           </select>
         </div>
         <div class="col-md-3"><label>Model</label><input type="text" name="ups_model" class="form-control" required></div>
-        <div class="col-md-3"><label>Capacity</label><input type="text" name="ups_capacity" class="form-control" required></div>
+        
+        <div class="col-md-3">
+  <label for="ups_capacity" class="form-label">UPS Capacity</label>
+  <select class="form-select form-control" id="ups_capacity" name="ups_capacity" required>
+    <option value="" disabled selected>Select UPS Capacity</option>
+    <option value="500 VA">500 VA</option>
+    <option value="650 VA">650 VA</option>
+    <option value="800 VA">800 VA</option>
+    <option value="1000 VA">1000 VA</option>
+    <option value="1200 VA">1200 VA</option>
+    <option value="1500 VA">1500 VA</option>
+    <option value="2000 VA">2000 VA</option>
+    <option value="3000 VA">3000 VA</option>
+  </select>
+</div>
       </div>
     </div>
   </div>
@@ -342,6 +389,7 @@
             <option value="" disabled selected>Select End User</option>
             {% for emp in employees %}
               <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+              
             {% endfor %}
           </select>
         </div>

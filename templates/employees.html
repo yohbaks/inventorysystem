@@ -1,52 +1,430 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
+<style>
+  /* Premium Design Enhancements */
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    --card-hover-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  }
+
+  .premium-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  .premium-card:hover {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-5px);
+  }
+
+  .premium-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%);
+    padding: 2rem;
+    border-radius: 20px 20px 0 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  }
+
+  .premium-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .premium-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px);
+    }
+    50% {
+      transform: translateY(-10px) translateX(-10px);
+    }
+    75% {
+      transform: translateY(-30px) translateX(5px);
+    }
+  }
+
+  .premium-header h4 {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .premium-header .icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .premium-btn {
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .premium-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: width 0.3s ease;
+    z-index: -1;
+  }
+
+  .premium-btn:hover::before {
+    width: 100%;
+  }
+
+  .premium-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .premium-btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .premium-table-wrapper {
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .premium-table {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+  }
+
+  .premium-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .premium-table thead th {
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 1.25rem 1rem;
+    border: none;
+  }
+
+  .premium-table thead tr.filters th {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 0.75rem 1rem;
+  }
+
+  .premium-table tbody tr {
+    transition: all 0.3s ease;
+  }
+
+  .premium-table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.01);
+  }
+
+  .premium-table tbody td {
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .premium-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .premium-badge.badge-success {
+    background: var(--success-gradient);
+    border: none;
+  }
+
+  .premium-badge.badge-secondary {
+    background: linear-gradient(135deg, #868f96 0%, #596164 100%);
+    border: none;
+  }
+
+  .premium-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .action-btn {
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    margin: 0 0.25rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .action-btn-view {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .action-btn-edit {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+
+  .action-btn-delete {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+  }
+
+  .premium-modal .modal-content {
+    border-radius: 20px;
+    border: none;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .premium-modal .modal-header {
+    padding: 2rem;
+    border: none;
+    position: relative;
+  }
+
+  .premium-modal .modal-header.header-primary {
+    background: var(--primary-gradient);
+  }
+
+  .premium-modal .modal-header.header-warning {
+    background: var(--warning-gradient);
+  }
+
+  .premium-modal .modal-header.header-danger {
+    background: var(--danger-gradient);
+  }
+
+  .premium-modal .modal-body {
+    padding: 2rem;
+  }
+
+  .premium-form-control {
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+  }
+
+  .premium-form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+  }
+
+  .premium-form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .employee-avatar {
+    width: 70px;
+    height: 70px;
+    background: var(--primary-gradient);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  .info-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #667eea;
+  }
+
+  .info-card strong {
+    color: #667eea;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .search-input {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+  }
+
+  .search-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  .toast-premium {
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border: none;
+  }
+
+  .dataTables_wrapper .dataTables_length select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.5rem 2rem 0.5rem 1rem;
+  }
+
+  .dataTables_wrapper .dataTables_filter input {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.5rem 1rem;
+  }
+
+  .page-item.active .page-link {
+    background: var(--primary-gradient);
+    border: none;
+  }
+
+  .page-link {
+    border-radius: 10px;
+    margin: 0 0.25rem;
+    border: 2px solid #e9ecef;
+    color: #667eea;
+  }
+</style>
+
+<div class="container px-4 py-4">
   <div class="page-inner">
     <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="card-header">
-            <div class="d-flex align-items-center">
-              <h4 class="card-title"><i class="fas fa-users me-2"></i> Employee Management</h4>
-              <div class="ms-auto">
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-                  <i class="fa fa-plus me-1"></i> Add Employee
-                </button>
-              </div>
+      <div class="col-12">
+        <div class="card premium-card">
+          <div class="premium-header">
+            <div class="d-flex align-items-center justify-content-between">
+              <h4 class="mb-0">
+                <div class="icon-wrapper">
+                  <i class="fas fa-users"></i>
+                </div>
+                Employee Management System
+              </h4>
+              <button class="premium-btn premium-btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                <i class="fa fa-plus me-2"></i> Add New Employee
+              </button>
             </div>
           </div>
 
           <!-- Add Employee Modal -->
-          <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+          <div class="modal fade premium-modal" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
               <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                  <h5 class="modal-title" id="addEmployeeModalLabel">Add Employee</h5>
+                <div class="modal-header header-primary text-white">
+                  <h5 class="modal-title fw-bold" id="addEmployeeModalLabel">
+                    <i class="fas fa-user-plus me-2"></i> Add New Employee
+                  </h5>
                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                   <form id="addEmployeeForm" method="POST" action="{% url 'employee_list' %}">
                     {% csrf_token %}
                     <div class="mb-3">
-                      <label class="form-label">First Name</label>
-                      <input type="text" class="form-control" name="firstName" required>
+                      <label class="premium-form-label">First Name</label>
+                      <input type="text" class="form-control premium-form-control" name="firstName" placeholder="Enter first name" required>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Middle Initial</label>
-                      <input type="text" class="form-control" name="middleInitial" maxlength="1">
+                      <label class="premium-form-label">Middle Initial</label>
+                      <input type="text" class="form-control premium-form-control" name="middleInitial" placeholder="M.I." maxlength="1">
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Last Name</label>
-                      <input type="text" class="form-control" name="lastName" required>
+                      <label class="premium-form-label">Last Name</label>
+                      <input type="text" class="form-control premium-form-control" name="lastName" placeholder="Enter last name" required>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Position</label>
-                      <input type="text" class="form-control" name="position" required>
+                      <label class="premium-form-label">Position</label>
+                      <input type="text" class="form-control premium-form-control" name="position" placeholder="Enter position title" required>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Office Section</label>
-                      <select class="form-control" name="office_section" required>
+                      <label class="premium-form-label">Office Section</label>
+                      <select class="form-control premium-form-control" name="office_section" required>
                         <option value="" disabled selected>Select office section</option>
                         {% for section in office_sections %}
                           <option value="{{ section.id }}">{{ section.name }}</option>
@@ -54,15 +432,19 @@
                       </select>
                     </div>
                     <div class="mb-3">
-                      <label class="form-label">Status</label>
-                      <select class="form-control" name="status" required>
+                      <label class="premium-form-label">Status</label>
+                      <select class="form-control premium-form-control" name="status" required>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                       </select>
                     </div>
-                    <div class="modal-footer px-0">
-                      <button type="submit" class="btn btn-primary">Add Employee</button>
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <div class="modal-footer border-0 px-0 pt-4">
+                      <button type="submit" class="premium-btn premium-btn-primary px-4">
+                        <i class="fa fa-check me-2"></i> Add Employee
+                      </button>
+                      <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">
+                        Cancel
+                      </button>
                     </div>
                   </form>
                 </div>
@@ -70,24 +452,24 @@
             </div>
           </div>
 
-          <div class="card-body">
-            <div class="table-responsive table-head-bg-primary">
-              <table id="employee-table" class="display table table-striped table-hover" style="width:100%">
+          <div class="premium-table-wrapper">
+            <div class="table-responsive premium-table">
+              <table id="employee-table" class="display table table-hover" style="width:100%">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Position</th>
-                    <th>Office</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th><i class="fas fa-user me-2"></i>Employee Name</th>
+                    <th><i class="fas fa-briefcase me-2"></i>Position</th>
+                    <th><i class="fas fa-building me-2"></i>Office Section</th>
+                    <th><i class="fas fa-info-circle me-2"></i>Status</th>
+                    <th><i class="fas fa-cog me-2"></i>Actions</th>
                   </tr>
                   <tr class="filters">
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Name" data-column="0" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Position" data-column="1" /></th>
-                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Office" data-column="2" /></th>
+                    <th><input type="text" class="form-control search-input column-search" placeholder="🔍 Search name..." data-column="0" /></th>
+                    <th><input type="text" class="form-control search-input column-search" placeholder="🔍 Search position..." data-column="1" /></th>
+                    <th><input type="text" class="form-control search-input column-search" placeholder="🔍 Search office..." data-column="2" /></th>
                     <th>
-                      <select class="form-select form-select-sm column-search" data-column="3">
-                        <option value="">All</option>
+                      <select class="form-select search-input column-search" data-column="3">
+                        <option value="">All Status</option>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                       </select>
@@ -98,141 +480,191 @@
                 <tbody>
                   {% for employee in employees %}
                   <tr>
-                    <td>{{ employee.employee_fname }} {% if employee.employee_mname %}{{ employee.employee_mname }}.{% endif %} {{ employee.employee_lname }}</td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar bg-primary text-white me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1rem; font-weight: 600;">
+                          {{ employee.employee_fname|first }}{{ employee.employee_lname|first }}
+                        </div>
+                        <span class="fw-semibold">{{ employee.employee_fname }} {% if employee.employee_mname %}{{ employee.employee_mname }}.{% endif %} {{ employee.employee_lname }}</span>
+                      </div>
+                    </td>
                     <td>{{ employee.employee_position }}</td>
                     <td>{{ employee.employee_office_section.name }}</td>
                     <td>
                       {% if employee.employee_status == "Active" %}
-                        <span class="badge bg-success">Active</span>
+                        <span class="badge premium-badge badge-success">Active</span>
                       {% else %}
-                        <span class="badge bg-secondary">Inactive</span>
+                        <span class="badge premium-badge badge-secondary">Inactive</span>
                       {% endif %}
                     </td>
                     <td>
-                      <button class="btn btn-info btn-xs" data-bs-toggle="modal" data-bs-target="#viewEmployeeModal{{ employee.id }}">
-                        <i class="fa fa-eye"></i> View
+                      <button class="btn action-btn action-btn-view btn-sm" data-bs-toggle="modal" data-bs-target="#viewEmployeeModal{{ employee.id }}">
+                        <i class="fa fa-eye"></i>
                       </button>
-                      <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ employee.id }}">
-                        <i class="fa fa-edit"></i> Edit
+                      <button class="btn action-btn action-btn-edit btn-sm" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ employee.id }}">
+                        <i class="fa fa-edit"></i>
                       </button>
-                      <button class="btn btn-danger btn-xs" data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal{{ employee.id }}">
-                        <i class="fa fa-trash"></i> Delete
+                      <button class="btn action-btn action-btn-delete btn-sm" data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal{{ employee.id }}">
+                        <i class="fa fa-trash"></i>
                       </button>
                     </td>
                   </tr>
 
                   <!-- Delete Modal -->
-                  <div class="modal fade" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
-                    <div class="modal-dialog">
+                  <div class="modal fade premium-modal" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content">
-                        <div class="modal-header bg-danger text-white">
-                          <h5 class="modal-title">Confirm Delete</h5>
+                        <div class="modal-header header-danger text-white">
+                          <h5 class="modal-title fw-bold">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Confirm Deletion
+                          </h5>
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body">
-                          <p>Are you sure you want to delete <strong>{{ employee.employee_fname }} {{ employee.employee_lname }}</strong>?</p>
+                        <div class="modal-body text-center py-4">
+                          <div class="mb-4">
+                            <i class="fas fa-user-times" style="font-size: 4rem; color: #fa709a;"></i>
+                          </div>
+                          <h5 class="mb-3">Are you sure you want to delete this employee?</h5>
+                          <p class="text-muted">
+                            <strong>{{ employee.employee_fname }} {{ employee.employee_lname }}</strong>
+                          </p>
+                          <p class="text-muted small">This action cannot be undone.</p>
                         </div>
-                        <div class="modal-footer">
-                          <form method="POST" action="{% url 'delete_employee' employee.id %}">
+                        <div class="modal-footer border-0 justify-content-center pb-4">
+                          <form method="POST" action="{% url 'delete_employee' employee.id %}" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Delete</button>
+                            <button type="submit" class="premium-btn action-btn-delete px-4">
+                              <i class="fa fa-trash me-2"></i> Yes, Delete
+                            </button>
                           </form>
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">
+                            Cancel
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <!-- View Modal -->
-                  <div class="modal fade" id="viewEmployeeModal{{ employee.id }}" tabindex="-1">
-                    <div class="modal-dialog modal-lg">
+                  <div class="modal fade premium-modal" id="viewEmployeeModal{{ employee.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
                       <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                          <h5 class="modal-title">Employee Details</h5>
+                        <div class="modal-header header-primary text-white">
+                          <h5 class="modal-title fw-bold">
+                            <i class="fas fa-id-card me-2"></i> Employee Profile
+                          </h5>
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body p-4">
-                          <div class="d-flex align-items-center mb-3">
-                            <div class="avatar bg-primary text-white me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                          <div class="text-center mb-4">
+                            <div class="employee-avatar mx-auto mb-3">
                               {{ employee.employee_fname|first }}{{ employee.employee_lname|first }}
                             </div>
-                            <div>
-                              <h4 class="fw-bold mb-1">{{ employee.employee_fname }} {{ employee.employee_lname }}</h4>
-                              <p class="text-muted mb-0">{{ employee.employee_position }}</p>
+                            <h4 class="mb-1 fw-bold">{{ employee.employee_fname }} {% if employee.employee_mname %}{{ employee.employee_mname }}.{% endif %} {{ employee.employee_lname }}</h4>
+                            <p class="text-muted">{{ employee.employee_position }}</p>
+                          </div>
+                          
+                          <div class="row">
+                            <div class="col-md-6">
+                              <div class="info-card">
+                                <strong>Full Name</strong>
+                                <p class="mb-0">{{ employee.employee_fname }} {% if employee.employee_mname %}{{ employee.employee_mname }}.{% endif %} {{ employee.employee_lname }}</p>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="info-card">
+                                <strong>Position</strong>
+                                <p class="mb-0">{{ employee.employee_position }}</p>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="info-card">
+                                <strong>Office Section</strong>
+                                <p class="mb-0">{{ employee.employee_office_section.name }}</p>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="info-card">
+                                <strong>Status</strong>
+                                <p class="mb-0">
+                                  {% if employee.employee_status == "Active" %}
+                                    <span class="badge premium-badge badge-success">Active</span>
+                                  {% else %}
+                                    <span class="badge premium-badge badge-secondary">Inactive</span>
+                                  {% endif %}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <hr>
-                          <p><strong>Middle Initial:</strong> {{ employee.employee_mname|default:"N/A" }}</p>
-                          <p><strong>Office:</strong> {{ employee.employee_office_section.name }}</p>
-                          <p><strong>Level:</strong> {{ employee.employee_level|default:"N/A" }}</p>
-                          <p><strong>Status:</strong> 
-                            {% if employee.employee_status == "Active" %}
-                              <span class="badge bg-success">Active</span>
-                            {% else %}
-                              <span class="badge bg-secondary">Inactive</span>
-                            {% endif %}
-                          </p>
                         </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <div class="modal-footer border-0">
+                          <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">
+                            Close
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <!-- Edit Modal -->
-                  <div class="modal fade" id="editEmployeeModal{{ employee.id }}" tabindex="-1">
-                    <div class="modal-dialog">
+                  <div class="modal fade premium-modal" id="editEmployeeModal{{ employee.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
                       <div class="modal-content">
-                        <div class="modal-header bg-warning text-dark">
-                          <h5 class="modal-title">Edit Employee</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <div class="modal-header header-warning text-white">
+                          <h5 class="modal-title fw-bold">
+                            <i class="fas fa-edit me-2"></i> Edit Employee Details
+                          </h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                           <form method="POST" action="{% url 'update_employee' employee.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="id" value="{{ employee.id }}">
                             <div class="mb-3">
-                              <label class="form-label">First Name</label>
-                              <input type="text" class="form-control" name="firstName" value="{{ employee.employee_fname }}" required>
+                              <label class="premium-form-label">First Name</label>
+                              <input type="text" class="form-control premium-form-control" name="firstName" value="{{ employee.employee_fname }}" required>
                             </div>
                             <div class="mb-3">
-                              <label class="form-label">Middle Initial</label>
-                              <input type="text" class="form-control" name="middleInitial" value="{{ employee.employee_mname }}" maxlength="1">
+                              <label class="premium-form-label">Middle Initial</label>
+                              <input type="text" class="form-control premium-form-control" name="middleInitial" value="{{ employee.employee_mname }}" maxlength="1">
                             </div>
                             <div class="mb-3">
-                              <label class="form-label">Last Name</label>
-                              <input type="text" class="form-control" name="lastName" value="{{ employee.employee_lname }}" required>
+                              <label class="premium-form-label">Last Name</label>
+                              <input type="text" class="form-control premium-form-control" name="lastName" value="{{ employee.employee_lname }}" required>
                             </div>
                             <div class="mb-3">
-                              <label class="form-label">Position</label>
-                              <input type="text" class="form-control" name="position" value="{{ employee.employee_position }}" required>
+                              <label class="premium-form-label">Position</label>
+                              <input type="text" class="form-control premium-form-control" name="position" value="{{ employee.employee_position }}" required>
                             </div>
                             <div class="mb-3">
-                              <label class="form-label">Office Section</label>
-                              <select class="form-control" name="office_section" required>
+                              <label class="premium-form-label">Office Section</label>
+                              <select class="form-control premium-form-control" name="office_section" required>
                                 {% for section in office_sections %}
                                   <option value="{{ section.id }}" {% if employee.employee_office_section.id == section.id %}selected{% endif %}>{{ section.name }}</option>
                                 {% endfor %}
                               </select>
                             </div>
                             <div class="mb-3">
-                              <label class="form-label">Level</label>
-                              <select class="form-control" name="level" required>
+                              <label class="premium-form-label">Level</label>
+                              <select class="form-control premium-form-control" name="level" required>
                                 <option value="Permanent" {% if employee.employee_level == "Permanent" %}selected{% endif %}>Permanent</option>
                                 <option value="Job-Order" {% if employee.employee_level == "Job-Order" %}selected{% endif %}>Job-Order</option>
                               </select>
                             </div>
                             <div class="mb-3">
-                              <label class="form-label">Status</label>
-                              <select class="form-control" name="status" required>
+                              <label class="premium-form-label">Status</label>
+                              <select class="form-control premium-form-control" name="status" required>
                                 <option value="Active" {% if employee.employee_status == "Active" %}selected{% endif %}>Active</option>
                                 <option value="Inactive" {% if employee.employee_status == "Inactive" %}selected{% endif %}>Inactive</option>
                               </select>
                             </div>
-                            <div class="modal-footer px-0">
-                              <button type="submit" class="btn btn-primary">Update</button>
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <div class="modal-footer border-0 px-0 pt-4">
+                              <button type="submit" class="premium-btn action-btn-edit px-4">
+                                <i class="fa fa-save me-2"></i> Update Employee
+                              </button>
+                              <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">
+                                Cancel
+                              </button>
                             </div>
                           </form>
                         </div>
@@ -253,11 +685,13 @@
 
 <!-- Display Toasts -->
 {% if messages %}
-<div class="toast-container position-fixed top-0 end-0 p-3">
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
   {% for message in messages %}
-  <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">{{ message }}</div>
+  <div class="toast toast-premium align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex p-3">
+      <div class="toast-body fs-6">
+        <i class="fas fa-check-circle me-2"></i> {{ message }}
+      </div>
       <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   </div>
@@ -267,10 +701,10 @@
 
 <!-- Optional Alert Block -->
 {% if the_messages %}
-<div class="alert-container position-fixed top-0 end-0 p-3">
+<div class="alert-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
   {% for messagee in the_messages %}
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ messagee }}
+  <div class="alert alert-danger alert-dismissible fade show toast-premium" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i> {{ messagee }}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
   {% endfor %}
@@ -282,7 +716,7 @@
 {{ block.super }}
 <script>
 $(document).ready(function() {
-  console.log('Initializing Employee DataTable...');
+  console.log('Initializing Premium Employee DataTable...');
   
   // Initialize DataTable
   var table = $('#employee-table').DataTable({
@@ -294,11 +728,19 @@ $(document).ready(function() {
       lengthMenu: "Show _MENU_ entries",
       info: "Showing _START_ to _END_ of _TOTAL_ employees",
       infoEmpty: "Showing 0 to 0 of 0 employees",
-      infoFiltered: "(filtered from _MAX_ total employees)"
-    }
+      infoFiltered: "(filtered from _MAX_ total employees)",
+      search: "Search:",
+      paginate: {
+        first: "First",
+        last: "Last",
+        next: "Next",
+        previous: "Previous"
+      }
+    },
+    dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
   });
   
-  console.log('DataTable initialized');
+  console.log('Premium DataTable initialized');
   
   // Apply the search using data-column attribute
   $('.column-search').on('keyup change', function() {
@@ -313,11 +755,22 @@ $(document).ready(function() {
   console.log('Filter handlers attached');
   
   // Initialize toasts
-  let toastElement = document.querySelector('.toast');
-  if (toastElement) {
-    let toast = new bootstrap.Toast(toastElement);
+  let toastElements = document.querySelectorAll('.toast');
+  toastElements.forEach(function(toastElement) {
+    let toast = new bootstrap.Toast(toastElement, {
+      autohide: true,
+      delay: 5000
+    });
     toast.show();
-  }
+  });
+
+  // Add smooth scroll animations
+  $('button[data-bs-toggle="modal"]').on('click', function() {
+    $(this).addClass('clicked');
+    setTimeout(() => {
+      $(this).removeClass('clicked');
+    }, 300);
+  });
 });
 </script>
 {% endblock %}

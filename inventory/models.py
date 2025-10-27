@@ -546,12 +546,23 @@ class Employee(models.Model):
     employee_level = models.CharField(max_length=100, blank=True, null=True)
     employee_status = models.CharField(max_length=100, blank=True, null=True)
 
+    class Meta:
+        ordering = ['employee_lname', 'employee_fname']
+        
     @property
     def full_name(self):
-        return f"{self.employee_fname} {self.employee_lname}".strip()
+        lname = (self.employee_lname or "").strip()
+        fname = (self.employee_fname or "").strip()
+        mname = (self.employee_mname or "").strip()
+
+        # Optional: include middle initial if present
+        middle_initial = f" {mname[0]}." if mname else ""
+
+        # Format: Lastname, Firstname M.
+        return f"{lname}, {fname}{middle_initial}"
     
     def __str__(self):
-        return f"{self.employee_fname} {self.employee_lname} - {self.employee_office_section}"
+        return f"{self.employee_lname} {self.employee_fname} - {self.employee_office_section}"
     
 
 #This tracks which user changed the End User and when.

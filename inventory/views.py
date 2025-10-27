@@ -2136,9 +2136,22 @@ def disposed_mice(request):
     # Render the list of disposed mice to the template
     return render(request, 'disposed_mice.html', {'disposed_mice': disposed_mice})
 
+from django.db.models.functions import Lower, Coalesce
 
+@login_required
 def add_equipment_package_with_details(request):
-    employees = Employee.objects.all()
+
+    employees = (
+        Employee.objects
+        .annotate(
+            ln=Coalesce(Lower('employee_lname'), Value('zzzzzz')),
+            fn=Coalesce(Lower('employee_fname'), Value(''))
+        )
+        .order_by('ln', 'fn')
+    )
+    print("=== EMPLOYEE SORT CHECK ===")
+    for e in employees:
+        print(e.full_name)
     desktop_brands = Brand.objects.filter(is_desktop=True)
     keyboard_brands = Brand.objects.filter(is_keyboard=True)
     mouse_brands = Brand.objects.filter(is_mouse=True)

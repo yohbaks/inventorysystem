@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="d-flex align-items-center">
+              <h4 class="card-title"><i class="fas fa-users me-2"></i> Employee Management</h4>
+              <div class="ms-auto">
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                  <i class="fa fa-plus me-1"></i> Add Employee
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Employee Modal -->
+          <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                  <h5 class="modal-title" id="addEmployeeModalLabel">Add Employee</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <form id="addEmployeeForm" method="POST" action="{% url 'employee_list' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                      <label class="form-label">First Name</label>
+                      <input type="text" class="form-control" name="firstName" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Middle Initial</label>
+                      <input type="text" class="form-control" name="middleInitial" maxlength="1">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Last Name</label>
+                      <input type="text" class="form-control" name="lastName" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Position</label>
+                      <input type="text" class="form-control" name="position" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Office Section</label>
+                      <select class="form-control" name="office_section" required>
+                        <option value="" disabled selected>Select office section</option>
+                        {% for section in office_sections %}
+                          <option value="{{ section.id }}">{{ section.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Status</label>
+                      <select class="form-control" name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                      </select>
+                    </div>
+                    <div class="modal-footer px-0">
+                      <button type="submit" class="btn btn-primary">Add Employee</button>
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive table-head-bg-primary">
+              <table id="employee-table" class="display table table-striped table-hover" style="width:100%">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                  <tr class="filters">
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Name" data-column="0" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Position" data-column="1" /></th>
+                    <th><input type="text" class="form-control form-control-sm column-search" placeholder="Search Office" data-column="2" /></th>
+                    <th>
+                      <select class="form-select form-select-sm column-search" data-column="3">
+                        <option value="">All</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                      </select>
+                    </th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for employee in employees %}
+                  <tr>
+                    <td>{{ employee.employee_fname }} {% if employee.employee_mname %}{{ employee.employee_mname }}.{% endif %} {{ employee.employee_lname }}</td>
+                    <td>{{ employee.employee_position }}</td>
+                    <td>{{ employee.employee_office_section.name }}</td>
+                    <td>
+                      {% if employee.employee_status == "Active" %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <button class="btn btn-info btn-xs" data-bs-toggle="modal" data-bs-target="#viewEmployeeModal{{ employee.id }}">
+                        <i class="fa fa-eye"></i> View
+                      </button>
+                      <button class="btn btn-warning btn-xs" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ employee.id }}">
+                        <i class="fa fa-edit"></i> Edit
+                      </button>
+                      <button class="btn btn-danger btn-xs" data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal{{ employee.id }}">
+                        <i class="fa fa-trash"></i> Delete
+                      </button>
+                    </td>
+                  </tr>
+
+                  <!-- Delete Modal -->
+                  <div class="modal fade" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                          <h5 class="modal-title">Confirm Delete</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p>Are you sure you want to delete <strong>{{ employee.employee_fname }} {{ employee.employee_lname }}</strong>?</p>
+                        </div>
+                        <div class="modal-footer">
+                          <form method="POST" action="{% url 'delete_employee' employee.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                          </form>
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- View Modal -->
+                  <div class="modal fade" id="viewEmployeeModal{{ employee.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                      <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                          <h5 class="modal-title">Employee Details</h5>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                          <div class="d-flex align-items-center mb-3">
+                            <div class="avatar bg-primary text-white me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                              {{ employee.employee_fname|first }}{{ employee.employee_lname|first }}
+                            </div>
+                            <div>
+                              <h4 class="fw-bold mb-1">{{ employee.employee_fname }} {{ employee.employee_lname }}</h4>
+                              <p class="text-muted mb-0">{{ employee.employee_position }}</p>
+                            </div>
+                          </div>
+                          <hr>
+                          <p><strong>Middle Initial:</strong> {{ employee.employee_mname|default:"N/A" }}</p>
+                          <p><strong>Office:</strong> {{ employee.employee_office_section.name }}</p>
+                          <p><strong>Level:</strong> {{ employee.employee_level|default:"N/A" }}</p>
+                          <p><strong>Status:</strong> 
+                            {% if employee.employee_status == "Active" %}
+                              <span class="badge bg-success">Active</span>
+                            {% else %}
+                              <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                          </p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Edit Modal -->
+                  <div class="modal fade" id="editEmployeeModal{{ employee.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                          <h5 class="modal-title">Edit Employee</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          <form method="POST" action="{% url 'update_employee' employee.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ employee.id }}">
+                            <div class="mb-3">
+                              <label class="form-label">First Name</label>
+                              <input type="text" class="form-control" name="firstName" value="{{ employee.employee_fname }}" required>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Middle Initial</label>
+                              <input type="text" class="form-control" name="middleInitial" value="{{ employee.employee_mname }}" maxlength="1">
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Last Name</label>
+                              <input type="text" class="form-control" name="lastName" value="{{ employee.employee_lname }}" required>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Position</label>
+                              <input type="text" class="form-control" name="position" value="{{ employee.employee_position }}" required>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Office Section</label>
+                              <select class="form-control" name="office_section" required>
+                                {% for section in office_sections %}
+                                  <option value="{{ section.id }}" {% if employee.employee_office_section.id == section.id %}selected{% endif %}>{{ section.name }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Level</label>
+                              <select class="form-control" name="level" required>
+                                <option value="Permanent" {% if employee.employee_level == "Permanent" %}selected{% endif %}>Permanent</option>
+                                <option value="Job-Order" {% if employee.employee_level == "Job-Order" %}selected{% endif %}>Job-Order</option>
+                              </select>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Status</label>
+                              <select class="form-control" name="status" required>
+                                <option value="Active" {% if employee.employee_status == "Active" %}selected{% endif %}>Active</option>
+                                <option value="Inactive" {% if employee.employee_status == "Inactive" %}selected{% endif %}>Inactive</option>
+                              </select>
+                            </div>
+                            <div class="modal-footer px-0">
+                              <button type="submit" class="btn btn-primary">Update</button>
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Display Toasts -->
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3">
+  {% for message in messages %}
+  <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">{{ message }}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Optional Alert Block -->
+{% if the_messages %}
+<div class="alert-container position-fixed top-0 end-0 p-3">
+  {% for messagee in the_messages %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ messagee }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+$(document).ready(function() {
+  console.log('Initializing Employee DataTable...');
+  
+  // Initialize DataTable
+  var table = $('#employee-table').DataTable({
+    orderCellsTop: true,
+    fixedHeader: false,
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    language: {
+      lengthMenu: "Show _MENU_ entries",
+      info: "Showing _START_ to _END_ of _TOTAL_ employees",
+      infoEmpty: "Showing 0 to 0 of 0 employees",
+      infoFiltered: "(filtered from _MAX_ total employees)"
+    }
+  });
+  
+  console.log('DataTable initialized');
+  
+  // Apply the search using data-column attribute
+  $('.column-search').on('keyup change', function() {
+    var columnIndex = $(this).data('column');
+    var searchValue = this.value;
+    
+    console.log('Searching column ' + columnIndex + ' for: ' + searchValue);
+    
+    table.column(columnIndex).search(searchValue).draw();
+  });
+  
+  console.log('Filter handlers attached');
+  
+  // Initialize toasts
+  let toastElement = document.querySelector('.toast');
+  if (toastElement) {
+    let toast = new bootstrap.Toast(toastElement);
+    toast.show();
+  }
+});
+</script>
+{% endblock %}
