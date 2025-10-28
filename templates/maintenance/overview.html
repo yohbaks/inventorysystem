@@ -133,7 +133,7 @@
       </div>
     </div>
 
-    <!-- ==================== PREMIUM TABLE CARD ==================== -->
+    <!-- ==================== PREMIUM TABLE CARD WITH TABS ==================== -->
     <div class="row">
       <div class="col-12">
         <div class="premium-table-card">
@@ -158,173 +158,339 @@
               });
             </script>
             {% endif %}
-            
-            <!-- DataTable -->
-            <div class="table-responsive">
-              <table id="pm-table" class="premium-datatable display" style="width:100%">
-                <thead>
-                  <!-- Header Row -->
-                  <tr>
-                    <th>Quarter</th>
-                    <th>Section</th>
-                    <th>Computer Name</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                  
-                  <!-- Filter Row -->
-                  <tr class="filters">
-                    <th>
-                      <input type="text" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Search Quarter" 
-                             data-column="0" />
-                    </th>
-                    <th>
-                      <input type="text" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Search Section" 
-                             data-column="1" />
-                    </th>
-                    <th>
-                      <input type="text" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Search Computer" 
-                             data-column="2" />
-                    </th>
-                    <th>
-                      <input type="text" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Search Start" 
-                             data-column="3" />
-                    </th>
-                    <th>
-                      <input type="text" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Search End" 
-                             data-column="4" />
-                    </th>
-                    <th>
-                      <select class="form-select form-select-sm column-search" 
-                              data-column="5">
-                        <option value="">All Status</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Due">Due</option>
-                        <option value="Pending">Pending</option>
-                      </select>
-                    </th>
-                    <th></th>
-                  </tr>
-                </thead>
-                
-                <tbody>
-                  {% for assignment in pm_assignments %}
-                  <tr class="clickable-row"
-                      {% if assignment.equipment_package %}
-                        data-href="{% url 'maintenance_history' assignment.equipment_package.id %}"
-                      {% elif assignment.laptop_package %}
-                        data-href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}"
-                      {% endif %}
-                      style="cursor: pointer;">
-                    <td>
-                      {% with quarter=assignment.pm_section_schedule.quarter_schedule.get_quarter_display %}
-                        {% if quarter == "Q1" or quarter == "1st Quarter" %}
-                          <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
-                            <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                          </span>
-                        {% elif quarter == "Q2" or quarter == "2nd Quarter" %}
-                          <span class="badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
-                            <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                          </span>
-                        {% elif quarter == "Q3" or quarter == "3rd Quarter" %}
-                          <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
-                            <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                          </span>
-                        {% elif quarter == "Q4" or quarter == "4th Quarter" %}
-                          <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
-                            <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                          </span>
-                        {% else %}
-                          <span class="badge" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
-                            <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
-                          </span>
+
+            <!-- Nav Pills (Tabs) -->
+            <ul class="nav nav-pills nav-secondary mb-3" id="pm-tabs" role="tablist">
+              <li class="nav-item submenu">
+                <a class="nav-link active" data-bs-toggle="pill" href="#desktops" role="tab">
+                  <i class="fa fa-desktop me-1"></i> Desktops
+                </a>
+              </li>
+              <li class="nav-item submenu">
+                <a class="nav-link" data-bs-toggle="pill" href="#laptops" role="tab">
+                  <i class="fa fa-laptop me-1"></i> Laptops
+                </a>
+              </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content mt-2" id="pm-tabContent">
+              
+              <!-- ==================== DESKTOPS TAB ==================== -->
+              <div class="tab-pane fade show active" id="desktops" role="tabpanel">
+                <div class="table-responsive">
+                  <table id="desktop-table" class="premium-datatable display" style="width:100%">
+                    <thead>
+                      <!-- Header Row -->
+                      <tr>
+                        <th>Quarter</th>
+                        <th>Section</th>
+                        <th>Computer Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                      
+                      <!-- Filter Row -->
+                      <tr class="filters">
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Quarter" 
+                                 data-table="desktop"
+                                 data-column="0" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Section" 
+                                 data-table="desktop"
+                                 data-column="1" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Computer" 
+                                 data-table="desktop"
+                                 data-column="2" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Start" 
+                                 data-table="desktop"
+                                 data-column="3" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search End" 
+                                 data-table="desktop"
+                                 data-column="4" />
+                        </th>
+                        <th>
+                          <select class="form-select form-select-sm column-search" 
+                                  data-table="desktop"
+                                  data-column="5">
+                            <option value="">All Status</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Overdue">Overdue</option>
+                          </select>
+                        </th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for assignment in pm_assignments %}
+                        {% if assignment.equipment_package %}
+                        <tr class="clickable-row" data-href="{% url 'maintenance_history' assignment.equipment_package.id %}" style="cursor: pointer;">
+                          <td>
+                            {% with quarter=assignment.pm_section_schedule.quarter_schedule.get_quarter_display %}
+                              {% if quarter == "Q1" or quarter == "1st Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% elif quarter == "Q2" or quarter == "2nd Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% elif quarter == "Q3" or quarter == "3rd Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% elif quarter == "Q4" or quarter == "4th Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% else %}
+                                <span class="badge" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% endif %}
+                            {% endwith %}
+                          </td>
+                          <td>
+                            <span class="fw-semibold text-dark">
+                              <i class="fa fa-building text-primary me-1" style="font-size: 12px;"></i>
+                              {{ assignment.pm_section_schedule.section.name }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="fw-bold text-dark">{{ assignment.computer_name_display }}</span>
+                          </td>
+                          <td>
+                            <span class="text-muted" style="font-size: 0.875rem;">
+                              <i class="fa fa-calendar-day text-success me-1" style="font-size: 11px;"></i>
+                              {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="text-muted" style="font-size: 0.875rem;">
+                              <i class="fa fa-calendar-times text-danger me-1" style="font-size: 11px;"></i>
+                              {{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}
+                            </span>
+                          </td>
+                          <td>
+                            {% if assignment.is_completed %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46;">
+                                <i class="fa fa-check-circle"></i>
+                                Completed
+                              </span>
+                            {% elif assignment.is_overdue %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b;">
+                                <i class="fa fa-exclamation-circle"></i>
+                                Overdue
+                              </span>
+                            {% elif assignment.is_in_progress %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+                                <i class="fa fa-clock"></i>
+                                In Progress
+                              </span>
+                            {% else %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af;">
+                                <i class="fa fa-calendar"></i>
+                                Scheduled
+                              </span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <a href="{% url 'maintenance_history' assignment.equipment_package.id %}" 
+                               class="premium-view-btn theme-success" 
+                               title="View Details">
+                              <i class="fa fa-eye"></i> View
+                            </a>
+                          </td>
+                        </tr>
                         {% endif %}
-                      {% endwith %}
-                    </td>
-                    <td>
-                      <span class="fw-semibold text-dark">
-                        <i class="fa fa-building text-primary me-1" style="font-size: 12px;"></i>
-                        {{ assignment.pm_section_schedule.section.name }}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="fw-bold text-dark">{{ assignment.computer_name_display }}</span>
-                    </td>
-                    <td>
-                      <span class="text-muted" style="font-size: 0.875rem;">
-                        <i class="fa fa-calendar-day text-success me-1" style="font-size: 11px;"></i>
-                        {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
-                      </span>
-                    </td>
-                    <td>
-                      <span class="text-muted" style="font-size: 0.875rem;">
-                        <i class="fa fa-calendar-times text-danger me-1" style="font-size: 11px;"></i>
-                        {{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}
-                      </span>
-                    </td>
-                    <td>
-                      {% if assignment.is_completed %}
-                        <span class="premium-status-badge" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46;">
-                          <i class="fa fa-check-circle"></i>
-                          Completed
-                        </span>
-                      {% elif assignment.is_due %}
-                        <span class="premium-status-badge" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b;">
-                          <i class="fa fa-exclamation-circle"></i>
-                          Due
-                        </span>
-                      {% else %}
-                        <span class="premium-status-badge" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
-                          <i class="fa fa-clock"></i>
-                          Pending
-                        </span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if assignment.equipment_package %}
-                        <a href="{% url 'maintenance_history' assignment.equipment_package.id %}" class="premium-view-btn theme-success">
-                          <i class="fa fa-eye"></i> View
-                        </a>
-                      {% elif assignment.laptop_package %}
-                        <a href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" class="premium-view-btn theme-success">
-                          <i class="fa fa-eye"></i> View
-                        </a>
-                      {% else %}
-                        <span class="text-muted">N/A</span>
-                      {% endif %}
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td colspan="7" class="text-center py-5">
-                      <div style="opacity: 0.5;">
-                        <i class="fa fa-tools fa-3x text-muted mb-3"></i>
-                        <p class="text-muted mb-0">No PM assignments available</p>
-                      </div>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- ==================== LAPTOPS TAB ==================== -->
+              <div class="tab-pane fade" id="laptops" role="tabpanel">
+                <div class="table-responsive">
+                  <table id="laptop-table" class="premium-datatable display" style="width:100%">
+                    <thead>
+                      <!-- Header Row -->
+                      <tr>
+                        <th>Quarter</th>
+                        <th>Section</th>
+                        <th>Computer Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                      
+                      <!-- Filter Row -->
+                      <tr class="filters">
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Quarter" 
+                                 data-table="laptop"
+                                 data-column="0" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Section" 
+                                 data-table="laptop"
+                                 data-column="1" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Computer" 
+                                 data-table="laptop"
+                                 data-column="2" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search Start" 
+                                 data-table="laptop"
+                                 data-column="3" />
+                        </th>
+                        <th>
+                          <input type="text" 
+                                 class="form-control form-control-sm column-search" 
+                                 placeholder="Search End" 
+                                 data-table="laptop"
+                                 data-column="4" />
+                        </th>
+                        <th>
+                          <select class="form-select form-select-sm column-search" 
+                                  data-table="laptop"
+                                  data-column="5">
+                            <option value="">All Status</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Overdue">Overdue</option>
+                          </select>
+                        </th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for assignment in pm_assignments %}
+                        {% if assignment.laptop_package %}
+                        <tr class="clickable-row" data-href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" style="cursor: pointer;">
+                          <td>
+                            {% with quarter=assignment.pm_section_schedule.quarter_schedule.get_quarter_display %}
+                              {% if quarter == "Q1" or quarter == "1st Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% elif quarter == "Q2" or quarter == "2nd Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% elif quarter == "Q3" or quarter == "3rd Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% elif quarter == "Q4" or quarter == "4th Quarter" %}
+                                <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% else %}
+                                <span class="badge" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 0.5rem 0.875rem; border-radius: 50px; font-weight: 600; font-size: 0.75rem;">
+                                  <i class="fa fa-calendar me-1"></i>{{ quarter }} {{ assignment.pm_section_schedule.quarter_schedule.year }}
+                                </span>
+                              {% endif %}
+                            {% endwith %}
+                          </td>
+                          <td>
+                            <span class="fw-semibold text-dark">
+                              <i class="fa fa-building text-primary me-1" style="font-size: 12px;"></i>
+                              {{ assignment.pm_section_schedule.section.name }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="fw-bold text-dark">{{ assignment.computer_name_display }}</span>
+                          </td>
+                          <td>
+                            <span class="text-muted" style="font-size: 0.875rem;">
+                              <i class="fa fa-calendar-day text-success me-1" style="font-size: 11px;"></i>
+                              {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="text-muted" style="font-size: 0.875rem;">
+                              <i class="fa fa-calendar-times text-danger me-1" style="font-size: 11px;"></i>
+                              {{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}
+                            </span>
+                          </td>
+                          <td>
+                            {% if assignment.is_completed %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46;">
+                                <i class="fa fa-check-circle"></i>
+                                Completed
+                              </span>
+                            {% elif assignment.is_overdue %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b;">
+                                <i class="fa fa-exclamation-circle"></i>
+                                Overdue
+                              </span>
+                            {% elif assignment.is_in_progress %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e;">
+                                <i class="fa fa-clock"></i>
+                                In Progress
+                              </span>
+                            {% else %}
+                              <span class="premium-status-badge" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af;">
+                                <i class="fa fa-calendar"></i>
+                                Scheduled
+                              </span>
+                            {% endif %}
+                          </td>
+                          <td>
+                            <a href="{% url 'maintenance_history_laptop' assignment.laptop_package.id %}" 
+                               class="premium-view-btn theme-success" 
+                               title="View Details">
+                              <i class="fa fa-eye"></i> View
+                            </a>
+                          </td>
+                        </tr>
+                        {% endif %}
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
-            
           </div>
         </div>
       </div>
     </div>
-    
   </div>
 </div>
 {% endblock %}
@@ -333,21 +499,25 @@
 {{ block.super }}
 <script>
 $(document).ready(function() {
-  console.log('Initializing Premium PM Overview DataTable...');
-  
-  // Initialize DataTable
-  var table = $('#pm-table').DataTable({
-    orderCellsTop: true,
-    fixedHeader: false,
+  console.log('Initializing PM Overview with Tabs...');
+
+  // Initialize Desktop Table
+  var desktopTable = $('#desktop-table').DataTable({
     pageLength: 10,
     lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    order: [[3, 'desc']],
+    orderCellsTop: true,
+    fixedHeader: false,
+    responsive: true,
     language: {
+      search: "_INPUT_",
+      searchPlaceholder: "Search all columns...",
       lengthMenu: "Show _MENU_ entries",
-      info: "Showing _START_ to _END_ of _TOTAL_ assignments",
-      infoEmpty: "Showing 0 to 0 of 0 assignments",
-      infoFiltered: "(filtered from _MAX_ total assignments)",
-      zeroRecords: "No matching assignments found",
-      emptyTable: "No PM assignments available",
+      info: "Showing _START_ to _END_ of _TOTAL_ entries",
+      infoEmpty: "No entries available",
+      infoFiltered: "(filtered from _MAX_ total entries)",
+      zeroRecords: "No matching records found",
+      emptyTable: "No PM assignments available for desktops",
       paginate: {
         first: '<i class="fa fa-angle-double-left"></i>',
         last: '<i class="fa fa-angle-double-right"></i>',
@@ -357,29 +527,55 @@ $(document).ready(function() {
     },
     dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
     initComplete: function() {
-      console.log('Premium PM Overview DataTable initialized successfully');
-      
-      // Add animation to rows
-      $('#pm-table tbody tr').each(function(index) {
-        $(this).css({
-          'animation': 'fadeInUp 0.5s ease-out',
-          'animation-delay': (index * 0.05) + 's',
-          'animation-fill-mode': 'both'
-        });
-      });
+      console.log('Desktop DataTable initialized successfully');
+    }
+  });
+
+  // Initialize Laptop Table
+  var laptopTable = $('#laptop-table').DataTable({
+    pageLength: 10,
+    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+    order: [[3, 'desc']],
+    orderCellsTop: true,
+    fixedHeader: false,
+    responsive: true,
+    language: {
+      search: "_INPUT_",
+      searchPlaceholder: "Search all columns...",
+      lengthMenu: "Show _MENU_ entries",
+      info: "Showing _START_ to _END_ of _TOTAL_ entries",
+      infoEmpty: "No entries available",
+      infoFiltered: "(filtered from _MAX_ total entries)",
+      zeroRecords: "No matching records found",
+      emptyTable: "No PM assignments available for laptops",
+      paginate: {
+        first: '<i class="fa fa-angle-double-left"></i>',
+        last: '<i class="fa fa-angle-double-right"></i>',
+        next: '<i class="fa fa-angle-right"></i>',
+        previous: '<i class="fa fa-angle-left"></i>'
+      }
+    },
+    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    initComplete: function() {
+      console.log('Laptop DataTable initialized successfully');
     }
   });
   
-  console.log('DataTable initialized');
+  console.log('Both DataTables initialized');
   
-  // Apply the search using data-column attribute
+  // Apply the search using data-table and data-column attributes
   $('.column-search').on('keyup change', function() {
+    var tableType = $(this).data('table');
     var columnIndex = $(this).data('column');
     var searchValue = this.value;
     
-    console.log('Searching column ' + columnIndex + ' for: ' + searchValue);
+    console.log('Searching ' + tableType + ' table column ' + columnIndex + ' for: ' + searchValue);
     
-    table.column(columnIndex).search(searchValue).draw();
+    if (tableType === 'desktop') {
+      desktopTable.column(columnIndex).search(searchValue).draw();
+    } else if (tableType === 'laptop') {
+      laptopTable.column(columnIndex).search(searchValue).draw();
+    }
   });
   
   // Add clear filters button
@@ -391,11 +587,24 @@ $(document).ready(function() {
   
   $('#clearFilters').on('click', function() {
     $('.column-search').val('');
-    table.columns().search('').draw();
+    desktopTable.columns().search('').draw();
+    laptopTable.columns().search('').draw();
     console.log('All filters cleared');
   });
   
   console.log('Filter handlers attached');
+
+  // Adjust columns when switching tabs
+  $('a[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+    var target = $(e.target).attr("href");
+    console.log('Tab switched to: ' + target);
+    
+    if (target === '#desktops') {
+      desktopTable.columns.adjust().responsive.recalc();
+    } else if (target === '#laptops') {
+      laptopTable.columns.adjust().responsive.recalc();
+    }
+  });
 
   // Device type toggle
   $('#deviceTypeSelect').on('change', function() {
@@ -472,30 +681,7 @@ $(document).ready(function() {
     const section = ($(this).find(':selected').data('section') || '').trim();
     filterSchedules('laptop', id, section);
   });
-});
 
-// Add fade-in animation keyframes
-if (!document.querySelector('#fadeInUpKeyframes')) {
-  var style = document.createElement('style');
-  style.id = 'fadeInUpKeyframes';
-  style.textContent = `
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  `;
-  document.head.appendChild(style);
-}
-</script>
-
-<script>
-$(document).ready(function() {
   // ✅ FLOAT SUCCESS TOAST + CLOSE MODAL AFTER SUCCESS
   {% if messages %}
     {% for message in messages %}

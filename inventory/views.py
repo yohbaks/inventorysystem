@@ -3725,7 +3725,7 @@ def pm_overview_view(request):
         laptop_detail = package.laptop_details.first()
         package.computer_name_display = laptop_detail.computer_name if laptop_detail else "N/A"
         u = package.user_details.first()
-        package.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser else None
+        package.section_name = u.user_Enduser.employee_office_section.name if u and u.user_Enduser and u.user_Enduser.employee_office_section else None
         package.enduser_name = u.user_Enduser.full_name if u and u.user_Enduser else None
 
     # Schedules

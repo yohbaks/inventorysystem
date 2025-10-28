@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="{% static 'css/disposal-tabs-ultimate.css' %}">
   <link rel="stylesheet" href="{% static 'css/salvage-tabs-additions.css' %}">
   <link rel="stylesheet" href="{% static 'css/profile-premium.css' %}">
+  <link rel="stylesheet" href="{% static 'css/premium-navbar.css' %}">
   
   {% endblock %}
 </head>
@@ -238,279 +239,306 @@
         </div>
 
         <!-- Navbar Header -->
-        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
-          <div class="container-fluid">
-            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <button type="submit" class="btn btn-search pe-1">
-                    <i class="fa fa-search search-icon"></i>
-                  </button>
-                </div>
-                <input type="text" placeholder="Search ..." class="form-control" />
-              </div>
-            </nav>
+        <!-- ==================== REPLACE YOUR ENTIRE NAVBAR SECTION WITH THIS ==================== -->
+<!-- This goes inside {% block topbar %} in your base.html -->
 
-            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
-              <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
-                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" aria-haspopup="true">
-                  <i class="fa fa-search"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-search animated fadeIn">
-                  <form class="navbar-left navbar-form nav-search">
-                    <div class="input-group">
-                      <input type="text" placeholder="Search ..." class="form-control" />
-                    </div>
-                  </form>
-                </ul>
-              </li>
+<!-- Navbar Header -->
+<nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom premium-navbar">
+  <div class="container">
+    
+    <!-- ==================== LEFT SECTION: Search & Stats ==================== -->
+    <div class="navbar-left d-flex align-items-center gap-3">
+      
+      <!-- Premium Search Bar -->
+      <div class="premium-search-wrapper">
+        <div class="input-group premium-search-group">
+          <span class="input-group-text premium-search-icon">
+            <i class="fas fa-search"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control premium-search-input" 
+            placeholder="Search assets, employees, or equipment..."
+            aria-label="Search"
+          />
+          <span class="premium-search-kbd">
+            <kbd>Ctrl</kbd> + <kbd>K</kbd>
+          </span>
+        </div>
+      </div>
 
-              <li class="nav-item topbar-icon dropdown hidden-caret">
-                <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fa fa-envelope"></i>
-                </a>
-                <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
-                  <li>
-                    <div class="dropdown-title d-flex justify-content-between align-items-center">
-                      Messages
-                      <a href="#" class="small">Mark all as read</a>
-                    </div>
-                  </li>
-                  <li>
-                    <div class="message-notif-scroll scrollbar-outer">
-                      <div class="notif-center">
-                        <a href="#">
-                          <div class="notif-img">
-                            <img src="{% static 'img/jm_denis.jpg' %}" alt="Img Profile" />
-                          </div>
-                          <div class="notif-content">
-                            <span class="subject">Jimmy Denis</span>
-                            <span class="block"> How are you ? </span>
-                            <span class="time">5 minutes ago</span>
-                          </div>
-                        </a>
-                        <a href="#">
-                          <div class="notif-img">
-                            <img src="{% static 'img/chadengle.jpg' %}" alt="Img Profile" />
-                          </div>
-                          <div class="notif-content">
-                            <span class="subject">Chad</span>
-                            <span class="block"> Ok, Thanks ! </span>
-                            <span class="time">12 minutes ago</span>
-                          </div>
-                        </a>
-                        <a href="#">
-                          <div class="notif-img">
-                            <img src="{% static 'img/mlane.jpg' %}" alt="Img Profile" />
-                          </div>
-                          <div class="notif-content">
-                            <span class="subject">Jhon Doe</span>
-                            <span class="block"> Ready for the meeting today... </span>
-                            <span class="time">12 minutes ago</span>
-                          </div>
-                        </a>
-                        <a href="#">
-                          <div class="notif-img">
-                            <img src="{% static 'img/talha.jpg' %}" alt="Img Profile" />
-                          </div>
-                          <div class="notif-content">
-                            <span class="subject">Talha</span>
-                            <span class="block"> Hi, Apa Kabar ? </span>
-                            <span class="time">17 minutes ago</span>
-                          </div>
-                        </a>
-                      </div>
-                    </div>
-                  </li>
-                  <li>
-                    <a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i></a>
-                  </li>
-                </ul>
-              </li>
+      <!-- Live Stats Pills (Animated) -->
+      <div class="premium-stats-pills d-none d-xl-flex">
+        <div class="stat-pill stat-pill-success" data-bs-toggle="tooltip" title="Active Assets">
+          <i class="fas fa-check-circle"></i>
+          <span class="stat-label">Active</span>
+          <span class="stat-value">{{ total_assets|default:"0" }}</span>
+        </div>
+        <div class="stat-pill stat-pill-warning" data-bs-toggle="tooltip" title="Pending Maintenance">
+          <i class="fas fa-tools"></i>
+          <span class="stat-label">PM</span>
+          <span class="stat-value">{{ pending_pm_count|default:"0" }}</span>
+        </div>
+        <div class="stat-pill stat-pill-info" data-bs-toggle="tooltip" title="Total Users">
+          <i class="fas fa-users"></i>
+          <span class="stat-label">Users</span>
+          <span class="stat-value">{{ total_users|default:"0" }}</span>
+        </div>
+      </div>
+    </div>
 
-              {% comment %} notification area for PM {% endcomment %}
-              <li class="nav-item topbar-icon dropdown hidden-caret">
-                <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fa fa-bell"></i>
-                  {% if pending_pm_count > 0 %}
-                    <span class="notification">{{ pending_pm_count }}</span>
-                  {% endif %}
-                </a>
-                <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
-                  <li>
-                    <div class="dropdown-title">
-                      {% if pending_pm_count > 0 %}
-                        You have {{ pending_pm_count }} pending PM assignment{{ pending_pm_count|pluralize }}
-                      {% else %}
-                        No pending PM
-                      {% endif %}
-                    </div>
-                  </li>
-                  <li>
-                    <div class="notif-scroll scrollbar-outer">
-                      <div class="notif-center">
-                        {% for assignment in pending_pm_list %}
-                          <a href="{% url 'maintenance_history' assignment.equipment_package.id %}">
-                            <div class="notif-icon notif-warning">
-                              <i class="fa fa-exclamation-triangle"></i>
-                            </div>
-                            <div class="notif-content">
-                              <span class="block">
-                                PM pending for 
-                                {% if assignment.computer_name %}
-                                  {{ assignment.computer_name }}
-                                {% else %}
-                                  Desktop #{{ assignment.equipment_package.id }}
-                                {% endif %}
-                              </span>
-                              <span class="time">
-                                {{ assignment.pm_section_schedule.start_date|date:"M d, Y" }}
-                                {% if assignment.is_overdue %}
-                                  <span class="badge bg-danger ms-1">Overdue</span>
-                                {% else %}
-                                  <span class="badge bg-warning text-dark ms-1">Upcoming</span>
-                                {% endif %}
-                              </span>
-                            </div>
-                          </a>
-                        {% empty %}
-                          <div class="notif-content">
-                            <span class="block">No pending PM tasks.</span>
-                          </div>
-                        {% endfor %}
-                      </div>
-                    </div>
-                  </li>
-                  <li>
-                    <a class="see-all" href="{% url 'pm_overview' %}">
-                      See all PM Tasks <i class="fa fa-angle-right"></i>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              {% comment %} end notification area for PM  {% endcomment %}
-
-              <li class="nav-item topbar-icon dropdown hidden-caret">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                  <i class="fas fa-layer-group"></i>
-                </a>
-                <div class="dropdown-menu quick-actions animated fadeIn">
-                  <div class="quick-actions-header">
-                    <span class="title mb-1">Quick Actions</span>
-                    <span class="subtitle op-7">Shortcuts</span>
-                  </div>
-                  <div class="quick-actions-scroll scrollbar-outer">
-                    <div class="quick-actions-items">
-                      <div class="row m-0">
-                        <a class="col-6 col-md-4 p-0" href="{% url 'section_schedule_list' %}">
-                          <div class="quick-actions-item">
-                            <div class="avatar-item bg-danger rounded-circle">
-                              <i class="far fa-calendar-alt"></i>
-                            </div>
-                            <span class="text">PM Sched</span>
-                          </div>
-                        </a>
-                        <a class="col-6 col-md-4 p-0" href="{% url 'add_equipment_package_with_details' %}">
-                          <div class="quick-actions-item">
-                            <div class="avatar-item bg-success rounded-circle">
-                              <i class="fas fa-edit"></i>
-                            </div>
-                            <span class="text">Add Item</span>
-                          </div>
-                        </a>
-                        <a class="col-6 col-md-4 p-0" href="{% url 'export_desktop_excel' %}">
-                          <div class="quick-actions-item">
-                            <div class="avatar-item bg-info rounded-circle">
-                              <i class="fas fa-file-excel"></i>
-                            </div>
-                            <span class="text">Reports</span>
-                          </div>
-                        </a>
-                        <a class="col-6 col-md-4 p-0" href="{% url 'dashboard_view_chart' %}">
-                          <div class="quick-actions-item">
-                            <div class="avatar-item bg-warning rounded-circle">
-                              <i class="fas fa-envelope"></i>
-                            </div>
-                            <span class="text">Dashboard</span>
-                          </div>
-                        </a>
-                        <a class="col-6 col-md-4 p-0" href="{% url 'disposal_overview' %}">
-                          <div class="quick-actions-item">
-                            <div class="avatar-item bg-primary rounded-circle">
-                              <i class="far fa-trash-alt"></i>
-                            </div>
-                            <span class="text">Disposals</span>
-                          </div>
-                        </a>
-                        <a class="col-6 col-md-4 p-0" href="{% url 'employee_list' %}">
-                          <div class="quick-actions-item">
-                            <div class="avatar-item bg-secondary rounded-circle">
-                              <i class="fas fa-user"></i>
-                            </div>
-                            <span class="text">Employee</span>
-                          </div>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-
-              <li class="nav-item topbar-user dropdown hidden-caret">
-                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                  <div class="avatar-sm">
-                    <img
-                      src="{% if request.user.is_authenticated and request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'img/profile.jpg' %}{% endif %}"
-                      alt="avatar"
-                      class="avatar-img rounded-circle"
-                    />
-                  </div>
-                  <span class="profile-username">
-                    <span class="op-7">Hi,</span>
-                    <span class="fw-bold">
-                      {% if request.user.is_authenticated %}
-                        {{ request.user.first_name|default:request.user.username }}
-                      {% else %}
-                        Guest
-                      {% endif %}
-                    </span>
-                  </span>
-                </a>
-                <ul class="dropdown-menu dropdown-user animated fadeIn">
-                  <div class="dropdown-user-scroll scrollbar-outer">
-                    <li>
-                      <div class="user-box">
-                        <div class="avatar-lg">
-                          <img src="{{ request.user.profile.avatar_url }}" class="avatar-img rounded" width="32" height="32" style="object-fit:cover;">
-                        </div>
-                        <div class="u-text">
-                          <h4>Yohbaks</h4>
-                          <p class="text-muted">IT Officer</p>
-                          <a href="{% url 'profile' %}" class="btn btn-primary btn-sm">View Profile</a>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#">My Profile</a>
-                      <a class="dropdown-item" href="#">My Balance</a>
-                      <a class="dropdown-item" href="#">Inbox</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#">Account Setting</a>
-                      <div class="dropdown-divider"></div>
-                      <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="dropdown-item">Logout</button>
-                      </form>
-                    </li>
-                  </div>
-                </ul>
-              </li>
-            </ul>
+    <!-- ==================== RIGHT SECTION: Actions & Profile ==================== -->
+    <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+      
+      <!-- ==================== NOTIFICATIONS ==================== -->
+      <li class="nav-item topbar-icon dropdown hidden-caret premium-notification-item">
+        <a class="nav-link dropdown-toggle premium-icon-btn" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-bell"></i>
+          {% if pending_pm_count > 0 %}
+            <span class="notification-badge pulse">{{ pending_pm_count }}</span>
+          {% endif %}
+        </a>
+        <ul class="dropdown-menu premium-notifications-dropdown animated fadeIn" aria-labelledby="notificationDropdown">
+          <div class="dropdown-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold">Notifications</h6>
+              {% if pending_pm_count > 0 %}
+                <span class="badge bg-primary rounded-pill">{{ pending_pm_count }} New</span>
+              {% endif %}
+            </div>
           </div>
-        </nav>
+          <div class="dropdown-body premium-notifications-scroll">
+            {% for assignment in pending_pm_list %}
+              <a href="{% if assignment.equipment_package %}{% url 'maintenance_history' assignment.equipment_package.id %}{% elif assignment.laptop_package %}{% url 'maintenance_history_laptop' assignment.laptop_package.id %}{% endif %}" 
+                 class="dropdown-item premium-notification-item unread">
+                <div class="notification-icon {% if assignment.is_overdue %}bg-danger{% else %}bg-warning{% endif %}">
+                  <i class="fas fa-{% if assignment.is_overdue %}exclamation-circle{% else %}tools{% endif %}"></i>
+                </div>
+                <div class="notification-content">
+                  <h6 class="notification-title">
+                    {% if assignment.is_overdue %}Maintenance Overdue{% else %}Maintenance Due{% endif %}
+                  </h6>
+                  <p class="notification-text">
+                    PM for {{ assignment.computer_name_display|default:"N/A" }}
+                  </p>
+                  <span class="notification-time">{{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}</span>
+                </div>
+              </a>
+            {% empty %}
+              <div class="dropdown-item premium-notification-item">
+                <div class="notification-icon bg-success">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="notification-content">
+                  <h6 class="notification-title">All Clear!</h6>
+                  <p class="notification-text">No pending maintenance tasks</p>
+                  <span class="notification-time">Today</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="dropdown-footer">
+            <a href="{% url 'pm_overview' %}" class="text-center d-block">View All Notifications</a>
+          </div>
+        </ul>
+      </li>
+
+      <!-- ==================== MESSAGES ==================== -->
+      <li class="nav-item topbar-icon dropdown hidden-caret premium-notification-item d-none d-lg-block">
+        <a class="nav-link dropdown-toggle premium-icon-btn" href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-envelope"></i>
+          <span class="notification-badge">3</span>
+        </a>
+        <ul class="dropdown-menu premium-messages-dropdown animated fadeIn" aria-labelledby="messageDropdown">
+          <div class="dropdown-header">
+            <h6 class="mb-0 fw-bold">Messages</h6>
+          </div>
+          <div class="dropdown-body premium-notifications-scroll">
+            <a href="#" class="dropdown-item premium-message-item">
+              <div class="message-avatar">
+                <img src="{% static 'img/profile.jpg' %}" alt="User" class="rounded-circle">
+                <span class="status-dot status-online"></span>
+              </div>
+              <div class="message-content">
+                <h6 class="message-sender">Sarah Johnson</h6>
+                <p class="message-text">Can you check the new printer setup?</p>
+                <span class="message-time">Just now</span>
+              </div>
+            </a>
+            <a href="#" class="dropdown-item premium-message-item">
+              <div class="message-avatar">
+                <img src="{% static 'img/profile.jpg' %}" alt="User" class="rounded-circle">
+                <span class="status-dot status-away"></span>
+              </div>
+              <div class="message-content">
+                <h6 class="message-sender">Mike Chen</h6>
+                <p class="message-text">PM report is ready for review</p>
+                <span class="message-time">10m ago</span>
+              </div>
+            </a>
+            <a href="#" class="dropdown-item premium-message-item">
+              <div class="message-avatar">
+                <img src="{% static 'img/profile.jpg' %}" alt="User" class="rounded-circle">
+                <span class="status-dot status-online"></span>
+              </div>
+              <div class="message-content">
+                <h6 class="message-sender">Emma Wilson</h6>
+                <p class="message-text">Thanks for the quick response!</p>
+                <span class="message-time">1h ago</span>
+              </div>
+            </a>
+          </div>
+          <div class="dropdown-footer">
+            <a href="#" class="text-center d-block">View All Messages</a>
+          </div>
+        </ul>
+      </li>
+
+      <!-- ==================== QUICK ACTIONS ==================== -->
+      <li class="nav-item topbar-icon dropdown hidden-caret d-none d-md-block">
+        <a class="nav-link premium-icon-btn" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+          <i class="fas fa-th"></i>
+        </a>
+        <div class="dropdown-menu premium-quick-actions-dropdown animated fadeIn">
+          <div class="quick-actions-title">
+            <h6 class="fw-bold mb-0">Quick Actions</h6>
+          </div>
+          <div class="quick-actions-grid">
+            <a href="{% url 'add_equipment_package_with_details' %}" class="quick-action-card">
+              <div class="quick-action-icon bg-primary">
+                <i class="fas fa-plus"></i>
+              </div>
+              <span class="quick-action-label">Add Asset</span>
+            </a>
+            <a href="{% url 'export_desktop_excel' %}" class="quick-action-card">
+              <div class="quick-action-icon bg-success">
+                <i class="fas fa-file-excel"></i>
+              </div>
+              <span class="quick-action-label">Export</span>
+            </a>
+            <a href="{% url 'dashboard_view_chart' %}" class="quick-action-card">
+              <div class="quick-action-icon bg-warning">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <span class="quick-action-label">Analytics</span>
+            </a>
+            <a href="{% url 'disposal_overview' %}" class="quick-action-card">
+              <div class="quick-action-icon bg-danger">
+                <i class="fas fa-trash-alt"></i>
+              </div>
+              <span class="quick-action-label">Disposal</span>
+            </a>
+            <a href="{% url 'employee_list' %}" class="quick-action-card">
+              <div class="quick-action-icon bg-info">
+                <i class="fas fa-users"></i>
+              </div>
+              <span class="quick-action-label">Employees</span>
+            </a>
+            <a href="{% url 'pm_overview' %}" class="quick-action-card">
+              <div class="quick-action-icon bg-secondary">
+                <i class="fas fa-tools"></i>
+              </div>
+              <span class="quick-action-label">Maintenance</span>
+            </a>
+          </div>
+        </div>
+      </li>
+
+      <!-- ==================== THEME TOGGLE ==================== -->
+      <li class="nav-item d-none d-lg-block">
+        <button class="nav-link premium-icon-btn" id="themeToggle" title="Toggle Theme">
+          <i class="fas fa-moon"></i>
+        </button>
+      </li>
+
+      <!-- ==================== PREMIUM USER PROFILE ==================== -->
+      <li class="nav-item topbar-user dropdown hidden-caret">
+        <a class="dropdown-toggle premium-profile-btn" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+          <div class="premium-avatar-wrapper">
+            <img
+              src="{% if request.user.is_authenticated and request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'img/profile.jpg' %}{% endif %}"
+              alt="avatar"
+              class="premium-avatar"
+            />
+            <span class="premium-status-indicator"></span>
+          </div>
+          <div class="premium-user-info d-none d-lg-block">
+            <span class="premium-greeting">Hi there!</span>
+            <span class="premium-username">
+              {% if request.user.is_authenticated %}
+                {{ request.user.first_name|default:request.user.username }}
+              {% else %}
+                Guest
+              {% endif %}
+            </span>
+          </div>
+          <i class="fas fa-chevron-down premium-dropdown-icon"></i>
+        </a>
+        <ul class="dropdown-menu premium-user-dropdown animated fadeIn">
+          <li class="premium-user-header">
+            <div class="premium-user-avatar-lg">
+              <img src="{% if request.user.is_authenticated and request.user.profile.avatar %}{{ request.user.profile.avatar.url }}{% else %}{% static 'img/profile.jpg' %}{% endif %}" alt="User Avatar" class="rounded-circle">
+              <span class="premium-status-dot"></span>
+            </div>
+            <div class="premium-user-details">
+              <h5 class="premium-user-name">
+                {% if request.user.is_authenticated %}
+                  {{ request.user.get_full_name|default:request.user.username }}
+                {% else %}
+                  Guest User
+                {% endif %}
+              </h5>
+              <p class="premium-user-role">IT Officer</p>
+              <p class="premium-user-email">{{ request.user.email }}</p>
+            </div>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item premium-dropdown-link" href="{% url 'profile' %}">
+              <i class="fas fa-user-circle"></i>
+              <span>My Profile</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item premium-dropdown-link" href="#">
+              <i class="fas fa-cog"></i>
+              <span>Account Settings</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item premium-dropdown-link" href="#">
+              <i class="fas fa-bell"></i>
+              <span>Notifications</span>
+              {% if pending_pm_count > 0 %}
+                <span class="badge bg-danger ms-auto">{{ pending_pm_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item premium-dropdown-link" href="#">
+              <i class="fas fa-question-circle"></i>
+              <span>Help & Support</span>
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-item premium-dropdown-link text-danger">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </button>
+            </form>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>{% endblock %}
+<!-- End Premium Navbar -->
         <!-- End Navbar -->
       </div>
+     
       {% endblock %}
 
       {% block content %}
@@ -523,6 +551,7 @@
       <script src="{% static 'js/core/popper.min.js' %}"></script>
       <script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script>
       <script src="{% static '/js/demo.js' %}"></script>
+      <script src="{% static 'js/premium-navbar.js' %}"></script>
 
       <!-- Plugins -->
       <script src="{% static 'js/plugin/jquery-scrollbar/jquery.scrollbar.min.js' %}"></script>
@@ -534,6 +563,7 @@
       <script src="{% static 'js/plugin/jsvectormap/jsvectormap.min.js' %}"></script>
       <script src="{% static 'js/plugin/jsvectormap/world.js' %}"></script>
       <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+     
 
      
       <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
