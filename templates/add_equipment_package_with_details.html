@@ -441,7 +441,23 @@
       <div class="row mt-2">
         <div class="col-md-4">
           <label>Processor</label>
-          <input type="text" name="laptop_processor" class="form-control">
+
+          <select class="form-select form-control" id="laptop_processor" name="laptop_processor" required>
+             <option value="" disabled selected>-- Select Processor --</option>
+            <optgroup label="Core i9">
+              <option value="i9-14900K">Core i9-14900K (14th Gen)</option>
+              <option value="i9-13900K">Core i9-13900K (13th Gen)</option>
+              <option value="i9-12900K">Core i9-12900K (12th Gen)</option>
+            </optgroup>
+            <optgroup label="Core i7">
+              <option value="i7-14700K">Core i7-14700K (14th Gen)</option>
+              <option value="i7-13700K">Core i7-13700K (13th Gen)</option>
+            </optgroup>
+            <optgroup label="Core i5">
+              <option value="i5-14600K">Core i5-14600K (14th Gen)</option>
+              <option value="i5-13600K">Core i5-13600K (13th Gen)</option>
+            </optgroup>
+          </select>
         </div>
         <div class="col-md-4">
           <label>Memory (RAM)</label>
