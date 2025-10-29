@@ -15,6 +15,9 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+
+
+
 # Create your models here.
 
 def normalize_sn(value: str | None) -> str | None:
@@ -1021,3 +1024,222 @@ class DisposedPrinter(models.Model):
 
     def __str__(self):
         return f"Disposed Printer: {self.printer_brand} {self.printer_model} ({self.printer_sn})"
+    
+
+# ==================== NOTIFICATION PAGE ====================
+class Notification(models.Model):
+    """
+    Universal notification model for all system notifications
+    """
+    
+    # Notification Types
+    NOTIFICATION_TYPES = [
+        ('pm_due', 'PM Maintenance Due'),
+        ('pm_overdue', 'PM Maintenance Overdue'),
+        ('pm_completed', 'PM Maintenance Completed'),
+        ('asset_added', 'New Asset Added'),
+        ('asset_updated', 'Asset Updated'),
+        ('asset_disposed', 'Asset Disposed'),
+        ('employee_added', 'New Employee Added'),
+        ('employee_updated', 'Employee Updated'),
+        ('disposal_pending', 'Disposal Pending Approval'),
+        ('disposal_approved', 'Disposal Approved'),
+        ('system', 'System Notification'),
+        ('warning', 'Warning'),
+        ('info', 'Information'),
+    ]
+    
+    # Priority Levels
+    PRIORITY_LEVELS = [
+        ('low', 'Low'),
+        ('normal', 'Normal'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    # Core Fields
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=30, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    
+    # Additional Info
+    priority = models.CharField(max_length=10, choices=PRIORITY_LEVELS, default='normal')
+    link_url = models.CharField(max_length=500, blank=True, null=True, help_text="Link to related item")
+    link_text = models.CharField(max_length=100, blank=True, null=True, help_text="Text for the link button")
+    
+    # Status
+    is_read = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    
+    # Optional: Related objects (using GenericForeignKey for flexibility)
+    from django.contrib.contenttypes.fields import GenericForeignKey
+    from django.contrib.contenttypes.models import ContentType
+    
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read', '-created_at']),
+            models.Index(fields=['notification_type', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"
+    
+    def mark_as_read(self):
+        """Mark notification as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+    
+    def get_icon(self):
+        """Return appropriate icon based on notification type"""
+        icons = {
+            'pm_due': 'fa-tools',
+            'pm_overdue': 'fa-exclamation-triangle',
+            'pm_completed': 'fa-check-circle',
+            'asset_added': 'fa-plus-circle',
+            'asset_updated': 'fa-edit',
+            'asset_disposed': 'fa-trash-alt',
+            'employee_added': 'fa-user-plus',
+            'employee_updated': 'fa-user-edit',
+            'disposal_pending': 'fa-hourglass-half',
+            'disposal_approved': 'fa-check',
+            'system': 'fa-info-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle',
+        }
+        return icons.get(self.notification_type, 'fa-bell')
+    
+    def get_color_class(self):
+        """Return appropriate color class based on notification type"""
+        colors = {
+            'pm_due': 'warning',
+            'pm_overdue': 'danger',
+            'pm_completed': 'success',
+            'asset_added': 'primary',
+            'asset_updated': 'info',
+            'asset_disposed': 'danger',
+            'employee_added': 'success',
+            'employee_updated': 'info',
+            'disposal_pending': 'warning',
+            'disposal_approved': 'success',
+            'system': 'secondary',
+            'warning': 'warning',
+            'info': 'info',
+        }
+        return colors.get(self.notification_type, 'secondary')
+    
+    def get_priority_badge(self):
+        """Return bootstrap badge class based on priority"""
+        badges = {
+            'low': 'badge-secondary',
+            'normal': 'badge-primary',
+            'high': 'badge-warning',
+            'urgent': 'badge-danger',
+        }
+        return badges.get(self.priority, 'badge-primary')
+
+
+# ==================== HELPER FUNCTIONS ====================
+
+def create_notification(user, notification_type, title, message, priority='normal', 
+                       link_url=None, link_text=None, related_object=None):
+    """
+    Helper function to create notifications easily
+    
+    Usage:
+        create_notification(
+            user=request.user,
+            notification_type='pm_due',
+            title='PM Maintenance Due',
+            message='Desktop PC-001 requires maintenance',
+            priority='high',
+            link_url=reverse('maintenance_history', args=[package_id]),
+            link_text='View Details'
+        )
+    """
+    notification = Notification.objects.create(
+        user=user,
+        notification_type=notification_type,
+        title=title,
+        message=message,
+        priority=priority,
+        link_url=link_url,
+        link_text=link_text,
+    )
+    
+    if related_object:
+        from django.contrib.contenttypes.models import ContentType
+        notification.content_type = ContentType.objects.get_for_model(related_object)
+        notification.object_id = related_object.id
+        notification.save()
+    
+    return notification
+
+
+def create_pm_notification(assignment):
+    """
+    Create PM-related notification
+    Example usage in your PM views
+    """
+    users = User.objects.filter(is_staff=True)  # Or specific users
+    
+    for user in users:
+        if assignment.is_overdue:
+            create_notification(
+                user=user,
+                notification_type='pm_overdue',
+                title='PM Maintenance Overdue',
+                message=f'Preventive maintenance for {assignment.computer_name_display} is overdue',
+                priority='urgent',
+                link_url=f'/maintenance/history/{assignment.equipment_package.id}/',
+                link_text='View Details',
+                related_object=assignment
+            )
+        else:
+            create_notification(
+                user=user,
+                notification_type='pm_due',
+                title='PM Maintenance Due',
+                message=f'Preventive maintenance for {assignment.computer_name_display} is due',
+                priority='high',
+                link_url=f'/maintenance/history/{assignment.equipment_package.id}/',
+                link_text='View Details',
+                related_object=assignment
+            )
+
+
+def notify_asset_disposal(asset, user):
+    """Notify when asset is disposed"""
+    create_notification(
+        user=user,
+        notification_type='asset_disposed',
+        title='Asset Disposed',
+        message=f'{asset.computer_name} has been moved to disposal',
+        priority='normal',
+        link_url=f'/disposal/overview/',
+        link_text='View Disposal Area'
+    )
+
+
+def notify_new_employee(employee, user):
+    """Notify when new employee is added"""
+    create_notification(
+        user=user,
+        notification_type='employee_added',
+        title='New Employee Added',
+        message=f'{employee.full_name} has been added to the system',
+        priority='low',
+        link_url=f'/employee/{employee.id}/',
+        link_text='View Profile'
+    )

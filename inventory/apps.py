@@ -6,4 +6,4 @@ class InventoryConfig(AppConfig):
     name = 'inventory'
 
     def ready(self):
-        import inventory.signals  # 👈 Load your signal (this being used in QR CODE)
+        import inventory.signals  # 👈 Load your signal (this being used in QR CODE and notifications)

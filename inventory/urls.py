@@ -188,4 +188,20 @@ urlpatterns = [
     path("check_mouse_sn/", views.check_mouse_sn, name="check_mouse_sn"),
     path("check_ups_sn/", views.check_ups_sn, name="check_ups_sn"),
 
+
+    # ================================
+    # NOTIFICATIONS PAGE ROUTES
+    # ================================
+    path('notifications/', views.notifications_center, name='notifications_center'),
+    
+    # Notification Actions
+    path('notifications/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/mark-all-read/', views.mark_all_read, name='mark_all_read'),
+    path('notifications/<int:notification_id>/delete/', views.delete_notification, name='delete_notification'),
+    path('notifications/clear-all/', views.clear_all_notifications, name='clear_all_notifications'),
+    
+    # API Endpoint
+    path('api/notifications/count/', views.get_notification_count, name='notification_count_api'),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

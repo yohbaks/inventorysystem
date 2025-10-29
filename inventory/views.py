@@ -53,7 +53,7 @@ from inventory.models import (
     EndUserChangeHistory, AssetOwnerChangeHistory,
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
     QuarterSchedule, PMSectionSchedule, OfficeSection, Profile,
-    LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter 
+    LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification 
 )
 
 
@@ -1524,104 +1524,6 @@ def monitor_disposed(request, monitor_id):
 
 
 
-# def add_monitor_to_package(request, package_id):
-#     equipment_package = get_object_or_404(Equipment_Package, id=package_id)
-
-#     if request.method == "POST":
-#         salvaged_monitor_id = request.POST.get("salvaged_monitor_id")
-
-#         try:
-#             # CASE 1: Salvaged Monitor
-#             if salvaged_monitor_id:
-#                 salvaged_monitor = get_object_or_404(SalvagedMonitor, id=salvaged_monitor_id)
-#                 if salvaged_monitor.is_reassigned:
-#                     msg = "❌ This salvaged monitor has already been reassigned."
-#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#                         return JsonResponse({'success': False, 'message': msg})
-#                     messages.error(request, msg)
-#                     return redirect("desktop_details_view", package_id=equipment_package.id)
-
-#                 sn_norm = salvaged_monitor.monitor_sn.strip().upper()
-#                 if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
-#                     msg = f"❌ A monitor with serial number '{sn_norm}' already exists."
-#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#                         return JsonResponse({'success': False, 'message': msg})
-#                     messages.error(request, msg)
-#                     return redirect("desktop_details_view", package_id=equipment_package.id)
-
-#                 MonitorDetails.objects.create(
-#                     equipment_package=equipment_package,
-#                     monitor_sn_db=salvaged_monitor.monitor_sn,
-#                     monitor_brand_db=Brand.objects.filter(name=salvaged_monitor.monitor_brand).first(),
-#                     monitor_model_db=salvaged_monitor.monitor_model,
-#                     monitor_size_db=salvaged_monitor.monitor_size,
-#                     is_disposed=False,
-#                 )
-
-#                 salvaged_monitor.is_reassigned = True
-#                 salvaged_monitor.reassigned_to = equipment_package
-#                 salvaged_monitor.save()
-
-#                 SalvagedMonitorHistory.objects.create(
-#                     salvaged_monitor=salvaged_monitor,
-#                     reassigned_to=equipment_package,
-#                 )
-
-#                 msg = "✅ Salvaged monitor reassigned and logged."
-
-#             # CASE 2: Manual Input
-#             else:
-#                 monitor_sn = request.POST.get("monitor_sn", "").strip()
-#                 monitor_brand_id = request.POST.get("monitor_brand_db")
-#                 monitor_model = request.POST.get("monitor_model")
-#                 monitor_size = request.POST.get("monitor_size")
-
-#                 if not monitor_sn or not monitor_model:
-#                     msg = "❌ Please fill in all required fields."
-#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#                         return JsonResponse({'success': False, 'message': msg})
-#                     messages.error(request, msg)
-#                     return redirect("desktop_details_view", package_id=equipment_package.id)
-
-#                 sn_norm = monitor_sn.upper()
-#                 if MonitorDetails.objects.filter(monitor_sn_norm=sn_norm).exists():
-#                     msg = f"❌ A monitor with serial number '{monitor_sn}' already exists."
-#                     if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#                         return JsonResponse({'success': False, 'message': msg})
-#                     messages.error(request, msg)
-#                     return redirect("desktop_details_view", package_id=equipment_package.id)
-
-#                 brand_instance = Brand.objects.filter(id=monitor_brand_id).first() if monitor_brand_id else None
-
-#                 MonitorDetails.objects.create(
-#                     equipment_package=equipment_package,
-#                     monitor_sn_db=monitor_sn,
-#                     monitor_brand_db=brand_instance,
-#                     monitor_model_db=monitor_model,
-#                     monitor_size_db=monitor_size,
-#                     is_disposed=False,
-#                 )
-
-#                 msg = "✅ New monitor added successfully."
-
-#             base_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.pk})
-#             redirect_url = f"{base_url}#pills-monitor"
-
-#             if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#                 return JsonResponse({'success': True, 'message': msg, 'redirect_url': redirect_url})
-
-#             messages.success(request, msg)
-#             return redirect(redirect_url)
-
-#         except Exception as e:
-#             err = f"❌ Error adding monitor: {str(e)}"
-#             if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#                 return JsonResponse({'success': False, 'message': err})
-#             messages.error(request, err)
-#             return redirect("desktop_details_view", package_id=equipment_package.id)
-
-#     messages.error(request, "❌ Invalid request.")
-#     return redirect("desktop_details_view", package_id=equipment_package.id)
 
 @login_required
 def add_monitor_to_package(request, package_id):
@@ -2469,7 +2371,7 @@ def add_equipment_package_with_details(request):
                 messages.error(request, f"❌ Could not save: duplicate detected. Details: {ie}")
                 return render(request, 'add_equipment_package_with_details.html', context)
             except Exception as e:
-                messages.error(request, f"❌ Exception: {str(e)}")
+                messages.error(request, f"❌❌ Exception: {str(e)}")
                 return render(request, 'add_equipment_package_with_details.html', context)
 
         elif equipment_type == "Printer":
@@ -5299,3 +5201,159 @@ def disposed_printers(request):
     """List all disposed printers."""
     disposed = DisposedPrinter.objects.all().select_related('printer_db', 'printer_package')
     return render(request, 'printer/disposed_printers.html', {'disposed_printers': disposed})
+
+
+
+# ================================ NOTIFICATIONS VIEWS ================================
+@login_required
+def notifications_center(request):
+    """
+    Main notifications center page
+    """
+    # Get filter parameters
+    filter_type = request.GET.get('type', 'all')
+    filter_status = request.GET.get('status', 'all')
+    search_query = request.GET.get('q', '')
+    
+    # Base queryset
+    notifications = Notification.objects.filter(user=request.user, is_archived=False)
+    
+    # Apply type filter
+    if filter_type != 'all':
+        notifications = notifications.filter(notification_type=filter_type)
+    
+    # Apply status filter
+    if filter_status == 'unread':
+        notifications = notifications.filter(is_read=False)
+    elif filter_status == 'read':
+        notifications = notifications.filter(is_read=True)
+    
+    # Apply search
+    if search_query:
+        notifications = notifications.filter(
+            Q(title__icontains=search_query) | 
+            Q(message__icontains=search_query)
+        )
+    
+    # Get statistics
+    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
+    total_count = Notification.objects.filter(user=request.user, is_archived=False).count()
+    
+    # Get counts by type
+    type_counts = Notification.objects.filter(
+        user=request.user, 
+        is_archived=False
+    ).values('notification_type').annotate(count=Count('id'))
+    
+    # Today's notifications
+    today = timezone.now().date()
+    today_notifications = Notification.objects.filter(
+        user=request.user,
+        created_at__date=today
+    ).count()
+    
+    # This week's notifications
+    week_ago = timezone.now() - timedelta(days=7)
+    week_notifications = Notification.objects.filter(
+        user=request.user,
+        created_at__gte=week_ago
+    ).count()
+    
+    # Priority counts
+    urgent_count = notifications.filter(priority='urgent', is_read=False).count()
+    high_count = notifications.filter(priority='high', is_read=False).count()
+    
+    context = {
+        'notifications': notifications,
+        'unread_count': unread_count,
+        'total_count': total_count,
+        'today_count': today_notifications,
+        'week_count': week_notifications,
+        'urgent_count': urgent_count,
+        'high_count': high_count,
+        'type_counts': type_counts,
+        'current_filter': filter_type,
+        'current_status': filter_status,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'notifications/notifications_center.html', context)
+
+
+@login_required
+def mark_notification_read(request, notification_id):
+    """
+    Mark a single notification as read
+    """
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.mark_as_read()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success'})
+    
+    return redirect('notifications_center')
+
+
+@login_required
+def mark_all_read(request):
+    """
+    Mark all notifications as read
+    """
+    if request.method == 'POST':
+        Notification.objects.filter(
+            user=request.user, 
+            is_read=False
+        ).update(is_read=True, read_at=timezone.now())
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'All notifications marked as read'})
+    
+    return redirect('notifications_center')
+
+
+@login_required
+def delete_notification(request, notification_id):
+    """
+    Delete a single notification (archive it)
+    """
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.is_archived = True
+    notification.save()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success'})
+    
+    return redirect('notifications_center')
+
+
+@login_required
+def clear_all_notifications(request):
+    """
+    Clear all read notifications (archive them)
+    """
+    if request.method == 'POST':
+        Notification.objects.filter(
+            user=request.user,
+            is_read=True
+        ).update(is_archived=True)
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'All read notifications cleared'})
+    
+    return redirect('notifications_center')
+
+
+@login_required
+def get_notification_count(request):
+    """
+    API endpoint to get unread notification count
+    For updating navbar badge in real-time
+    """
+    unread_count = Notification.objects.filter(
+        user=request.user,
+        is_read=False
+    ).count()
+    
+    return JsonResponse({'unread_count': unread_count})
+
+

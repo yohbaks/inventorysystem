@@ -8,6 +8,8 @@
   <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
   <link rel="icon" href="{% static 'img/kaiadmin/favicon.ico' %}" type="image/x-icon" />
 
+
+
   <!-- Fonts and icons -->
   <script src="{% static 'js/plugin/webfont/webfont.min.js' %}"></script>
   <script>
@@ -37,6 +39,7 @@
   <link rel="stylesheet" href="{% static 'css/salvage-tabs-additions.css' %}">
   <link rel="stylesheet" href="{% static 'css/profile-premium.css' %}">
   <link rel="stylesheet" href="{% static 'css/premium-navbar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/notifications_center.css' %}">
   
   {% endblock %}
 </head>
@@ -241,10 +244,21 @@
         <!-- Navbar Header -->
         <!-- ==================== REPLACE YOUR ENTIRE NAVBAR SECTION WITH THIS ==================== -->
 <!-- This goes inside {% block topbar %} in your base.html -->
-
+<style>
+@media (min-width: 1400px) {
+    .container, 
+    .container-lg, 
+    .container-md, 
+    .container-sm, 
+    .container-xl, 
+    .container-xxl {
+        max-width: 1620px;
+    }
+}
+</style>
 <!-- Navbar Header -->
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom premium-navbar">
-  <div class="container">
+  <div class="container-lg">
     
     <!-- ==================== LEFT SECTION: Search & Stats ==================== -->
     <div class="navbar-left d-flex align-items-center gap-3">
@@ -292,12 +306,16 @@
       
       <!-- ==================== NOTIFICATIONS ==================== -->
       <li class="nav-item topbar-icon dropdown hidden-caret premium-notification-item">
-        <a class="nav-link dropdown-toggle premium-icon-btn" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-bell"></i>
-          {% if pending_pm_count > 0 %}
-            <span class="notification-badge pulse">{{ pending_pm_count }}</span>
-          {% endif %}
-        </a>
+          <a class="nav-link dropdown-toggle premium-icon-btn" 
+            href="{% url 'notifications_center' %}"  
+            id="notificationDropdown" 
+            role="button" 
+            data-bs-toggle="dropdown">
+            <i class="fas fa-bell"></i>
+            {% if pending_pm_count > 0 %}
+              <span class="notification-badge pulse">{{ pending_pm_count }}</span>
+            {% endif %}
+          </a>
         <ul class="dropdown-menu premium-notifications-dropdown animated fadeIn" aria-labelledby="notificationDropdown">
           <div class="dropdown-header">
             <div class="d-flex justify-content-between align-items-center">
@@ -337,9 +355,11 @@
               </div>
             {% endfor %}
           </div>
-          <div class="dropdown-footer">
-            <a href="{% url 'pm_overview' %}" class="text-center d-block">View All Notifications</a>
-          </div>
+            <div class="dropdown-footer">
+              <a href="{% url 'notifications_center' %}" class="text-center d-block">
+                View All Notifications
+              </a>
+            </div>
         </ul>
       </li>
 
@@ -563,6 +583,7 @@
       <script src="{% static 'js/plugin/jsvectormap/jsvectormap.min.js' %}"></script>
       <script src="{% static 'js/plugin/jsvectormap/world.js' %}"></script>
       <script src="{% static 'js/plugin/sweetalert/sweetalert.min.js' %}"></script>
+    
      
 
      

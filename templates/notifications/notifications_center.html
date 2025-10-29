@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    
+    <!-- ==================== PREMIUM PAGE HEADER ==================== -->
+    <div class="premium-notifications-header">
+      <div class="d-flex align-items-center justify-content-between flex-wrap mb-4">
+        <div>
+          <h3 class="notifications-page-title">
+            <i class="fas fa-bell me-2"></i>
+            Notifications Center
+          </h3>
+          <p class="text-muted mb-0">Stay updated with all system activities</p>
+        </div>
+        
+        <div class="notifications-actions d-flex gap-2">
+          <button class="btn btn-light" id="markAllReadBtn">
+            <i class="fas fa-check-double me-1"></i>
+            Mark All Read
+          </button>
+          <button class="btn btn-danger" id="clearAllBtn">
+            <i class="fas fa-trash me-1"></i>
+            Clear Read
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Cards Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="notification-stat-card stat-unread">
+            <div class="stat-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ unread_count }}</h4>
+              <p>Unread</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="notification-stat-card stat-total">
+            <div class="stat-icon">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ total_count }}</h4>
+              <p>Total</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="notification-stat-card stat-today">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ today_count }}</h4>
+              <p>Today</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="notification-stat-card stat-week">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-week"></i>
+            </div>
+            <div class="stat-info">
+              <h4>{{ week_count }}</h4>
+              <p>This Week</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- ==================== SIDEBAR (Filters) ==================== -->
+      <div class="col-lg-3 mb-4">
+        <div class="notifications-sidebar">
+          
+          <!-- Search Box -->
+          <div class="sidebar-search mb-3">
+            <form method="GET" action="{% url 'notifications_center' %}">
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  name="q" 
+                  placeholder="Search notifications..."
+                  value="{{ search_query }}"
+                />
+                <button class="btn btn-primary" type="submit">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="sidebar-section">
+            <h6 class="sidebar-title">Status</h6>
+            <div class="list-group">
+              <a href="{% url 'notifications_center' %}?status=all&type={{ current_filter }}" 
+                 class="list-group-item {% if current_status == 'all' %}active{% endif %}">
+                <i class="fas fa-list me-2"></i>
+                All Notifications
+                <span class="badge bg-secondary float-end">{{ total_count }}</span>
+              </a>
+              <a href="{% url 'notifications_center' %}?status=unread&type={{ current_filter }}" 
+                 class="list-group-item {% if current_status == 'unread' %}active{% endif %}">
+                <i class="fas fa-envelope me-2"></i>
+                Unread
+                <span class="badge bg-danger float-end">{{ unread_count }}</span>
+              </a>
+              <a href="{% url 'notifications_center' %}?status=read&type={{ current_filter }}" 
+                 class="list-group-item {% if current_status == 'read' %}active{% endif %}">
+                <i class="fas fa-envelope-open me-2"></i>
+                Read
+              </a>
+            </div>
+          </div>
+
+          <!-- Type Filter -->
+          <div class="sidebar-section mt-3">
+            <h6 class="sidebar-title">Categories</h6>
+            <div class="list-group">
+              <a href="{% url 'notifications_center' %}?type=all&status={{ current_status }}" 
+                 class="list-group-item {% if current_filter == 'all' %}active{% endif %}">
+                <i class="fas fa-th-large me-2"></i>
+                All Categories
+              </a>
+              <a href="{% url 'notifications_center' %}?type=pm_due&status={{ current_status }}" 
+                 class="list-group-item {% if current_filter == 'pm_due' %}active{% endif %}">
+                <i class="fas fa-tools me-2 text-warning"></i>
+                PM Maintenance
+              </a>
+              <a href="{% url 'notifications_center' %}?type=asset_added&status={{ current_status }}" 
+                 class="list-group-item {% if current_filter == 'asset_added' %}active{% endif %}">
+                <i class="fas fa-plus-circle me-2 text-primary"></i>
+                Assets
+              </a>
+              <a href="{% url 'notifications_center' %}?type=employee_added&status={{ current_status }}" 
+                 class="list-group-item {% if current_filter == 'employee_added' %}active{% endif %}">
+                <i class="fas fa-user-plus me-2 text-success"></i>
+                Employees
+              </a>
+              <a href="{% url 'notifications_center' %}?type=disposal_pending&status={{ current_status }}" 
+                 class="list-group-item {% if current_filter == 'disposal_pending' %}active{% endif %}">
+                <i class="fas fa-trash-alt me-2 text-danger"></i>
+                Disposals
+              </a>
+              <a href="{% url 'notifications_center' %}?type=system&status={{ current_status }}" 
+                 class="list-group-item {% if current_filter == 'system' %}active{% endif %}">
+                <i class="fas fa-cog me-2 text-secondary"></i>
+                System
+              </a>
+            </div>
+          </div>
+
+          <!-- Priority Alerts -->
+          {% if urgent_count > 0 or high_count > 0 %}
+          <div class="sidebar-section mt-3">
+            <h6 class="sidebar-title">Priority Alerts</h6>
+            <div class="alert alert-danger mb-2" role="alert">
+              <i class="fas fa-exclamation-circle me-1"></i>
+              <strong>{{ urgent_count }}</strong> Urgent
+            </div>
+            <div class="alert alert-warning mb-0" role="alert">
+              <i class="fas fa-exclamation-triangle me-1"></i>
+              <strong>{{ high_count }}</strong> High Priority
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <!-- ==================== MAIN CONTENT (Notifications List) ==================== -->
+      <div class="col-lg-9">
+        <div class="notifications-main-content">
+          
+          {% if notifications %}
+            <!-- Notifications List -->
+            <div class="notifications-list">
+              {% for notification in notifications %}
+              <div class="notification-card {% if not notification.is_read %}unread{% endif %}" 
+                   data-notification-id="{{ notification.id }}">
+                
+                <!-- Notification Icon -->
+                <div class="notification-icon-wrapper bg-{{ notification.get_color_class }}">
+                  <i class="fas {{ notification.get_icon }}"></i>
+                </div>
+
+                <!-- Notification Content -->
+                <div class="notification-content">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 class="notification-title mb-1">
+                        {{ notification.title }}
+                        {% if not notification.is_read %}
+                          <span class="badge bg-primary ms-2">New</span>
+                        {% endif %}
+                      </h6>
+                      <span class="notification-type-badge">
+                        <i class="fas fa-tag me-1"></i>
+                        {{ notification.get_notification_type_display }}
+                      </span>
+                    </div>
+                    
+                    <!-- Priority Badge -->
+                    {% if notification.priority == 'urgent' or notification.priority == 'high' %}
+                    <span class="badge {{ notification.get_priority_badge }}">
+                      {{ notification.get_priority_display }}
+                    </span>
+                    {% endif %}
+                  </div>
+
+                  <p class="notification-message">{{ notification.message }}</p>
+
+                  <!-- Notification Footer -->
+                  <div class="notification-footer">
+                    <span class="notification-time">
+                      <i class="far fa-clock me-1"></i>
+                      {{ notification.created_at|timesince }} ago
+                    </span>
+
+                    <div class="notification-actions">
+                      {% if notification.link_url %}
+                      <a href="{{ notification.link_url }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>
+                        {{ notification.link_text|default:"View Details" }}
+                      </a>
+                      {% endif %}
+
+                      {% if not notification.is_read %}
+                      <button class="btn btn-sm btn-success mark-read-btn" data-id="{{ notification.id }}">
+                        <i class="fas fa-check me-1"></i>
+                        Mark Read
+                      </button>
+                      {% endif %}
+
+                      <button class="btn btn-sm btn-danger delete-btn" data-id="{{ notification.id }}">
+                        <i class="fas fa-trash me-1"></i>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+          {% else %}
+            <!-- Empty State -->
+            <div class="notifications-empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-bell-slash"></i>
+              </div>
+              <h4>No Notifications</h4>
+              <p class="text-muted">
+                {% if search_query %}
+                  No notifications found matching "{{ search_query }}"
+                {% elif current_status == 'unread' %}
+                  You're all caught up! No unread notifications.
+                {% else %}
+                  You don't have any notifications yet.
+                {% endif %}
+              </p>
+              {% if search_query or current_status != 'all' or current_filter != 'all' %}
+              <a href="{% url 'notifications_center' %}" class="btn btn-primary">
+                <i class="fas fa-undo me-1"></i>
+                Clear Filters
+              </a>
+              {% endif %}
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+$(document).ready(function() {
+  
+  // Mark single notification as read
+  $('.mark-read-btn').on('click', function(e) {
+    e.preventDefault();
+    const notificationId = $(this).data('id');
+    const $card = $(this).closest('.notification-card');
+    
+    $.ajax({
+      url: `/notifications/${notificationId}/read/`,
+      method: 'POST',
+      headers: {'X-CSRFToken': '{{ csrf_token }}'},
+      success: function() {
+        $card.removeClass('unread');
+        $(e.target).closest('.mark-read-btn').remove();
+        
+        $.notify({
+          icon: 'fas fa-check',
+          message: 'Notification marked as read'
+        }, {
+          type: 'success',
+          placement: { from: "bottom", align: "right" },
+          delay: 2000
+        });
+        
+        // Update unread count
+        updateUnreadCount();
+      }
+    });
+  });
+
+  // Delete notification
+  $('.delete-btn').on('click', function(e) {
+    e.preventDefault();
+    const notificationId = $(this).data('id');
+    const $card = $(this).closest('.notification-card');
+    
+    if (confirm('Are you sure you want to delete this notification?')) {
+      $.ajax({
+        url: `/notifications/${notificationId}/delete/`,
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        success: function() {
+          $card.fadeOut(300, function() {
+            $(this).remove();
+            
+            // Check if no notifications left
+            if ($('.notification-card').length === 0) {
+              location.reload();
+            }
+          });
+          
+          $.notify({
+            icon: 'fas fa-trash',
+            message: 'Notification deleted'
+          }, {
+            type: 'info',
+            placement: { from: "bottom", align: "right" },
+            delay: 2000
+          });
+        }
+      });
+    }
+  });
+
+  // Mark all as read
+  $('#markAllReadBtn').on('click', function() {
+    if (confirm('Mark all notifications as read?')) {
+      $.ajax({
+        url: '{% url "mark_all_read" %}',
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        success: function() {
+          location.reload();
+        }
+      });
+    }
+  });
+
+  // Clear all read notifications
+  $('#clearAllBtn').on('click', function() {
+    if (confirm('Clear all read notifications? This cannot be undone.')) {
+      $.ajax({
+        url: '{% url "clear_all_notifications" %}',
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        success: function() {
+          location.reload();
+        }
+      });
+    }
+  });
+
+  // Update unread count in navbar
+  function updateUnreadCount() {
+    $.get('{% url "notification_count_api" %}', function(data) {
+      const badge = $('.notification-badge');
+      if (data.unread_count > 0) {
+        badge.text(data.unread_count).show();
+      } else {
+        badge.hide();
+      }
+    });
+  }
+
+  // Auto-refresh unread count every 30 seconds
+  setInterval(updateUnreadCount, 30000);
+
+});
+</script>
+{% endblock %}
