@@ -168,13 +168,16 @@
     </form>
   </div>
 </div>
+
 {% endif %}
 
-<!-- ==================== 🗑 DISPOSE LAPTOP MODAL ==================== -->
+
+<!-- ==================== 🗑 DISPOSE LAPTOP MODAL (FIXED) ==================== -->
 <div class="modal fade" id="disposeModal" tabindex="-1" aria-labelledby="disposeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     {% if laptop_details %}
-    <form method="POST" action="{% url 'dispose_laptop' laptop_details.id %}" id="disposeLaptopForm">
+    <!-- ✅ FIXED: Use laptop_package.id instead of laptop_details.id -->
+    <form method="POST" action="{% url 'dispose_laptop' laptop_package.id %}" id="disposeLaptopForm">
       {% csrf_token %}
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">

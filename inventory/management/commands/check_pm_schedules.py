@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         today = timezone.now().date()
         
-        # Get all pending PM assignments
+        # Get all pending PM assignments (excluding disposed equipment/laptops)
         pending_assignments = PMScheduleAssignment.objects.filter(
             is_completed=False
         ).select_related(
@@ -23,6 +23,12 @@ class Command(BaseCommand):
             'laptop_package',
             'pm_section_schedule',
             'pm_section_schedule__section'
+        ).exclude(
+            # Exclude disposed desktops
+            equipment_package__is_disposed=True
+        ).exclude(
+            # Exclude disposed laptops
+            laptop_package__is_disposed=True
         )
         
         overdue_count = 0

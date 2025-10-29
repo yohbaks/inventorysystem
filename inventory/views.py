@@ -2759,6 +2759,29 @@ def dispose_desktop(request, desktop_id):
         equipment_package.disposal_date = timezone.now()
         equipment_package.save()
 
+        # ---------- Delete related PM notifications AND schedules ----------
+        # Get all PM assignments related to this equipment package
+        pm_assignments = PMScheduleAssignment.objects.filter(
+            equipment_package=equipment_package,
+            is_completed=False  # Only delete pending/incomplete PM assignments
+        )
+        
+        # Delete notifications linked to these PM assignments
+        for assignment in pm_assignments:
+            content_type = ContentType.objects.get_for_model(assignment)
+            Notification.objects.filter(
+                content_type=content_type,
+                object_id=assignment.id,
+                notification_type__in=['pm_due', 'pm_overdue']
+            ).delete()
+        
+        # Delete the PM assignments themselves (or mark as cancelled)
+        # Option 1: Delete them completely
+        pm_assignments.delete()
+        
+        # Option 2: Mark as cancelled (if you want to keep history)
+        # pm_assignments.update(is_completed=True, notes="Cancelled - Equipment Disposed")
+
         redirect_url = reverse('desktop_details_view', kwargs={'package_id': equipment_package.id})
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -4779,6 +4802,25 @@ def dispose_laptop(request, package_id):
         laptop_package.disposal_date = timezone.now()
         laptop_package.save()
 
+        # ---------- Delete related PM notifications AND schedules ----------
+        # Get all PM assignments related to this laptop package
+        pm_assignments = PMScheduleAssignment.objects.filter(
+            laptop_package=laptop_package,
+            is_completed=False  # Only delete pending/incomplete PM assignments
+        )
+        
+        # Delete notifications linked to these PM assignments
+        for assignment in pm_assignments:
+            content_type = ContentType.objects.get_for_model(assignment)
+            Notification.objects.filter(
+                content_type=content_type,
+                object_id=assignment.id,
+                notification_type__in=['pm_due', 'pm_overdue']
+            ).delete()
+        
+        # Delete the PM assignments themselves
+        pm_assignments.delete()
+
         return JsonResponse({
             'success': True,
             'message': 'Laptop disposed successfully!'
@@ -5355,5 +5397,3 @@ def get_notification_count(request):
     ).count()
     
     return JsonResponse({'unread_count': unread_count})
-
-
