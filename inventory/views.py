@@ -2572,6 +2572,314 @@ def delete_employee(request, employee_id):
         'the_messages': the_messages
     })
 
+
+# ==========================================
+# EMPLOYEE PROFILE VIEW (Logged-in access)
+# ==========================================
+@login_required
+def employee_profile_view(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    sections = OfficeSection.objects.all().order_by("name")
+
+    # =============================
+    # ASSETS I USE (I am End User)
+    # =============================
+    assets_i_use_desktops = (
+        Equipment_Package.objects
+        .filter(user_details__user_Enduser=employee, is_disposed=False)
+        .exclude(user_details__user_Assetowner=employee)  # 👈 Exclude self-owned
+        .prefetch_related('user_details__user_Assetowner', 'desktop_details')
+        .distinct()
+    )
+
+    assets_i_use_laptops = (
+        LaptopPackage.objects
+        .filter(user_details__user_Enduser=employee, is_disposed=False)
+        .exclude(user_details__user_Assetowner=employee)  # 👈 Exclude self-owned
+        .prefetch_related('user_details__user_Assetowner', 'laptop_details')
+        .distinct()
+    )
+
+    assets_i_use_printers = (
+        PrinterDetails.objects
+        .select_related("printer_package", "printer_brand_db")
+        .filter(
+            printer_package__user_details__user_Enduser=employee,
+            printer_package__is_disposed=False,
+            is_disposed=False
+        )
+        .exclude(printer_package__user_details__user_Assetowner=employee)  # 👈 Exclude self-owned
+        .distinct()
+    )
+
+    # =============================
+    # ASSETS I OWN (I am Asset Owner)
+    # =============================
+    assets_i_own_desktops = (
+        Equipment_Package.objects
+        .filter(user_details__user_Assetowner=employee, is_disposed=False)
+        .prefetch_related('user_details__user_Enduser', 'desktop_details')
+        .distinct()
+    )
+
+    assets_i_own_laptops = (
+        LaptopPackage.objects
+        .filter(user_details__user_Assetowner=employee, is_disposed=False)
+        .prefetch_related('user_details__user_Enduser', 'laptop_details')
+        .distinct()
+    )
+
+    assets_i_own_printers = (
+        PrinterDetails.objects
+        .select_related("printer_package", "printer_brand_db")
+        .filter(
+            printer_package__user_details__user_Assetowner=employee,
+            printer_package__is_disposed=False,
+            is_disposed=False
+        )
+        .distinct()
+    )
+
+    # (rest of your code unchanged — disposal history, history logs, etc.)
+
+    # ============================================
+    # DISPOSAL & HISTORY
+    # ============================================
+    all_packages = assets_i_use_desktops | assets_i_own_desktops
+    disposed_desktops = DisposedDesktopDetail.objects.filter(
+        desktop__equipment_package__in=all_packages
+    ).select_related('desktop')
+
+    disposed_laptops = DisposedLaptop.objects.filter(
+        laptop__laptop_package__in=(assets_i_use_laptops | assets_i_own_laptops)
+    ).select_related('laptop')
+
+    desktop_ct = ContentType.objects.get_for_model(Equipment_Package)
+    laptop_ct = ContentType.objects.get_for_model(LaptopPackage)
+
+    desktop_ids = list(all_packages.values_list('id', flat=True))
+    laptop_ids = list((assets_i_use_laptops | assets_i_own_laptops).values_list('id', flat=True))
+
+    enduser_history = EndUserChangeHistory.objects.filter(
+        Q(content_type=desktop_ct, object_id__in=desktop_ids)
+        | Q(content_type=laptop_ct, object_id__in=laptop_ids)
+    ).select_related('old_enduser', 'new_enduser', 'changed_by')[:20]
+
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(
+        Q(content_type=desktop_ct, object_id__in=desktop_ids)
+        | Q(content_type=laptop_ct, object_id__in=laptop_ids)
+    ).select_related('old_assetowner', 'new_assetowner', 'changed_by')[:20]
+
+    # Public profile link
+    public_url = (
+        request.build_absolute_uri(reverse('employee_assets_public', args=[employee.qr_token]))
+        if employee.qr_token else None
+    )
+
+    return render(
+        request,
+        "employees/employee_profile.html",
+        {
+            "employee": employee,
+            "sections": sections,
+            "assets_i_use_desktops": assets_i_use_desktops,
+            "assets_i_use_laptops": assets_i_use_laptops,
+            "assets_i_use_printers": assets_i_use_printers,
+            "assets_i_own_desktops": assets_i_own_desktops,
+            "assets_i_own_laptops": assets_i_own_laptops,
+            "assets_i_own_printers": assets_i_own_printers,
+            "disposed_desktops": disposed_desktops,
+            "disposed_laptops": disposed_laptops,
+            "enduser_history": enduser_history,
+            "assetowner_history": assetowner_history,
+            "public_url": public_url,
+        },
+    )
+
+
+# ==========================================
+# UPDATE EMPLOYEE PROFILE
+# ==========================================
+@login_required
+def update_employee_profile(request, employee_id):
+    """Update employee profile information"""
+    if request.method != "POST":
+        return redirect("employee_profile_view", employee_id=employee_id)
+    
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    # Update basic fields
+    employee.employee_fname = request.POST.get("first_name", "").strip()
+    employee.employee_mname = request.POST.get("middle_name", "").strip()
+    employee.employee_lname = request.POST.get("last_name", "").strip()
+    employee.employee_position = request.POST.get("position", "").strip()
+    employee.email = request.POST.get("email", "").strip()
+    employee.phone = request.POST.get("phone", "").strip()
+    employee.bio = request.POST.get("bio", "").strip()
+    employee.employee_level = request.POST.get("level", "").strip()
+    employee.employee_status = request.POST.get("status", "Active")
+    
+    # Update office section
+    section_id = request.POST.get("office_section_id")
+    if section_id:
+        try:
+            employee.employee_office_section = OfficeSection.objects.get(id=section_id)
+        except OfficeSection.DoesNotExist:
+            employee.employee_office_section = None
+    
+    # Handle avatar upload
+    if "avatar" in request.FILES:
+        avatar = request.FILES["avatar"]
+        employee.avatar = avatar
+    
+    # Handle date hired
+    date_hired = request.POST.get("date_hired")
+    if date_hired:
+        from datetime import datetime
+        try:
+            employee.date_hired = datetime.strptime(date_hired, "%Y-%m-%d").date()
+        except ValueError:
+            pass
+    
+    employee.save()
+    messages.success(request, f"Profile updated for {employee.full_name}.")
+    return redirect("employee_profile_view", employee_id=employee_id)
+
+
+# ==========================================
+# REGENERATE EMPLOYEE QR CODE
+# ==========================================
+@login_required
+def regenerate_employee_qr(request, employee_id):
+    """Regenerate QR code for employee"""
+    if request.method != "POST":
+        return redirect("employee_profile_view", employee_id=employee_id)
+    
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    # Delete old QR code
+    if employee.qr_code:
+        employee.qr_code.delete(save=False)
+    
+    # Generate new token and QR
+    import uuid
+    employee.qr_token = uuid.uuid4()
+    employee.qr_code = None
+    employee.save()
+    
+    # Regenerate QR
+    from inventory.models import ensure_employee_qr
+    ensure_employee_qr(employee)
+    
+    messages.success(request, f"QR code regenerated for {employee.full_name}.")
+    return redirect("employee_profile_view", employee_id=employee_id)
+
+
+# ==========================================
+# PUBLIC EMPLOYEE ASSETS VIEW (QR Access)
+# ==========================================
+def employee_assets_public(request, token):
+    """
+    Public page accessed via QR code - no login required
+    Shows all IT assets assigned to this employee
+    """
+    employee = get_object_or_404(Employee, qr_token=token)
+    
+    # Get assigned packages
+    packages = Equipment_Package.objects.none()
+    desktops = DesktopDetails.objects.none()
+    laptops = LaptopPackage.objects.none()
+    printers = PrinterDetails.objects.none()
+    
+    if employee:
+        # 🖥 DESKTOP PACKAGES
+        packages = (
+            Equipment_Package.objects
+            .filter(user_details__user_Enduser=employee, is_disposed=False)
+            .distinct()
+            .prefetch_related("desktop_details", "monitors", "keyboards", "mouse_db", "ups")
+        )
+        desktops = DesktopDetails.objects.filter(equipment_package__in=packages)
+        
+        # 💻 LAPTOP PACKAGES
+        laptops = (
+            LaptopPackage.objects
+            .filter(user_details__user_Enduser=employee, is_disposed=False)
+            .distinct()
+            .prefetch_related("laptop_details")
+        )
+        
+        # 🖨 PRINTERS
+        printers = (
+            PrinterDetails.objects
+            .select_related("printer_package", "printer_brand_db")
+            .filter(
+                printer_package__user_details__user_Enduser=employee,
+                printer_package__is_disposed=False,
+                is_disposed=False
+            )
+            .distinct()
+        )
+    
+    # Get disposal history
+    disposed_desktops = DisposedDesktopDetail.objects.filter(
+        desktop__equipment_package__in=packages
+    ).select_related('desktop')
+    disposed_monitors = DisposedMonitor.objects.filter(
+        monitor_disposed_db__equipment_package__in=packages
+    )
+    disposed_keyboards = DisposedKeyboard.objects.filter(
+        keyboard_dispose_db__equipment_package__in=packages
+    )
+    disposed_mice = DisposedMouse.objects.filter(
+        mouse_db__equipment_package__in=packages
+    )
+    disposed_ups = DisposedUPS.objects.filter(
+        ups_db__equipment_package__in=packages
+    )
+    disposed_laptops = DisposedLaptop.objects.filter(
+        laptop__laptop_package__in=laptops
+    ).select_related('laptop')
+    
+    # Get change history
+    desktop_ct = ContentType.objects.get_for_model(Equipment_Package)
+    laptop_ct = ContentType.objects.get_for_model(LaptopPackage)
+    
+    desktop_ids = list(packages.values_list('id', flat=True))
+    laptop_ids = list(laptops.values_list('id', flat=True))
+    
+    enduser_history = EndUserChangeHistory.objects.filter(
+        Q(content_type=desktop_ct, object_id__in=desktop_ids) |
+        Q(content_type=laptop_ct, object_id__in=laptop_ids)
+    ).select_related('old_enduser', 'new_enduser', 'changed_by').order_by('-changed_at')[:20]
+    
+    assetowner_history = AssetOwnerChangeHistory.objects.filter(
+        Q(content_type=desktop_ct, object_id__in=desktop_ids) |
+        Q(content_type=laptop_ct, object_id__in=laptop_ids)
+    ).select_related('old_assetowner', 'new_assetowner', 'changed_by').order_by('-changed_at')[:20]
+    
+    context = {
+        "employee_owner": employee,
+        "employee": employee,
+        "packages": packages,
+        "desktops": desktops,
+        "laptops": laptops,
+        "printers": printers,
+        "disposed_desktops": disposed_desktops,
+        "disposed_monitors": disposed_monitors,
+        "disposed_keyboards": disposed_keyboards,
+        "disposed_mice": disposed_mice,
+        "disposed_ups": disposed_ups,
+        "disposed_laptops": disposed_laptops,
+        "enduser_history": enduser_history,
+        "assetowner_history": assetowner_history,
+    }
+    
+    return render(request, "employees/employee_assets_public.html", context)
+
+
+
+
 ##update asset owner for desktop
 
 

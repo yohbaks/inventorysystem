@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  /* Copy all styles from user_assets_public.html */
+  .profile-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+  
+  .profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .profile-header-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid #f8f9fa;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  }
+  
+  .profile-info h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+  }
+  
+  .profile-subtitle {
+    color: #718096;
+    font-size: 16px;
+  }
+  
+  .premium-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+  
+  .premium-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+  }
+  
+  .premium-card-header h5 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .premium-card-body {
+    padding: 30px;
+  }
+  
+  .asset-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 4px solid #667eea;
+  }
+  
+  .asset-item h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  .asset-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .asset-detail:last-child {
+    border-bottom: none;
+  }
+  
+  .asset-label {
+    color: #718096;
+    font-weight: 500;
+  }
+  
+  .asset-value {
+    color: #1a202c;
+    font-weight: 600;
+  }
+  
+  .badge-custom {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .badge-active {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+  }
+  
+  .badge-disposed {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color: white;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #a0aec0;
+  }
+  
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+  }
+</style>
+
+<div class="profile-page">
+  <div class="profile-container">
+    
+    <!-- ==================== EMPLOYEE HEADER ==================== -->
+    <div class="profile-header-card">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          <img src="{{ employee_owner.avatar_url }}" alt="Avatar" class="profile-avatar">
+        </div>
+        <div class="col">
+          <div class="profile-info">
+            <h2>{{ employee_owner.full_name }}</h2>
+            <p class="profile-subtitle">
+              <i class="fas fa-briefcase me-2"></i>
+              {{ employee_owner.employee_position|default:"Employee" }}
+              {% if employee_owner.employee_office_section %}
+                • {{ employee_owner.employee_office_section.name }}
+              {% endif %}
+            </p>
+            <div class="mt-2">
+              <span class="badge-custom {% if employee_owner.employee_status == 'Active' %}badge-active{% else %}badge-secondary{% endif %}">
+                {{ employee_owner.employee_status|default:"Active" }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-auto">
+          <div class="text-end">
+            <i class="fas fa-qrcode" style="font-size: 3rem; color: #667eea;"></i>
+            <p class="text-muted small mt-2 mb-0">Scanned via QR</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== DESKTOP ASSETS ==================== -->
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5><i class="fas fa-desktop me-2"></i>Desktop Computers ({{ packages|length }})</h5>
+      </div>
+      <div class="premium-card-body">
+        {% if packages %}
+          {% for package in packages %}
+            {% with desktop=package.desktop_details.first %}
+              <div class="asset-item">
+                <h6><i class="fas fa-computer me-2"></i>{{ desktop.computer_name|default:"Desktop" }}</h6>
+                <div class="asset-detail">
+                  <span class="asset-label">Serial Number</span>
+                  <span class="asset-value">{{ desktop.serial_no|default:"N/A" }}</span>
+                </div>
+                <div class="asset-detail">
+                  <span class="asset-label">Brand</span>
+                  <span class="asset-value">{{ desktop.brand.name|default:"N/A" }}</span>
+                </div>
+                <div class="asset-detail">
+                  <span class="asset-label">Model</span>
+                  <span class="asset-value">{{ desktop.model|default:"N/A" }}</span>
+                </div>
+                <div class="asset-detail">
+                  <span class="asset-label">Processor</span>
+                  <span class="asset-value">{{ desktop.processor|default:"N/A" }}</span>
+                </div>
+                <div class="asset-detail">
+                  <span class="asset-label">RAM</span>
+                  <span class="asset-value">{{ desktop.ram|default:"N/A" }}</span>
+                </div>
+                <div class="asset-detail">
+                  <span class="asset-label">Storage</span>
+                  <span class="asset-value">{{ desktop.storage|default:"N/A" }}</span>
+                </div>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-desktop"></i>
+            <p>No desktop computers assigned</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ==================== LAPTOP ASSETS ==================== -->
+    {% if laptops %}
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5><i class="fas fa-laptop me-2"></i>Laptop Computers ({{ laptops|length }})</h5>
+      </div>
+      <div class="premium-card-body">
+        {% for laptop_pkg in laptops %}
+          {% with laptop=laptop_pkg.laptop_details.first %}
+            <div class="asset-item">
+              <h6><i class="fas fa-laptop me-2"></i>{{ laptop.computer_name|default:"Laptop" }}</h6>
+              <div class="asset-detail">
+                <span class="asset-label">Serial Number</span>
+                <span class="asset-value">{{ laptop.serial_no|default:"N/A" }}</span>
+              </div>
+              <div class="asset-detail">
+                <span class="asset-label">Brand</span>
+                <span class="asset-value">{{ laptop.brand.name|default:"N/A" }}</span>
+              </div>
+              <div class="asset-detail">
+                <span class="asset-label">Model</span>
+                <span class="asset-value">{{ laptop.model|default:"N/A" }}</span>
+              </div>
+              <div class="asset-detail">
+                <span class="asset-label">Processor</span>
+                <span class="asset-value">{{ laptop.processor|default:"N/A" }}</span>
+              </div>
+              <div class="asset-detail">
+                <span class="asset-label">RAM</span>
+                <span class="asset-value">{{ laptop.ram|default:"N/A" }}</span>
+              </div>
+            </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ==================== PRINTER ASSETS ==================== -->
+    {% if printers %}
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5><i class="fas fa-print me-2"></i>Printers ({{ printers|length }})</h5>
+      </div>
+      <div class="premium-card-body">
+        {% for printer in printers %}
+          <div class="asset-item">
+            <h6><i class="fas fa-print me-2"></i>{{ printer.printer_model_db|default:"Printer" }}</h6>
+            <div class="asset-detail">
+              <span class="asset-label">Serial Number</span>
+              <span class="asset-value">{{ printer.printer_sn_db|default:"N/A" }}</span>
+            </div>
+            <div class="asset-detail">
+              <span class="asset-label">Brand</span>
+              <span class="asset-value">{{ printer.printer_brand_db.name|default:"N/A" }}</span>
+            </div>
+            <div class="asset-detail">
+              <span class="asset-label">Type</span>
+              <span class="asset-value">{{ printer.printer_type|default:"N/A" }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ==================== DISPOSED ASSETS ==================== -->
+    {% if disposed_desktops or disposed_laptops %}
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5><i class="fas fa-trash-alt me-2"></i>Disposed Assets</h5>
+      </div>
+      <div class="premium-card-body">
+        {% for disposed in disposed_desktops %}
+          <div class="asset-item" style="border-left-color: #fa709a;">
+            <h6><i class="fas fa-desktop me-2"></i>{{ disposed.desktop.computer_name }} <span class="badge-custom badge-disposed">Disposed</span></h6>
+            <div class="asset-detail">
+              <span class="asset-label">Disposal Date</span>
+              <span class="asset-value">{{ disposed.disposal_date|date:"M d, Y" }}</span>
+            </div>
+            <div class="asset-detail">
+              <span class="asset-label">Reason</span>
+              <span class="asset-value">{{ disposed.disposal_reason|default:"N/A" }}</span>
+            </div>
+          </div>
+        {% endfor %}
+        
+        {% for disposed in disposed_laptops %}
+          <div class="asset-item" style="border-left-color: #fa709a;">
+            <h6><i class="fas fa-laptop me-2"></i>{{ disposed.laptop.computer_name }} <span class="badge-custom badge-disposed">Disposed</span></h6>
+            <div class="asset-detail">
+              <span class="asset-label">Disposal Date</span>
+              <span class="asset-value">{{ disposed.disposal_date|date:"M d, Y" }}</span>
+            </div>
+            <div class="asset-detail">
+              <span class="asset-label">Reason</span>
+              <span class="asset-value">{{ disposed.disposal_reason|default:"N/A" }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ==================== CHANGE HISTORY ==================== -->
+    {% if enduser_history or assetowner_history %}
+    <div class="premium-card">
+      <div class="premium-card-header">
+        <h5><i class="fas fa-history me-2"></i>Assignment History</h5>
+      </div>
+      <div class="premium-card-body">
+        <h6 class="text-muted mb-3">End User Changes</h6>
+        {% if enduser_history %}
+          {% for change in enduser_history|slice:":10" %}
+            <div class="asset-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ change.device_display }}</strong>
+                  <p class="mb-1 text-muted small">
+                    Changed from 
+                    <strong>{{ change.old_enduser.full_name|default:"None" }}</strong> to 
+                    <strong>{{ change.new_enduser.full_name|default:"None" }}</strong>
+                  </p>
+                  <p class="mb-0 text-muted small">
+                    <i class="fas fa-user me-1"></i>
+                    By {{ change.changed_by.get_full_name|default:change.changed_by.username }}
+                  </p>
+                </div>
+                <span class="text-muted small">{{ change.changed_at|date:"M d, Y" }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No end user changes recorded</p>
+        {% endif %}
+        
+        <h6 class="text-muted mb-3 mt-4">Asset Owner Changes</h6>
+        {% if assetowner_history %}
+          {% for change in assetowner_history|slice:":10" %}
+            <div class="asset-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ change.device_display }}</strong>
+                  <p class="mb-1 text-muted small">
+                    Changed from 
+                    <strong>{{ change.old_assetowner.full_name|default:"None" }}</strong> to 
+                    <strong>{{ change.new_assetowner.full_name|default:"None" }}</strong>
+                  </p>
+                  <p class="mb-0 text-muted small">
+                    <i class="fas fa-user me-1"></i>
+                    By {{ change.changed_by.get_full_name|default:change.changed_by.username }}
+                  </p>
+                </div>
+                <span class="text-muted small">{{ change.changed_at|date:"M d, Y" }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted">No asset owner changes recorded</p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="text-center text-white mt-4">
+      <p class="mb-0">
+        <i class="fas fa-shield-alt me-2"></i>
+        Powered by IT Asset Management System
+      </p>
+      <p class="small mb-0 mt-2 opacity-75">
+        Generated on {{ now|date:"F d, Y" }} at {{ now|time:"h:i A" }}
+      </p>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

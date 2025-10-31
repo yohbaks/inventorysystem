@@ -390,6 +390,7 @@
               <button class="premium-btn premium-btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                 <i class="fa fa-plus me-2"></i> Add New Employee
               </button>
+
             </div>
           </div>
 
@@ -497,17 +498,35 @@
                         <span class="badge premium-badge badge-secondary">Inactive</span>
                       {% endif %}
                     </td>
-                    <td>
-                      <button class="btn action-btn action-btn-view btn-sm" data-bs-toggle="modal" data-bs-target="#viewEmployeeModal{{ employee.id }}">
-                        <i class="fa fa-eye"></i>
-                      </button>
-                      <button class="btn action-btn action-btn-edit btn-sm" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ employee.id }}">
-                        <i class="fa fa-edit"></i>
-                      </button>
-                      <button class="btn action-btn action-btn-delete btn-sm" data-bs-toggle="modal" data-bs-target="#deleteEmployeeModal{{ employee.id }}">
-                        <i class="fa fa-trash"></i>
-                      </button>
-                    </td>
+<td>
+    <!-- View Button -->
+    <button class="btn action-btn action-btn-view btn-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#viewEmployeeModal{{ employee.id }}">
+        <i class="fa fa-eye"></i>
+    </button>
+    
+    <!-- ✅ NEW: Profile Button -->
+    <a href="{% url 'employee_profile_view' employee.id %}" 
+       class="btn action-btn action-btn-view btn-sm"
+       title="View Profile">
+        <i class="fa fa-id-card"></i>
+    </a>
+    
+    <!-- Edit Button -->
+    <button class="btn action-btn action-btn-edit btn-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#editEmployeeModal{{ employee.id }}">
+        <i class="fa fa-edit"></i>
+    </button>
+    
+    <!-- Delete Button -->
+    <button class="btn action-btn action-btn-delete btn-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#deleteEmployeeModal{{ employee.id }}">
+        <i class="fa fa-trash"></i>
+    </button>
+</td>
                   </tr>
                   {% endfor %}
                 </tbody>

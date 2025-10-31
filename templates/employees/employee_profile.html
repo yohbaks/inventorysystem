@@ -1,0 +1,1005 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Reuse the same premium profile styles from your user profile.html */
+  .profile-premium { font-family: 'Inter', sans-serif; }
+  
+  .profile-header-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  }
+  
+  .profile-header-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .profile-gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    filter: blur(40px);
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  .profile-gradient-orb.orb-1 {
+    width: 400px;
+    height: 400px;
+    top: -200px;
+    right: -100px;
+    animation-delay: 0s;
+  }
+  
+  .profile-gradient-orb.orb-2 {
+    width: 300px;
+    height: 300px;
+    bottom: -150px;
+    left: -50px;
+    animation-delay: 2s;
+  }
+  
+  .profile-gradient-orb.orb-3 {
+    width: 250px;
+    height: 250px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 4s;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-20px, -20px); }
+    50% { transform: translate(20px, -10px); }
+    75% { transform: translate(-10px, 20px); }
+  }
+  
+  .profile-header-glass {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .profile-avatar-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+  }
+  
+  .profile-avatar-glow {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.1); opacity: 0.9; }
+  }
+  
+  .profile-avatar-modern {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 5px solid white;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .profile-verified-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 3px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    z-index: 3;
+  }
+  
+  .profile-camera-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 3;
+  }
+  
+  .profile-camera-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+  }
+  
+  .profile-info-modern {
+    color: white;
+  }
+  
+  .profile-display-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .profile-name-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .profile-status-dot {
+    width: 14px;
+    height: 14px;
+    background: #38ef7d;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px rgba(56, 239, 125, 0.3);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(56, 239, 125, 0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(56, 239, 125, 0.1); }
+  }
+  
+  .profile-email-modern {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0.5rem 0 1rem 0;
+  }
+  
+  .profile-badges-modern {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .profile-info-badge {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .profile-quick-stats {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .profile-stat-box {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 140px;
+  }
+  
+  .profile-stat-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+  }
+  
+  .profile-stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+  }
+  
+  .profile-stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .profile-info-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  
+  .profile-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+  }
+  
+  .profile-card-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  
+  .profile-card-body {
+    padding: 2rem;
+  }
+  
+  .profile-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .profile-info-item:last-child {
+    border-bottom: none;
+  }
+  
+  .profile-info-label {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 0.9rem;
+  }
+  
+  .profile-info-value {
+    color: #333;
+    font-size: 0.95rem;
+  }
+  
+  .profile-badge {
+    padding: 0.4rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .profile-badge.success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+  }
+  
+  .profile-badge.secondary {
+    background: #e9ecef;
+    color: #6c757d;
+  }
+  
+  .profile-badge.light {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    color: #2d3436;
+  }
+  
+  .profile-badge.dark {
+    background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+    color: white;
+  }
+  
+  .profile-qr-wrapper {
+    background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+    padding: 2rem;
+    border-radius: 16px;
+    margin: 1rem 0;
+    border: 2px solid #e9ecef;
+  }
+  
+  .profile-qr-image {
+    max-width: 250px;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .profile-qr-subtitle {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .profile-qr-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  
+  .profile-qr-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+  
+  .profile-qr-btn.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .profile-qr-btn.secondary {
+    background: #f8f9fa;
+    color: #667eea;
+    border: 2px solid #667eea;
+  }
+  
+  .profile-qr-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  }
+  
+  .profile-form-label {
+    display: block;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .profile-form-input, .profile-form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+  
+  .profile-form-input:focus, .profile-form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+  
+  .profile-form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    min-height: 120px;
+    transition: all 0.3s ease;
+    resize: vertical;
+  }
+  
+  .profile-form-textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+  
+  .profile-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.85rem 2rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .profile-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+  
+  .asset-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+  }
+  
+  .asset-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .asset-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .asset-card-title {
+    font-weight: 700;
+    color: #667eea;
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  
+  .asset-badge {
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+  }
+  
+  .asset-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .asset-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .asset-info-item-label {
+    font-size: 0.85rem;
+    color: #667eea;
+    font-weight: 600;
+  }
+  
+  .asset-info-item-value {
+    font-size: 0.95rem;
+    color: #333;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+  
+  .empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+</style>
+
+<div class="container profile-premium">
+  <div class="page-inner py-4">
+
+    <!-- ==================== EMPLOYEE PROFILE HEADER ==================== -->
+    <div class="profile-header-modern">
+      <!-- Animated Background -->
+      <div class="profile-header-backdrop">
+        <div class="profile-gradient-orb orb-1"></div>
+        <div class="profile-gradient-orb orb-2"></div>
+        <div class="profile-gradient-orb orb-3"></div>
+      </div>
+      
+      <!-- Content Container -->
+      <div class="profile-header-glass">
+        <div class="container">
+          <div class="row align-items-center">
+            
+            <!-- Avatar Section -->
+            <div class="col-auto">
+              <div class="profile-avatar-container">
+                <div class="profile-avatar-glow"></div>
+                <img src="{{ employee.avatar_url }}" alt="avatar" class="profile-avatar-modern">
+                <div class="profile-verified-badge">
+                  <i class="fas fa-id-badge"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Info Section -->
+            <div class="col">
+              <div class="profile-info-modern">
+                <div class="profile-name-section">
+                  <h1 class="profile-display-name">{{ employee.full_name }}</h1>
+                  <span class="profile-status-dot"></span>
+                </div>
+                <p class="profile-email-modern">
+                  <i class="fas fa-envelope"></i>
+                  {{ employee.email|default:"No email" }}
+                </p>
+                <div class="profile-badges-modern">
+                  {% if employee.employee_position %}
+                  <div class="profile-info-badge">
+                    <i class="fas fa-briefcase"></i>
+                    <span>{{ employee.employee_position }}</span>
+                  </div>
+                  {% endif %}
+                  {% if employee.employee_office_section %}
+                  <div class="profile-info-badge">
+                    <i class="fas fa-building"></i>
+                    <span>{{ employee.employee_office_section.name }}</span>
+                  </div>
+                  {% endif %}
+                  <div class="profile-info-badge">
+                    <i class="fas fa-user-check"></i>
+                    <span>{{ employee.employee_status|default:"Active" }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="col-auto d-none d-lg-block">
+              <div class="profile-quick-stats">
+                <div class="profile-stat-box">
+                  <div class="profile-stat-icon">
+                    <i class="fas fa-desktop"></i>
+                  </div>
+                  <div class="profile-stat-info">
+                    <div class="profile-stat-value">{{ assets_i_own_desktops|length }}</div>
+                    <div class="profile-stat-label">Desktops</div>
+                  </div>
+                </div>
+                <div class="profile-stat-box">
+                  <div class="profile-stat-icon">
+                    <i class="fas fa-laptop"></i>
+                  </div>
+                  <div class="profile-stat-info">
+                    <div class="profile-stat-value">{{ assets_i_own_laptops|length }}</div>
+                    <div class="profile-stat-label">Laptops</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MAIN CONTENT GRID ==================== -->
+    <div class="row g-4 mt-2">
+      
+      <!-- LEFT SIDEBAR -->
+      <div class="col-lg-4">
+        
+        <!-- Quick Info Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-info-circle me-2"></i>
+            <h5>Employee Information</h5>
+          </div>
+          <div class="profile-card-body">
+            <div class="profile-info-item">
+              <span class="profile-info-label">Employee ID</span>
+              <span class="profile-info-value">#{{ employee.id }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Position</span>
+              <span class="profile-info-value">{{ employee.employee_position|default:"N/A" }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Office</span>
+              <span class="profile-info-value">{{ employee.employee_office_section.name|default:"N/A" }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Level</span>
+              <span class="profile-info-value">{{ employee.employee_level|default:"N/A" }}</span>
+            </div>
+            <div class="profile-info-item">
+              <span class="profile-info-label">Status</span>
+              <span class="profile-info-value">
+                <span class="profile-badge {% if employee.employee_status == 'Active' %}success{% else %}secondary{% endif %}">
+                  {{ employee.employee_status|default:"Active" }}
+                </span>
+              </span>
+            </div>
+            {% if employee.phone %}
+            <div class="profile-info-item">
+              <span class="profile-info-label">Phone</span>
+              <span class="profile-info-value">{{ employee.phone }}</span>
+            </div>
+            {% endif %}
+            {% if employee.date_hired %}
+            <div class="profile-info-item">
+              <span class="profile-info-label">Date Hired</span>
+              <span class="profile-info-value">{{ employee.date_hired|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- QR Code Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-qrcode me-2"></i>
+            <h5>Employee QR Code</h5>
+          </div>
+          <div class="profile-card-body text-center">
+            <p class="profile-qr-subtitle">Scan to view assigned assets</p>
+            {% if employee.qr_code %}
+              <div class="profile-qr-wrapper">
+                <img src="{{ employee.qr_code.url }}" alt="Employee QR" class="profile-qr-image" />
+              </div>
+            {% else %}
+              <div class="profile-qr-placeholder">
+                <i class="fa fa-qrcode fa-3x mb-2 text-muted"></i>
+                <p class="text-muted small">QR code will appear after refresh</p>
+              </div>
+            {% endif %}
+            <div class="profile-qr-actions">
+              {% if public_url %}
+              <a href="{{ public_url }}" class="profile-qr-btn primary" target="_blank">
+                <i class="fa fa-external-link-alt me-1"></i> Open Link
+              </a>
+              {% endif %}
+              <form method="post" action="{% url 'regenerate_employee_qr' employee.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="profile-qr-btn secondary" style="border: none;">
+                  <i class="fa fa-sync-alt me-1"></i> Regenerate
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT CONTENT -->
+      <div class="col-lg-8">
+        
+        <!-- Edit Profile Card -->
+        <div class="profile-info-card">
+          <div class="profile-card-header">
+            <i class="fa fa-user-edit me-2"></i>
+            <h5>Edit Employee Profile</h5>
+          </div>
+          <div class="profile-card-body">
+            <form method="post" action="{% url 'update_employee_profile' employee.id %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="profile-form-label">First Name</label>
+                  <input class="profile-form-input" name="first_name" value="{{ employee.employee_fname }}" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="profile-form-label">M.I.</label>
+                  <input class="profile-form-input" name="middle_name" value="{{ employee.employee_mname }}" maxlength="1">
+                </div>
+                <div class="col-md-3">
+                  <label class="profile-form-label">Last Name</label>
+                  <input class="profile-form-input" name="last_name" value="{{ employee.employee_lname }}" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="profile-form-label">Email</label>
+                  <input type="email" class="profile-form-input" name="email" value="{{ employee.email }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="profile-form-label">Phone</label>
+                  <input class="profile-form-input" name="phone" value="{{ employee.phone }}" placeholder="Enter phone number">
+                </div>
+                <div class="col-md-6">
+                  <label class="profile-form-label">Position</label>
+                  <input class="profile-form-input" name="position" value="{{ employee.employee_position }}" placeholder="Enter position">
+                </div>
+                <div class="col-md-6">
+                  <label class="profile-form-label">Office Section</label>
+                  <select class="profile-form-select" name="office_section_id">
+                    <option value="">Select section...</option>
+                    {% for s in sections %}
+                      <option value="{{ s.id }}" {% if employee.employee_office_section and employee.employee_office_section.id == s.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="profile-form-label">Employment Level</label>
+                  <select class="profile-form-select" name="level">
+                    <option value="Permanent" {% if employee.employee_level == "Permanent" %}selected{% endif %}>Permanent</option>
+                    <option value="Job-Order" {% if employee.employee_level == "Job-Order" %}selected{% endif %}>Job-Order</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="profile-form-label">Status</label>
+                  <select class="profile-form-select" name="status">
+                    <option value="Active" {% if employee.employee_status == "Active" %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if employee.employee_status == "Inactive" %}selected{% endif %}>Inactive</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="profile-form-label">Date Hired</label>
+                  <input type="date" class="profile-form-input" name="date_hired" value="{{ employee.date_hired|date:'Y-m-d' }}">
+                </div>
+                <div class="col-12">
+                  <label class="profile-form-label">Avatar</label>
+                  <input type="file" class="profile-form-input" name="avatar" accept="image/*">
+                </div>
+                <div class="col-12">
+                  <label class="profile-form-label">Bio / Notes</label>
+                  <textarea class="profile-form-textarea" name="bio" placeholder="Additional information...">{{ employee.bio }}</textarea>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="profile-btn-primary">
+                    <i class="fa fa-save me-2"></i> Save Changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+<!-- ==================== ASSETS I USE (I am End User) ==================== -->
+<div class="profile-info-card">
+  <div class="profile-card-header">
+    <i class="fa fa-user me-2"></i>
+    <h5>Assets I Use (I am End User) - {{ assets_i_use_desktops|length|add:assets_i_use_laptops|length }} Total</h5>
+  </div>
+  <div class="profile-card-body">
+    
+    <!-- Desktops I Use -->
+    <h6 class="text-primary mb-3">
+      <i class="fas fa-desktop me-2"></i>Desktop Computers ({{ assets_i_use_desktops|length }})
+    </h6>
+    {% if assets_i_use_desktops %}
+      {% for package in assets_i_use_desktops %}
+        <div class="asset-card">
+          <div class="asset-card-header">
+            <h6 class="asset-card-title">
+              <i class="fas fa-desktop me-2"></i>
+              {% with desktop=package.desktop_details.first %}
+                {{ desktop.computer_name|default:"Desktop" }}
+              {% endwith %}
+            </h6>
+            <span class="asset-badge">Active</span>
+          </div>
+          <div class="asset-info-grid">
+            {% with desktop=package.desktop_details.first user=package.user_details.first %}
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Serial Number</span>
+                <span class="asset-info-item-value">{{ desktop.serial_no|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Brand</span>
+                <span class="asset-info-item-value">{{ desktop.brand.name|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Model</span>
+                <span class="asset-info-item-value">{{ desktop.model|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">👑 Asset Owner</span>
+                <span class="asset-info-item-value">
+                  {% if user.user_Assetowner %}
+                    <strong class="text-warning">{{ user.user_Assetowner.full_name }}</strong>
+                  {% else %}
+                    <span class="text-muted">Not Assigned</span>
+                  {% endif %}
+                </span>
+              </div>
+            {% endwith %}
+          </div>
+          <div class="mt-3">
+            <a href="{% url 'desktop_details_view' package.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="fa fa-eye me-1"></i> View Details
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="fas fa-desktop"></i>
+        <p>No desktop assets you are using</p>
+      </div>
+    {% endif %}
+
+    <!-- Laptops I Use -->
+    {% if assets_i_use_laptops %}
+      <h6 class="text-primary mb-3 mt-4">
+        <i class="fas fa-laptop me-2"></i>Laptop Computers ({{ assets_i_use_laptops|length }})
+      </h6>
+      {% for laptop_pkg in assets_i_use_laptops %}
+        <div class="asset-card">
+          <div class="asset-card-header">
+            <h6 class="asset-card-title">
+              <i class="fas fa-laptop me-2"></i>
+              {% with laptop=laptop_pkg.laptop_details.first %}
+                {{ laptop.computer_name|default:"Laptop" }}
+              {% endwith %}
+            </h6>
+            <span class="asset-badge">Active</span>
+          </div>
+          <div class="asset-info-grid">
+            {% with laptop=laptop_pkg.laptop_details.first user=laptop_pkg.user_details.first %}
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Serial Number</span>
+                <span class="asset-info-item-value">{{ laptop.serial_no|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Brand</span>
+                <span class="asset-info-item-value">{{ laptop.brand.name|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">👑 Asset Owner</span>
+                <span class="asset-info-item-value">
+                  {% if user.user_Assetowner %}
+                    <strong class="text-warning">{{ user.user_Assetowner.full_name }}</strong>
+                  {% else %}
+                    <span class="text-muted">Not Assigned</span>
+                  {% endif %}
+                </span>
+              </div>
+            {% endwith %}
+          </div>
+          <div class="mt-3">
+            <a href="{% url 'laptop_details_view' laptop_pkg.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="fa fa-eye me-1"></i> View Details
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+    
+  </div>
+</div>
+
+<!-- ==================== ASSETS I OWN (I am Asset Owner) ==================== -->
+<div class="profile-info-card">
+  <div class="profile-card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+    <i class="fa fa-crown me-2"></i>
+    <h5>Assets I Own (I am Asset Owner) - {{ assets_i_own_desktops|length|add:assets_i_own_laptops|length }} Total</h5>
+  </div>
+  <div class="profile-card-body">
+    
+    <!-- Desktops I Own -->
+    <h6 class="text-danger mb-3">
+      <i class="fas fa-desktop me-2"></i>Desktop Computers ({{ assets_i_own_desktops|length }})
+    </h6>
+    {% if assets_i_own_desktops %}
+      {% for package in assets_i_own_desktops %}
+        <div class="asset-card" style="border-left-color: #f5576c;">
+          <div class="asset-card-header">
+            <h6 class="asset-card-title">
+              <i class="fas fa-desktop me-2"></i>
+              {% with desktop=package.desktop_details.first %}
+                {{ desktop.computer_name|default:"Desktop" }}
+              {% endwith %}
+            </h6>
+            <span class="asset-badge" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">Owned</span>
+          </div>
+          <div class="asset-info-grid">
+            {% with desktop=package.desktop_details.first user=package.user_details.first %}
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Serial Number</span>
+                <span class="asset-info-item-value">{{ desktop.serial_no|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Brand</span>
+                <span class="asset-info-item-value">{{ desktop.brand.name|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Model</span>
+                <span class="asset-info-item-value">{{ desktop.model|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">👤 End User</span>
+                <span class="asset-info-item-value">
+                  {% if user.user_Enduser %}
+                    <strong class="text-primary">{{ user.user_Enduser.full_name }}</strong>
+                  {% else %}
+                    <span class="text-muted">Not Assigned</span>
+                  {% endif %}
+                </span>
+              </div>
+            {% endwith %}
+          </div>
+          <div class="mt-3">
+            <a href="{% url 'desktop_details_view' package.id %}" class="btn btn-sm btn-outline-danger">
+              <i class="fa fa-eye me-1"></i> View Details
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="fas fa-desktop"></i>
+        <p>No desktop assets you own</p>
+      </div>
+    {% endif %}
+
+    <!-- Laptops I Own -->
+    {% if assets_i_own_laptops %}
+      <h6 class="text-danger mb-3 mt-4">
+        <i class="fas fa-laptop me-2"></i>Laptop Computers ({{ assets_i_own_laptops|length }})
+      </h6>
+      {% for laptop_pkg in assets_i_own_laptops %}
+        <div class="asset-card" style="border-left-color: #f5576c;">
+          <div class="asset-card-header">
+            <h6 class="asset-card-title">
+              <i class="fas fa-laptop me-2"></i>
+              {% with laptop=laptop_pkg.laptop_details.first %}
+                {{ laptop.computer_name|default:"Laptop" }}
+              {% endwith %}
+            </h6>
+            <span class="asset-badge" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">Owned</span>
+          </div>
+          <div class="asset-info-grid">
+            {% with laptop=laptop_pkg.laptop_details.first user=laptop_pkg.user_details.first %}
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Serial Number</span>
+                <span class="asset-info-item-value">{{ laptop.serial_no|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">Brand</span>
+                <span class="asset-info-item-value">{{ laptop.brand.name|default:"N/A" }}</span>
+              </div>
+              <div class="asset-info-item">
+                <span class="asset-info-item-label">👤 End User</span>
+                <span class="asset-info-item-value">
+                  {% if user.user_Enduser %}
+                    <strong class="text-primary">{{ user.user_Enduser.full_name }}</strong>
+                  {% else %}
+                    <span class="text-muted">Not Assigned</span>
+                  {% endif %}
+                </span>
+              </div>
+            {% endwith %}
+          </div>
+          <div class="mt-3">
+            <a href="{% url 'laptop_details_view' laptop_pkg.id %}" class="btn btn-sm btn-outline-danger">
+              <i class="fa fa-eye me-1"></i> View Details
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+    
+  </div>
+</div>
+
+
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.getElementById('avatarInput')?.addEventListener('change', function() {
+  document.getElementById('avatarForm')?.submit();
+});
+</script>
+
+{% endblock %}

@@ -549,6 +549,26 @@ class Employee(models.Model):
     employee_level = models.CharField(max_length=100, blank=True, null=True)
     employee_status = models.CharField(max_length=100, blank=True, null=True)
 
+    # Inside Employee model, add these NEW fields:
+    user_account = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='employee_profile')
+    # qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, null=True, blank=True)
+    qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, null=True, blank=True)
+    qr_code = models.ImageField(upload_to="qr/employees/", null=True, blank=True)
+    
+    email = models.EmailField(max_length=254, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    avatar = models.ImageField(upload_to="avatars/employees/", null=True, blank=True)
+    date_hired = models.DateField(null=True, blank=True)
+    bio = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    @property
+    def avatar_url(self):
+        if self.avatar and hasattr(self.avatar, "url"):
+            return self.avatar.url
+        return "/static/img/default-avatar.png"
+
     class Meta:
         ordering = ['employee_lname', 'employee_fname']
         
@@ -1243,3 +1263,34 @@ def notify_new_employee(employee, user):
         link_url=f'/employee/{employee.id}/',
         link_text='View Profile'
     )
+
+# ============================================
+# HELPER FUNCTION FOR EMPLOYEE QR GENERATION
+# ============================================
+
+def ensure_employee_qr(employee):
+    """
+    Helper function to generate QR code for employee if not exists
+    """
+    from django.conf import settings
+    from django.urls import reverse
+    from django.core.files import File
+    import qrcode
+    from io import BytesIO
+    import uuid
+    
+    if not employee.qr_token:
+        employee.qr_token = uuid.uuid4()
+        employee.save(update_fields=['qr_token'])
+    
+    if not employee.qr_code:
+        try:
+            profile_url = f"{settings.SITE_URL}{reverse('employee_assets_public', args=[employee.qr_token])}"
+            qr = qrcode.make(profile_url)
+            qr_io = BytesIO()
+            qr.save(qr_io, format='PNG')
+            qr_filename = f"employee_qr_{employee.id}.png"
+            employee.qr_code.save(qr_filename, File(qr_io), save=False)
+            employee.save(update_fields=['qr_code'])
+        except Exception as e:
+            print(f"❌ QR generation failed for employee {employee.id}: {e}")
