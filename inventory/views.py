@@ -2051,9 +2051,7 @@ def add_equipment_package_with_details(request):
         )
         .order_by('ln', 'fn')
     )
-    print("=== EMPLOYEE SORT CHECK ===")
-    for e in employees:
-        print(e.full_name)
+
     desktop_brands = Brand.objects.filter(is_desktop=True)
     keyboard_brands = Brand.objects.filter(is_keyboard=True)
     mouse_brands = Brand.objects.filter(is_mouse=True)
@@ -2235,13 +2233,16 @@ def add_equipment_package_with_details(request):
                         ups_model_db=request.POST.get('ups_model'),
                         ups_capacity_db=request.POST.get('ups_capacity')
                     )
+                    
+                    raw_value = request.POST.get('value_desktop_input', '')
+                    clean_value = raw_value.replace('₱', '').replace(',', '')
 
                     DocumentsDetails.objects.create(
                         equipment_package=equipment_package,
                         docs_PAR=request.POST.get('par_number_input'),
                         docs_Propertyno=request.POST.get('property_number_input'),
                         docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
-                        docs_Value=request.POST.get('value_desktop_input'),
+                        docs_Value = clean_value,
                         docs_Datereceived=request.POST.get('date_received_input'),
                         docs_Dateinspected=request.POST.get('date_inspected_input'),
                         docs_Supplier=request.POST.get('supplier_name_input'),
@@ -2785,36 +2786,34 @@ def employee_assets_public(request, token):
     """
     employee = get_object_or_404(Employee, qr_token=token)
     
-    # Get assigned packages
+    # Get assigned packages WHERE EMPLOYEE IS ASSET OWNER
     packages = Equipment_Package.objects.none()
-    desktops = DesktopDetails.objects.none()
     laptops = LaptopPackage.objects.none()
     printers = PrinterDetails.objects.none()
     
     if employee:
-        # 🖥 DESKTOP PACKAGES
+        # 🖥 DESKTOP PACKAGES - Filter by ASSET OWNER
         packages = (
             Equipment_Package.objects
-            .filter(user_details__user_Enduser=employee, is_disposed=False)
+            .filter(user_details__user_Assetowner=employee, is_disposed=False)
             .distinct()
             .prefetch_related("desktop_details", "monitors", "keyboards", "mouse_db", "ups")
         )
-        desktops = DesktopDetails.objects.filter(equipment_package__in=packages)
         
-        # 💻 LAPTOP PACKAGES
+        # 💻 LAPTOP PACKAGES - Filter by ASSET OWNER
         laptops = (
             LaptopPackage.objects
-            .filter(user_details__user_Enduser=employee, is_disposed=False)
+            .filter(user_details__user_Assetowner=employee, is_disposed=False)
             .distinct()
             .prefetch_related("laptop_details")
         )
         
-        # 🖨 PRINTERS
+        # 🖨 PRINTERS - Filter by ASSET OWNER
         printers = (
             PrinterDetails.objects
             .select_related("printer_package", "printer_brand_db")
             .filter(
-                printer_package__user_details__user_Enduser=employee,
+                printer_package__user_details__user_Assetowner=employee,
                 printer_package__is_disposed=False,
                 is_disposed=False
             )
@@ -2862,7 +2861,6 @@ def employee_assets_public(request, token):
         "employee_owner": employee,
         "employee": employee,
         "packages": packages,
-        "desktops": desktops,
         "laptops": laptops,
         "printers": printers,
         "disposed_desktops": disposed_desktops,
@@ -4692,7 +4690,7 @@ def dashboard_pro(request):
 
 #end all for dashboard
 
-#QR code for Profile
+#QR code for Profile of the ADMIN only
 @login_required
 def _ensure_user_qr(profile, request):
     """Generate and persist a QR PNG for this profile if missing."""
@@ -4835,6 +4833,7 @@ def regenerate_user_qr(request):
     messages.success(request, "Your QR code has been regenerated.")
     return redirect('profile')
 
+
 def user_assets_public(request, token):
     """
     Public (or internal) page: by QR token. No login required.
@@ -4845,31 +4844,36 @@ def user_assets_public(request, token):
     employee = profile.employee
 
     packages = Equipment_Package.objects.none()
-    desktops = DesktopDetails.objects.none()
     laptops = LaptopPackage.objects.none()
     printers = PrinterDetails.objects.none()
 
     if employee:
-        # 🖥 DESKTOP PACKAGES
+        # 🖥 DESKTOP PACKAGES - Filter by ASSET OWNER
         packages = (
             Equipment_Package.objects
-            .filter(user_details__user_Enduser=employee)
+            .filter(user_details__user_Assetowner=employee, is_disposed=False)  # ✅ FIXED
             .distinct()
+            .prefetch_related('desktop_details')
         )
-        desktops = DesktopDetails.objects.filter(equipment_package__in=packages)
 
-        # 💻 LAPTOP PACKAGES
+        # 💻 LAPTOP PACKAGES - Filter by ASSET OWNER
         laptops = (
             LaptopPackage.objects
-            .filter(user_details__user_Enduser=employee)
+            .filter(user_details__user_Assetowner=employee, is_disposed=False)  # ✅ FIXED
             .distinct()
+            .prefetch_related('laptop_details')
         )
 
-        # 🖨 PRINTERS - now uses printer_package (not equipment_package)
+        # 🖨 PRINTERS - Filter by ASSET OWNER
         printers = (
             PrinterDetails.objects
             .select_related("printer_package", "printer_brand_db")
-            .filter(printer_package__is_disposed=False)
+            .filter(
+                printer_package__is_disposed=False,
+                printer_package__user_details__user_Assetowner=employee,  # ✅ FIXED
+                is_disposed=False
+            )
+            .distinct()
         )
 
     # 🗑 Disposals (for all desktop-related assets)
@@ -4881,9 +4885,13 @@ def user_assets_public(request, token):
     
     # 🗑 Laptop disposals
     disposed_laptops = DisposedLaptop.objects.filter(laptop__laptop_package__in=laptops)
+    
+    # 🗑 Printer disposals (if you have this model)
+    disposed_printers = DisposedPrinter.objects.filter(
+        printer_package__user_details__user_Assetowner=employee
+    ) if hasattr(globals(), 'DisposedPrinter') else []
 
     # 🕒 Change history - using GenericForeignKey filtering
-    # Get ContentType for Equipment_Package and LaptopPackage
     desktop_ct = ContentType.objects.get_for_model(Equipment_Package)
     laptop_ct = ContentType.objects.get_for_model(LaptopPackage)
     
@@ -4895,19 +4903,18 @@ def user_assets_public(request, token):
     enduser_history = EndUserChangeHistory.objects.filter(
         Q(content_type=desktop_ct, object_id__in=desktop_ids) |
         Q(content_type=laptop_ct, object_id__in=laptop_ids)
-    ).order_by('-changed_at')
+    ).select_related('old_enduser', 'new_enduser', 'changed_by').order_by('-changed_at')[:20]
     
     # Filter AssetOwnerChangeHistory for both desktops and laptops
     assetowner_history = AssetOwnerChangeHistory.objects.filter(
         Q(content_type=desktop_ct, object_id__in=desktop_ids) |
         Q(content_type=laptop_ct, object_id__in=laptop_ids)
-    ).order_by('-changed_at')
+    ).select_related('old_assetowner', 'new_assetowner', 'changed_by').order_by('-changed_at')[:20]
 
     return render(request, "account/user_assets_public.html", {
         "profile_owner": profile,
         "employee": employee,
         "packages": packages,
-        "desktops": desktops,
         "laptops": laptops,
         "printers": printers,
         "disposed_desktops": disposed_desktops,
@@ -4916,6 +4923,7 @@ def user_assets_public(request, token):
         "disposed_mice": disposed_mice,
         "disposed_ups": disposed_ups,
         "disposed_laptops": disposed_laptops,
+        "disposed_printers": disposed_printers,  # ✅ Added
         "enduser_history": enduser_history,
         "assetowner_history": assetowner_history,
     })

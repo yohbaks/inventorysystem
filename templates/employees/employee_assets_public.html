@@ -178,52 +178,50 @@
       </div>
     </div>
 
-    <!-- ==================== DESKTOP ASSETS ==================== -->
-    <div class="premium-card">
-      <div class="premium-card-header">
-        <h5><i class="fas fa-desktop me-2"></i>Desktop Computers ({{ packages|length }})</h5>
-      </div>
-      <div class="premium-card-body">
-        {% if packages %}
-          {% for package in packages %}
-            {% with desktop=package.desktop_details.first %}
-              <div class="asset-item">
-                <h6><i class="fas fa-computer me-2"></i>{{ desktop.computer_name|default:"Desktop" }}</h6>
-                <div class="asset-detail">
-                  <span class="asset-label">Serial Number</span>
-                  <span class="asset-value">{{ desktop.serial_no|default:"N/A" }}</span>
-                </div>
-                <div class="asset-detail">
-                  <span class="asset-label">Brand</span>
-                  <span class="asset-value">{{ desktop.brand.name|default:"N/A" }}</span>
-                </div>
-                <div class="asset-detail">
-                  <span class="asset-label">Model</span>
-                  <span class="asset-value">{{ desktop.model|default:"N/A" }}</span>
-                </div>
-                <div class="asset-detail">
-                  <span class="asset-label">Processor</span>
-                  <span class="asset-value">{{ desktop.processor|default:"N/A" }}</span>
-                </div>
-                <div class="asset-detail">
-                  <span class="asset-label">RAM</span>
-                  <span class="asset-value">{{ desktop.ram|default:"N/A" }}</span>
-                </div>
-                <div class="asset-detail">
-                  <span class="asset-label">Storage</span>
-                  <span class="asset-value">{{ desktop.storage|default:"N/A" }}</span>
-                </div>
-              </div>
-            {% endwith %}
-          {% endfor %}
-        {% else %}
-          <div class="empty-state">
-            <i class="fas fa-desktop"></i>
-            <p>No desktop computers assigned</p>
+  <!-- ==================== DESKTOP ASSETS ==================== -->
+<div class="premium-card">
+  <div class="premium-card-header">
+    <h5><i class="fas fa-desktop me-2"></i>Desktop Computers ({{ packages.count }})</h5>
+  </div>
+  <div class="premium-card-body">
+    {% for package in packages %}
+      {% with desktop=package.desktop_details.first %}
+        <div class="asset-item">
+          <h6><i class="fas fa-computer me-2"></i>{{ desktop.computer_name|default:"Desktop" }}</h6>
+          <div class="asset-detail">
+            <span class="asset-label">Serial Number</span>
+            <span class="asset-value">{{ desktop.serial_no|default:"N/A" }}</span>
           </div>
-        {% endif %}
+          <div class="asset-detail">
+            <span class="asset-label">Brand</span>
+            <span class="asset-value">{{ desktop.brand_name.name|default:"N/A" }}</span>
+          </div>
+          <div class="asset-detail">
+            <span class="asset-label">Model</span>
+            <span class="asset-value">{{ desktop.model|default:"N/A" }}</span>
+          </div>
+          <div class="asset-detail">
+            <span class="asset-label">Processor</span>
+            <span class="asset-value">{{ desktop.processor|default:"N/A" }}</span>
+          </div>
+          <div class="asset-detail">
+            <span class="asset-label">RAM</span>
+            <span class="asset-value">{{ desktop.memory|default:"N/A" }}</span>
+          </div>
+          <div class="asset-detail">
+            <span class="asset-label">Storage</span>
+            <span class="asset-value">{{ desktop.drive|default:"N/A" }}</span>
+          </div>
+        </div>
+      {% endwith %}
+    {% empty %}
+      <div class="empty-state">
+        <i class="fas fa-desktop"></i>
+        <p>No desktop computers assigned</p>
       </div>
-    </div>
+    {% endfor %}
+  </div>
+</div>
 
     <!-- ==================== LAPTOP ASSETS ==================== -->
     {% if laptops %}

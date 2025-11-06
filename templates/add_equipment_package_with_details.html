@@ -120,7 +120,7 @@
           <!-- <input type="text" name="desktop_Graphics_Size" class="form-control" required> -->
           <div class="mb-3">
 
-  <select class="form-select form-control" id="desktop_Graphics_Siz" name="desktop_Graphics_Siz" required>
+  <select class="form-select form-control" id="desktop_Graphics_Size" name="desktop_Graphics_Size" required>
     <option value="" disabled selected>Select Graphics Size</option>
 
     <option value="Integrated / Shared">Integrated / Shared (uses system RAM)</option>
@@ -366,7 +366,27 @@
         </div>
       </div>
       <div class="row mt-2">
-        <div class="col-md-4"><label>Value</label><input type="text" name="value_desktop_input" class="form-control" required></div>
+        <div class="col-md-4">
+        <label>Value</label>
+          <div class="input-group">
+            <span class="input-group-text">₱</span>
+            <input type="text" id="value_desktop_input" name="value_desktop_input" class="form-control" required>
+          </div>
+        </div>
+        <!--- JavaScript for formatting the value input -->
+              <script>
+                document.getElementById("value_desktop_input").addEventListener("input", function (e) {
+                    let value = e.target.value.replace(/[^0-9.]/g, '');
+                    if (value) {
+                        value = parseFloat(value).toLocaleString('en-PH', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    }
+                    e.target.value = value;
+                });
+              </script>
+
         <div class="col-md-4"><label>Date Received</label><input type="date" name="date_received_input" class="form-control" required></div>
         <div class="col-md-4"><label>Date Inspected</label><input type="date" name="date_inspected_input" class="form-control" required></div>
       </div>
@@ -610,7 +630,32 @@
         </div>
       </div>
       <div class="row mt-2">
-        <div class="col-md-4"><label>Value</label><input type="text" name="value_laptop_input" class="form-control" required></div>
+        <div class="col-md-4">
+          <label>Value</label>
+          <div class="input-group">
+            <span class="input-group-text">₱</span>
+            <input type="text" id="value_laptop_input" name="value_laptop_input" class="form-control" required>
+          </div>
+<!--- JavaScript for formatting the value input -->
+                  <!--- JavaScript for formatting the value input -->
+              <script>
+                document.getElementById("value_laptop_input").addEventListener("input", function (e) {
+                    let value = e.target.value.replace(/[^0-9.]/g, '');
+                    if (value) {
+                        value = parseFloat(value).toLocaleString('en-PH', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                    }
+                    e.target.value = value;
+                });
+              </script>
+  
+
+
+
+
+        </div>
         <div class="col-md-4"><label>Date Received</label><input type="date" name="date_received_input" class="form-control" required></div>
         <div class="col-md-4"><label>Date Inspected</label><input type="date" name="date_inspected_input" class="form-control" required></div>
       </div>

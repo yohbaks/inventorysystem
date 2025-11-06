@@ -390,66 +390,6 @@
               <button class="premium-btn premium-btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                 <i class="fa fa-plus me-2"></i> Add New Employee
               </button>
-
-            </div>
-          </div>
-
-          <!-- Add Employee Modal -->
-          <div class="modal fade premium-modal" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header header-primary text-white">
-                  <h5 class="modal-title fw-bold" id="addEmployeeModalLabel">
-                    <i class="fas fa-user-plus me-2"></i> Add New Employee
-                  </h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <form id="addEmployeeForm" method="POST" action="{% url 'employee_list' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                      <label class="premium-form-label">First Name</label>
-                      <input type="text" class="form-control premium-form-control" name="firstName" placeholder="Enter first name" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="premium-form-label">Middle Initial</label>
-                      <input type="text" class="form-control premium-form-control" name="middleInitial" placeholder="M.I." maxlength="1">
-                    </div>
-                    <div class="mb-3">
-                      <label class="premium-form-label">Last Name</label>
-                      <input type="text" class="form-control premium-form-control" name="lastName" placeholder="Enter last name" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="premium-form-label">Position</label>
-                      <input type="text" class="form-control premium-form-control" name="position" placeholder="Enter position title" required>
-                    </div>
-                    <div class="mb-3">
-                      <label class="premium-form-label">Office Section</label>
-                      <select class="form-control premium-form-control" name="office_section" required>
-                        <option value="" disabled selected>Select office section</option>
-                        {% for section in office_sections %}
-                          <option value="{{ section.id }}">{{ section.name }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                    <div class="mb-3">
-                      <label class="premium-form-label">Status</label>
-                      <select class="form-control premium-form-control" name="status" required>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                      </select>
-                    </div>
-                    <div class="modal-footer border-0 px-0 pt-4">
-                      <button type="submit" class="premium-btn premium-btn-primary px-4">
-                        <i class="fa fa-check me-2"></i> Add Employee
-                      </button>
-                      <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -498,35 +438,35 @@
                         <span class="badge premium-badge badge-secondary">Inactive</span>
                       {% endif %}
                     </td>
-<td>
-    <!-- View Button -->
-    <button class="btn action-btn action-btn-view btn-sm" 
-            data-bs-toggle="modal" 
-            data-bs-target="#viewEmployeeModal{{ employee.id }}">
-        <i class="fa fa-eye"></i>
-    </button>
-    
-    <!-- ✅ NEW: Profile Button -->
-    <a href="{% url 'employee_profile_view' employee.id %}" 
-       class="btn action-btn action-btn-view btn-sm"
-       title="View Profile">
-        <i class="fa fa-id-card"></i>
-    </a>
-    
-    <!-- Edit Button -->
-    <button class="btn action-btn action-btn-edit btn-sm" 
-            data-bs-toggle="modal" 
-            data-bs-target="#editEmployeeModal{{ employee.id }}">
-        <i class="fa fa-edit"></i>
-    </button>
-    
-    <!-- Delete Button -->
-    <button class="btn action-btn action-btn-delete btn-sm" 
-            data-bs-toggle="modal" 
-            data-bs-target="#deleteEmployeeModal{{ employee.id }}">
-        <i class="fa fa-trash"></i>
-    </button>
-</td>
+                    <td>
+                      <!-- View Button -->
+                      <button class="btn action-btn action-btn-view btn-sm" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#viewEmployeeModal{{ employee.id }}">
+                          <i class="fa fa-eye"></i>
+                      </button>
+                      
+                      <!-- Profile Button -->
+                      <a href="{% url 'employee_profile_view' employee.id %}" 
+                         class="btn action-btn action-btn-view btn-sm"
+                         title="View Profile">
+                          <i class="fa fa-id-card"></i>
+                      </a>
+                      
+                      <!-- Edit Button -->
+                      <button class="btn action-btn action-btn-edit btn-sm" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#editEmployeeModal{{ employee.id }}">
+                          <i class="fa fa-edit"></i>
+                      </button>
+                      
+                      <!-- Delete Button -->
+                      <button class="btn action-btn action-btn-delete btn-sm" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#deleteEmployeeModal{{ employee.id }}">
+                          <i class="fa fa-trash"></i>
+                      </button>
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -539,7 +479,66 @@
   </div>
 </div>
 
-<!-- Employee Modals (View, Edit, Delete) - Moved Outside Table to Fix Glitching -->
+<!-- ✅ FIXED: Add Employee Modal - Moved OUTSIDE the card container -->
+<div class="modal fade premium-modal" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header header-primary text-white">
+        <h5 class="modal-title fw-bold" id="addEmployeeModalLabel">
+          <i class="fas fa-user-plus me-2"></i> Add New Employee
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addEmployeeForm" method="POST" action="{% url 'employee_list' %}">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="premium-form-label">First Name</label>
+            <input type="text" class="form-control premium-form-control" name="firstName" placeholder="Enter first name" required>
+          </div>
+          <div class="mb-3">
+            <label class="premium-form-label">Middle Initial</label>
+            <input type="text" class="form-control premium-form-control" name="middleInitial" placeholder="M.I." maxlength="1">
+          </div>
+          <div class="mb-3">
+            <label class="premium-form-label">Last Name</label>
+            <input type="text" class="form-control premium-form-control" name="lastName" placeholder="Enter last name" required>
+          </div>
+          <div class="mb-3">
+            <label class="premium-form-label">Position</label>
+            <input type="text" class="form-control premium-form-control" name="position" placeholder="Enter position title" required>
+          </div>
+          <div class="mb-3">
+            <label class="premium-form-label">Office Section</label>
+            <select class="form-control premium-form-control" name="office_section" required>
+              <option value="" disabled selected>Select office section</option>
+              {% for section in office_sections %}
+                <option value="{{ section.id }}">{{ section.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="premium-form-label">Status</label>
+            <select class="form-control premium-form-control" name="status" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="modal-footer border-0 px-0 pt-4">
+            <button type="submit" class="premium-btn premium-btn-primary px-4">
+              <i class="fa fa-check me-2"></i> Add Employee
+            </button>
+            <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 12px;">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Modals (View, Edit, Delete) -->
 {% for employee in employees %}
   <!-- Delete Modal -->
   <div class="modal fade premium-modal" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">

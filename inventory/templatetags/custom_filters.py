@@ -16,3 +16,18 @@ def get_attr(obj, attr_name):
 def num_range(value):
     """Return range 1..value inclusive"""
     return range(1, value+1)
+
+
+@register.filter
+def peso_format(value):
+    if not value:
+        return "₱0.00"
+
+    # Convert to string and remove peso/comma formatting
+    value = str(value).replace("₱", "").replace(",", "")
+
+    try:
+        value = float(value)
+        return "₱{:,.2f}".format(value)
+    except:
+        return value
