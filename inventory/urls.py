@@ -193,6 +193,7 @@ urlpatterns = [
     # OFFICE SUPPLIES ROUTES
     # ================================
     path("office_supplies/", views.office_supplies_list, name="office_supplies_list"),
+    path("office_supplies/add/", views.add_office_supplies, name="add_office_supplies"),
     path("office_supplies/<int:package_id>/", views.office_supplies_details_view, name="office_supplies_details_view"),
     path("office_supplies/dispose/<int:package_id>/", views.dispose_office_supplies, name="dispose_office_supplies"),
 

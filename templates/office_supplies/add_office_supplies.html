@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .premium-card {
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: none;
+        overflow: hidden;
+    }
+
+    .premium-header {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        padding: 2rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-header h4 {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-control:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+    }
+
+    .form-select:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+    }
+</style>
+
+<div class="container-fluid px-4" style="padding-top: 5rem; padding-bottom: 3rem;">
+    <div class="page-inner">
+        <div class="premium-card">
+            <!-- Premium Header -->
+            <div class="premium-header">
+                <div class="d-flex align-items-center">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.2); margin-right: 0.75rem;">
+                        <i class="fa fa-paperclip fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 text-white">Add Office Supplies</h4>
+                        <p class="mb-0 text-white-50" style="font-size: 0.875rem;">Add new office supplies to inventory</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-4">
+                <form method="post" id="addOfficeSuppliesForm">
+                    {% csrf_token %}
+
+                    <!-- Office Supplies Information -->
+                    <div class="card mb-3">
+                        <div class="card-header"><h5>📎 Office Supplies Information</h5></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Item Type <span class="text-danger">*</span></label>
+                                    <input type="text" name="item_type" class="form-control" placeholder="e.g., Pen, Paper, Folder" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Brand (Optional)</label>
+                                    <select name="supplies_brand" class="form-select form-control">
+                                        <option value="">-- No Brand --</option>
+                                        {% for brand in office_supplies_brands %}
+                                            <option value="{{ brand.id }}">{{ brand.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Quantity <span class="text-danger">*</span></label>
+                                    <input type="number" name="quantity" class="form-control" value="1" min="1" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Unit <span class="text-danger">*</span></label>
+                                    <input type="text" name="unit" class="form-control" placeholder="Box, Pack, Unit" value="Unit" required>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Serial Number (Optional)</label>
+                                    <input type="text" name="supplies_sn_db" class="form-control" placeholder="Optional">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" class="form-control" rows="2" placeholder="Additional details about the supplies"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="card mb-3">
+                        <div class="card-header"><h5>📄 Document Details</h5></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label">PAR Number <span class="text-danger">*</span></label>
+                                    <input type="text" name="par_number_input" class="form-control" placeholder="e.g., PAR-12345" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Property Number <span class="text-danger">*</span></label>
+                                    <input type="text" name="property_number_input" class="form-control" placeholder="e.g., PROP-67890" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Acquisition Type <span class="text-danger">*</span></label>
+                                    <input type="text" name="acquisition_type_input" class="form-control" placeholder="e.g., Purchase, Donation" required>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">Value <span class="text-danger">*</span></label>
+                                    <input type="text" name="value_supplies_input" class="form-control" placeholder="e.g., 5000.00" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Date Received <span class="text-danger">*</span></label>
+                                    <input type="date" name="date_received_input" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Date Inspected <span class="text-danger">*</span></label>
+                                    <input type="date" name="date_inspected_input" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Status <span class="text-danger">*</span></label>
+                                    <input type="text" name="status_supplies_input" class="form-control" placeholder="e.g., Active, In Stock" required>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">Supplier Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="supplier_name_input" class="form-control" placeholder="e.g., ABC Supplies Co." required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Assignment -->
+                    <div class="card mb-3">
+                        <div class="card-header"><h5>👥 User Assignment</h5></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">End User <span class="text-danger">*</span></label>
+                                    <select name="enduser_input" class="form-select form-control" required>
+                                        <option value="">Select End User</option>
+                                        {% for emp in employees %}
+                                            <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Asset Owner <span class="text-danger">*</span></label>
+                                    <select name="assetowner_input" class="form-select form-control" required>
+                                        <option value="" disabled selected>Select Asset Owner</option>
+                                        {% for emp in employees %}
+                                            <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="text-end mt-3">
+                        <a href="{% url 'office_supplies_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Submit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

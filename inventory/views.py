@@ -2081,7 +2081,6 @@ def add_equipment_package_with_details(request):
     ups_brands = Brand.objects.filter(is_ups=True)
 
     printer_brands = Brand.objects.filter(is_printer=True)
-    office_supplies_brands = Brand.objects.filter(is_office_supplies=True)
 
     if hasattr(Brand, "is_laptop"):
         laptop_brands = Brand.objects.filter(Q(is_laptop=True) | Q(is_desktop=True))
@@ -2097,7 +2096,6 @@ def add_equipment_package_with_details(request):
         'ups_brands': ups_brands,
         'printer_brands': printer_brands,
         'laptop_brands': laptop_brands,
-        'office_supplies_brands': office_supplies_brands,
         'employees': employees,
     }
 
@@ -2491,100 +2489,6 @@ def add_equipment_package_with_details(request):
                 return render(request, 'add_equipment_package_with_details.html', context)
             except Exception as e:
                 messages.error(request, f"❌ Exception while saving printer: {str(e)}")
-                return render(request, 'add_equipment_package_with_details.html', context)
-
-        elif equipment_type == "Office Supplies":
-            item_type = request.POST.get("item_type")
-            supplies_sn = request.POST.get("supplies_sn_db")
-            brand = get_brand_or_none("supplies_brand")
-            description = request.POST.get("description")
-            quantity_str = request.POST.get("quantity", "1")
-            unit = request.POST.get("unit", "Unit")
-
-            # validations
-            errors = []
-            if not item_type:
-                errors.append("Item type is required.")
-
-            try:
-                quantity = int(quantity_str)
-                if quantity < 1:
-                    errors.append("Quantity must be at least 1.")
-            except (ValueError, TypeError):
-                errors.append("Valid quantity is required.")
-                quantity = 1
-
-            # Documents
-            if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
-            if not request.POST.get('property_number_input'): errors.append("Property Number is required.")
-            if not request.POST.get('acquisition_type_input'): errors.append("Acquisition type is required.")
-            if not request.POST.get('value_supplies_input'): errors.append("Value is required.")
-            if not request.POST.get('date_received_input'): errors.append("Date received is required.")
-            if not request.POST.get('date_inspected_input'): errors.append("Date inspected is required.")
-            if not request.POST.get('supplier_name_input'): errors.append("Supplier name is required.")
-            if not request.POST.get('status_supplies_input'): errors.append("Status is required.")
-
-            # User
-            if not request.POST.get('enduser_input'): errors.append("End user is required.")
-            if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
-
-            # Duplicate check (only if serial number provided)
-            if supplies_sn and sn_exists(OfficeSuppliesDetails, 'supplies_sn_db', supplies_sn):
-                errors.append(f"Office supplies SN '{supplies_sn}' already exists.")
-
-            if errors:
-                for e in errors:
-                    messages.error(request, f"❌ {e}")
-                return render(request, 'add_equipment_package_with_details.html', context)
-
-            try:
-                with transaction.atomic():
-                    # ✅ Create office supplies package
-                    supplies_package = OfficeSuppliesPackage.objects.create(is_disposed=False)
-
-                    # ✅ Create office supplies details
-                    supplies = OfficeSuppliesDetails.objects.create(
-                        supplies_package=supplies_package,
-                        supplies_sn_db=supplies_sn,
-                        item_type=item_type,
-                        brand_name=brand,
-                        description=description,
-                        quantity=quantity,
-                        unit=unit
-                    )
-
-                    # ✅ Create documents
-                    DocumentsDetails.objects.create(
-                        office_supplies_package=supplies_package,
-                        docs_PAR=request.POST.get('par_number_input'),
-                        docs_Propertyno=request.POST.get('property_number_input'),
-                        docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
-                        docs_Value=request.POST.get('value_supplies_input'),
-                        docs_Datereceived=request.POST.get('date_received_input'),
-                        docs_Dateinspected=request.POST.get('date_inspected_input'),
-                        docs_Supplier=request.POST.get('supplier_name_input'),
-                        docs_Status=request.POST.get('status_supplies_input')
-                    )
-
-                    # ✅ Create user details
-                    enduser = get_employee_or_none('enduser_input')
-                    assetowner = get_employee_or_none('assetowner_input')
-
-                    UserDetails.objects.create(
-                        office_supplies_package=supplies_package,
-                        user_Enduser=enduser,
-                        user_Assetowner=assetowner
-                    )
-
-                    # ✅ No PM logic for office supplies
-                    messages.success(request, "✅ Office supplies added successfully.")
-                    return redirect(reverse("success_page", args=[supplies.id]) + "?type=OfficeSupplies")
-
-            except IntegrityError as ie:
-                messages.error(request, f"❌ Could not save office supplies: duplicate detected. Details: {ie}")
-                return render(request, 'add_equipment_package_with_details.html', context)
-            except Exception as e:
-                messages.error(request, f"❌ Exception while saving office supplies: {str(e)}")
                 return render(request, 'add_equipment_package_with_details.html', context)
 
     return render(request, 'add_equipment_package_with_details.html', context)
@@ -5893,3 +5797,144 @@ def dispose_office_supplies(request, package_id):
         'package': package,
         'supplies': supplies
     })
+
+
+@login_required
+def add_office_supplies(request):
+    """Add new office supplies (separate from IT equipment)"""
+    from django.db.models.functions import Lower, Coalesce
+
+    employees = (
+        Employee.objects
+        .annotate(
+            ln=Coalesce(Lower('employee_lname'), Value('zzzzzz')),
+            fn=Coalesce(Lower('employee_fname'), Value(''))
+        )
+        .order_by('ln', 'fn')
+    )
+
+    office_supplies_brands = Brand.objects.filter(is_office_supplies=True)
+
+    context = {
+        'office_supplies_brands': office_supplies_brands,
+        'employees': employees,
+    }
+
+    def normalize_sn(value):
+        v = (value or "").strip()
+        return v.upper() if v else ""
+
+    def sn_exists(model, field_name, serial_value):
+        norm = normalize_sn(serial_value)
+        if not norm:
+            return False
+        return model.objects.annotate(
+            sn_norm=Upper(Trim(F(field_name)))
+        ).filter(sn_norm=norm).exists()
+
+    def get_brand_or_none(field_name):
+        brand_id = request.POST.get(field_name)
+        if brand_id and brand_id.isdigit():
+            return Brand.objects.filter(id=brand_id).first()
+        return None
+
+    def get_employee_or_none(field_name):
+        emp_id = request.POST.get(field_name)
+        if emp_id and emp_id.isdigit():
+            return Employee.objects.filter(id=emp_id).first()
+        return None
+
+    if request.method == 'POST':
+        item_type = request.POST.get("item_type")
+        supplies_sn = request.POST.get("supplies_sn_db")
+        brand = get_brand_or_none("supplies_brand")
+        description = request.POST.get("description")
+        quantity_str = request.POST.get("quantity", "1")
+        unit = request.POST.get("unit", "Unit")
+
+        # validations
+        errors = []
+        if not item_type:
+            errors.append("Item type is required.")
+
+        try:
+            quantity = int(quantity_str)
+            if quantity < 1:
+                errors.append("Quantity must be at least 1.")
+        except (ValueError, TypeError):
+            errors.append("Valid quantity is required.")
+            quantity = 1
+
+        # Documents
+        if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
+        if not request.POST.get('property_number_input'): errors.append("Property Number is required.")
+        if not request.POST.get('acquisition_type_input'): errors.append("Acquisition type is required.")
+        if not request.POST.get('value_supplies_input'): errors.append("Value is required.")
+        if not request.POST.get('date_received_input'): errors.append("Date received is required.")
+        if not request.POST.get('date_inspected_input'): errors.append("Date inspected is required.")
+        if not request.POST.get('supplier_name_input'): errors.append("Supplier name is required.")
+        if not request.POST.get('status_supplies_input'): errors.append("Status is required.")
+
+        # User
+        if not request.POST.get('enduser_input'): errors.append("End user is required.")
+        if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
+
+        # Duplicate check (only if serial number provided)
+        if supplies_sn and sn_exists(OfficeSuppliesDetails, 'supplies_sn_db', supplies_sn):
+            errors.append(f"Office supplies SN '{supplies_sn}' already exists.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, f"❌ {e}")
+            return render(request, 'office_supplies/add_office_supplies.html', context)
+
+        try:
+            with transaction.atomic():
+                # ✅ Create office supplies package
+                supplies_package = OfficeSuppliesPackage.objects.create(is_disposed=False)
+
+                # ✅ Create office supplies details
+                supplies = OfficeSuppliesDetails.objects.create(
+                    supplies_package=supplies_package,
+                    supplies_sn_db=supplies_sn,
+                    item_type=item_type,
+                    brand_name=brand,
+                    description=description,
+                    quantity=quantity,
+                    unit=unit
+                )
+
+                # ✅ Create documents
+                DocumentsDetails.objects.create(
+                    office_supplies_package=supplies_package,
+                    docs_PAR=request.POST.get('par_number_input'),
+                    docs_Propertyno=request.POST.get('property_number_input'),
+                    docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
+                    docs_Value=request.POST.get('value_supplies_input'),
+                    docs_Datereceived=request.POST.get('date_received_input'),
+                    docs_Dateinspected=request.POST.get('date_inspected_input'),
+                    docs_Supplier=request.POST.get('supplier_name_input'),
+                    docs_Status=request.POST.get('status_supplies_input')
+                )
+
+                # ✅ Create user details
+                enduser = get_employee_or_none('enduser_input')
+                assetowner = get_employee_or_none('assetowner_input')
+
+                UserDetails.objects.create(
+                    office_supplies_package=supplies_package,
+                    user_Enduser=enduser,
+                    user_Assetowner=assetowner
+                )
+
+                messages.success(request, "✅ Office supplies added successfully.")
+                return redirect('office_supplies_list')
+
+        except IntegrityError as ie:
+            messages.error(request, f"❌ Could not save office supplies: duplicate detected. Details: {ie}")
+            return render(request, 'office_supplies/add_office_supplies.html', context)
+        except Exception as e:
+            messages.error(request, f"❌ Exception while saving office supplies: {str(e)}")
+            return render(request, 'office_supplies/add_office_supplies.html', context)
+
+    return render(request, 'office_supplies/add_office_supplies.html', context)
