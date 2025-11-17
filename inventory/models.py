@@ -114,6 +114,8 @@ class DesktopDetails(models.Model):
     desktop_OS_keys = models.CharField(max_length=100, blank=True, null=True)
     desktop_Office_keys = models.CharField(max_length=100, blank=True, null=True)
 
+    desktop_photo = models.ImageField(upload_to="desktop_photos/", null=True, blank=True)
+
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 

@@ -166,6 +166,25 @@
               </div>
 
               {% if has_active_desktop %}
+
+              <!-- Desktop Photo Display -->
+              {% if desktop_detailsx.desktop_photo %}
+              <div class="desktop-photo-container mb-4" style="position: relative; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+                <div style="position: relative; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                  <img src="{{ desktop_detailsx.desktop_photo.url }}"
+                       alt="Desktop Photo"
+                       style="width: 100%; height: 100%; object-fit: cover; opacity: 0.95;">
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); padding: 2rem 1.5rem 1rem;">
+                    <div style="color: white;">
+                      <i class="fas fa-desktop" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                      <h3 style="margin: 0; font-weight: 700; font-size: 1.5rem;">{{ desktop_detailsx.computer_name }}</h3>
+                      <p style="margin: 0; opacity: 0.9;">{{ desktop_detailsx.brand_name }} {{ desktop_detailsx.model }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
               <div class="spec-grid">
                 <div class="spec-item">
                   <div class="spec-label">Serial Number</div>

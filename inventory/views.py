@@ -801,6 +801,10 @@ def update_desktop(request, pk):
         desktop.desktop_Office = request.POST.get('desktop_Office', desktop.desktop_Office)
         desktop.desktop_Office_keys = request.POST.get('desktop_Office_keys', desktop.desktop_Office_keys)
 
+        # ✅ Handle photo upload
+        if 'desktop_photo' in request.FILES:
+            desktop.desktop_photo = request.FILES['desktop_photo']
+
         # ✅ Validate required fields
         if not desktop.serial_no or not desktop.model:
             return JsonResponse({

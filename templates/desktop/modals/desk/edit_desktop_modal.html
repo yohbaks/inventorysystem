@@ -1,6 +1,6 @@
 <div class="modal fade" id="editDesktopModal" tabindex="-1" aria-labelledby="editDesktopModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="editDesktopForm" method="POST"
+    <form id="editDesktopForm" method="POST" enctype="multipart/form-data"
       action="{% if desktop_detailsx %}{% url 'update_desktop' pk=desktop_detailsx.id %}{% else %}#{% endif %}">
       {% csrf_token %}
       <div class="modal-content">
@@ -88,6 +88,19 @@
           <div class="mb-3">
             <label for="desktop_drive_form" class="form-label">Drive</label>
             <input type="text" class="form-control" id="desktop_drive_form" name="desktop_drive_form" value="{{ desktop_detailsx.drive }}" required>
+          </div>
+
+          <!-- Desktop Photo -->
+          <div class="mb-3">
+            <label for="desktop_photo" class="form-label">Desktop Photo</label>
+            {% if desktop_detailsx.desktop_photo %}
+              <div class="mb-2">
+                <img src="{{ desktop_detailsx.desktop_photo.url }}" alt="Current Desktop Photo" style="max-width: 200px; max-height: 150px; border-radius: 0.5rem; object-fit: cover;">
+                <p class="text-muted small mt-1">Current photo (upload a new one to replace)</p>
+              </div>
+            {% endif %}
+            <input type="file" class="form-control" id="desktop_photo" name="desktop_photo" accept="image/*">
+            <small class="text-muted">Supported formats: JPG, PNG, GIF (max 5MB)</small>
           </div>
 
           <!-- 🪟 Operating System (SELECT preserved) -->
