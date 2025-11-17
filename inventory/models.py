@@ -76,6 +76,7 @@ class Brand(models.Model):
     is_desktop = models.BooleanField(default=False)
     is_printer = models.BooleanField(default=False)
     is_laptop = models.BooleanField(default=False)
+    is_office_supplies = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -225,6 +226,12 @@ class UserDetails(models.Model):
         null=True, blank=True, related_name='user_details'
     )
 
+    # 📎 Office Supplies package
+    office_supplies_package = models.ForeignKey(
+        'OfficeSuppliesPackage', on_delete=models.CASCADE,
+        null=True, blank=True, related_name='user_details'
+    )
+
     # 👥 Assigned people
     user_Enduser = models.ForeignKey(
         'Employee', on_delete=models.SET_NULL,
@@ -245,6 +252,8 @@ class UserDetails(models.Model):
             target = f"Laptop {self.laptop_package.id}"
         elif self.printer_package:
             target = f"Printer {self.printer_package.id}"
+        elif self.office_supplies_package:
+            target = f"Office Supplies {self.office_supplies_package.id}"
         else:
             target = "Unassigned"
         return f"{target} | Enduser: {self.user_Enduser or 'N/A'} | Owner: {self.user_Assetowner or 'N/A'}"
@@ -516,7 +525,10 @@ class DocumentsDetails(models.Model):
         "PrinterPackage", related_name='docs',
         on_delete=models.CASCADE, null=True, blank=True
     )
-
+    office_supplies_package = models.ForeignKey(
+        "OfficeSuppliesPackage", related_name='docs',
+        on_delete=models.CASCADE, null=True, blank=True
+    )
 
     docs_PAR = models.CharField(max_length=100, blank=True, null=True)
     docs_Propertyno = models.CharField(max_length=100, blank=True, null=True)
@@ -534,6 +546,8 @@ class DocumentsDetails(models.Model):
             return f"Docs for Laptop Package {self.laptop_package.id}"
         elif self.printer_package:
             return f"Docs for Printer Package {self.printer_package.id}"
+        elif self.office_supplies_package:
+            return f"Docs for Office Supplies Package {self.office_supplies_package.id}"
         return "Docs (unlinked)"
     
     
@@ -1044,7 +1058,98 @@ class DisposedPrinter(models.Model):
 
     def __str__(self):
         return f"Disposed Printer: {self.printer_brand} {self.printer_model} ({self.printer_sn})"
-    
+
+
+################################################## OFFICE SUPPLIES MODELS
+
+class OfficeSuppliesPackage(models.Model):
+    """Container for office supplies (pens, paper, folders, etc.)"""
+    is_disposed = models.BooleanField(default=False)
+    disposal_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    qr_code = models.ImageField(upload_to='qr_codes/office_supplies', blank=True, null=True)
+
+    def __str__(self):
+        return f"Office Supplies Package {self.pk}"
+
+
+class OfficeSuppliesDetails(models.Model):
+    """Details for office supplies items"""
+    supplies_package = models.ForeignKey(
+        OfficeSuppliesPackage, related_name='supplies_details',
+        on_delete=models.CASCADE, null=True
+    )
+
+    supplies_sn_db = models.CharField(max_length=255, null=True, blank=True)
+    serial_no_norm = models.CharField(
+        max_length=255, null=True, blank=True,
+        db_index=True, editable=False, unique=True
+    )
+
+    def save(self, *args, **kwargs):
+        if self.supplies_sn_db:
+            self.serial_no_norm = normalize_sn(self.supplies_sn_db)
+        super().save(*args, **kwargs)
+
+    item_type = models.CharField(max_length=100)  # "Pen", "Paper", "Folder", etc.
+    brand_name = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
+    quantity = models.IntegerField(default=1)
+    unit = models.CharField(max_length=50, blank=True)  # "Box", "Pack", "Unit"
+
+    is_disposed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    @property
+    def end_user(self):
+        """Get the end user (Employee) assigned to this supplies package."""
+        if self.supplies_package:
+            user_details = self.supplies_package.user_details.all()
+            if user_details:
+                return user_details[0].user_Enduser if user_details[0].user_Enduser else None
+        return None
+
+    @property
+    def asset_owner(self):
+        """Get the asset owner (Employee) assigned to this supplies package."""
+        if self.supplies_package:
+            user_details = self.supplies_package.user_details.all()
+            if user_details:
+                return user_details[0].user_Assetowner if user_details[0].user_Assetowner else None
+        return None
+
+    @property
+    def user_assignment(self):
+        """Get the full UserDetails object for this supplies package."""
+        if self.supplies_package:
+            user_details = self.supplies_package.user_details.all()
+            return user_details[0] if user_details else None
+        return None
+
+    def __str__(self):
+        return f"{self.item_type} - {self.quantity} {self.unit}"
+
+
+class DisposedOfficeSupplies(models.Model):
+    """Track disposed office supplies"""
+    supplies_db = models.ForeignKey("OfficeSuppliesDetails", on_delete=models.CASCADE)
+    supplies_package = models.ForeignKey(
+        OfficeSuppliesPackage, related_name='disposed_supplies',
+        on_delete=models.CASCADE, null=True
+    )
+
+    item_type = models.CharField(max_length=100, blank=True, null=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    unit = models.CharField(max_length=50, blank=True, null=True)
+
+    reason = models.TextField(blank=True, null=True)
+    disposal_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    disposed_photo = models.ImageField(upload_to="disposed_supplies_photos/", null=True, blank=True)
+
+    def __str__(self):
+        return f"Disposed {self.item_type}: {self.quantity} {self.unit}"
+
 
 # ==================== NOTIFICATION PAGE ====================
 class Notification(models.Model):

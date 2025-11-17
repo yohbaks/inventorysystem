@@ -1,11 +1,12 @@
 from django.contrib import admin
 from .models import (
-    Equipment_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor, 
-    KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse, 
+    Equipment_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor,
+    KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse,
     UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
     PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment, MaintenanceChecklistItem, SalvagedMonitor,
     SalvagedMonitorHistory, SalvagedKeyboard, SalvagedKeyboardHistory, SalvagedMouse, SalvagedMouseHistory, SalvagedUPS, SalvagedUPSHistory,
-    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification
+    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification,
+    OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies
 )
 
 # Register your models here.
@@ -49,6 +50,9 @@ admin.site.register(PrinterPackage)
 admin.site.register(PrinterDetails)
 admin.site.register(DisposedPrinter)
 admin.site.register(Notification)
+admin.site.register(OfficeSuppliesPackage)
+admin.site.register(OfficeSuppliesDetails)
+admin.site.register(DisposedOfficeSupplies)
 
 
 

@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .premium-card {
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: none;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .premium-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    .premium-header {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        padding: 2rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .premium-header h4 {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-premium {
+        border-radius: 10px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-premium-light {
+        background: rgba(255, 255, 255, 0.95);
+        color: #f59e0b;
+        border: none;
+    }
+
+    .btn-premium-light:hover {
+        background: white;
+        color: #d97706;
+    }
+
+    .premium-table thead th {
+        background: linear-gradient(135deg, #f8f9fe 0%, #fef5e7 100%);
+        color: #4a5568;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.75rem;
+        border: none;
+    }
+
+    .premium-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .premium-table tbody tr:hover {
+        background: linear-gradient(135deg, #fef5e7 0%, #fffbeb 100%);
+        transform: scale(1.01);
+    }
+
+    .premium-table tbody td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .badge-premium {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+
+    .badge-premium-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .badge-premium-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .badge-premium-secondary {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .action-btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .action-btn-danger:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    }
+
+    .icon-wrapper {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.2);
+        margin-right: 0.75rem;
+    }
+</style>
+
+<div class="container-fluid px-4" style="padding-top: 5rem; padding-bottom: 3rem;">
+    <div class="page-inner">
+
+        <!-- Main Card -->
+        <div class="premium-card">
+            <!-- Premium Header -->
+            <div class="premium-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-wrapper">
+                            <i class="fa fa-paperclip fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 text-white">Office Supplies Inventory</h4>
+                            <p class="mb-0 text-white-50" style="font-size: 0.875rem;">Manage and track all office supplies</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'add_equipment_package_with_details' %}" class="btn btn-premium btn-premium-light">
+                            <i class="fa fa-plus me-2"></i> Add Office Supplies
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body p-0">
+                {% if supplies %}
+                <div class="table-responsive">
+                    <table id="suppliesTable" class="table premium-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Item Type</th>
+                                <th>Brand</th>
+                                <th>Quantity</th>
+                                <th>Serial Number</th>
+                                <th>End-User</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center" style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for supply in supplies %}
+                            <tr id="supply-row-{{ supply.id }}">
+                                <td>
+                                    <div class="text-center">
+                                        <span class="badge badge-premium badge-premium-secondary" style="font-size: 0.7rem;">
+                                            {{ forloop.counter }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-wrapper me-2" style="background: linear-gradient(135deg, #f59e0b15 0%, #d9770615 100%); width: 36px; height: 36px;">
+                                            <i class="fa fa-paperclip" style="color: #f59e0b;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ supply.item_type }}</div>
+                                            <small class="text-muted">{{ supply.description|truncatewords:5|default:"—" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-premium badge-premium-secondary">
+                                        {{ supply.brand_name|default:"No Brand" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-premium badge-premium-warning">
+                                        {{ supply.quantity }} {{ supply.unit }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if supply.supplies_sn_db %}
+                                    <span class="badge badge-premium badge-premium-secondary">
+                                        <i class="fa fa-barcode me-1"></i>
+                                        {{ supply.supplies_sn_db }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if supply.end_user %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-wrapper me-2" style="background: linear-gradient(135deg, #10b98115 0%, #05966915 100%); width: 36px; height: 36px;">
+                                            <i class="fa fa-user" style="color: #10b981;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-dark">{{ supply.end_user.full_name }}</div>
+                                            <small class="text-muted">{{ supply.end_user.employee_office_section|default:"—" }}</small>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-muted">
+                                        <i class="fa fa-user-slash me-1"></i> Unassigned
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if supply.is_disposed %}
+                                    <span class="badge badge-premium badge-premium-danger">
+                                        <i class="fa fa-trash me-1"></i> Disposed
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-premium badge-premium-success">
+                                        <i class="fa fa-check-circle me-1"></i> Active
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="{% url 'office_supplies_details_view' supply.supplies_package.id %}"
+                                           class="action-btn action-btn-primary"
+                                           title="View Details"
+                                           data-bs-toggle="tooltip">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        {% if not supply.is_disposed %}
+                                        <a href="{% url 'dispose_office_supplies' supply.supplies_package.id %}"
+                                           class="action-btn action-btn-danger"
+                                           title="Dispose Supplies">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <div class="icon-wrapper mx-auto mb-3" style="width: 120px; height: 120px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fa fa-paperclip text-white" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">No Office Supplies Found</h4>
+                    <p class="text-muted mb-4">Start by adding your first office supplies to the inventory.</p>
+                    <a href="{% url 'add_equipment_package_with_details' %}" class="btn btn-premium" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        <i class="fa fa-plus me-2"></i> Add Office Supplies
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // DataTable initialization
+    $('#suppliesTable').DataTable({
+        responsive: true,
+        pageLength: 10,
+        order: [[1, "asc"]],
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Search supplies...",
+            lengthMenu: "Show _MENU_ items",
+            info: "Showing _START_ to _END_ of _TOTAL_ items",
+            infoEmpty: "No supplies available",
+            infoFiltered: "(filtered from _MAX_ total items)",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: '<i class="fa fa-chevron-right"></i>',
+                previous: '<i class="fa fa-chevron-left"></i>'
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

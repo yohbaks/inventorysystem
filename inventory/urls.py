@@ -189,6 +189,13 @@ urlpatterns = [
     path("printers/dispose/<int:printer_id>/", views.dispose_printer, name="dispose_printer"),
     path("printers/disposed/", views.disposed_printers, name="disposed_printers"),
 
+    # ================================
+    # OFFICE SUPPLIES ROUTES
+    # ================================
+    path("office_supplies/", views.office_supplies_list, name="office_supplies_list"),
+    path("office_supplies/<int:package_id>/", views.office_supplies_details_view, name="office_supplies_details_view"),
+    path("office_supplies/dispose/<int:package_id>/", views.dispose_office_supplies, name="dispose_office_supplies"),
+
     path("check_monitor_sn/", views.check_monitor_sn, name="check_monitor_sn"),
     path("check_keyboard_sn/", views.check_keyboard_sn, name="check_keyboard_sn"),
     path("check_mouse_sn/", views.check_mouse_sn, name="check_mouse_sn"),

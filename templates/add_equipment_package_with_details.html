@@ -34,6 +34,7 @@
             <option value="Desktop" {% if equipment_type == "Desktop" %}selected{% endif %}>🖥 Desktop</option>
             <option value="Laptop" {% if equipment_type == "Laptop" %}selected{% endif %}>💻 Laptop</option>
             <option value="Printer" {% if equipment_type == "Printer" %}selected{% endif %}>🔌 Printer</option>
+            <option value="Office Supplies" {% if equipment_type == "Office Supplies" %}selected{% endif %}>📎 Office Supplies</option>
           </select>
         </div>
       </div>
@@ -819,6 +820,120 @@
   </div>
 </div>
 
+<!-- =================== OFFICE SUPPLIES =================== -->
+<div id="officeSuppliesForm" class="equipment-form" style="display:none;">
+  <div class="card mb-3">
+    <div class="card-header"><h5>📎 Office Supplies Information</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <label>Item Type <span class="text-danger">*</span></label>
+          <input type="text" name="item_type" class="form-control" placeholder="e.g., Pen, Paper, Folder" required>
+        </div>
+        <div class="col-md-3">
+          <label>Brand (Optional)</label>
+          <select name="supplies_brand" class="form-select form-control">
+            <option value="">-- No Brand --</option>
+            {% for brand in office_supplies_brands %}
+              <option value="{{ brand.id }}">{{ brand.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label>Quantity <span class="text-danger">*</span></label>
+          <input type="number" name="quantity" class="form-control" value="1" min="1" required>
+        </div>
+        <div class="col-md-3">
+          <label>Unit <span class="text-danger">*</span></label>
+          <input type="text" name="unit" class="form-control" placeholder="Box, Pack, Unit" value="Unit" required>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <label>Serial Number (Optional)</label>
+          <input type="text" name="supplies_sn_db" class="form-control" placeholder="Optional">
+        </div>
+        <div class="col-md-6">
+          <label>Description</label>
+          <textarea name="description" class="form-control" rows="2" placeholder="Additional details about the supplies"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>📄 Document Details</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <label>PAR Number <span class="text-danger">*</span></label>
+          <input type="text" name="par_number_input" class="form-control" placeholder="e.g., PAR-12345" required>
+        </div>
+        <div class="col-md-4">
+          <label>Property Number <span class="text-danger">*</span></label>
+          <input type="text" name="property_number_input" class="form-control" placeholder="e.g., PROP-67890" required>
+        </div>
+        <div class="col-md-4">
+          <label>Acquisition Type <span class="text-danger">*</span></label>
+          <input type="text" name="acquisition_type_input" class="form-control" placeholder="e.g., Purchase, Donation" required>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-3">
+          <label>Value <span class="text-danger">*</span></label>
+          <input type="text" name="value_supplies_input" class="form-control" placeholder="e.g., 5000.00" required>
+        </div>
+        <div class="col-md-3">
+          <label>Date Received <span class="text-danger">*</span></label>
+          <input type="date" name="date_received_input" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label>Date Inspected <span class="text-danger">*</span></label>
+          <input type="date" name="date_inspected_input" class="form-control" required>
+        </div>
+        <div class="col-md-3">
+          <label>Status <span class="text-danger">*</span></label>
+          <input type="text" name="status_supplies_input" class="form-control" placeholder="e.g., Active, In Stock" required>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-12">
+          <label>Supplier Name <span class="text-danger">*</span></label>
+          <input type="text" name="supplier_name_input" class="form-control" placeholder="e.g., ABC Supplies Co." required>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Assignment -->
+  <div class="card mb-3">
+    <div class="card-header"><h5>👥 User Assignment</h5></div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <label>End User <span class="text-danger">*</span></label>
+          <select name="enduser_input" class="form-select form-control" required>
+            <option value="">Select End User</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>Asset Owner <span class="text-danger">*</span></label>
+          <select name="assetowner_input" class="form-select form-control" required>
+            <option value="" disabled selected>Select Asset Owner</option>
+            {% for emp in employees %}
+              <option value="{{ emp.id }}">{{ emp.full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
       <!-- Submit -->
       <div class="text-end mt-3">
         <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i> Submit</button>
@@ -967,6 +1082,16 @@ $(function () {
     if (this.value === "Printer") {
       const form = $("#printerForm").show();
       form.find("input, select, textarea").prop("disabled", false).prop("required", true);
+    }
+
+    if (this.value === "Office Supplies") {
+      const form = $("#officeSuppliesForm").show();
+      form.find("input, select, textarea").prop("disabled", false);
+
+      // Mark Office Supplies required fields
+      form.find("[name=item_type],[name=quantity],[name=unit]").prop("required", true);
+      form.find("[name=par_number_input],[name=property_number_input],[name=acquisition_type_input],[name=value_supplies_input],[name=date_received_input],[name=date_inspected_input],[name=supplier_name_input],[name=status_supplies_input]").prop("required", true);
+      form.find("[name=enduser_input],[name=assetowner_input]").prop("required", true);
     }
   });
 

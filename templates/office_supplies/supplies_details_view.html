@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-4" style="padding-top: 5rem; padding-bottom: 3rem;">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <h4 class="mb-0 text-white">
+                        <i class="fa fa-paperclip me-2"></i>
+                        Office Supplies Details
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if supplies %}
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Supplies Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Item Type:</th>
+                                    <td>{{ supplies.item_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Brand:</th>
+                                    <td>{{ supplies.brand_name|default:"No Brand" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Quantity:</th>
+                                    <td><span class="badge bg-warning">{{ supplies.quantity }} {{ supplies.unit }}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Serial Number:</th>
+                                    <td>{{ supplies.supplies_sn_db|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Description:</th>
+                                    <td>{{ supplies.description|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        {% if supplies.is_disposed %}
+                                        <span class="badge bg-danger">Disposed</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Assignment</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">End User:</th>
+                                    <td>{{ user_details.user_Enduser.full_name|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Asset Owner:</th>
+                                    <td>{{ user_details.user_Assetowner.full_name|default:"—" }}</td>
+                                </tr>
+                            </table>
+
+                            {% if docs %}
+                            <h5 class="border-bottom pb-2 mt-4">Documents</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">PAR Number:</th>
+                                    <td>{{ docs.docs_PAR|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Property Number:</th>
+                                    <td>{{ docs.docs_Propertyno|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Value:</th>
+                                    <td>{{ docs.docs_Value|default:"—" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Supplier:</th>
+                                    <td>{{ docs.docs_Supplier|default:"—" }}</td>
+                                </tr>
+                            </table>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <a href="{% url 'office_supplies_list' %}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left me-1"></i> Back to List
+                        </a>
+                        {% if not supplies.is_disposed %}
+                        <a href="{% url 'dispose_office_supplies' package.id %}" class="btn btn-danger">
+                            <i class="fa fa-trash me-1"></i> Dispose
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No supplies details available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

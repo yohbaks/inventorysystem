@@ -8,8 +8,13 @@ from io import BytesIO
 from datetime import datetime, timedelta
 from calendar import month_abbr
 from collections import defaultdict
-import pythoncom
-from win32com.client import Dispatch
+try:
+    import pythoncom
+    from win32com.client import Dispatch
+    HAS_WIN32 = True
+except ImportError:
+    # Windows-specific modules not available on Linux
+    HAS_WIN32 = False
 from django.http import HttpResponse, Http404
 
 
@@ -38,10 +43,26 @@ from django.views.decorators.http import require_POST
 # Third-party (keep if used anywhere in file)
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
-from weasyprint import HTML
-from fpdf import FPDF
-from docx import Document
-from docx2pdf import convert
+try:
+    from weasyprint import HTML
+    HAS_WEASYPRINT = True
+except ImportError:
+    HAS_WEASYPRINT = False
+try:
+    from fpdf import FPDF
+    HAS_FPDF = True
+except ImportError:
+    HAS_FPDF = False
+try:
+    from docx import Document
+    HAS_DOCX = True
+except ImportError:
+    HAS_DOCX = False
+try:
+    from docx2pdf import convert
+    HAS_DOCX2PDF = True
+except ImportError:
+    HAS_DOCX2PDF = False
 
 # Local
 from inventory.models import (
@@ -53,7 +74,8 @@ from inventory.models import (
     EndUserChangeHistory, AssetOwnerChangeHistory,
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
     QuarterSchedule, PMSectionSchedule, OfficeSection, Profile,
-    LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification 
+    LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification,
+    OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies
 )
 
 
@@ -2057,8 +2079,9 @@ def add_equipment_package_with_details(request):
     mouse_brands = Brand.objects.filter(is_mouse=True)
     monitor_brands = Brand.objects.filter(is_monitor=True)
     ups_brands = Brand.objects.filter(is_ups=True)
-    
+
     printer_brands = Brand.objects.filter(is_printer=True)
+    office_supplies_brands = Brand.objects.filter(is_office_supplies=True)
 
     if hasattr(Brand, "is_laptop"):
         laptop_brands = Brand.objects.filter(Q(is_laptop=True) | Q(is_desktop=True))
@@ -2073,7 +2096,8 @@ def add_equipment_package_with_details(request):
         'monitor_brands': monitor_brands,
         'ups_brands': ups_brands,
         'printer_brands': printer_brands,
-        'laptop_brands': laptop_brands, 
+        'laptop_brands': laptop_brands,
+        'office_supplies_brands': office_supplies_brands,
         'employees': employees,
     }
 
@@ -2467,6 +2491,100 @@ def add_equipment_package_with_details(request):
                 return render(request, 'add_equipment_package_with_details.html', context)
             except Exception as e:
                 messages.error(request, f"❌ Exception while saving printer: {str(e)}")
+                return render(request, 'add_equipment_package_with_details.html', context)
+
+        elif equipment_type == "Office Supplies":
+            item_type = request.POST.get("item_type")
+            supplies_sn = request.POST.get("supplies_sn_db")
+            brand = get_brand_or_none("supplies_brand")
+            description = request.POST.get("description")
+            quantity_str = request.POST.get("quantity", "1")
+            unit = request.POST.get("unit", "Unit")
+
+            # validations
+            errors = []
+            if not item_type:
+                errors.append("Item type is required.")
+
+            try:
+                quantity = int(quantity_str)
+                if quantity < 1:
+                    errors.append("Quantity must be at least 1.")
+            except (ValueError, TypeError):
+                errors.append("Valid quantity is required.")
+                quantity = 1
+
+            # Documents
+            if not request.POST.get('par_number_input'): errors.append("PAR Number is required.")
+            if not request.POST.get('property_number_input'): errors.append("Property Number is required.")
+            if not request.POST.get('acquisition_type_input'): errors.append("Acquisition type is required.")
+            if not request.POST.get('value_supplies_input'): errors.append("Value is required.")
+            if not request.POST.get('date_received_input'): errors.append("Date received is required.")
+            if not request.POST.get('date_inspected_input'): errors.append("Date inspected is required.")
+            if not request.POST.get('supplier_name_input'): errors.append("Supplier name is required.")
+            if not request.POST.get('status_supplies_input'): errors.append("Status is required.")
+
+            # User
+            if not request.POST.get('enduser_input'): errors.append("End user is required.")
+            if not request.POST.get('assetowner_input'): errors.append("Asset owner is required.")
+
+            # Duplicate check (only if serial number provided)
+            if supplies_sn and sn_exists(OfficeSuppliesDetails, 'supplies_sn_db', supplies_sn):
+                errors.append(f"Office supplies SN '{supplies_sn}' already exists.")
+
+            if errors:
+                for e in errors:
+                    messages.error(request, f"❌ {e}")
+                return render(request, 'add_equipment_package_with_details.html', context)
+
+            try:
+                with transaction.atomic():
+                    # ✅ Create office supplies package
+                    supplies_package = OfficeSuppliesPackage.objects.create(is_disposed=False)
+
+                    # ✅ Create office supplies details
+                    supplies = OfficeSuppliesDetails.objects.create(
+                        supplies_package=supplies_package,
+                        supplies_sn_db=supplies_sn,
+                        item_type=item_type,
+                        brand_name=brand,
+                        description=description,
+                        quantity=quantity,
+                        unit=unit
+                    )
+
+                    # ✅ Create documents
+                    DocumentsDetails.objects.create(
+                        office_supplies_package=supplies_package,
+                        docs_PAR=request.POST.get('par_number_input'),
+                        docs_Propertyno=request.POST.get('property_number_input'),
+                        docs_Acquisition_Type=request.POST.get('acquisition_type_input'),
+                        docs_Value=request.POST.get('value_supplies_input'),
+                        docs_Datereceived=request.POST.get('date_received_input'),
+                        docs_Dateinspected=request.POST.get('date_inspected_input'),
+                        docs_Supplier=request.POST.get('supplier_name_input'),
+                        docs_Status=request.POST.get('status_supplies_input')
+                    )
+
+                    # ✅ Create user details
+                    enduser = get_employee_or_none('enduser_input')
+                    assetowner = get_employee_or_none('assetowner_input')
+
+                    UserDetails.objects.create(
+                        office_supplies_package=supplies_package,
+                        user_Enduser=enduser,
+                        user_Assetowner=assetowner
+                    )
+
+                    # ✅ No PM logic for office supplies
+                    messages.success(request, "✅ Office supplies added successfully.")
+                    return redirect(reverse("success_page", args=[supplies.id]) + "?type=OfficeSupplies")
+
+            except IntegrityError as ie:
+                messages.error(request, f"❌ Could not save office supplies: duplicate detected. Details: {ie}")
+                return render(request, 'add_equipment_package_with_details.html', context)
+            except Exception as e:
+                messages.error(request, f"❌ Exception while saving office supplies: {str(e)}")
                 return render(request, 'add_equipment_package_with_details.html', context)
 
     return render(request, 'add_equipment_package_with_details.html', context)
@@ -5711,5 +5829,67 @@ def get_notification_count(request):
         user=request.user,
         is_read=False
     ).count()
-    
+
     return JsonResponse({'unread_count': unread_count})
+
+
+# ==================== OFFICE SUPPLIES VIEWS ====================
+
+@login_required
+def office_supplies_list(request):
+    """List all office supplies"""
+    supplies = OfficeSuppliesDetails.objects.select_related(
+        'supplies_package', 'brand_name'
+    ).filter(is_disposed=False).order_by('-created_at')
+
+    return render(request, 'office_supplies/supplies_list.html', {'supplies': supplies})
+
+
+@login_required
+def office_supplies_details_view(request, package_id):
+    """View details of office supplies package"""
+    package = get_object_or_404(OfficeSuppliesPackage, id=package_id)
+    supplies = package.supplies_details.first()
+    user_details = package.user_details.first()
+    docs = package.docs.first()
+
+    return render(request, 'office_supplies/supplies_details_view.html', {
+        'package': package,
+        'supplies': supplies,
+        'user_details': user_details,
+        'docs': docs
+    })
+
+
+@login_required
+def dispose_office_supplies(request, package_id):
+    """Mark office supplies as disposed"""
+    package = get_object_or_404(OfficeSuppliesPackage, id=package_id)
+    supplies = package.supplies_details.first()
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '')
+
+        with transaction.atomic():
+            DisposedOfficeSupplies.objects.create(
+                supplies_db=supplies,
+                supplies_package=package,
+                item_type=supplies.item_type,
+                quantity=supplies.quantity,
+                unit=supplies.unit,
+                reason=reason
+            )
+            package.is_disposed = True
+            package.disposal_date = datetime.now().date()
+            package.save()
+
+            supplies.is_disposed = True
+            supplies.save()
+
+        messages.success(request, "✅ Office supplies disposed successfully.")
+        return redirect('office_supplies_list')
+
+    return render(request, 'office_supplies/dispose_supplies.html', {
+        'package': package,
+        'supplies': supplies
+    })
