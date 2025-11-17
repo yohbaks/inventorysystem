@@ -227,69 +227,66 @@
               </style>
 
               <script>
-              (function() {
-                const mainImage = document.getElementById('desktopMainImage');
-                if (!mainImage) return;
+              window.addEventListener('load', function() {
+                const img = document.getElementById('desktopMainImage');
+                if (!img) return;
 
-                function initZoom() {
-                  const imageContainer = mainImage.parentElement;
-                  const zoomLens = document.getElementById('zoomLens');
-                  const zoomResult = document.getElementById('zoomResult');
-                  const zoomImage = document.getElementById('desktopZoomImage');
+                const container = img.parentElement;
+                const lens = document.getElementById('zoomLens');
+                const result = document.getElementById('zoomResult');
+                const zoomedImg = document.getElementById('desktopZoomImage');
 
-                  if (!imageContainer || !zoomLens || !zoomResult || !zoomImage) return;
-
-                  let cx, cy;
-
-                  function calculateZoom() {
-                    cx = zoomResult.offsetWidth / zoomLens.offsetWidth;
-                    cy = zoomResult.offsetHeight / zoomLens.offsetHeight;
-                    zoomImage.style.width = (imageContainer.offsetWidth * cx) + "px";
-                    zoomImage.style.height = (imageContainer.offsetHeight * cy) + "px";
-                  }
-
-                  function moveLens(e) {
-                    const rect = imageContainer.getBoundingClientRect();
-                    let x = e.clientX - rect.left;
-                    let y = e.clientY - rect.top;
-
-                    let lensX = x - (zoomLens.offsetWidth / 2);
-                    let lensY = y - (zoomLens.offsetHeight / 2);
-
-                    const maxX = rect.width - zoomLens.offsetWidth;
-                    const maxY = rect.height - zoomLens.offsetHeight;
-
-                    lensX = Math.max(0, Math.min(lensX, maxX));
-                    lensY = Math.max(0, Math.min(lensY, maxY));
-
-                    zoomLens.style.left = lensX + 'px';
-                    zoomLens.style.top = lensY + 'px';
-                    zoomImage.style.left = '-' + (lensX * cx) + 'px';
-                    zoomImage.style.top = '-' + (lensY * cy) + 'px';
-                  }
-
-                  imageContainer.addEventListener('mouseenter', function() {
-                    calculateZoom();
-                    zoomLens.style.display = 'block';
-                    zoomResult.style.display = 'block';
-                  });
-
-                  imageContainer.addEventListener('mouseleave', function() {
-                    zoomLens.style.display = 'none';
-                    zoomResult.style.display = 'none';
-                  });
-
-                  imageContainer.addEventListener('mousemove', moveLens);
-
-                  console.log('Desktop photo zoom activated!');
+                if (!container || !lens || !result || !zoomedImg) {
+                  console.log('Zoom elements not found');
+                  return;
                 }
 
-                if (mainImage.complete) {
-                  initZoom();
-                } else {
-                  mainImage.addEventListener('load', initZoom);
-                }
-              })();
+                let cx, cy;
+
+                container.onmousemove = function(e) {
+                  // Calculate zoom ratio on first move
+                  if (!cx || !cy) {
+                    cx = result.offsetWidth / lens.offsetWidth;
+                    cy = result.offsetHeight / lens.offsetHeight;
+                    zoomedImg.style.width = (container.offsetWidth * cx) + 'px';
+                    zoomedImg.style.height = (container.offsetHeight * cy) + 'px';
+                  }
+
+                  // Show lens and result
+                  lens.style.display = 'block';
+                  result.style.display = 'block';
+
+                  // Get mouse position relative to container
+                  const rect = container.getBoundingClientRect();
+                  let x = e.clientX - rect.left - window.scrollX;
+                  let y = e.clientY - rect.top - window.scrollY;
+
+                  // Calculate lens position (centered on cursor)
+                  let posX = x - (lens.offsetWidth / 2);
+                  let posY = y - (lens.offsetHeight / 2);
+
+                  // Keep lens within bounds
+                  if (posX < 0) posX = 0;
+                  if (posX > container.offsetWidth - lens.offsetWidth) posX = container.offsetWidth - lens.offsetWidth;
+                  if (posY < 0) posY = 0;
+                  if (posY > container.offsetHeight - lens.offsetHeight) posY = container.offsetHeight - lens.offsetHeight;
+
+                  // Position lens
+                  lens.style.left = posX + 'px';
+                  lens.style.top = posY + 'px';
+
+                  // Position zoomed image
+                  zoomedImg.style.left = '-' + (posX * cx) + 'px';
+                  zoomedImg.style.top = '-' + (posY * cy) + 'px';
+                };
+
+                container.onmouseleave = function() {
+                  lens.style.display = 'none';
+                  result.style.display = 'none';
+                };
+
+                console.log('✅ Zoom initialized - move mouse over image!');
+              });
               </script>
               {% endif %}
 
