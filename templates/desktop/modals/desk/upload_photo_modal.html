@@ -76,87 +76,112 @@
 </div>
 
 <script>
-// Image preview functionality
-document.getElementById('desktop_photo')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('previewImage').src = e.target.result;
-      document.getElementById('imagePreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// CSRF helper
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
+(function() {
+  // CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
       }
     }
+    return cookieValue;
   }
-  return cookieValue;
-}
 
-// Handle form submission with AJAX
-$(document).ready(function() {
-  $('#uploadPhotoForm').on('submit', function(e) {
-    e.preventDefault();
+  // Image preview functionality
+  const photoInput = document.getElementById('desktop_photo');
+  if (photoInput) {
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('previewImage').src = e.target.result;
+          document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
-    const form = this;
-    const formData = new FormData(form);
-    const submitBtn = $(form).find('button[type="submit"]');
-    const btnIcon = submitBtn.find('i');
-    const originalHtml = submitBtn.html();
+  // Handle form submission with AJAX
+  const uploadForm = document.getElementById('uploadPhotoForm');
+  if (uploadForm) {
+    uploadForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-    // Disable submit button and show loading
-    submitBtn.prop('disabled', true);
-    submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Uploading...');
+      const formData = new FormData(this);
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalHtml = submitBtn.innerHTML;
 
-    $.ajax({
-      url: $(form).attr('action'),
-      type: 'POST',
-      data: formData,
-      processData: false,
-      contentType: false,
-      headers: {
-        'X-CSRFToken': getCookie('csrftoken')
-      },
-      success: function(response) {
-        if (response.success) {
-          // Hide the modal
-          $('#uploadPhotoModal').modal('hide');
+      // Disable submit button and show loading
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
 
-          // Show success notification
-          $.notify({
-            title: "✅ Success",
-            message: response.message || "Photo uploaded successfully!",
-            icon: "fa fa-check-circle"
-          }, {
-            type: "success",
-            placement: { from: "bottom", align: "right" },
-            delay: 2000,
-            z_index: 9999
-          });
+      // Use jQuery AJAX
+      $.ajax({
+        url: uploadForm.getAttribute('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function(response) {
+          if (response.success) {
+            // Hide the modal
+            $('#uploadPhotoModal').modal('hide');
 
-          // Reload page after short delay to show new photo
-          setTimeout(function() {
-            window.location.href = window.location.pathname + '#pills-desktop';
-            window.location.reload();
-          }, 800);
-        } else {
+            // Show success notification
+            $.notify({
+              title: "✅ Success",
+              message: response.message || "Photo uploaded successfully!",
+              icon: "fa fa-check-circle"
+            }, {
+              type: "success",
+              placement: { from: "bottom", align: "right" },
+              delay: 2000,
+              z_index: 9999
+            });
+
+            // Reload page after short delay to show new photo
+            setTimeout(function() {
+              window.location.href = window.location.pathname + '#pills-desktop';
+              window.location.reload();
+            }, 800);
+          } else {
+            // Show error notification
+            $.notify({
+              title: "⚠️ Upload Failed",
+              message: response.error || "Failed to upload photo",
+              icon: "fa fa-exclamation-triangle"
+            }, {
+              type: "danger",
+              placement: { from: "bottom", align: "right" },
+              delay: 4000,
+              z_index: 9999
+            });
+
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHtml;
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Upload error:', error);
+
           // Show error notification
           $.notify({
-            title: "⚠️ Upload Failed",
-            message: response.error || "Failed to upload photo",
-            icon: "fa fa-exclamation-triangle"
+            title: "❌ Server Error",
+            message: xhr.responseJSON?.error || "An unexpected error occurred while uploading",
+            icon: "fa fa-times-circle"
           }, {
             type: "danger",
             placement: { from: "bottom", align: "right" },
@@ -165,46 +190,50 @@ $(document).ready(function() {
           });
 
           // Re-enable button
-          submitBtn.prop('disabled', false);
-          submitBtn.html(originalHtml);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalHtml;
         }
-      },
-      error: function(xhr, status, error) {
-        console.error('Upload error:', error);
+      });
 
-        // Show error notification
-        $.notify({
-          title: "❌ Server Error",
-          message: xhr.responseJSON?.error || "An unexpected error occurred while uploading",
-          icon: "fa fa-times-circle"
-        }, {
-          type: "danger",
-          placement: { from: "bottom", align: "right" },
-          delay: 4000,
-          z_index: 9999
-        });
-
-        // Re-enable button
-        submitBtn.prop('disabled', false);
-        submitBtn.html(originalHtml);
-      }
+      return false;
     });
-  });
+  }
 
   // Reset form when modal is closed
   $('#uploadPhotoModal').on('hidden.bs.modal', function() {
-    $('#uploadPhotoForm')[0].reset();
-    $('#imagePreview').hide();
-    const submitBtn = $('#uploadPhotoForm button[type="submit"]');
-    submitBtn.prop('disabled', false);
-    submitBtn.html('<i class="fas fa-upload"></i> Upload Photo');
+    const form = document.getElementById('uploadPhotoForm');
+    if (form) {
+      form.reset();
+      const preview = document.getElementById('imagePreview');
+      if (preview) preview.style.display = 'none';
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+      }
+    }
   });
-});
+})();
 
 // Delete photo function
 function deleteDesktopPhoto(desktopId) {
   if (!confirm('Are you sure you want to remove this photo? This action cannot be undone.')) {
     return;
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
   }
 
   $.ajax({
