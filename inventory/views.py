@@ -801,10 +801,6 @@ def update_desktop(request, pk):
         desktop.desktop_Office = request.POST.get('desktop_Office', desktop.desktop_Office)
         desktop.desktop_Office_keys = request.POST.get('desktop_Office_keys', desktop.desktop_Office_keys)
 
-        # ✅ Handle photo upload
-        if 'desktop_photo' in request.FILES:
-            desktop.desktop_photo = request.FILES['desktop_photo']
-
         # ✅ Validate required fields
         if not desktop.serial_no or not desktop.model:
             return JsonResponse({
@@ -839,6 +835,73 @@ def update_desktop(request, pk):
             'success': False,
             'error': f'An error occurred while updating: {str(e)}'
         }, status=500)
+
+
+# Upload desktop photo
+@require_POST
+def upload_desktop_photo(request, pk):
+    try:
+        desktop = get_object_or_404(DesktopDetails, pk=pk)
+
+        if 'desktop_photo' not in request.FILES:
+            return JsonResponse({
+                'success': False,
+                'error': 'No photo file provided.'
+            }, status=400)
+
+        # Handle photo upload
+        desktop.desktop_photo = request.FILES['desktop_photo']
+        desktop.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Desktop photo uploaded successfully!',
+            'photo_url': desktop.desktop_photo.url if desktop.desktop_photo else None
+        })
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error uploading desktop photo {pk}: {str(e)}")
+
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to upload photo: {str(e)}'
+        }, status=500)
+
+
+# Delete desktop photo
+@require_POST
+def delete_desktop_photo(request, pk):
+    try:
+        desktop = get_object_or_404(DesktopDetails, pk=pk)
+
+        if desktop.desktop_photo:
+            # Delete the file from storage
+            desktop.desktop_photo.delete(save=False)
+            desktop.desktop_photo = None
+            desktop.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Desktop photo deleted successfully!'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'No photo to delete.'
+            }, status=400)
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error deleting desktop photo {pk}: {str(e)}")
+
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to delete photo: {str(e)}'
+        }, status=500)
+
 
 #update monitor details
 @require_POST

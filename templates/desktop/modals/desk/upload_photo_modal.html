@@ -1,0 +1,185 @@
+<!-- Desktop Photo Upload Modal -->
+<div class="modal fade" id="uploadPhotoModal" tabindex="-1" aria-labelledby="uploadPhotoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="uploadPhotoForm" method="POST" enctype="multipart/form-data"
+      action="{% if desktop_detailsx %}{% url 'upload_desktop_photo' pk=desktop_detailsx.id %}{% else %}#{% endif %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <h5 class="modal-title" id="uploadPhotoModalLabel">
+            <i class="fas fa-camera"></i> Desktop Photo
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Current Photo Preview -->
+          {% if desktop_detailsx.desktop_photo %}
+          <div class="mb-4 text-center">
+            <label class="form-label fw-bold">Current Photo</label>
+            <div style="position: relative; max-width: 100%; margin: 0 auto; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <img src="{{ desktop_detailsx.desktop_photo.url }}"
+                   alt="Current Desktop Photo"
+                   style="width: 100%; height: auto; display: block;">
+            </div>
+          </div>
+          {% else %}
+          <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle"></i> No photo uploaded yet. Upload one below!
+          </div>
+          {% endif %}
+
+          <!-- Upload New Photo -->
+          <div class="mb-3">
+            <label for="desktop_photo" class="form-label fw-bold">
+              <i class="fas fa-upload"></i> Upload New Photo
+            </label>
+            <input type="file"
+                   class="form-control form-control-lg"
+                   id="desktop_photo"
+                   name="desktop_photo"
+                   accept="image/*"
+                   required>
+            <small class="text-muted d-block mt-2">
+              <i class="fas fa-check-circle text-success"></i> Supported: JPG, PNG, GIF (max 5MB)
+            </small>
+          </div>
+
+          <!-- Image Preview -->
+          <div id="imagePreview" class="mt-3" style="display: none;">
+            <label class="form-label fw-bold">Preview</label>
+            <div style="position: relative; max-width: 100%; margin: 0 auto; border-radius: 1rem; overflow: hidden; border: 2px dashed #667eea;">
+              <img id="previewImage"
+                   src="#"
+                   alt="Preview"
+                   style="width: 100%; height: auto; display: block;">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {% if desktop_detailsx.desktop_photo %}
+          <button type="button"
+                  class="btn btn-danger me-auto"
+                  onclick="deleteDesktopPhoto({{ desktop_detailsx.id }})">
+            <i class="fas fa-trash"></i> Remove Photo
+          </button>
+          {% endif %}
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload Photo
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Image preview functionality
+document.getElementById('desktop_photo')?.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('previewImage').src = e.target.result;
+      document.getElementById('imagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Handle form submission with AJAX
+document.getElementById('uploadPhotoForm')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+
+  // Disable submit button and show loading
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+
+  fetch(this.action, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Show success message
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: data.message || 'Photo uploaded successfully!',
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => {
+        // Reload the page to show the new photo
+        window.location.reload();
+      });
+    } else {
+      throw new Error(data.error || 'Upload failed');
+    }
+  })
+  .catch(error => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.message || 'Failed to upload photo'
+    });
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  });
+});
+
+// Delete photo function
+function deleteDesktopPhoto(desktopId) {
+  Swal.fire({
+    title: 'Remove Photo?',
+    text: "This will permanently delete the desktop photo.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d',
+    confirmButtonText: 'Yes, remove it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch(`/delete_desktop_photo/${desktopId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Photo has been removed.',
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.reload();
+          });
+        } else {
+          throw new Error(data.error || 'Delete failed');
+        }
+      })
+      .catch(error => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message || 'Failed to delete photo'
+        });
+      });
+    }
+  });
+}
+</script>

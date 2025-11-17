@@ -80,6 +80,8 @@ urlpatterns = [
 
     #update desktop, monitor, mouse, ups
     path('desktop/<int:pk>/update/',    views.update_desktop, name='update_desktop'),
+    path('upload_desktop_photo/<int:pk>/', views.upload_desktop_photo, name='upload_desktop_photo'),
+    path('delete_desktop_photo/<int:pk>/', views.delete_desktop_photo, name='delete_desktop_photo'),
     path('monitor/<int:pk>/update/',    views.update_monitor, name='update_monitor'),
     path('keyboard/<int:pk>/update/',   views.update_keyboard, name='update_keyboard'),
     path('mouse/<int:pk>/update/',      views.update_mouse, name='update_mouse'),

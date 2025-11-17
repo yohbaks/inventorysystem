@@ -150,6 +150,9 @@
                 <h2 class="card-title-modern">Desktop Specifications</h2>
                 <div class="d-flex gap-2">
                   {% if desktop_detailsx and not desktop_detailsx.is_disposed %}
+                    <button class="btn btn-info rounded-pill" data-bs-toggle="modal" data-bs-target="#uploadPhotoModal">
+                      <i class="fas fa-camera"></i> Photo
+                    </button>
                     <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDesktopModal">
                       <i class="fa fa-edit"></i> Edit
                     </button>
@@ -1551,6 +1554,8 @@ Include all your existing modals here:
 
 <!-- Edit Desktop Modal -->
  {% include 'desktop/modals/desk/edit_desktop_modal.html' %}
+<!-- Upload Photo Modal -->
+ {% include 'desktop/modals/desk/upload_photo_modal.html' %}
 <!-- Dispose Desktop Modal -->
  {% include 'desktop/modals/desk/dispose_desktop_modal_all.html' %}
 <!-- Add Monitor Modal -->
