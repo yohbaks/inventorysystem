@@ -543,6 +543,7 @@ class DocumentsDetails(models.Model):
     docs_Dateinspected = models.CharField(max_length=100, blank=True, null=True)
     docs_Supplier = models.CharField(max_length=100, blank=True, null=True)
     docs_Status = models.CharField(max_length=100, blank=True, null=True)
+    docs_photo = models.ImageField(upload_to="document_photos/", null=True, blank=True)
 
     def __str__(self):
         if self.equipment_package:

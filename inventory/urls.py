@@ -148,6 +148,9 @@ urlpatterns = [
     path('upload_mouse_photo/<int:mouse_id>/', views.upload_mouse_photo, name='upload_mouse_photo'),
     path('upload_ups_photo/<int:ups_id>/', views.upload_ups_photo, name='upload_ups_photo'),
 
+    #photo upload for documents
+    path('upload_document_photo/<int:document_id>/', views.upload_document_photo, name='upload_document_photo'),
+
     #profile
     path("account/profile/", views.profile_view, name="profile"),
     path("account/profile/update/", views.update_profile, name="update_profile"),

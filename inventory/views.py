@@ -4274,6 +4274,26 @@ def upload_ups_photo(request, ups_id):
     return redirect(f'/desktop_details_view/{ups.equipment_package.id}/#pills-ups')
 
 
+@require_POST
+def upload_document_photo(request, document_id):
+    document = get_object_or_404(DocumentsDetails, id=document_id)
+    if 'photo' in request.FILES:
+        document.docs_photo = request.FILES['photo']
+        document.save()
+
+    # Redirect based on which package type this document belongs to
+    if document.equipment_package:
+        return redirect(f'/desktop_details_view/{document.equipment_package.id}/#pills-documents')
+    elif document.laptop_package:
+        return redirect(f'/laptop_details_view/{document.laptop_package.id}/#pills-documents')
+    elif document.printer_package:
+        return redirect(f'/printer_details_view/{document.printer_package.id}/#pills-documents')
+    elif document.office_supplies_package:
+        return redirect(f'/office_supplies_details_view/{document.office_supplies_package.id}/#pills-documents')
+    else:
+        return redirect('/')
+
+
 def export_salvage_excel(request):
     wb = Workbook()
     ws = wb.active
