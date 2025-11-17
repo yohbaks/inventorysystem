@@ -170,22 +170,122 @@
 
               {% if has_active_desktop %}
 
-              <!-- Desktop Photo Display -->
+              <!-- Desktop Photo Display with Zoom -->
               {% if desktop_detailsx.desktop_photo %}
-              <div class="desktop-photo-container mb-4" style="position: relative; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+              <div class="desktop-photo-zoom-container mb-4" id="desktopPhotoZoom" style="position: relative; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); cursor: crosshair;">
                 <div style="position: relative; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                  <img src="{{ desktop_detailsx.desktop_photo.url }}"
+                  <!-- Main Image -->
+                  <img id="desktopMainImage"
+                       src="{{ desktop_detailsx.desktop_photo.url }}"
                        alt="Desktop Photo"
-                       style="width: 100%; height: 100%; object-fit: cover; opacity: 0.95;">
-                  <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); padding: 2rem 1.5rem 1rem;">
+                       style="width: 100%; height: 100%; object-fit: cover; opacity: 0.95; display: block;">
+
+                  <!-- Zoom Lens -->
+                  <div id="zoomLens" style="position: absolute; width: 100px; height: 100px; border: 3px solid #667eea; background: rgba(102, 126, 234, 0.2); display: none; pointer-events: none; z-index: 10;"></div>
+
+                  <!-- Info Overlay -->
+                  <div id="photoInfo" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); padding: 2rem 1.5rem 1rem; transition: opacity 0.3s;">
                     <div style="color: white;">
                       <i class="fas fa-desktop" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
                       <h3 style="margin: 0; font-weight: 700; font-size: 1.5rem;">{{ desktop_detailsx.computer_name }}</h3>
                       <p style="margin: 0; opacity: 0.9;">{{ desktop_detailsx.brand_name }} {{ desktop_detailsx.model }}</p>
+                      <small style="opacity: 0.7; font-size: 0.875rem;"><i class="fas fa-search-plus"></i> Hover to zoom</small>
                     </div>
                   </div>
                 </div>
+
+                <!-- Zoomed Image Container -->
+                <div id="zoomResult" style="position: absolute; right: -420px; top: 0; width: 400px; height: 400px; border: 3px solid #667eea; background: white; display: none; z-index: 1000; border-radius: 0.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); overflow: hidden;">
+                  <img id="desktopZoomImage" src="{{ desktop_detailsx.desktop_photo.url }}" style="position: absolute;">
+                </div>
               </div>
+
+              <style>
+                .desktop-photo-zoom-container:hover #photoInfo {
+                  opacity: 0.3;
+                }
+
+                .desktop-photo-zoom-container:hover {
+                  cursor: crosshair;
+                }
+
+                @media (max-width: 768px) {
+                  #zoomResult {
+                    display: none !important;
+                  }
+                }
+              </style>
+
+              <script>
+              (function() {
+                const container = document.getElementById('desktopPhotoZoom');
+                const mainImage = document.getElementById('desktopMainImage');
+                const zoomLens = document.getElementById('zoomLens');
+                const zoomResult = document.getElementById('zoomResult');
+                const zoomImage = document.getElementById('desktopZoomImage');
+
+                if (!container || !mainImage || !zoomLens || !zoomResult || !zoomImage) return;
+
+                const zoomLevel = 2.5; // Zoom magnification
+                let cx, cy;
+
+                // Calculate zoom ratios
+                function calculateZoom() {
+                  cx = zoomResult.offsetWidth / zoomLens.offsetWidth;
+                  cy = zoomResult.offsetHeight / zoomLens.offsetHeight;
+                  zoomImage.style.width = (mainImage.width * cx) + "px";
+                  zoomImage.style.height = (mainImage.height * cy) + "px";
+                }
+
+                // Show zoom on mouse enter
+                container.addEventListener('mouseenter', function() {
+                  calculateZoom();
+                  zoomLens.style.display = 'block';
+                  zoomResult.style.display = 'block';
+                });
+
+                // Hide zoom on mouse leave
+                container.addEventListener('mouseleave', function() {
+                  zoomLens.style.display = 'none';
+                  zoomResult.style.display = 'none';
+                });
+
+                // Move zoom lens and update zoomed image
+                container.addEventListener('mousemove', function(e) {
+                  const rect = mainImage.getBoundingClientRect();
+                  let x = e.clientX - rect.left;
+                  let y = e.clientY - rect.top;
+
+                  // Prevent lens from going outside image
+                  let lensX = x - (zoomLens.offsetWidth / 2);
+                  let lensY = y - (zoomLens.offsetHeight / 2);
+
+                  if (lensX < 0) lensX = 0;
+                  if (lensY < 0) lensY = 0;
+                  if (lensX > mainImage.width - zoomLens.offsetWidth) {
+                    lensX = mainImage.width - zoomLens.offsetWidth;
+                  }
+                  if (lensY > mainImage.height - zoomLens.offsetHeight) {
+                    lensY = mainImage.height - zoomLens.offsetHeight;
+                  }
+
+                  // Position the lens
+                  zoomLens.style.left = lensX + 'px';
+                  zoomLens.style.top = lensY + 'px';
+
+                  // Update zoomed image position
+                  zoomImage.style.left = '-' + (lensX * cx) + 'px';
+                  zoomImage.style.top = '-' + (lensY * cy) + 'px';
+                });
+
+                // Recalculate on window resize
+                window.addEventListener('resize', function() {
+                  if (zoomLens.style.display === 'block') {
+                    calculateZoom();
+                  }
+                });
+              })();
+              </script>
               {% endif %}
 
               <div class="spec-grid">
