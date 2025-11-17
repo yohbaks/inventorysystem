@@ -258,8 +258,8 @@
 
                   // Get mouse position relative to container
                   const rect = container.getBoundingClientRect();
-                  let x = e.clientX - rect.left - window.scrollX;
-                  let y = e.clientY - rect.top - window.scrollY;
+                  let x = e.clientX - rect.left;
+                  let y = e.clientY - rect.top;
 
                   // Calculate lens position (centered on cursor)
                   let posX = x - (lens.offsetWidth / 2);
