@@ -4276,10 +4276,45 @@ def upload_ups_photo(request, ups_id):
 
 @require_POST
 def upload_document_photo(request, document_id):
+    """Upload multiple photos for supporting documents"""
+    from inventory.models import DocumentPhoto
+
     document = get_object_or_404(DocumentsDetails, id=document_id)
-    if 'photo' in request.FILES:
-        document.docs_photo = request.FILES['photo']
-        document.save()
+
+    # Handle multiple file uploads
+    photos = request.FILES.getlist('photos')
+    if photos:
+        for photo in photos:
+            DocumentPhoto.objects.create(
+                document=document,
+                photo=photo,
+                caption=request.POST.get('caption', '')
+            )
+
+    # Redirect based on which package type this document belongs to
+    if document.equipment_package:
+        return redirect(f'/desktop_details_view/{document.equipment_package.id}/#pills-documents')
+    elif document.laptop_package:
+        return redirect(f'/laptop_details_view/{document.laptop_package.id}/#pills-documents')
+    elif document.printer_package:
+        return redirect(f'/printer_details_view/{document.printer_package.id}/#pills-documents')
+    elif document.office_supplies_package:
+        return redirect(f'/office_supplies_details_view/{document.office_supplies_package.id}/#pills-documents')
+    else:
+        return redirect('/')
+
+
+@require_POST
+def delete_document_photo(request, photo_id):
+    """Delete a document photo"""
+    from inventory.models import DocumentPhoto
+
+    photo = get_object_or_404(DocumentPhoto, id=photo_id)
+    document = photo.document
+
+    # Delete the photo file and database record
+    photo.photo.delete()
+    photo.delete()
 
     # Redirect based on which package type this document belongs to
     if document.equipment_package:

@@ -1262,7 +1262,6 @@
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Documents Details</h2>
-                {% include "photo/documents_photo.html" %}
               </div>
 
               <div class="spec-grid">
@@ -1305,6 +1304,9 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Photo Slider -->
+              {% include "photo/documents_photo.html" %}
 
               <div class="mt-4">
                 <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">

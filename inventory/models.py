@@ -555,8 +555,21 @@ class DocumentsDetails(models.Model):
         elif self.office_supplies_package:
             return f"Docs for Office Supplies Package {self.office_supplies_package.id}"
         return "Docs (unlinked)"
-    
-    
+
+
+class DocumentPhoto(models.Model):
+    """Multiple photos for supporting documents"""
+    document = models.ForeignKey(DocumentsDetails, related_name='photos', on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to="document_photos/")
+    caption = models.CharField(max_length=255, blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return f"Photo for {self.document} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
+
 
 class Employee(models.Model):
     equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE, null=True)
