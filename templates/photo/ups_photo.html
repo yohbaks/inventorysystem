@@ -1,0 +1,45 @@
+{% if ups_detailse %}
+  <!-- UPS Photo -->
+  <div class="dropdown float-end">
+    <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="fas fa-ellipsis-h"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li>
+        <form action="{% url 'upload_ups_photo' ups_detailse.id %}" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="file" name="photo" class="d-none" id="uploadUpsPhotoInput" onchange="this.form.submit()">
+          <label for="uploadUpsPhotoInput" class="dropdown-item">Upload Photo</label>
+        </form>
+      </li>
+      <li>
+        {% if ups_detailse.ups_photo %}
+          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#upsPhotoModal">
+            View Photo
+          </a>
+        {% else %}
+          <span class="dropdown-item text-muted">No Photo</span>
+        {% endif %}
+      </li>
+    </ul>
+  </div>
+
+  <!-- UPS Photo Modal -->
+  <div class="modal fade" id="upsPhotoModal" tabindex="-1" aria-labelledby="upsPhotoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="upsPhotoModalLabel">UPS Photo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          {% if ups_detailse.ups_photo %}
+            <img src="{{ ups_detailse.ups_photo.url }}" class="img-fluid rounded shadow" alt="UPS Photo">
+          {% else %}
+            <p class="text-muted">No photo available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}

@@ -148,6 +148,7 @@
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Desktop Specifications</h2>
+                {% include "photo/desktop_photo.html" %}
                 <div class="d-flex gap-2">
                   {% if desktop_detailsx and not desktop_detailsx.is_disposed %}
                     <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDesktopModal">
@@ -302,6 +303,7 @@
   <div class="modern-card">
     <div class="card-header-modern">
       <h2 class="card-title-modern">Monitor Details</h2>
+      {% include "photo/monitor_photo.html" %}
       {% if not has_active_monitor and has_active_desktop %}
       <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addMonitorModal">
         <i class="fa fa-plus"></i> Add Monitor
@@ -505,6 +507,7 @@
   <div class="modern-card">
     <div class="card-header-modern">
       <h2 class="card-title-modern">Keyboard Details</h2>
+      {% include "photo/keyboard_photo.html" %}
       {% if not has_active_keyboards and has_active_desktop %}
       <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addKeyboardModal">
         <i class="fa fa-plus"></i> Add Keyboard
@@ -677,6 +680,7 @@
   <div class="modern-card">
     <div class="card-header-modern">
       <h2 class="card-title-modern">Mouse Details</h2>
+      {% include "photo/mouse_photo.html" %}
       {% if not has_active_mouse and has_active_desktop %}
       <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addMouseModal">
         <i class="fa fa-plus"></i> Add Mouse
@@ -854,6 +858,7 @@
   <div class="modern-card">
     <div class="card-header-modern">
       <h2 class="card-title-modern">UPS Details</h2>
+      {% include "photo/ups_photo.html" %}
       {% if not has_active_ups and has_active_desktop %}
       <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#addUPSModal">
         <i class="fa fa-plus"></i> Add UPS

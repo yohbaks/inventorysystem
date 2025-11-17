@@ -4238,6 +4238,42 @@ def upload_monitor_photo(request, monitor_id):
     return redirect(f'/desktop_details_view/{monitor.equipment_package.id}/#pills-monitor')
 
 
+@require_POST
+def upload_desktop_photo(request, desktop_id):
+    desktop = get_object_or_404(DesktopDetails, id=desktop_id)
+    if 'photo' in request.FILES:
+        desktop.desktop_photo = request.FILES['photo']
+        desktop.save()
+    return redirect(f'/desktop_details_view/{desktop.equipment_package.id}/#pills-desktop')
+
+
+@require_POST
+def upload_keyboard_photo(request, keyboard_id):
+    keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
+    if 'photo' in request.FILES:
+        keyboard.keyboard_photo = request.FILES['photo']
+        keyboard.save()
+    return redirect(f'/desktop_details_view/{keyboard.equipment_package.id}/#pills-keyboard')
+
+
+@require_POST
+def upload_mouse_photo(request, mouse_id):
+    mouse = get_object_or_404(MouseDetails, id=mouse_id)
+    if 'photo' in request.FILES:
+        mouse.mouse_photo = request.FILES['photo']
+        mouse.save()
+    return redirect(f'/desktop_details_view/{mouse.equipment_package.id}/#pills-mouse')
+
+
+@require_POST
+def upload_ups_photo(request, ups_id):
+    ups = get_object_or_404(UPSDetails, id=ups_id)
+    if 'photo' in request.FILES:
+        ups.ups_photo = request.FILES['photo']
+        ups.save()
+    return redirect(f'/desktop_details_view/{ups.equipment_package.id}/#pills-ups')
+
+
 def export_salvage_excel(request):
     wb = Workbook()
     ws = wb.active
