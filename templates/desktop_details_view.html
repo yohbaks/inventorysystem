@@ -227,66 +227,89 @@
               </style>
 
               <script>
-              window.addEventListener('load', function() {
-                const img = document.getElementById('desktopMainImage');
-                if (!img) return;
+              (function() {
+                // Wait for image to load
+                const mainImage = document.getElementById('desktopMainImage');
+                if (!mainImage) return;
 
-                const container = img.parentElement;
-                const lens = document.getElementById('zoomLens');
-                const result = document.getElementById('zoomResult');
-                const zoomedImg = document.getElementById('desktopZoomImage');
+                function initZoom() {
+                  const container = document.getElementById('desktopPhotoZoom');
+                  const zoomLens = document.getElementById('zoomLens');
+                  const zoomResult = document.getElementById('zoomResult');
+                  const zoomImage = document.getElementById('desktopZoomImage');
 
-                if (!container || !lens || !result || !zoomedImg) {
-                  console.log('Zoom elements not found');
-                  return;
-                }
-
-                let cx, cy;
-
-                container.onmousemove = function(e) {
-                  // Calculate zoom ratio on first move
-                  if (!cx || !cy) {
-                    cx = result.offsetWidth / lens.offsetWidth;
-                    cy = result.offsetHeight / lens.offsetHeight;
-                    zoomedImg.style.width = (container.offsetWidth * cx) + 'px';
-                    zoomedImg.style.height = (container.offsetHeight * cy) + 'px';
+                  if (!container || !mainImage || !zoomLens || !zoomResult || !zoomImage) {
+                    console.log('Zoom elements not found');
+                    return;
                   }
 
-                  // Show lens and result
-                  lens.style.display = 'block';
-                  result.style.display = 'block';
+                  let cx, cy;
 
-                  // Get mouse position relative to container
-                  const rect = container.getBoundingClientRect();
-                  let x = e.clientX - rect.left;
-                  let y = e.clientY - rect.top;
+                  // Calculate zoom ratios
+                  function calculateZoom() {
+                    cx = zoomResult.offsetWidth / zoomLens.offsetWidth;
+                    cy = zoomResult.offsetHeight / zoomLens.offsetHeight;
+                    zoomImage.style.width = (mainImage.offsetWidth * cx) + "px";
+                    zoomImage.style.height = (mainImage.offsetHeight * cy) + "px";
+                  }
 
-                  // Calculate lens position (centered on cursor)
-                  let posX = x - (lens.offsetWidth / 2);
-                  let posY = y - (lens.offsetHeight / 2);
+                  // Show zoom on mouse enter
+                  container.addEventListener('mouseenter', function() {
+                    calculateZoom();
+                    zoomLens.style.display = 'block';
+                    zoomResult.style.display = 'block';
+                  });
 
-                  // Keep lens within bounds
-                  if (posX < 0) posX = 0;
-                  if (posX > container.offsetWidth - lens.offsetWidth) posX = container.offsetWidth - lens.offsetWidth;
-                  if (posY < 0) posY = 0;
-                  if (posY > container.offsetHeight - lens.offsetHeight) posY = container.offsetHeight - lens.offsetHeight;
+                  // Hide zoom on mouse leave
+                  container.addEventListener('mouseleave', function() {
+                    zoomLens.style.display = 'none';
+                    zoomResult.style.display = 'none';
+                  });
 
-                  // Position lens
-                  lens.style.left = posX + 'px';
-                  lens.style.top = posY + 'px';
+                  // Move zoom lens and update zoomed image
+                  container.addEventListener('mousemove', function(e) {
+                    const rect = container.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    let y = e.clientY - rect.top;
 
-                  // Position zoomed image
-                  zoomedImg.style.left = '-' + (posX * cx) + 'px';
-                  zoomedImg.style.top = '-' + (posY * cy) + 'px';
-                };
+                    // Prevent lens from going outside image
+                    let lensX = x - (zoomLens.offsetWidth / 2);
+                    let lensY = y - (zoomLens.offsetHeight / 2);
 
-                container.onmouseleave = function() {
-                  lens.style.display = 'none';
-                  result.style.display = 'none';
-                };
+                    const maxX = container.offsetWidth - zoomLens.offsetWidth;
+                    const maxY = container.offsetHeight - zoomLens.offsetHeight;
 
-                console.log('✅ Zoom initialized - move mouse over image!');
-              });
+                    if (lensX < 0) lensX = 0;
+                    if (lensY < 0) lensY = 0;
+                    if (lensX > maxX) lensX = maxX;
+                    if (lensY > maxY) lensY = maxY;
+
+                    // Position the lens
+                    zoomLens.style.left = lensX + 'px';
+                    zoomLens.style.top = lensY + 'px';
+
+                    // Update zoomed image position
+                    zoomImage.style.left = '-' + (lensX * cx) + 'px';
+                    zoomImage.style.top = '-' + (lensY * cy) + 'px';
+                  });
+
+                  // Recalculate on window resize
+                  window.addEventListener('resize', function() {
+                    if (zoomLens.style.display === 'block') {
+                      calculateZoom();
+                    }
+                  });
+
+                  console.log('Zoom initialized successfully');
+                }
+
+                // Initialize when image is loaded
+                if (mainImage.complete) {
+                  initZoom();
+                } else {
+                  mainImage.addEventListener('load', initZoom);
+                }
+              })();
               </script>
               {% endif %}
 
