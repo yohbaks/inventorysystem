@@ -11,6 +11,11 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 import uuid
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+
 
 
 # Create your models here.
@@ -544,37 +549,54 @@ class Employee(models.Model):
     employee_level = models.CharField(max_length=100, blank=True, null=True)
     employee_status = models.CharField(max_length=100, blank=True, null=True)
 
+    # Inside Employee model, add these NEW fields:
+    user_account = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='employee_profile')
+    # qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, null=True, blank=True)
+    qr_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, null=True, blank=True)
+    qr_code = models.ImageField(upload_to="qr/employees/", null=True, blank=True)
+    
+    email = models.EmailField(max_length=254, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    avatar = models.ImageField(upload_to="avatars/employees/", null=True, blank=True)
+    date_hired = models.DateField(null=True, blank=True)
+    bio = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    @property
+    def avatar_url(self):
+        if self.avatar and hasattr(self.avatar, "url"):
+            return self.avatar.url
+        return "/static/img/default-avatar.png"
+
+    class Meta:
+        ordering = ['employee_lname', 'employee_fname']
+        
     @property
     def full_name(self):
-        return f"{self.employee_fname} {self.employee_lname}".strip()
+        lname = (self.employee_lname or "").strip()
+        fname = (self.employee_fname or "").strip()
+        mname = (self.employee_mname or "").strip()
+
+        # Optional: include middle initial if present
+        middle_initial = f" {mname[0]}." if mname else ""
+
+        # Format: Lastname, Firstname M.
+        return f"{lname}, {fname}{middle_initial}"
     
     def __str__(self):
-        return f"{self.employee_fname} {self.employee_lname} - {self.employee_office_section}"
+        return f"{self.employee_lname} {self.employee_fname} - {self.employee_office_section}"
     
 
 #This tracks which user changed the End User and when.
    
-class EndUserChangeHistory(models.Model):
-    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE)
-    old_enduser = models.ForeignKey(Employee, related_name="old_enduser", on_delete=models.SET_NULL, null=True, blank=True)
-    new_enduser = models.ForeignKey(Employee, related_name="new_enduser", on_delete=models.CASCADE, null=True)
-    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
-class AssetOwnerChangeHistory(models.Model):
-    equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE)
-    old_assetowner = models.ForeignKey(Employee, related_name="old_assetowner", on_delete=models.SET_NULL, null=True, blank=True)
-    new_assetowner = models.ForeignKey(Employee, related_name="new_assetowner", on_delete=models.CASCADE, null=True)
-    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    changed_at = models.DateTimeField(auto_now_add=True)  # Use auto_now_add to save the time automatically
 
-# PreventiveMaintenance
 class PreventiveMaintenance(models.Model):
     equipment_package = models.ForeignKey(
         'Equipment_Package', related_name='maintenances',
         on_delete=models.CASCADE, null=True, blank=True
     )
-    # 👉 Add this (nullable so desktop rows still work)
     laptop_package = models.ForeignKey(
         'LaptopPackage', related_name='maintenances',
         on_delete=models.CASCADE, null=True, blank=True
@@ -583,7 +605,6 @@ class PreventiveMaintenance(models.Model):
         'PMScheduleAssignment', on_delete=models.SET_NULL,
         null=True, blank=True, related_name='maintenances'
     )
-    
     maintenance_date = models.DateField(null=True, blank=True)
     next_schedule = models.DateField(blank=True, null=True)
     performed_by = models.CharField(max_length=255, blank=True, null=True)
@@ -593,9 +614,7 @@ class PreventiveMaintenance(models.Model):
     date_accomplished = models.DateField(null=True, blank=True)
     office = models.CharField(max_length=255, blank=True, null=True)
     end_user = models.CharField(max_length=255, blank=True, null=True)
-    # task_1..task_9 and note_1..note_9 unchanged
 
-    # Task fields
     task_1 = models.BooleanField(default=False)
     note_1 = models.TextField(blank=True, null=True)
     task_2 = models.BooleanField(default=False)
@@ -619,6 +638,8 @@ class PreventiveMaintenance(models.Model):
         device = self.equipment_package or self.laptop_package
         return f"PM for {device} on {self.date_accomplished or 'N/A'}"
 
+
+
 class MaintenanceChecklistItem(models.Model):
     maintenance = models.ForeignKey(PreventiveMaintenance, on_delete=models.CASCADE, related_name='items')
     item_text = models.CharField(max_length=255)
@@ -629,14 +650,17 @@ class MaintenanceChecklistItem(models.Model):
 
 
 
+# ==========================
+# 🧭 OFFICE & QUARTER MODELS
+# ==========================
+
 class OfficeSection(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
-    
 
-    
+
 class QuarterSchedule(models.Model):
     QUARTERS = [
         ('Q1', '1st Quarter'),
@@ -646,9 +670,13 @@ class QuarterSchedule(models.Model):
     ]
     year = models.IntegerField()
     quarter = models.CharField(max_length=2, choices=QUARTERS)
-    
+
+    class Meta:
+        unique_together = ('year', 'quarter')
+
     def __str__(self):
-        return f"{self.get_quarter_display()} {self.year}"
+        return f"{self.get_quarter_display()} {self.year}"  
+    
     
 class PMSectionSchedule(models.Model):
     quarter_schedule = models.ForeignKey(QuarterSchedule, on_delete=models.CASCADE, related_name='schedules')
@@ -657,21 +685,25 @@ class PMSectionSchedule(models.Model):
     end_date = models.DateField()
     notes = models.TextField(blank=True, null=True)
 
+    class Meta:
+        unique_together = ('quarter_schedule', 'section')
+
     def __str__(self):
-        return f"{self.section.name} | {self.start_date} to {self.end_date} ({self.quarter_schedule})"
+        return f"{self.section.name} – {self.quarter_schedule}"
     
+
 class PMScheduleAssignment(models.Model):
     equipment_package = models.ForeignKey(
         Equipment_Package, on_delete=models.CASCADE,
         related_name='pm_assignments', null=True, blank=True
     )
     laptop_package = models.ForeignKey(
-        'LaptopPackage', on_delete=models.CASCADE,   # ✅ now consistent
+        'LaptopPackage', on_delete=models.CASCADE,
         related_name='pm_assignments', null=True, blank=True
     )
     pm_section_schedule = models.ForeignKey(
         'PMSectionSchedule', on_delete=models.CASCADE,
-        related_name='schedule_assignments'
+        related_name='schedule_assignments', 
     )
     assigned_date = models.DateField(auto_now_add=True)
     is_completed = models.BooleanField(default=False)
@@ -680,6 +712,14 @@ class PMScheduleAssignment(models.Model):
     def __str__(self):
         target = self.equipment_package or self.laptop_package
         return f"{target} -> {self.pm_section_schedule}"
+
+    # ✅ Validation logic goes here
+    def clean(self):
+        if not self.equipment_package and not self.laptop_package:
+            raise ValidationError("Either equipment_package or laptop_package must be set.")
+        if self.equipment_package and self.laptop_package:
+            raise ValidationError("Only one of equipment_package or laptop_package can be set.")
+
 #END - Preventivemaintenance REAL - END
 
 
@@ -806,6 +846,99 @@ class DisposedLaptop(models.Model):
         return f"Disposed Laptop : {self.laptop.computer_name if self.laptop else self.serial_no}"
     
 
+#==========================
+# CHANGE HISTORY MODELS
+class EndUserChangeHistory(models.Model):
+    """
+    Tracks end user changes for ANY device type (Desktop, Laptop, Printer, etc.)
+    Uses GenericForeignKey for flexibility and scalability.
+    """
+    # Generic relation to any device package
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    device = GenericForeignKey('content_type', 'object_id')
+    
+    # Change details
+    old_enduser = models.ForeignKey(
+        Employee, 
+        related_name="old_enduser_history", 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    new_enduser = models.ForeignKey(
+        Employee, 
+        related_name="new_enduser_history", 
+        on_delete=models.CASCADE, 
+        null=True
+    )
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-changed_at']
+        verbose_name = "End User Change History"
+        verbose_name_plural = "End User Change Histories"
+
+    def __str__(self):
+        device_name = f"{self.content_type.model.capitalize()} #{self.object_id}"
+        return f"End User Change: {device_name} on {self.changed_at}"
+
+    @property
+    def device_display(self):
+        """Returns a readable device name"""
+        if hasattr(self.device, 'computer_name'):
+            return self.device.computer_name
+        elif hasattr(self.device, 'printer_name'):
+            return self.device.printer_name
+        return f"{self.content_type.model.capitalize()} #{self.object_id}"
+
+
+class AssetOwnerChangeHistory(models.Model):
+    """
+    Tracks asset owner changes for ANY device type (Desktop, Laptop, Printer, etc.)
+    Uses GenericForeignKey for flexibility and scalability.
+    """
+    # Generic relation to any device package
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    device = GenericForeignKey('content_type', 'object_id')
+    
+    # Change details
+    old_assetowner = models.ForeignKey(
+        Employee, 
+        related_name="old_assetowner_history", 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    new_assetowner = models.ForeignKey(
+        Employee, 
+        related_name="new_assetowner_history", 
+        on_delete=models.CASCADE, 
+        null=True
+    )
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-changed_at']
+        verbose_name = "Asset Owner Change History"
+        verbose_name_plural = "Asset Owner Change Histories"
+
+    def __str__(self):
+        device_name = f"{self.content_type.model.capitalize()} #{self.object_id}"
+        return f"Asset Owner Change: {device_name} on {self.changed_at}"
+
+    @property
+    def device_display(self):
+        """Returns a readable device name"""
+        if hasattr(self.device, 'computer_name'):
+            return self.device.computer_name
+        elif hasattr(self.device, 'printer_name'):
+            return self.device.printer_name
+        return f"{self.content_type.model.capitalize()} #{self.object_id}"
+
 ################################################## PRINTER MODELS
 
 class PrinterPackage(models.Model):
@@ -825,7 +958,6 @@ class PrinterPackage(models.Model):
 
     def __str__(self):
         return f"Printer Package {self.pk}"
-
 
 class PrinterDetails(models.Model):
     printer_package = models.ForeignKey(
@@ -855,6 +987,35 @@ class PrinterDetails(models.Model):
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
+    @property
+    def end_user(self):
+        """Get the end user (Employee) assigned to this printer's package."""
+        if self.printer_package:
+            # ✅ Use .all() to leverage prefetched data instead of .filter() which causes new query
+            user_details = self.printer_package.user_details.all()
+            if user_details:
+                return user_details[0].user_Enduser if user_details[0].user_Enduser else None
+        return None
+    
+    @property
+    def asset_owner(self):
+        """Get the asset owner (Employee) assigned to this printer's package."""
+        if self.printer_package:
+            # ✅ Use .all() to leverage prefetched data
+            user_details = self.printer_package.user_details.all()
+            if user_details:
+                return user_details[0].user_Assetowner if user_details[0].user_Assetowner else None
+        return None
+    
+    @property
+    def user_assignment(self):
+        """Get the full UserDetails object for this printer."""
+        if self.printer_package:
+            # ✅ Use .all() to leverage prefetched data
+            user_details = self.printer_package.user_details.all()
+            return user_details[0] if user_details else None
+        return None
+
     def __str__(self):
         return f"{self.printer_package} | {self.printer_brand_db} {self.printer_model_db} ({self.printer_sn_db})"
     
@@ -883,3 +1044,253 @@ class DisposedPrinter(models.Model):
 
     def __str__(self):
         return f"Disposed Printer: {self.printer_brand} {self.printer_model} ({self.printer_sn})"
+    
+
+# ==================== NOTIFICATION PAGE ====================
+class Notification(models.Model):
+    """
+    Universal notification model for all system notifications
+    """
+    
+    # Notification Types
+    NOTIFICATION_TYPES = [
+        ('pm_due', 'PM Maintenance Due'),
+        ('pm_overdue', 'PM Maintenance Overdue'),
+        ('pm_completed', 'PM Maintenance Completed'),
+        ('asset_added', 'New Asset Added'),
+        ('asset_updated', 'Asset Updated'),
+        ('asset_disposed', 'Asset Disposed'),
+        ('employee_added', 'New Employee Added'),
+        ('employee_updated', 'Employee Updated'),
+        ('disposal_pending', 'Disposal Pending Approval'),
+        ('disposal_approved', 'Disposal Approved'),
+        ('system', 'System Notification'),
+        ('warning', 'Warning'),
+        ('info', 'Information'),
+    ]
+    
+    # Priority Levels
+    PRIORITY_LEVELS = [
+        ('low', 'Low'),
+        ('normal', 'Normal'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    # Core Fields
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=30, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    
+    # Additional Info
+    priority = models.CharField(max_length=10, choices=PRIORITY_LEVELS, default='normal')
+    link_url = models.CharField(max_length=500, blank=True, null=True, help_text="Link to related item")
+    link_text = models.CharField(max_length=100, blank=True, null=True, help_text="Text for the link button")
+    
+    # Status
+    is_read = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    
+    # Optional: Related objects (using GenericForeignKey for flexibility)
+    from django.contrib.contenttypes.fields import GenericForeignKey
+    from django.contrib.contenttypes.models import ContentType
+    
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read', '-created_at']),
+            models.Index(fields=['notification_type', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"
+    
+    def mark_as_read(self):
+        """Mark notification as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+    
+    def get_icon(self):
+        """Return appropriate icon based on notification type"""
+        icons = {
+            'pm_due': 'fa-tools',
+            'pm_overdue': 'fa-exclamation-triangle',
+            'pm_completed': 'fa-check-circle',
+            'asset_added': 'fa-plus-circle',
+            'asset_updated': 'fa-edit',
+            'asset_disposed': 'fa-trash-alt',
+            'employee_added': 'fa-user-plus',
+            'employee_updated': 'fa-user-edit',
+            'disposal_pending': 'fa-hourglass-half',
+            'disposal_approved': 'fa-check',
+            'system': 'fa-info-circle',
+            'warning': 'fa-exclamation-triangle',
+            'info': 'fa-info-circle',
+        }
+        return icons.get(self.notification_type, 'fa-bell')
+    
+    def get_color_class(self):
+        """Return appropriate color class based on notification type"""
+        colors = {
+            'pm_due': 'warning',
+            'pm_overdue': 'danger',
+            'pm_completed': 'success',
+            'asset_added': 'primary',
+            'asset_updated': 'info',
+            'asset_disposed': 'danger',
+            'employee_added': 'success',
+            'employee_updated': 'info',
+            'disposal_pending': 'warning',
+            'disposal_approved': 'success',
+            'system': 'secondary',
+            'warning': 'warning',
+            'info': 'info',
+        }
+        return colors.get(self.notification_type, 'secondary')
+    
+    def get_priority_badge(self):
+        """Return bootstrap badge class based on priority"""
+        badges = {
+            'low': 'badge-secondary',
+            'normal': 'badge-primary',
+            'high': 'badge-warning',
+            'urgent': 'badge-danger',
+        }
+        return badges.get(self.priority, 'badge-primary')
+
+
+# ==================== HELPER FUNCTIONS ====================
+
+def create_notification(user, notification_type, title, message, priority='normal', 
+                       link_url=None, link_text=None, related_object=None):
+    """
+    Helper function to create notifications easily
+    
+    Usage:
+        create_notification(
+            user=request.user,
+            notification_type='pm_due',
+            title='PM Maintenance Due',
+            message='Desktop PC-001 requires maintenance',
+            priority='high',
+            link_url=reverse('maintenance_history', args=[package_id]),
+            link_text='View Details'
+        )
+    """
+    notification = Notification.objects.create(
+        user=user,
+        notification_type=notification_type,
+        title=title,
+        message=message,
+        priority=priority,
+        link_url=link_url,
+        link_text=link_text,
+    )
+    
+    if related_object:
+        from django.contrib.contenttypes.models import ContentType
+        notification.content_type = ContentType.objects.get_for_model(related_object)
+        notification.object_id = related_object.id
+        notification.save()
+    
+    return notification
+
+
+def create_pm_notification(assignment):
+    """
+    Create PM-related notification
+    Example usage in your PM views
+    """
+    users = User.objects.filter(is_staff=True)  # Or specific users
+    
+    for user in users:
+        if assignment.is_overdue:
+            create_notification(
+                user=user,
+                notification_type='pm_overdue',
+                title='PM Maintenance Overdue',
+                message=f'Preventive maintenance for {assignment.computer_name_display} is overdue',
+                priority='urgent',
+                link_url=f'/maintenance/history/{assignment.equipment_package.id}/',
+                link_text='View Details',
+                related_object=assignment
+            )
+        else:
+            create_notification(
+                user=user,
+                notification_type='pm_due',
+                title='PM Maintenance Due',
+                message=f'Preventive maintenance for {assignment.computer_name_display} is due',
+                priority='high',
+                link_url=f'/maintenance/history/{assignment.equipment_package.id}/',
+                link_text='View Details',
+                related_object=assignment
+            )
+
+
+def notify_asset_disposal(asset, user):
+    """Notify when asset is disposed"""
+    create_notification(
+        user=user,
+        notification_type='asset_disposed',
+        title='Asset Disposed',
+        message=f'{asset.computer_name} has been moved to disposal',
+        priority='normal',
+        link_url=f'/disposal/overview/',
+        link_text='View Disposal Area'
+    )
+
+
+def notify_new_employee(employee, user):
+    """Notify when new employee is added"""
+    create_notification(
+        user=user,
+        notification_type='employee_added',
+        title='New Employee Added',
+        message=f'{employee.full_name} has been added to the system',
+        priority='low',
+        link_url=f'/employee/{employee.id}/',
+        link_text='View Profile'
+    )
+
+# ============================================
+# HELPER FUNCTION FOR EMPLOYEE QR GENERATION
+# ============================================
+
+def ensure_employee_qr(employee):
+    """
+    Helper function to generate QR code for employee if not exists
+    """
+    from django.conf import settings
+    from django.urls import reverse
+    from django.core.files import File
+    import qrcode
+    from io import BytesIO
+    import uuid
+    
+    if not employee.qr_token:
+        employee.qr_token = uuid.uuid4()
+        employee.save(update_fields=['qr_token'])
+    
+    if not employee.qr_code:
+        try:
+            profile_url = f"{settings.SITE_URL}{reverse('employee_assets_public', args=[employee.qr_token])}"
+            qr = qrcode.make(profile_url)
+            qr_io = BytesIO()
+            qr.save(qr_io, format='PNG')
+            qr_filename = f"employee_qr_{employee.id}.png"
+            employee.qr_code.save(qr_filename, File(qr_io), save=False)
+            employee.save(update_fields=['qr_code'])
+        except Exception as e:
+            print(f"❌ QR generation failed for employee {employee.id}: {e}")

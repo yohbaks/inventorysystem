@@ -1294,3 +1294,5 @@ def ensure_employee_qr(employee):
             employee.save(update_fields=['qr_code'])
         except Exception as e:
             print(f"❌ QR generation failed for employee {employee.id}: {e}")
+
+
