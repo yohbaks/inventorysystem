@@ -89,95 +89,177 @@ document.getElementById('desktop_photo')?.addEventListener('change', function(e)
   }
 });
 
+// CSRF helper
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
 // Handle form submission with AJAX
-document.getElementById('uploadPhotoForm')?.addEventListener('submit', function(e) {
-  e.preventDefault();
+$(document).ready(function() {
+  $('#uploadPhotoForm').on('submit', function(e) {
+    e.preventDefault();
 
-  const formData = new FormData(this);
-  const submitBtn = this.querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
+    const form = this;
+    const formData = new FormData(form);
+    const submitBtn = $(form).find('button[type="submit"]');
+    const btnIcon = submitBtn.find('i');
+    const originalHtml = submitBtn.html();
 
-  // Disable submit button and show loading
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+    // Disable submit button and show loading
+    submitBtn.prop('disabled', true);
+    submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Uploading...');
 
-  fetch(this.action, {
-    method: 'POST',
-    body: formData,
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Show success message
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: data.message || 'Photo uploaded successfully!',
-        timer: 2000,
-        showConfirmButton: false
-      }).then(() => {
-        // Reload the page to show the new photo
-        window.location.reload();
-      });
-    } else {
-      throw new Error(data.error || 'Upload failed');
-    }
-  })
-  .catch(error => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: error.message || 'Failed to upload photo'
+    $.ajax({
+      url: $(form).attr('action'),
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      success: function(response) {
+        if (response.success) {
+          // Hide the modal
+          $('#uploadPhotoModal').modal('hide');
+
+          // Show success notification
+          $.notify({
+            title: "✅ Success",
+            message: response.message || "Photo uploaded successfully!",
+            icon: "fa fa-check-circle"
+          }, {
+            type: "success",
+            placement: { from: "bottom", align: "right" },
+            delay: 2000,
+            z_index: 9999
+          });
+
+          // Reload page after short delay to show new photo
+          setTimeout(function() {
+            window.location.href = window.location.pathname + '#pills-desktop';
+            window.location.reload();
+          }, 800);
+        } else {
+          // Show error notification
+          $.notify({
+            title: "⚠️ Upload Failed",
+            message: response.error || "Failed to upload photo",
+            icon: "fa fa-exclamation-triangle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000,
+            z_index: 9999
+          });
+
+          // Re-enable button
+          submitBtn.prop('disabled', false);
+          submitBtn.html(originalHtml);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Upload error:', error);
+
+        // Show error notification
+        $.notify({
+          title: "❌ Server Error",
+          message: xhr.responseJSON?.error || "An unexpected error occurred while uploading",
+          icon: "fa fa-times-circle"
+        }, {
+          type: "danger",
+          placement: { from: "bottom", align: "right" },
+          delay: 4000,
+          z_index: 9999
+        });
+
+        // Re-enable button
+        submitBtn.prop('disabled', false);
+        submitBtn.html(originalHtml);
+      }
     });
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalText;
+  });
+
+  // Reset form when modal is closed
+  $('#uploadPhotoModal').on('hidden.bs.modal', function() {
+    $('#uploadPhotoForm')[0].reset();
+    $('#imagePreview').hide();
+    const submitBtn = $('#uploadPhotoForm button[type="submit"]');
+    submitBtn.prop('disabled', false);
+    submitBtn.html('<i class="fas fa-upload"></i> Upload Photo');
   });
 });
 
 // Delete photo function
 function deleteDesktopPhoto(desktopId) {
-  Swal.fire({
-    title: 'Remove Photo?',
-    text: "This will permanently delete the desktop photo.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6c757d',
-    confirmButtonText: 'Yes, remove it!'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      fetch(`/delete_desktop_photo/${desktopId}/`, {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'Photo has been removed.',
-            timer: 2000,
-            showConfirmButton: false
-          }).then(() => {
-            window.location.reload();
-          });
-        } else {
-          throw new Error(data.error || 'Delete failed');
-        }
-      })
-      .catch(error => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: error.message || 'Failed to delete photo'
+  if (!confirm('Are you sure you want to remove this photo? This action cannot be undone.')) {
+    return;
+  }
+
+  $.ajax({
+    url: `/delete_desktop_photo/${desktopId}/`,
+    type: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    success: function(response) {
+      if (response.success) {
+        // Hide modal
+        $('#uploadPhotoModal').modal('hide');
+
+        // Show success notification
+        $.notify({
+          title: "✅ Success",
+          message: response.message || "Photo deleted successfully!",
+          icon: "fa fa-check-circle"
+        }, {
+          type: "success",
+          placement: { from: "bottom", align: "right" },
+          delay: 2000,
+          z_index: 9999
         });
+
+        // Reload page after short delay
+        setTimeout(function() {
+          window.location.href = window.location.pathname + '#pills-desktop';
+          window.location.reload();
+        }, 800);
+      } else {
+        $.notify({
+          title: "⚠️ Delete Failed",
+          message: response.error || "Failed to delete photo",
+          icon: "fa fa-exclamation-triangle"
+        }, {
+          type: "danger",
+          placement: { from: "bottom", align: "right" },
+          delay: 4000,
+          z_index: 9999
+        });
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Delete error:', error);
+
+      $.notify({
+        title: "❌ Server Error",
+        message: xhr.responseJSON?.error || "An unexpected error occurred while deleting",
+        icon: "fa fa-times-circle"
+      }, {
+        type: "danger",
+        placement: { from: "bottom", align: "right" },
+        delay: 4000,
+        z_index: 9999
       });
     }
   });
