@@ -1,0 +1,45 @@
+{% if desktop_detailsx %}
+  <!-- Desktop Photo -->
+  <div class="dropdown float-end">
+    <button class="btn btn-icon btn-clean me-0" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="fas fa-ellipsis-h"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li>
+        <form action="{% url 'upload_desktop_photo' desktop_detailsx.id %}" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="file" name="photo" class="d-none" id="uploadDesktopPhotoInput" onchange="this.form.submit()">
+          <label for="uploadDesktopPhotoInput" class="dropdown-item">Upload Photo</label>
+        </form>
+      </li>
+      <li>
+        {% if desktop_detailsx.desktop_photo %}
+          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#desktopPhotoModal">
+            View Photo
+          </a>
+        {% else %}
+          <span class="dropdown-item text-muted">No Photo</span>
+        {% endif %}
+      </li>
+    </ul>
+  </div>
+
+  <!-- Desktop Photo Modal -->
+  <div class="modal fade" id="desktopPhotoModal" tabindex="-1" aria-labelledby="desktopPhotoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="desktopPhotoModalLabel">Desktop Photo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          {% if desktop_detailsx.desktop_photo %}
+            <img src="{{ desktop_detailsx.desktop_photo.url }}" class="img-fluid rounded shadow" alt="Desktop Photo">
+          {% else %}
+            <p class="text-muted">No photo available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}

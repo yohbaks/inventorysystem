@@ -143,8 +143,12 @@ urlpatterns = [
     #dashboard chart
     path('dashboard/chart/', views.dashboard_view_chart, name='dashboard_view_chart'),
 
-    #photo upload for monitor
+    #photo upload for all components
     path('upload_monitor_photo/<int:monitor_id>/', views.upload_monitor_photo, name='upload_monitor_photo'),
+    path('upload_desktop_photo/<int:desktop_id>/', views.upload_desktop_photo, name='upload_desktop_photo'),
+    path('upload_keyboard_photo/<int:keyboard_id>/', views.upload_keyboard_photo, name='upload_keyboard_photo'),
+    path('upload_mouse_photo/<int:mouse_id>/', views.upload_mouse_photo, name='upload_mouse_photo'),
+    path('upload_ups_photo/<int:ups_id>/', views.upload_ups_photo, name='upload_ups_photo'),
 
     #profile
     path("account/profile/", views.profile_view, name="profile"),

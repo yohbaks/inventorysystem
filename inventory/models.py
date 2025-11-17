@@ -160,6 +160,7 @@ class KeyboardDetails(models.Model):
 
     keyboard_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     keyboard_model_db = models.CharField(max_length=255)
+    keyboard_photo = models.ImageField(upload_to="keyboard_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -181,6 +182,7 @@ class MouseDetails(models.Model):
 
     mouse_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
+    mouse_photo = models.ImageField(upload_to="mouse_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -203,6 +205,7 @@ class UPSDetails(models.Model):
     ups_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     ups_model_db = models.CharField(max_length=255)
     ups_capacity_db = models.CharField(max_length=255, null=True)
+    ups_photo = models.ImageField(upload_to="ups_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
