@@ -97,17 +97,16 @@
             </li>
 
             <!-- IT Equipments -->
-           <!-- IT Equipments -->
-            <li class="nav-item {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list office_supplies_list' %}active{% endif %}">
+            <li class="nav-item {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuIT"
-                class="nav-link {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list office_supplies_list' %}{% else %}collapsed{% endif %}"
-                aria-expanded="{% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list office_supplies_list' %}true{% else %}false{% endif %}">
+                class="nav-link {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}{% else %}collapsed{% endif %}"
+                aria-expanded="{% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}true{% else %}false{% endif %}">
                 <i class="fas fa-layer-group"></i>
                 <p>IT Equipments</p>
                 <span class="caret"></span>
               </a>
 
-              <div class="collapse {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list office_supplies_list' %}show{% endif %}" id="menuIT">
+              <div class="collapse {% if request.resolver_match.url_name in 'desktop_details monitor_details keyboard_details mouse_details ups_details laptop_list printer_list' %}show{% endif %}" id="menuIT">
                 <ul class="nav nav-collapse">
                   <li class="{% if request.resolver_match.url_name == 'desktop_details' %}active{% endif %}">
                     <a href="{% url 'desktop_details' %}"><span class="sub-item">🗄️ Desktops Packages</span></a>
@@ -132,10 +131,27 @@
                   <li class="{% if request.resolver_match.url_name == 'printer_list' %}active{% endif %}">
                     <a href="{% url 'printer_list' %}"><span class="sub-item">🖨️ Printer</span></a>
                   </li>
+                </ul>
+              </div>
+            </li>
 
-                  <!-- ✅ Office Supplies Link -->
+            <!-- Office Supplies -->
+            <li class="nav-item {% if request.resolver_match.url_name in 'office_supplies_list add_office_supplies office_supplies_details_view dispose_office_supplies' %}active{% endif %}">
+              <a data-bs-toggle="collapse" href="#menuOfficeSupplies"
+                class="nav-link {% if request.resolver_match.url_name in 'office_supplies_list add_office_supplies office_supplies_details_view dispose_office_supplies' %}{% else %}collapsed{% endif %}"
+                aria-expanded="{% if request.resolver_match.url_name in 'office_supplies_list add_office_supplies office_supplies_details_view dispose_office_supplies' %}true{% else %}false{% endif %}">
+                <i class="fas fa-paperclip"></i>
+                <p>Office Supplies</p>
+                <span class="caret"></span>
+              </a>
+
+              <div class="collapse {% if request.resolver_match.url_name in 'office_supplies_list add_office_supplies office_supplies_details_view dispose_office_supplies' %}show{% endif %}" id="menuOfficeSupplies">
+                <ul class="nav nav-collapse">
                   <li class="{% if request.resolver_match.url_name == 'office_supplies_list' %}active{% endif %}">
-                    <a href="{% url 'office_supplies_list' %}"><span class="sub-item">📎 Office Supplies</span></a>
+                    <a href="{% url 'office_supplies_list' %}"><span class="sub-item">📋 Supplies List</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name == 'add_office_supplies' %}active{% endif %}">
+                    <a href="{% url 'add_office_supplies' %}"><span class="sub-item">➕ Add Supplies</span></a>
                   </li>
                 </ul>
               </div>
