@@ -2287,7 +2287,7 @@ def add_equipment_package_with_details(request):
                                 pm_section_schedule=schedule
                             )
 
-                    messages.success(request, "✅ Desktop Package added successfully.")
+                    messages.success(request, "✅ Desktop Package added successfully.", extra_tags='equipment')
                     return redirect(f'/success_add/{equipment_package.id}/?type=Desktop')
 
             except IntegrityError as ie:
@@ -2387,7 +2387,7 @@ def add_equipment_package_with_details(request):
                                 pm_section_schedule=schedule
                             )
 
-                    messages.success(request, "✅ Laptop Package added successfully.")
+                    messages.success(request, "✅ Laptop Package added successfully.", extra_tags='equipment')
                     return redirect(f'/success_add/{laptop_package.id}/?type=Laptop')
 
             except IntegrityError as ie:
@@ -2480,7 +2480,7 @@ def add_equipment_package_with_details(request):
                     )
 
                     # ✅ No PM logic for printers
-                    messages.success(request, "✅ Printer added successfully.")
+                    messages.success(request, "✅ Printer added successfully.", extra_tags='equipment')
                     return redirect(reverse("success_page", args=[printer.id]) + "?type=Printer")
 
 
@@ -2547,7 +2547,7 @@ def employee_list(request):
             employee_status=status
         )
 
-        messages.success(request, f"✅ {first_name} {last_name} has been added successfully!")
+        messages.success(request, f"✅ {first_name} {last_name} has been added successfully!", extra_tags='employee')
         return redirect('employee_list')
 
     employees = Employee.objects.all()
@@ -2570,7 +2570,7 @@ def update_employee(request, employee_id):
         employee.employee_status = request.POST.get('status')
         employee.save()
 
-        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been updated!")
+        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been updated!", extra_tags='employee')
         return redirect('employee_list')
 
     office_sections = OfficeSection.objects.all()
@@ -2585,7 +2585,7 @@ def delete_employee(request, employee_id):
 
     if request.method == 'POST':
         employee.delete()
-        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been deleted!")
+        messages.success(request, f"✅ {employee.employee_fname} {employee.employee_lname} has been deleted!", extra_tags='employee')
         return redirect('employee_list')
 
     the_messages = get_messages(request)

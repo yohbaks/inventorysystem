@@ -707,14 +707,17 @@
 {% if messages %}
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
   {% for message in messages %}
-  <div class="toast toast-premium align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex p-3">
-      <div class="toast-body fs-6">
-        <i class="fas fa-check-circle me-2"></i> {{ message }}
+    {# ✅ Only show employee-related messages #}
+    {% if 'employee' in message.tags %}
+    <div class="toast toast-premium align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex p-3">
+        <div class="toast-body fs-6">
+          <i class="fas fa-check-circle me-2"></i> {{ message }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
-  </div>
+    {% endif %}
   {% endfor %}
 </div>
 {% endif %}
