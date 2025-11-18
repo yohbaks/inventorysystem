@@ -85,7 +85,10 @@ def generate_pm_checklist_pdf(completion):
     
     elements.append(Paragraph(schedule_text, schedule_info_style))
     elements.append(Spacer(1, 15))
-    
+
+    # Get item completions for styling (needed for Annex A weekly tasks shading)
+    item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
+
     # Build checklist table based on annex type
     if template.annex_code == 'A':
         table_data = build_annex_a_table(completion)
@@ -97,7 +100,7 @@ def generate_pm_checklist_pdf(completion):
         table_data = build_annex_f_table(completion)
     else:
         table_data = build_simple_table(completion)
-    
+
     # Create table with different column widths based on annex type
     if template.annex_code == 'A':
         # 8 columns: Item No | Task | M | T | W | Th | F | Problems
@@ -107,7 +110,7 @@ def generate_pm_checklist_pdf(completion):
     else:
         col_widths = [15*mm, 100*mm, 35*mm, 40*mm]
 
-    table = Table(table_data, colWidths=col_widths, repeatRows=2)
+    table = Table(table_data, colWidths=col_widths, repeatRows=2 if template.annex_code == 'A' else 1)
 
     # Table style
     if template.annex_code == 'A':
