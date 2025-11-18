@@ -4295,7 +4295,7 @@ def upload_document_photo(request, document_id):
     if document.equipment_package:
         return redirect(f'/desktop_details_view/{document.equipment_package.id}/#pills-documents')
     elif document.laptop_package:
-        return redirect(f'/laptop_details_view/{document.laptop_package.id}/#pills-documents')
+        return redirect(f'/laptops/{document.laptop_package.id}/#pills-documents')
     elif document.printer_package:
         return redirect(f'/printer_details_view/{document.printer_package.id}/#pills-documents')
     elif document.office_supplies_package:
@@ -4320,7 +4320,7 @@ def delete_document_photo(request, photo_id):
     if document.equipment_package:
         return redirect(f'/desktop_details_view/{document.equipment_package.id}/#pills-documents')
     elif document.laptop_package:
-        return redirect(f'/laptop_details_view/{document.laptop_package.id}/#pills-documents')
+        return redirect(f'/laptops/{document.laptop_package.id}/#pills-documents')
     elif document.printer_package:
         return redirect(f'/printer_details_view/{document.printer_package.id}/#pills-documents')
     elif document.office_supplies_package:
@@ -4338,7 +4338,7 @@ def upload_laptop_photo(request, laptop_id):
     if 'photo' in request.FILES:
         laptop.laptop_photo = request.FILES['photo']
         laptop.save()
-    return redirect(f'/laptop_details_view/{laptop.laptop_package.id}/#pills-laptop')
+    return redirect(f'/laptops/{laptop.laptop_package.id}/#pills-laptop')
 
 
 def export_salvage_excel(request):
