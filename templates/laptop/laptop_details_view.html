@@ -173,20 +173,6 @@
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Laptop Specifications</h2>
                 {% include "photo/laptop_photo.html" %}
-                <div class="d-flex gap-2">
-                  {% if laptop_details and not laptop_details.is_disposed %}
-                    <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editLaptopModal">
-                      <i class="fa fa-edit"></i> Edit
-                    </button>
-                    <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#disposeModal">
-                      <i class="fa fa-trash"></i> Dispose
-                    </button>
-                  {% else %}
-                    <span class="badge bg-danger rounded-pill p-2 px-3 d-flex align-items-center">
-                      <i class="fas fa-trash-alt me-2"></i> Disposed
-                    </span>
-                  {% endif %}
-                </div>
               </div>
 
               {% if laptop_details %}
@@ -301,6 +287,22 @@
                 </div>
               </div>
               {% endif %}
+
+              <!-- Action Buttons -->
+              <div class="mt-4 d-flex gap-2">
+                {% if laptop_details and not laptop_details.is_disposed %}
+                  <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editLaptopModal">
+                    <i class="fa fa-edit"></i> Edit
+                  </button>
+                  <button class="btn btn-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#disposeModal">
+                    <i class="fa fa-trash"></i> Dispose
+                  </button>
+                {% else %}
+                  <span class="badge bg-danger rounded-pill p-2 px-3 d-flex align-items-center">
+                    <i class="fas fa-trash-alt me-2"></i> Disposed
+                  </span>
+                {% endif %}
+              </div>
             </div>
           </div>
 
