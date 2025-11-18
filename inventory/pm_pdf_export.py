@@ -98,39 +98,75 @@ def generate_pm_checklist_pdf(completion):
     else:
         table_data = build_simple_table(completion)
     
-    # Create table
+    # Create table with different column widths based on annex type
     if template.annex_code == 'A':
-        col_widths = [12*mm, 85*mm, 45*mm, 48*mm]
+        # 8 columns: Item No | Task | M | T | W | Th | F | Problems
+        col_widths = [12*mm, 75*mm, 9*mm, 9*mm, 9*mm, 9*mm, 9*mm, 45*mm]
     elif template.annex_code == 'C':
         col_widths = [15*mm, 80*mm, 45*mm, 50*mm]
     else:
         col_widths = [15*mm, 100*mm, 35*mm, 40*mm]
-    
-    table = Table(table_data, colWidths=col_widths, repeatRows=1)
+
+    table = Table(table_data, colWidths=col_widths, repeatRows=2)
 
     # Table style
-    table_style_list = [
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('TOPPADDING', (0, 1), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-    ]
-
-    # For Annex A, add gray shading for weekly tasks (items 7-11)
     if template.annex_code == 'A':
-        # Items 7-11 are weekly tasks (rows 7-11 in table_data, index 7-11)
-        # Add gray background for weekly task rows
-        weekly_task_color = colors.Color(0.7, 0.7, 0.7)  # Medium gray
-        for row_num in range(7, 12):  # Rows 7-11 (items 7-11)
+        table_style_list = [
+            # Header row 1 - gray background
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            # Header row 2 - gray background
+            ('BACKGROUND', (0, 1), (-1, 1), colors.lightgrey),
+
+            # Merge cells for header row 1
+            ('SPAN', (0, 0), (0, 1)),  # Item No. spans 2 rows
+            ('SPAN', (1, 0), (1, 1)),  # Task spans 2 rows
+            ('SPAN', (2, 0), (6, 0)),  # Status spans 5 columns (M T W Th F)
+            ('SPAN', (7, 0), (7, 1)),  # Problems spans 2 rows
+
+            # Alignment
+            ('ALIGN', (0, 0), (0, -1), 'CENTER'),  # Item No. centered
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),    # Task left-aligned
+            ('ALIGN', (2, 0), (6, -1), 'CENTER'),  # Status columns centered
+            ('ALIGN', (7, 0), (7, -1), 'LEFT'),    # Problems left-aligned
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+
+            # Fonts
+            ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 1), 8),
+            ('FONTSIZE', (0, 2), (-1, -1), 8),
+
+            # Padding
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+
+            # Grid lines
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ]
+
+        # Add VERY dark gray shading for weekly tasks (items 7-11)
+        # These are rows 8-12 (accounting for 2 header rows)
+        weekly_task_color = colors.Color(0.45, 0.45, 0.45)  # Dark gray matching template
+        for row_num in range(8, 13):  # Rows for items 7-11
             if row_num < len(table_data):
                 table_style_list.append(('BACKGROUND', (0, row_num), (-1, row_num), weekly_task_color))
+                # Make text white on dark background
+                table_style_list.append(('TEXTCOLOR', (0, row_num), (-1, row_num), colors.white))
+    else:
+        table_style_list = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('TOPPADDING', (0, 1), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ]
 
     table_style = TableStyle(table_style_list)
     table.setStyle(table_style)
@@ -171,62 +207,78 @@ def generate_pm_checklist_pdf(completion):
 
 
 def build_annex_a_table(completion):
-    """Build table for Annex A (Daily/Weekly)"""
+    """Build table for Annex A (Daily/Weekly) - matches exact template format"""
 
     from reportlab.platypus import Paragraph
     from reportlab.lib.styles import ParagraphStyle
-    from reportlab.lib.enums import TA_LEFT
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
     item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
 
-    # Create style for task descriptions
+    # Create styles
+    header_style = ParagraphStyle(
+        'HeaderStyle',
+        fontName='Helvetica-Bold',
+        fontSize=8,
+        leading=9,
+        alignment=TA_CENTER,
+    )
+
     task_style = ParagraphStyle(
         'TaskStyle',
         fontName='Helvetica',
         fontSize=8,
         leading=10,
-        leftIndent=0,
-        rightIndent=0,
+        alignment=TA_LEFT,
     )
 
-    # Header row - match exact template format
-    header = [
-        Paragraph('<b>Item<br/>No.</b>', task_style),
-        Paragraph('<b>Task</b>', task_style),
-        Paragraph('<b>Status<br/>(put ✓ if done)</b><br/>M      T      W      Th      F', task_style),
-        Paragraph('<b>Problems<br/>Encountered/Action</b>', task_style)
+    center_style = ParagraphStyle(
+        'CenterStyle',
+        fontName='Helvetica',
+        fontSize=8,
+        alignment=TA_CENTER,
+    )
+
+    # Header rows - Status column spans 5 sub-columns
+    header_row1 = [
+        Paragraph('<b>Item<br/>No.</b>', header_style),
+        Paragraph('<b>Task</b>', header_style),
+        Paragraph('<b>Status<br/>(put ✓ if done)</b>', header_style),  # This will span 5 columns
+        '',  # Placeholder for colspan
+        '',  # Placeholder for colspan
+        '',  # Placeholder for colspan
+        '',  # Placeholder for colspan
+        Paragraph('<b>Problems<br/>Encountered/Action</b>', header_style)
     ]
 
-    table_data = [header]
+    header_row2 = [
+        '',  # Empty for Item No.
+        '',  # Empty for Task
+        Paragraph('<b>M</b>', center_style),
+        Paragraph('<b>T</b>', center_style),
+        Paragraph('<b>W</b>', center_style),
+        Paragraph('<b>Th</b>', center_style),
+        Paragraph('<b>F</b>', center_style),
+        '',  # Empty for Problems
+    ]
+
+    table_data = [header_row1, header_row2]
 
     for item_comp in item_completions:
         item = item_comp.item
 
-        # Task description with time schedule if applicable
+        # Task description with time schedule
         task_text = item.task_description
         if item.has_schedule_times and item.schedule_times:
-            # Add time schedules inline
             time_list = "<br/>".join(item.schedule_times)
             task_text = f"{item.task_description}<br/><br/>{time_list}"
 
-        # Status checkmarks - aligned under M, T, W, Th, F
-        status_text = ""
-        if item.has_schedule_times and item_comp.time_completions:
-            # For items with time schedules, show time completion status
-            status_lines = []
-            for time_slot in item.schedule_times:
-                is_done = item_comp.time_completions.get(time_slot, False)
-                status_lines.append("✓" if is_done else "")
-            status_text = "<br/>".join(status_lines)
-        else:
-            # For regular items, show day completion status
-            mon = "✓" if item_comp.monday else ""
-            tue = "✓" if item_comp.tuesday else ""
-            wed = "✓" if item_comp.wednesday else ""
-            thu = "✓" if item_comp.thursday else ""
-            fri = "✓" if item_comp.friday else ""
-            # Use spaces to align checkmarks under days
-            status_text = f"{mon}        {tue}        {wed}        {thu}        {fri}"
+        # Status checkmarks for each day
+        mon = "✓" if item_comp.monday else ""
+        tue = "✓" if item_comp.tuesday else ""
+        wed = "✓" if item_comp.wednesday else ""
+        thu = "✓" if item_comp.thursday else ""
+        fri = "✓" if item_comp.friday else ""
 
         # Problems/Actions
         problems_text = ""
@@ -238,9 +290,13 @@ def build_annex_a_table(completion):
             problems_text += item_comp.action_taken
 
         table_data.append([
-            Paragraph(str(item.item_number), task_style),
+            Paragraph(str(item.item_number), center_style),
             Paragraph(task_text, task_style),
-            Paragraph(status_text, task_style),
+            Paragraph(mon, center_style),
+            Paragraph(tue, center_style),
+            Paragraph(wed, center_style),
+            Paragraph(thu, center_style),
+            Paragraph(fri, center_style),
             Paragraph(problems_text, task_style) if problems_text else ""
         ])
 
