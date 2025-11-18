@@ -15,6 +15,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 
 
@@ -1420,3 +1422,273 @@ def ensure_employee_qr(employee):
             employee.save(update_fields=['qr_code'])
         except Exception as e:
             print(f"❌ QR generation failed for employee {employee.id}: {e}")
+
+
+# ============================================
+# REPORTS AND PM
+# ============================================
+
+class PMChecklistTemplate(models.Model):
+    """Template for different types of PM checklists"""
+    
+    FREQUENCY_CHOICES = [
+        ('DAILY', 'Daily'),
+        ('WEEKLY', 'Weekly'),
+        ('MONTHLY', 'Monthly'),
+        ('QUARTERLY', 'Quarterly'),
+        ('SEMI_ANNUAL', 'Semi-Annual'),
+        ('ANNUAL', 'Annual'),
+    ]
+    
+    ANNEX_CHOICES = [
+        ('A', 'Annex A - Datacenter (Daily/Weekly)'),
+        ('B', 'Annex B - Datacenter (Monthly)'),
+        ('C', 'Annex C - Floor/Building Distributors (Weekly)'),
+        ('F', 'Annex F - Datacenter (Semi-Annual)'),
+    ]
+    
+    annex_code = models.CharField(max_length=1, choices=ANNEX_CHOICES, unique=True)
+    title = models.CharField(max_length=200)
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
+    description = models.TextField(blank=True)
+    schedule_note = models.CharField(max_length=200, blank=True, help_text="e.g., 'Mondays - Fridays', '1st week of the month'")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['annex_code']
+        verbose_name = 'PM Checklist Template'
+        verbose_name_plural = 'PM Checklist Templates'
+    
+    def __str__(self):
+        return f"{self.get_annex_code_display()}"
+
+
+class PMChecklistItem(models.Model):
+    """Individual tasks/items in a checklist template"""
+    
+    template = models.ForeignKey(PMChecklistTemplate, on_delete=models.CASCADE, related_name='items')
+    item_number = models.PositiveIntegerField()
+    task_description = models.TextField()
+    
+    # For items with scheduled times (Annex A)
+    has_schedule_times = models.BooleanField(default=False)
+    schedule_times = models.JSONField(
+        blank=True, 
+        null=True,
+        help_text="JSON array of time strings, e.g., ['9 AM', '2 PM', '8 AM', '10 AM', '12 PM', '2 PM', '4 PM']"
+    )
+    
+    # For items requiring specific checks
+    requires_value_input = models.BooleanField(default=False)
+    value_unit = models.CharField(max_length=50, blank=True, help_text="e.g., '°C', '%', etc.")
+    
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['template', 'item_number']
+        unique_together = ['template', 'item_number']
+    
+    def __str__(self):
+        return f"{self.template.annex_code}-{self.item_number}: {self.task_description[:50]}"
+
+
+class PMChecklistSchedule(models.Model):
+    """Scheduled PM checklists to be completed"""
+    
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('OVERDUE', 'Overdue'),
+        ('SKIPPED', 'Skipped'),
+    ]
+    
+    template = models.ForeignKey(PMChecklistTemplate, on_delete=models.CASCADE, related_name='schedules')
+    scheduled_date = models.DateField()
+    due_date = models.DateField()
+    
+    # For weekly checklists (Annex A, C)
+    week_number = models.PositiveIntegerField(
+        blank=True, 
+        null=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    # For checklists requiring location (Annex C)
+    location = models.CharField(max_length=200, blank=True, help_text="Location of FD/BD")
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_checklists')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-scheduled_date', 'template']
+        indexes = [
+            models.Index(fields=['scheduled_date', 'status']),
+            models.Index(fields=['due_date', 'status']),
+        ]
+    
+    def __str__(self):
+        return f"{self.template.annex_code} - {self.scheduled_date} ({self.status})"
+    
+    def is_overdue(self):
+        """Check if checklist is overdue"""
+        if self.status not in ['COMPLETED', 'SKIPPED']:
+            return timezone.now().date() > self.due_date
+        return False
+
+
+class PMChecklistCompletion(models.Model):
+    """Completed PM checklist instance"""
+    
+    schedule = models.OneToOneField(PMChecklistSchedule, on_delete=models.CASCADE, related_name='completion')
+    completed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='completed_checklists')
+    completion_date = models.DateField(default=timezone.now)
+    completion_time = models.TimeField(auto_now_add=True)
+    
+    # Signature
+    signature_image = models.ImageField(upload_to='pm_signatures/', blank=True, null=True)
+    printed_name = models.CharField(max_length=200, blank=True)
+    
+    # Additional notes
+    general_notes = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-completion_date']
+    
+    def __str__(self):
+        return f"{self.schedule.template.annex_code} - {self.completion_date} by {self.completed_by}"
+
+
+class PMChecklistItemCompletion(models.Model):
+    """Completion status for each item in the checklist"""
+    
+    completion = models.ForeignKey(PMChecklistCompletion, on_delete=models.CASCADE, related_name='item_completions')
+    item = models.ForeignKey(PMChecklistItem, on_delete=models.CASCADE)
+    
+    # For daily/weekly checklists with days
+    monday = models.BooleanField(default=False)
+    tuesday = models.BooleanField(default=False)
+    wednesday = models.BooleanField(default=False)
+    thursday = models.BooleanField(default=False)
+    friday = models.BooleanField(default=False)
+    
+    # For weekly checklists with week numbers (Annex C)
+    week1 = models.BooleanField(default=False)
+    week2 = models.BooleanField(default=False)
+    week3 = models.BooleanField(default=False)
+    week4 = models.BooleanField(default=False)
+    
+    # For simple monthly/semi-annual checklists
+    is_completed = models.BooleanField(default=False)
+    
+    # For items with scheduled times - store completion times
+    time_completions = models.JSONField(
+        blank=True, 
+        null=True,
+        help_text="JSON object with time as key and completion status, e.g., {'9 AM': true, '2 PM': false}"
+    )
+    
+    # Problems encountered
+    problems_encountered = models.TextField(blank=True)
+    action_taken = models.TextField(blank=True)
+    
+    # For items requiring value input
+    recorded_value = models.CharField(max_length=100, blank=True)
+    
+    # Photo evidence
+    photo1 = models.ImageField(upload_to='pm_photos/', blank=True, null=True)
+    photo2 = models.ImageField(upload_to='pm_photos/', blank=True, null=True)
+    photo3 = models.ImageField(upload_to='pm_photos/', blank=True, null=True)
+    
+    class Meta:
+        ordering = ['item__item_number']
+        unique_together = ['completion', 'item']
+    
+    def __str__(self):
+        return f"{self.completion} - Item {self.item.item_number}"
+
+
+class PMChecklistReport(models.Model):
+    """Monthly/Period reports compilation"""
+    
+    REPORT_TYPE_CHOICES = [
+        ('WEEKLY', 'Weekly Report'),
+        ('MONTHLY', 'Monthly Report'),
+        ('QUARTERLY', 'Quarterly Report'),
+        ('ANNUAL', 'Annual Report'),
+    ]
+    
+    report_type = models.CharField(max_length=20, choices=REPORT_TYPE_CHOICES)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    
+    # Filter by annex type
+    annex_filter = models.CharField(max_length=1, blank=True, help_text="Leave blank for all annexes")
+    
+    generated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    generated_at = models.DateTimeField(auto_now_add=True)
+    
+    # PDF file
+    pdf_file = models.FileField(upload_to='pm_reports/', blank=True, null=True)
+    
+    # Summary statistics
+    total_checklists = models.IntegerField(default=0)
+    completed_checklists = models.IntegerField(default=0)
+    pending_checklists = models.IntegerField(default=0)
+    overdue_checklists = models.IntegerField(default=0)
+    total_issues_found = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['-period_end']
+    
+    def __str__(self):
+        return f"{self.report_type} - {self.period_start} to {self.period_end}"
+
+
+class PMIssueLog(models.Model):
+    """Log of issues found during PM checklists"""
+    
+    PRIORITY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+        ('CRITICAL', 'Critical'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('OPEN', 'Open'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('RESOLVED', 'Resolved'),
+        ('CLOSED', 'Closed'),
+    ]
+    
+    item_completion = models.ForeignKey(PMChecklistItemCompletion, on_delete=models.CASCADE, related_name='issues')
+    
+    issue_title = models.CharField(max_length=200)
+    issue_description = models.TextField()
+    priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='MEDIUM')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='OPEN')
+    
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reported_issues')
+    reported_at = models.DateTimeField(auto_now_add=True)
+    
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_issues')
+    
+    resolution = models.TextField(blank=True)
+    resolved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='resolved_issues')
+    resolved_at = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['-reported_at']
+    
+    def __str__(self):
+        return f"{self.issue_title} - {self.priority} ({self.status})"

@@ -75,7 +75,9 @@ from inventory.models import (
     PreventiveMaintenance, PMScheduleAssignment, MaintenanceChecklistItem,
     QuarterSchedule, PMSectionSchedule, OfficeSection, Profile,
     LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification,
-    OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies
+    OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies, PMChecklistTemplate, PMChecklistItem, PMChecklistSchedule,
+    PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport,
+    PMIssueLog
 )
 
 
@@ -6166,3 +6168,502 @@ def add_office_supplies(request):
             return render(request, 'office_supplies/add_office_supplies.html', context)
 
     return render(request, 'office_supplies/add_office_supplies.html', context)
+
+
+######################################################### REPORTS AND PM #####################################
+
+# ==============================================================================
+# ADD THESE FUNCTIONS TO YOUR inventory/views.py FILE
+# ==============================================================================
+# Place these at the end of your views.py file
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.db.models import Q, Count
+from django.utils import timezone
+from datetime import datetime, timedelta
+import json
+
+from .models import (
+    PMChecklistTemplate, PMChecklistItem, PMChecklistSchedule,
+    PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport, PMIssueLog
+)
+
+
+# ==============================================================================
+# PM CHECKLIST DASHBOARD
+# ==============================================================================
+
+@login_required
+def pm_dashboard(request):
+    """Main PM Checklist Dashboard"""
+    
+    today = timezone.now().date()
+    
+    # Get pending checklists
+    pending_checklists = PMChecklistSchedule.objects.filter(
+        status='PENDING',
+        scheduled_date__lte=today
+    ).select_related('template', 'assigned_to').order_by('due_date')[:10]
+    
+    # Get overdue checklists
+    overdue_checklists = PMChecklistSchedule.objects.filter(
+        status__in=['PENDING', 'IN_PROGRESS'],
+        due_date__lt=today
+    ).select_related('template', 'assigned_to').order_by('due_date')[:10]
+    
+    # Get recently completed
+    completed_today = PMChecklistCompletion.objects.filter(
+        completion_date=today
+    ).select_related('schedule__template', 'completed_by').order_by('-completion_time')[:10]
+    
+    # Get open issues
+    open_issues = PMIssueLog.objects.filter(
+        status__in=['OPEN', 'IN_PROGRESS']
+    ).select_related('item_completion__completion__schedule__template', 'reported_by').order_by('-priority', '-reported_at')[:10]
+    
+    # Statistics
+    stats = {
+        'pending_count': PMChecklistSchedule.objects.filter(status='PENDING').count(),
+        'overdue_count': overdue_checklists.count(),
+        'completed_today_count': completed_today.count(),
+        'open_issues_count': open_issues.count(),
+    }
+    
+    context = {
+        'pending_checklists': pending_checklists,
+        'overdue_checklists': overdue_checklists,
+        'completed_today': completed_today,
+        'open_issues': open_issues,
+        'stats': stats,
+    }
+    
+    return render(request, 'pm/pm_dashboard.html', context)
+
+
+# ==============================================================================
+# CHECKLIST LIST
+# ==============================================================================
+
+@login_required
+def pm_checklist_list(request):
+    """List all scheduled checklists with filters"""
+    
+    # Get filter parameters
+    status_filter = request.GET.get('status', '')
+    annex_filter = request.GET.get('annex', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    
+    checklists = PMChecklistSchedule.objects.all().select_related('template', 'assigned_to')
+    
+    # Apply filters
+    if status_filter:
+        checklists = checklists.filter(status=status_filter)
+    
+    if annex_filter:
+        checklists = checklists.filter(template__annex_code=annex_filter)
+    
+    if date_from:
+        checklists = checklists.filter(scheduled_date__gte=date_from)
+    
+    if date_to:
+        checklists = checklists.filter(scheduled_date__lte=date_to)
+    
+    checklists = checklists.order_by('-scheduled_date')
+    
+    # Get all templates for filter dropdown
+    templates = PMChecklistTemplate.objects.filter(is_active=True)
+    
+    context = {
+        'checklists': checklists,
+        'templates': templates,
+        'status_filter': status_filter,
+        'annex_filter': annex_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+    
+    return render(request, 'pm/pm_checklist_list.html', context)
+
+
+# ==============================================================================
+# FILL CHECKLIST
+# ==============================================================================
+
+@login_required
+def pm_checklist_fill(request, schedule_id):
+    """Fill out a PM checklist"""
+    
+    schedule = get_object_or_404(PMChecklistSchedule, id=schedule_id)
+    template = schedule.template
+    items = template.items.filter(is_active=True).order_by('item_number')
+    
+    if request.method == 'POST':
+        # Create or get completion record
+        completion, created = PMChecklistCompletion.objects.get_or_create(
+            schedule=schedule,
+            defaults={
+                'completed_by': request.user,
+                'completion_date': timezone.now().date(),
+            }
+        )
+        
+        # Update signature and printed name
+        completion.printed_name = request.POST.get('printed_name', '')
+        
+        # Handle signature upload
+        if 'signature_image' in request.FILES:
+            completion.signature_image = request.FILES['signature_image']
+        
+        completion.general_notes = request.POST.get('general_notes', '')
+        completion.save()
+        
+        # Process each item
+        for item in items:
+            item_completion, created = PMChecklistItemCompletion.objects.get_or_create(
+                completion=completion,
+                item=item
+            )
+            
+            # Handle different checklist types
+            if template.annex_code == 'A':
+                # Daily/Weekly with days
+                item_completion.monday = request.POST.get(f'item_{item.id}_monday') == 'on'
+                item_completion.tuesday = request.POST.get(f'item_{item.id}_tuesday') == 'on'
+                item_completion.wednesday = request.POST.get(f'item_{item.id}_wednesday') == 'on'
+                item_completion.thursday = request.POST.get(f'item_{item.id}_thursday') == 'on'
+                item_completion.friday = request.POST.get(f'item_{item.id}_friday') == 'on'
+                
+                # Handle scheduled times if applicable
+                if item.has_schedule_times and item.schedule_times:
+                    time_completions = {}
+                    for time_slot in item.schedule_times:
+                        time_key = time_slot.replace(' ', '_').lower()
+                        time_completions[time_slot] = request.POST.get(f'item_{item.id}_time_{time_key}') == 'on'
+                    item_completion.time_completions = time_completions
+                
+                # Handle value input
+                if item.requires_value_input:
+                    item_completion.recorded_value = request.POST.get(f'item_{item.id}_value', '')
+            
+            elif template.annex_code == 'C':
+                # Weekly with week numbers
+                item_completion.week1 = request.POST.get(f'item_{item.id}_week1') == 'on'
+                item_completion.week2 = request.POST.get(f'item_{item.id}_week2') == 'on'
+                item_completion.week3 = request.POST.get(f'item_{item.id}_week3') == 'on'
+                item_completion.week4 = request.POST.get(f'item_{item.id}_week4') == 'on'
+            
+            else:
+                # Simple completion (Annex B, F)
+                item_completion.is_completed = request.POST.get(f'item_{item.id}_completed') == 'on'
+            
+            # Problems and actions
+            item_completion.problems_encountered = request.POST.get(f'item_{item.id}_problems', '')
+            item_completion.action_taken = request.POST.get(f'item_{item.id}_action', '')
+            
+            # Handle photo uploads
+            if f'item_{item.id}_photo1' in request.FILES:
+                item_completion.photo1 = request.FILES[f'item_{item.id}_photo1']
+            if f'item_{item.id}_photo2' in request.FILES:
+                item_completion.photo2 = request.FILES[f'item_{item.id}_photo2']
+            if f'item_{item.id}_photo3' in request.FILES:
+                item_completion.photo3 = request.FILES[f'item_{item.id}_photo3']
+            
+            item_completion.save()
+            
+            # Create issue log if problems encountered
+            if item_completion.problems_encountered:
+                PMIssueLog.objects.create(
+                    item_completion=item_completion,
+                    issue_title=f"{template.annex_code} Item {item.item_number} - Issue",
+                    issue_description=item_completion.problems_encountered,
+                    priority='MEDIUM',
+                    reported_by=request.user
+                )
+        
+        # Update schedule status
+        schedule.status = 'COMPLETED'
+        schedule.save()
+        
+        messages.success(request, f'Checklist {template.annex_code} completed successfully!')
+        return redirect('pm_dashboard')
+    
+    context = {
+        'schedule': schedule,
+        'template': template,
+        'items': items,
+    }
+    
+    return render(request, 'pm/pm_checklist_fill.html', context)
+
+
+# ==============================================================================
+# VIEW COMPLETED CHECKLIST
+# ==============================================================================
+
+@login_required
+def pm_checklist_view(request, completion_id):
+    """View a completed checklist"""
+    
+    completion = get_object_or_404(PMChecklistCompletion, id=completion_id)
+    item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
+    
+    context = {
+        'completion': completion,
+        'item_completions': item_completions,
+    }
+    
+    return render(request, 'pm/pm_checklist_view.html', context)
+
+
+# ==============================================================================
+# SCHEDULE CREATION
+# ==============================================================================
+
+@login_required
+def pm_schedule_create(request):
+    """Create new PM schedule"""
+    
+    if request.method == 'POST':
+        template_id = request.POST.get('template_id')
+        scheduled_date = request.POST.get('scheduled_date')
+        due_date = request.POST.get('due_date')
+        assigned_to_id = request.POST.get('assigned_to')
+        location = request.POST.get('location', '')
+        
+        schedule = PMChecklistSchedule.objects.create(
+            template_id=template_id,
+            scheduled_date=scheduled_date,
+            due_date=due_date,
+            assigned_to_id=assigned_to_id if assigned_to_id else None,
+            location=location
+        )
+        
+        messages.success(request, 'PM Checklist scheduled successfully!')
+        return redirect('pm_checklist_list')
+    
+    from django.contrib.auth.models import User
+    templates = PMChecklistTemplate.objects.filter(is_active=True)
+    users = User.objects.filter(is_active=True)
+    
+    context = {
+        'templates': templates,
+        'users': users,
+    }
+    
+    return render(request, 'pm/pm_schedule_create.html', context)
+
+
+# ==============================================================================
+# REPORTS
+# ==============================================================================
+
+@login_required
+def pm_reports(request):
+    """PM Reports listing"""
+    
+    reports = PMChecklistReport.objects.all().select_related('generated_by').order_by('-generated_at')
+    
+    context = {
+        'reports': reports,
+    }
+    
+    return render(request, 'pm/reports.html', context)
+
+
+@login_required
+def pm_generate_report(request):
+    """Generate PM Report"""
+    
+    if request.method == 'POST':
+        report_type = request.POST.get('report_type')
+        period_start = request.POST.get('period_start')
+        period_end = request.POST.get('period_end')
+        annex_filter = request.POST.get('annex_filter', '')
+        
+        # Create report record
+        report = PMChecklistReport.objects.create(
+            report_type=report_type,
+            period_start=period_start,
+            period_end=period_end,
+            annex_filter=annex_filter,
+            generated_by=request.user
+        )
+        
+        # Calculate statistics
+        completions = PMChecklistCompletion.objects.filter(
+            completion_date__gte=period_start,
+            completion_date__lte=period_end
+        )
+        
+        if annex_filter:
+            completions = completions.filter(schedule__template__annex_code=annex_filter)
+        
+        schedules = PMChecklistSchedule.objects.filter(
+            scheduled_date__gte=period_start,
+            scheduled_date__lte=period_end
+        )
+        
+        if annex_filter:
+            schedules = schedules.filter(template__annex_code=annex_filter)
+        
+        report.total_checklists = schedules.count()
+        report.completed_checklists = schedules.filter(status='COMPLETED').count()
+        report.pending_checklists = schedules.filter(status='PENDING').count()
+        report.overdue_checklists = schedules.filter(status='OVERDUE').count()
+        
+        # Count issues
+        issues = PMIssueLog.objects.filter(
+            item_completion__completion__completion_date__gte=period_start,
+            item_completion__completion__completion_date__lte=period_end
+        )
+        
+        if annex_filter:
+            issues = issues.filter(item_completion__completion__schedule__template__annex_code=annex_filter)
+        
+        report.total_issues_found = issues.count()
+        report.save()
+        
+        messages.success(request, 'Report generated successfully!')
+        return redirect('pm_export_report_pdf', report_id=report.id)
+    
+    templates = PMChecklistTemplate.objects.filter(is_active=True)
+    
+    context = {
+        'templates': templates,
+    }
+    
+    return render(request, 'pm/generate_report.html', context)
+
+
+# ==============================================================================
+# ISSUES MANAGEMENT
+# ==============================================================================
+
+@login_required
+def pm_issues(request):
+    """List all PM issues"""
+    
+    status_filter = request.GET.get('status', '')
+    priority_filter = request.GET.get('priority', '')
+    
+    issues = PMIssueLog.objects.all().select_related(
+        'item_completion__completion__schedule__template',
+        'reported_by',
+        'assigned_to'
+    )
+    
+    if status_filter:
+        issues = issues.filter(status=status_filter)
+    
+    if priority_filter:
+        issues = issues.filter(priority=priority_filter)
+    
+    issues = issues.order_by('-priority', '-reported_at')
+    
+    context = {
+        'issues': issues,
+        'status_filter': status_filter,
+        'priority_filter': priority_filter,
+    }
+    
+    return render(request, 'pm/issues.html', context)
+
+
+@login_required
+def pm_issue_update(request, issue_id):
+    """Update PM issue status"""
+    
+    issue = get_object_or_404(PMIssueLog, id=issue_id)
+    
+    if request.method == 'POST':
+        issue.status = request.POST.get('status')
+        issue.priority = request.POST.get('priority')
+        issue.resolution = request.POST.get('resolution', '')
+        
+        assigned_to_id = request.POST.get('assigned_to')
+        if assigned_to_id:
+            issue.assigned_to_id = assigned_to_id
+        
+        if issue.status == 'RESOLVED':
+            issue.resolved_by = request.user
+            issue.resolved_at = timezone.now()
+        
+        issue.save()
+        
+        messages.success(request, 'Issue updated successfully!')
+        return redirect('pm_issues')
+    
+    from django.contrib.auth.models import User
+    users = User.objects.filter(is_active=True)
+    
+    context = {
+        'issue': issue,
+        'users': users,
+    }
+    
+    return render(request, 'pm/issue_update.html', context)
+
+
+# ==============================================================================
+# API ENDPOINTS (Optional - can be commented out if causing errors)
+# ==============================================================================
+
+@login_required
+def api_mark_complete(request, schedule_id):
+    """API endpoint to mark a checklist schedule as complete"""
+    if request.method == 'POST':
+        try:
+            schedule = PMChecklistSchedule.objects.get(id=schedule_id)
+            schedule.status = 'COMPLETED'
+            schedule.save()
+            return JsonResponse({
+                'success': True,
+                'message': 'Checklist marked as completed'
+            })
+        except PMChecklistSchedule.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'Schedule not found'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+
+@login_required
+def api_schedule_bulk(request):
+    """API endpoint for bulk scheduling of checklists"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            template_id = data.get('template_id')
+            scheduled_date = data.get('scheduled_date')
+            due_date = data.get('due_date')
+            
+            template = PMChecklistTemplate.objects.get(id=template_id)
+            
+            schedule = PMChecklistSchedule.objects.create(
+                template=template,
+                scheduled_date=datetime.strptime(scheduled_date, '%Y-%m-%d').date(),
+                due_date=datetime.strptime(due_date, '%Y-%m-%d').date(),
+                status='PENDING'
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Schedule created successfully',
+                'schedule_id': schedule.id
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)

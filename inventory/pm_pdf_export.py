@@ -1,0 +1,428 @@
+"""
+PDF Export for PM Checklists
+Generates A4 format PDFs matching the original paper forms
+"""
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.pdfgen import canvas
+from django.conf import settings
+from io import BytesIO
+import os
+
+from .models import PMChecklistCompletion, PMChecklistItemCompletion
+
+
+def generate_pm_checklist_pdf(completion):
+    """
+    Generate PDF for a completed PM checklist
+    Returns BytesIO buffer containing the PDF
+    """
+    
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=15*mm,
+        bottomMargin=15*mm
+    )
+    
+    # Container for PDF elements
+    elements = []
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=14,
+        alignment=TA_CENTER,
+        spaceAfter=12,
+        fontName='Helvetica-Bold'
+    )
+    
+    annex_style = ParagraphStyle(
+        'AnnexStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        alignment=TA_RIGHT,
+        fontName='Helvetica-Bold'
+    )
+    
+    schedule = completion.schedule
+    template = schedule.template
+    
+    # Annex code (top right)
+    annex_text = f'ANNEX "{template.annex_code}"'
+    elements.append(Paragraph(annex_text, annex_style))
+    elements.append(Spacer(1, 10))
+    
+    # Title
+    title = Paragraph(template.title, title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 10))
+    
+    # Schedule information
+    schedule_info_style = ParagraphStyle(
+        'ScheduleInfo',
+        parent=styles['Normal'],
+        fontSize=10,
+        fontName='Helvetica'
+    )
+    
+    schedule_text = f"<b>Schedule:</b> {template.schedule_note}<br/>"
+    schedule_text += f"<b>Date accomplished:</b> {completion.completion_date.strftime('%B %d, %Y')}"
+    
+    if schedule.location:
+        schedule_text += f"<br/><b>Location of FD/BD:</b> {schedule.location}"
+    
+    elements.append(Paragraph(schedule_text, schedule_info_style))
+    elements.append(Spacer(1, 15))
+    
+    # Build checklist table based on annex type
+    if template.annex_code == 'A':
+        table_data = build_annex_a_table(completion)
+    elif template.annex_code == 'B':
+        table_data = build_annex_b_table(completion)
+    elif template.annex_code == 'C':
+        table_data = build_annex_c_table(completion)
+    elif template.annex_code == 'F':
+        table_data = build_annex_f_table(completion)
+    else:
+        table_data = build_simple_table(completion)
+    
+    # Create table
+    if template.annex_code == 'A':
+        col_widths = [15*mm, 80*mm, 55*mm, 40*mm]
+    elif template.annex_code == 'C':
+        col_widths = [15*mm, 80*mm, 45*mm, 50*mm]
+    else:
+        col_widths = [15*mm, 100*mm, 35*mm, 40*mm]
+    
+    table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    
+    # Table style
+    table_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 1), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.Color(0.95, 0.95, 0.95)]),
+    ])
+    
+    table.setStyle(table_style)
+    elements.append(table)
+    elements.append(Spacer(1, 20))
+    
+    # Signature section
+    signature_style = ParagraphStyle(
+        'SignatureStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        fontName='Helvetica'
+    )
+    
+    elements.append(Paragraph("<b>Accomplished by:</b>", signature_style))
+    elements.append(Spacer(1, 30))
+    
+    # Add signature image if available
+    if completion.signature_image:
+        try:
+            sig_path = os.path.join(settings.MEDIA_ROOT, completion.signature_image.name)
+            if os.path.exists(sig_path):
+                sig_img = Image(sig_path, width=60*mm, height=20*mm)
+                elements.append(sig_img)
+        except:
+            pass
+    
+    elements.append(Spacer(1, 5))
+    elements.append(Paragraph("_" * 50, signature_style))
+    elements.append(Paragraph(f"({completion.printed_name or completion.completed_by.get_full_name() or completion.completed_by.username})", signature_style))
+    elements.append(Paragraph("(Signature over printed name)", signature_style))
+    
+    # Build PDF
+    doc.build(elements)
+    
+    buffer.seek(0)
+    return buffer
+
+
+def build_annex_a_table(completion):
+    """Build table for Annex A (Daily/Weekly)"""
+    
+    item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
+    
+    # Header row
+    header = [
+        'Item\nNo.',
+        'Task',
+        'Status\n(put ✓ if done)\nM    T    W    Th    F',
+        'Problems\nEncountered/Action'
+    ]
+    
+    table_data = [header]
+    
+    for item_comp in item_completions:
+        item = item_comp.item
+        
+        # Task description with time schedule if applicable
+        task_text = item.task_description
+        if item.has_schedule_times and item.schedule_times:
+            task_text += "\n\n"
+            for time_slot in item.schedule_times:
+                task_text += f"{time_slot}\n"
+        
+        # Status checkmarks
+        status_text = ""
+        if item.has_schedule_times and item_comp.time_completions:
+            # For items with time schedules, show time completion status
+            for time_slot in item.schedule_times:
+                is_done = item_comp.time_completions.get(time_slot, False)
+                status_text += "✓  " if is_done else "   "
+                status_text += "\n"
+        else:
+            # For regular items, show day completion status
+            mon = "✓" if item_comp.monday else ""
+            tue = "✓" if item_comp.tuesday else ""
+            wed = "✓" if item_comp.wednesday else ""
+            thu = "✓" if item_comp.thursday else ""
+            fri = "✓" if item_comp.friday else ""
+            status_text = f"{mon}    {tue}    {wed}    {thu}    {fri}"
+        
+        # Problems/Actions
+        problems_text = ""
+        if item_comp.problems_encountered:
+            problems_text += item_comp.problems_encountered
+        if item_comp.action_taken:
+            if problems_text:
+                problems_text += "\n\nAction: "
+            problems_text += item_comp.action_taken
+        
+        table_data.append([
+            str(item.item_number),
+            task_text,
+            status_text,
+            problems_text
+        ])
+    
+    return table_data
+
+
+def build_annex_b_table(completion):
+    """Build table for Annex B (Monthly)"""
+    
+    item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
+    
+    # Header row
+    header = [
+        'Item\nNo.',
+        'Task',
+        'Status\n(put ✓ if done)',
+        'Problems Encountered/Action'
+    ]
+    
+    table_data = [header]
+    
+    for item_comp in item_completions:
+        item = item_comp.item
+        
+        status_text = "✓" if item_comp.is_completed else ""
+        
+        problems_text = ""
+        if item_comp.problems_encountered:
+            problems_text += item_comp.problems_encountered
+        if item_comp.action_taken:
+            if problems_text:
+                problems_text += "\n\nAction: "
+            problems_text += item_comp.action_taken
+        
+        table_data.append([
+            str(item.item_number),
+            item.task_description,
+            status_text,
+            problems_text
+        ])
+    
+    return table_data
+
+
+def build_annex_c_table(completion):
+    """Build table for Annex C (Weekly Building)"""
+    
+    item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
+    
+    # Header row
+    header = [
+        'Item\nNo.',
+        'Task',
+        'Status\n(put ✓ if done)\nWk1  Wk2  Wk3  Wk4',
+        'Problems\nEncountered/Action'
+    ]
+    
+    table_data = [header]
+    
+    for item_comp in item_completions:
+        item = item_comp.item
+        
+        wk1 = "✓" if item_comp.week1 else ""
+        wk2 = "✓" if item_comp.week2 else ""
+        wk3 = "✓" if item_comp.week3 else ""
+        wk4 = "✓" if item_comp.week4 else ""
+        status_text = f"{wk1}      {wk2}      {wk3}      {wk4}"
+        
+        problems_text = ""
+        if item_comp.problems_encountered:
+            problems_text += item_comp.problems_encountered
+        if item_comp.action_taken:
+            if problems_text:
+                problems_text += "\n\nAction: "
+            problems_text += item_comp.action_taken
+        
+        table_data.append([
+            str(item.item_number),
+            item.task_description,
+            status_text,
+            problems_text
+        ])
+    
+    return table_data
+
+
+def build_annex_f_table(completion):
+    """Build table for Annex F (Semi-Annual)"""
+    
+    return build_annex_b_table(completion)  # Same format as Annex B
+
+
+def build_simple_table(completion):
+    """Build simple table for other checklist types"""
+    
+    return build_annex_b_table(completion)  # Default to simple format
+
+
+def generate_monthly_report_pdf(report):
+    """
+    Generate monthly compilation report PDF
+    """
+    
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20*mm,
+        leftMargin=20*mm,
+        topMargin=15*mm,
+        bottomMargin=15*mm
+    )
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'ReportTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        alignment=TA_CENTER,
+        spaceAfter=20,
+        fontName='Helvetica-Bold'
+    )
+    
+    # Title
+    title_text = f"Preventive Maintenance Report<br/>{report.get_report_type_display()}"
+    elements.append(Paragraph(title_text, title_style))
+    
+    # Period
+    period_text = f"Period: {report.period_start.strftime('%B %d, %Y')} to {report.period_end.strftime('%B %d, %Y')}"
+    elements.append(Paragraph(period_text, styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Summary statistics
+    summary_data = [
+        ['Summary Statistics', 'Count'],
+        ['Total Checklists', str(report.total_checklists)],
+        ['Completed', str(report.completed_checklists)],
+        ['Pending', str(report.pending_checklists)],
+        ['Overdue', str(report.overdue_checklists)],
+        ['Issues Found', str(report.total_issues_found)],
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[120*mm, 50*mm])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 11),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+    ]))
+    
+    elements.append(summary_table)
+    elements.append(Spacer(1, 30))
+    
+    # Get completions for this period
+    from .models import PMChecklistCompletion
+    
+    completions = PMChecklistCompletion.objects.filter(
+        completion_date__gte=report.period_start,
+        completion_date__lte=report.period_end
+    ).select_related('schedule__template', 'completed_by').order_by('completion_date')
+    
+    if report.annex_filter:
+        completions = completions.filter(schedule__template__annex_code=report.annex_filter)
+    
+    # Completed checklists detail
+    if completions.exists():
+        elements.append(Paragraph("Completed Checklists Detail", styles['Heading2']))
+        elements.append(Spacer(1, 10))
+        
+        detail_data = [['Date', 'Checklist Type', 'Completed By', 'Issues']]
+        
+        for comp in completions:
+            issues_count = comp.item_completions.filter(problems_encountered__isnull=False).exclude(problems_encountered='').count()
+            
+            detail_data.append([
+                comp.completion_date.strftime('%Y-%m-%d'),
+                comp.schedule.template.get_annex_code_display(),
+                comp.completed_by.get_full_name() or comp.completed_by.username,
+                str(issues_count) if issues_count > 0 else '-'
+            ])
+        
+        detail_table = Table(detail_data, colWidths=[30*mm, 70*mm, 50*mm, 20*mm])
+        detail_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        ]))
+        
+        elements.append(detail_table)
+    
+    # Generated by footer
+    elements.append(Spacer(1, 30))
+    footer_text = f"Generated by: {report.generated_by.get_full_name() or report.generated_by.username}<br/>"
+    footer_text += f"Generated on: {report.generated_at.strftime('%B %d, %Y at %I:%M %p')}"
+    elements.append(Paragraph(footer_text, styles['Normal']))
+    
+    doc.build(elements)
+    
+    buffer.seek(0)
+    return buffer

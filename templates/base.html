@@ -220,23 +220,45 @@
               </div>
             </li>
 
-            <!-- Preventive Maintenance -->
-            <li class="nav-item {% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}active{% endif %}">
+            <!-- ==================== UPDATED PREVENTIVE MAINTENANCE SECTION ==================== -->
+            <li class="nav-item {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuPM"
-                 class="nav-link {% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}true{% else %}false{% endif %}">
+                 class="nav-link {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}{% else %}collapsed{% endif %}"
+                 aria-expanded="{% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}true{% else %}false{% endif %}">
                 <i class="fas fa-wrench"></i>
                 <p>Preventive Maintenance</p><span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name == 'pm_overview' or request.resolver_match.url_name == 'section_schedule_list' or request.resolver_match.url_name == 'disposed_keyboards' %}show{% endif %}" id="menuPM">
+              <div class="collapse {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}show{% endif %}" id="menuPM">
                 <ul class="nav nav-collapse">
+                  <!-- Original PM Links -->
                   <li class="{% if request.resolver_match.url_name == 'pm_overview' %}active{% endif %}">
-                    <a href="{% url 'pm_overview' %}"><span class="sub-item">PM Overview</span></a>
+                    <a href="{% url 'pm_overview' %}"><span class="sub-item">📋 PM Overview</span></a>
                   </li>
                   <li class="{% if request.resolver_match.url_name == 'section_schedule_list' %}active{% endif %}">
-                    <a href="{% url 'section_schedule_list' %}"><span class="sub-item">PM Schedules</span></a>
+                    <a href="{% url 'section_schedule_list' %}"><span class="sub-item">📅 PM Schedules</span></a>
+                  </li>
+
+                  <!-- NEW PM Checklist System Links -->
+                  <li class="nav-section">
+                    <span class="sidebar-mini-icon"><i class="fa fa-clipboard-check"></i></span>
+                    <h4 class="text-section" style="font-size: 11px; margin-top: 10px; margin-bottom: 5px;">PM Checklist System</h4>
                   </li>
                   
+                  <li class="{% if request.resolver_match.url_name == 'pm_dashboard' %}active{% endif %}">
+                    <a href="{% url 'pm_dashboard' %}"><span class="sub-item">📊 Checklist Dashboard</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name == 'pm_checklist_list' %}active{% endif %}">
+                    <a href="{% url 'pm_checklist_list' %}"><span class="sub-item">📝 All Checklists</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name == 'pm_schedule_create' %}active{% endif %}">
+                    <a href="{% url 'pm_schedule_create' %}"><span class="sub-item">➕ Schedule Checklist</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name == 'pm_reports' %}active{% endif %}">
+                    <a href="{% url 'pm_reports' %}"><span class="sub-item">📄 PM Reports</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name == 'pm_issues' %}active{% endif %}">
+                    <a href="{% url 'pm_issues' %}"><span class="sub-item">⚠️ Issues Log</span></a>
+                  </li>
                 </ul>
               </div>
             </li>

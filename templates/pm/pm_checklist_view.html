@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View Checklist - {{ completion.schedule.template.annex_code }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checklist-view-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .completion-info {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .item-view-row {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 4px solid #4facfe;
+    }
+    
+    .item-view-row.has-issue {
+        border-left-color: #f6ad55;
+        background: #fffaf0;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        margin: 0 3px;
+    }
+    
+    .status-done {
+        background: #48bb78;
+        color: white;
+    }
+    
+    .status-not-done {
+        background: #e2e8f0;
+        color: #718096;
+    }
+    
+    .signature-section {
+        border: 2px solid #4facfe;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 30px;
+        background: #f7fafc;
+    }
+    
+    .photo-evidence {
+        max-width: 200px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .photo-evidence:hover {
+        transform: scale(1.05);
+    }
+    
+    .info-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 5px;
+    }
+    
+    .info-completed {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+    
+    .info-date {
+        background: #bee3f8;
+        color: #2c5282;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="checklist-view-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-file-alt"></i>
+                    ANNEX "{{ completion.schedule.template.annex_code }}"
+                </h1>
+                <h3>{{ completion.schedule.template.title }}</h3>
+            </div>
+            <div>
+                <a href="{% url 'pm_export_checklist_pdf' completion.id %}" class="btn btn-light btn-lg me-2">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
+                <a href="{% url 'pm_dashboard' %}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Completion Information -->
+    <div class="completion-info">
+        <h4 class="mb-3"><i class="fas fa-info-circle text-primary"></i> Completion Information</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Completed By:</strong> {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</p>
+                <p><strong>Completion Date:</strong> {{ completion.completion_date|date:"F d, Y" }}</p>
+                <p><strong>Completion Time:</strong> {{ completion.completion_time|time:"g:i A" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Schedule:</strong> {{ completion.schedule.template.schedule_note }}</p>
+                <p><strong>Status:</strong> 
+                    <span class="badge bg-success">COMPLETED</span>
+                </p>
+                {% if completion.schedule.location %}
+                <p><strong>Location:</strong> {{ completion.schedule.location }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if completion.general_notes %}
+        <div class="mt-3">
+            <h5><i class="fas fa-sticky-note text-warning"></i> General Notes</h5>
+            <div class="alert alert-info">{{ completion.general_notes }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Checklist Items -->
+    <div class="completion-info">
+        <h4 class="mb-4"><i class="fas fa-tasks text-primary"></i> Completed Items</h4>
+        
+        {% for item_completion in item_completions %}
+        <div class="item-view-row {% if item_completion.problems_encountered %}has-issue{% endif %}">
+            <div class="d-flex">
+                <div style="min-width: 40px;">
+                    <span class="badge bg-primary" style="font-size: 1rem;">{{ item_completion.item.item_number }}</span>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="mb-3">{{ item_completion.item.task_description }}</h5>
+                    
+                    <!-- Status Display -->
+                    <div class="mb-3">
+                        <strong>Status:</strong>
+                        <div class="mt-2">
+                            {% if completion.schedule.template.annex_code == 'A' %}
+                                {% if item_completion.item.has_schedule_times %}
+                                    <!-- Time-based completions -->
+                                    {% for time_slot in item_completion.item.schedule_times %}
+                                        <div class="mb-1">
+                                            <span class="status-indicator {% if item_completion.time_completions|get_item:time_slot %}status-done{% else %}status-not-done{% endif %}">
+                                                {% if item_completion.time_completions|get_item:time_slot %}✓{% else %}✗{% endif %}
+                                            </span>
+                                            {{ time_slot }}
+                                            {% if item_completion.recorded_value %}
+                                                - <strong>{{ item_completion.recorded_value }} {{ item_completion.item.value_unit }}</strong>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- Day-based completions -->
+                                    <span class="status-indicator {% if item_completion.monday %}status-done{% else %}status-not-done{% endif %}">
+                                        {% if item_completion.monday %}✓{% else %}✗{% endif %}
+                                    </span> M
+                                    <span class="status-indicator {% if item_completion.tuesday %}status-done{% else %}status-not-done{% endif %}">
+                                        {% if item_completion.tuesday %}✓{% else %}✗{% endif %}
+                                    </span> T
+                                    <span class="status-indicator {% if item_completion.wednesday %}status-done{% else %}status-not-done{% endif %}">
+                                        {% if item_completion.wednesday %}✓{% else %}✗{% endif %}
+                                    </span> W
+                                    <span class="status-indicator {% if item_completion.thursday %}status-done{% else %}status-not-done{% endif %}">
+                                        {% if item_completion.thursday %}✓{% else %}✗{% endif %}
+                                    </span> Th
+                                    <span class="status-indicator {% if item_completion.friday %}status-done{% else %}status-not-done{% endif %}">
+                                        {% if item_completion.friday %}✓{% else %}✗{% endif %}
+                                    </span> F
+                                {% endif %}
+                            
+                            {% elif completion.schedule.template.annex_code == 'C' %}
+                                <!-- Week-based completions -->
+                                <span class="status-indicator {% if item_completion.week1 %}status-done{% else %}status-not-done{% endif %}">
+                                    {% if item_completion.week1 %}✓{% else %}✗{% endif %}
+                                </span> Wk1
+                                <span class="status-indicator {% if item_completion.week2 %}status-done{% else %}status-not-done{% endif %}">
+                                    {% if item_completion.week2 %}✓{% else %}✗{% endif %}
+                                </span> Wk2
+                                <span class="status-indicator {% if item_completion.week3 %}status-done{% else %}status-not-done{% endif %}">
+                                    {% if item_completion.week3 %}✓{% else %}✗{% endif %}
+                                </span> Wk3
+                                <span class="status-indicator {% if item_completion.week4 %}status-done{% else %}status-not-done{% endif %}">
+                                    {% if item_completion.week4 %}✓{% else %}✗{% endif %}
+                                </span> Wk4
+                            
+                            {% else %}
+                                <!-- Simple completion -->
+                                {% if item_completion.is_completed %}
+                                    <span class="badge bg-success"><i class="fas fa-check"></i> Completed</span>
+                                {% else %}
+                                    <span class="badge bg-secondary"><i class="fas fa-times"></i> Not Completed</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Problems Encountered -->
+                    {% if item_completion.problems_encountered %}
+                    <div class="alert alert-warning mb-3">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Problems Encountered</h6>
+                        <p class="mb-0">{{ item_completion.problems_encountered }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Action Taken -->
+                    {% if item_completion.action_taken %}
+                    <div class="alert alert-info mb-3">
+                        <h6><i class="fas fa-tools"></i> Action Taken</h6>
+                        <p class="mb-0">{{ item_completion.action_taken }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Photo Evidence -->
+                    {% if item_completion.photo1 or item_completion.photo2 or item_completion.photo3 %}
+                    <div class="mt-3">
+                        <h6><i class="fas fa-camera"></i> Photo Evidence</h6>
+                        <div class="d-flex gap-3 flex-wrap">
+                            {% if item_completion.photo1 %}
+                            <a href="{{ item_completion.photo1.url }}" target="_blank">
+                                <img src="{{ item_completion.photo1.url }}" class="photo-evidence" alt="Photo 1">
+                            </a>
+                            {% endif %}
+                            {% if item_completion.photo2 %}
+                            <a href="{{ item_completion.photo2.url }}" target="_blank">
+                                <img src="{{ item_completion.photo2.url }}" class="photo-evidence" alt="Photo 2">
+                            </a>
+                            {% endif %}
+                            {% if item_completion.photo3 %}
+                            <a href="{{ item_completion.photo3.url }}" target="_blank">
+                                <img src="{{ item_completion.photo3.url }}" class="photo-evidence" alt="Photo 3">
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Signature Section -->
+    <div class="signature-section">
+        <h4 class="mb-3"><i class="fas fa-signature"></i> Accomplished By</h4>
+        
+        {% if completion.signature_image %}
+        <div class="mb-3">
+            <img src="{{ completion.signature_image.url }}" style="max-width: 300px; border: 1px solid #cbd5e0; padding: 10px; background: white; border-radius: 8px;">
+        </div>
+        {% endif %}
+        
+        <div style="border-bottom: 2px solid #2d3748; width: 300px; margin: 20px 0 10px 0;"></div>
+        <p class="mb-0"><strong>{{ completion.printed_name|default:completion.completed_by.get_full_name|default:completion.completed_by.username }}</strong></p>
+        <p class="text-muted" style="font-size: 0.9rem;">(Signature over printed name)</p>
+    </div>
+</div>
+{% endblock %}

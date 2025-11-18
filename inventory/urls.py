@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import views
+from inventory import pm_pdf_views, views
 from django.conf import settings
 from django.conf.urls.static import static
+
 
  
 
@@ -230,6 +231,34 @@ urlpatterns = [
     
     # API Endpoint
     path('api/notifications/count/', views.get_notification_count, name='notification_count_api'),
+
+
+    # ================================
+    # PM CHECKLIST - REPORTS ROUTES
+    # ================================
+    path('pm/', views.pm_dashboard, name='pm_dashboard'),
+    
+    # Checklist Management
+    path('pm/checklists/', views.pm_checklist_list, name='pm_checklist_list'),
+    path('pm/checklist/fill/<int:schedule_id>/', views.pm_checklist_fill, name='pm_checklist_fill'),
+    path('pm/checklist/view/<int:completion_id>/', views.pm_checklist_view, name='pm_checklist_view'),
+    path('pm/schedule/create/', views.pm_schedule_create, name='pm_schedule_create'),
+    
+    # Reports
+    path('pm/reports/', views.pm_reports, name='pm_reports'),
+    path('pm/reports/generate/', views.pm_generate_report, name='pm_generate_report'),
+    
+    # PDF Exports
+    path('pm/export/checklist/<int:completion_id>/', pm_pdf_views.export_checklist_pdf, name='pm_export_checklist_pdf'),
+    path('pm/export/report/<int:report_id>/', pm_pdf_views.export_report_pdf, name='pm_export_report_pdf'),
+    
+    # Issues
+    path('pm/issues/', views.pm_issues, name='pm_issues'),
+    path('pm/issue/<int:issue_id>/update/', views.pm_issue_update, name='pm_issue_update'),
+    
+    # API endpoints for AJAX
+    path('pm/api/mark-complete/<int:schedule_id>/', views.api_mark_complete, name='pm_api_mark_complete'),
+    path('pm/api/schedule-bulk/', views.api_schedule_bulk, name='pm_api_schedule_bulk'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

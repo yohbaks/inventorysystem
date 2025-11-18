@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Schedule PM Checklist{% endblock %}
+
+{% block content %}
+<style>
+    .schedule-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .schedule-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        background: white;
+    }
+    
+    .schedule-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px;
+        color: white;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .schedule-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .schedule-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .schedule-header p {
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .schedule-icon {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .schedule-icon i {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .schedule-form {
+        padding: 40px;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-section-title i {
+        color: #667eea;
+    }
+    
+    .modern-input-group {
+        margin-bottom: 25px;
+    }
+    
+    .modern-label {
+        display: block;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+    }
+    
+    .modern-label i {
+        color: #667eea;
+        margin-right: 8px;
+    }
+    
+    .modern-label .required {
+        color: #ef4444;
+        margin-left: 4px;
+    }
+    
+    .modern-input,
+    .modern-select {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .modern-input:focus,
+    .modern-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .modern-select {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 18px center;
+        padding-right: 45px;
+        appearance: none;
+    }
+    
+    .input-hint {
+        display: block;
+        font-size: 0.85rem;
+        color: #718096;
+        margin-top: 8px;
+        font-style: italic;
+    }
+    
+    .date-inputs-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .date-inputs-row {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .template-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .template-card:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+        transform: translateX(5px);
+    }
+    
+    .template-card.selected {
+        border-color: #667eea;
+        background: #f8f9ff;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: space-between;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 2px solid #e2e8f0;
+    }
+    
+    .btn-modern-cancel {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        padding: 14px 30px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-modern-cancel:hover {
+        background: #e2e8f0;
+        color: #475569;
+        transform: translateY(-2px);
+    }
+    
+    .btn-modern-submit {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 14px 40px;
+        border-radius: 12px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-modern-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+    }
+    
+    .info-box i {
+        color: #667eea;
+        font-size: 1.5rem;
+        margin-right: 15px;
+    }
+    
+    .info-box-content {
+        display: flex;
+        align-items: start;
+    }
+    
+    .info-box-text {
+        flex: 1;
+    }
+    
+    .info-box-title {
+        font-weight: 700;
+        color: #1e40af;
+        margin-bottom: 5px;
+    }
+    
+    .info-box-description {
+        color: #3b82f6;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container">
+    <div class="page-inner">
+        <!-- Breadcrumbs -->
+        <div class="page-header mb-4">
+            <ul class="breadcrumbs">
+                <li class="nav-home">
+                    <a href="{% url 'dashboard' %}"><i class="icon-home"></i></a>
+                </li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="{% url 'pm_dashboard' %}">PM System</a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item active">Schedule Checklist</li>
+            </ul>
+        </div>
+
+        <!-- Schedule Form Card -->
+        <div class="schedule-container">
+            <div class="schedule-card">
+                <!-- Header -->
+                <div class="schedule-header">
+                    <div class="schedule-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <h2>Schedule PM Checklist</h2>
+                    <p>Create a new preventive maintenance checklist schedule</p>
+                </div>
+
+                <!-- Form -->
+                <div class="schedule-form">
+                    <form method="post" id="scheduleForm">
+                        {% csrf_token %}
+                        
+                        <!-- Template Selection -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Checklist Template</span>
+                            </div>
+                            
+                            <div class="modern-input-group">
+                                <label class="modern-label">
+                                    <i class="fas fa-folder-open"></i>
+                                    Select Annex Type
+                                    <span class="required">*</span>
+                                </label>
+                                <select name="template_id" id="template_id" class="modern-select" required>
+                                    <option value="">Choose a template...</option>
+                                    {% for template in templates %}
+                                    <option value="{{ template.id }}" 
+                                            data-frequency="{{ template.frequency }}"
+                                            data-note="{{ template.schedule_note }}">
+                                        Annex {{ template.annex_code }} - {{ template.title }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <span class="input-hint">Select the type of maintenance checklist to schedule</span>
+                            </div>
+                            
+                            <div id="template-info" class="info-box" style="display: none;">
+                                <div class="info-box-content">
+                                    <i class="fas fa-info-circle"></i>
+                                    <div class="info-box-text">
+                                        <div class="info-box-title" id="template-title"></div>
+                                        <div class="info-box-description" id="template-description"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Dates -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Schedule Dates</span>
+                            </div>
+                            
+                            <div class="date-inputs-row">
+                                <div class="modern-input-group">
+                                    <label class="modern-label">
+                                        <i class="fas fa-calendar"></i>
+                                        Scheduled Date
+                                        <span class="required">*</span>
+                                    </label>
+                                    <input type="date" 
+                                           name="scheduled_date" 
+                                           id="scheduled_date" 
+                                           class="modern-input" 
+                                           required>
+                                    <span class="input-hint">When should this checklist start?</span>
+                                </div>
+                                
+                                <div class="modern-input-group">
+                                    <label class="modern-label">
+                                        <i class="fas fa-flag-checkered"></i>
+                                        Due Date
+                                        <span class="required">*</span>
+                                    </label>
+                                    <input type="date" 
+                                           name="due_date" 
+                                           id="due_date" 
+                                           class="modern-input" 
+                                           required>
+                                    <span class="input-hint">Deadline for completion</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assignment & Location -->
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <i class="fas fa-user-cog"></i>
+                                <span>Assignment & Location</span>
+                            </div>
+                            
+                            <div class="modern-input-group">
+                                <label class="modern-label">
+                                    <i class="fas fa-user-check"></i>
+                                    Assign To
+                                </label>
+                                <select name="assigned_to" id="assigned_to" class="modern-select">
+                                    <option value="">Leave unassigned</option>
+                                    {% for user in users %}
+                                    <option value="{{ user.id }}">
+                                        {{ user.get_full_name|default:user.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <span class="input-hint">Optional: Assign this checklist to a specific person</span>
+                            </div>
+                            
+                            <div class="modern-input-group">
+                                <label class="modern-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Location
+                                </label>
+                                <input type="text" 
+                                       name="location" 
+                                       id="location" 
+                                       class="modern-input" 
+                                       placeholder="e.g., Building A, 2nd Floor, Server Room">
+                                <span class="input-hint">Optional: Specify the physical location</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a href="{% url 'pm_checklist_list' %}" class="btn btn-modern-cancel">
+                                <i class="fas fa-times-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-modern-submit">
+                                <i class="fas fa-check-circle"></i> Schedule Checklist
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateSelect = document.getElementById('template_id');
+    const templateInfo = document.getElementById('template-info');
+    const templateTitle = document.getElementById('template-title');
+    const templateDescription = document.getElementById('template-description');
+    const scheduledDate = document.getElementById('scheduled_date');
+    const dueDate = document.getElementById('due_date');
+    
+    // Show template info when selected
+    templateSelect.addEventListener('change', function() {
+        if (this.value) {
+            const selectedOption = this.options[this.selectedIndex];
+            const frequency = selectedOption.dataset.frequency;
+            const note = selectedOption.dataset.note;
+            
+            templateTitle.textContent = `${selectedOption.textContent}`;
+            templateDescription.textContent = `Frequency: ${frequency} | Schedule: ${note}`;
+            templateInfo.style.display = 'block';
+        } else {
+            templateInfo.style.display = 'none';
+        }
+    });
+    
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    scheduledDate.setAttribute('min', today);
+    dueDate.setAttribute('min', today);
+    
+    // Auto-update due date when scheduled date changes
+    scheduledDate.addEventListener('change', function() {
+        if (this.value) {
+            dueDate.setAttribute('min', this.value);
+            if (!dueDate.value || new Date(dueDate.value) < new Date(this.value)) {
+                // Set due date to 7 days after scheduled date
+                const scheduled = new Date(this.value);
+                scheduled.setDate(scheduled.getDate() + 7);
+                dueDate.value = scheduled.toISOString().split('T')[0];
+            }
+        }
+    });
+    
+    // Form validation
+    document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+        const scheduledValue = new Date(scheduledDate.value);
+        const dueValue = new Date(dueDate.value);
+        
+        if (dueValue < scheduledValue) {
+            e.preventDefault();
+            alert('Due date cannot be earlier than scheduled date!');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

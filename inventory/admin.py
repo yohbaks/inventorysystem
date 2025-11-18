@@ -2,15 +2,21 @@ from django.contrib import admin
 from .models import (
     Equipment_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor,
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse,
-    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
-    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, PMScheduleAssignment, MaintenanceChecklistItem, SalvagedMonitor,
-    SalvagedMonitorHistory, SalvagedKeyboard, SalvagedKeyboardHistory, SalvagedMouse, SalvagedMouseHistory, SalvagedUPS, SalvagedUPSHistory,
-    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification,
-    OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies, DocumentPhoto
+    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, 
+    AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
+    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, 
+    PMScheduleAssignment, MaintenanceChecklistItem, SalvagedMonitor,
+    SalvagedMonitorHistory, SalvagedKeyboard, SalvagedKeyboardHistory, SalvagedMouse, 
+    SalvagedMouseHistory, SalvagedUPS, SalvagedUPSHistory,
+    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, 
+    PrinterDetails, DisposedPrinter, Notification,
+    OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies, DocumentPhoto,
+    # New PM Checklist Models
+    PMChecklistTemplate, PMChecklistItem, PMChecklistSchedule,
+    PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport, PMIssueLog
 )
 
 # Register your models here.
-# admin.site.register(DESKTOPPACKAGE)
 admin.site.register(Equipment_Package)
 admin.site.register(DesktopDetails)
 admin.site.register(MonitorDetails)
@@ -55,6 +61,11 @@ admin.site.register(OfficeSuppliesDetails)
 admin.site.register(DisposedOfficeSupplies)
 admin.site.register(DocumentPhoto)
 
-
-
-
+# PM Checklist System Models
+admin.site.register(PMChecklistTemplate)
+admin.site.register(PMChecklistItem)
+admin.site.register(PMChecklistSchedule)
+admin.site.register(PMChecklistCompletion)
+admin.site.register(PMChecklistItemCompletion)
+admin.site.register(PMChecklistReport)
+admin.site.register(PMIssueLog)
