@@ -54,6 +54,41 @@
 
 <div class="modern-container">
   <div class="container-fluid">
+    <!-- Success Messages -->
+    {% if messages %}
+      <div class="messages-container" style="position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 400px;">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-lg" role="alert" style="border-radius: 0.75rem; animation: slideInRight 0.3s ease;">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+            <strong>{{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+      <style>
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .alert-success {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+        }
+        .alert-error, .alert-danger {
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+          border: none;
+        }
+      </style>
+    {% endif %}
+
     <!-- Hero Header -->
     <div class="hero-header">
       <div class="hero-content">
@@ -137,6 +172,7 @@
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Laptop Specifications</h2>
+                {% include "photo/laptop_photo.html" %}
                 <div class="d-flex gap-2">
                   {% if laptop_details and not laptop_details.is_disposed %}
                     <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editLaptopModal">
@@ -476,9 +512,6 @@
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Documents Details</h2>
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">
-                  <i class="fa fa-edit"></i> Edit
-                </button>
               </div>
 
               {% if documents_details %}
@@ -513,6 +546,17 @@
                     {% endif %}
                   </div>
                 </div>
+              </div>
+
+              <!-- Photo Slider -->
+              {% with documents_detailse=documents_details %}
+                {% include "photo/documents_photo.html" %}
+              {% endwith %}
+
+              <div class="mt-4">
+                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">
+                  <i class="fa fa-edit"></i> Edit
+                </button>
               </div>
               {% else %}
               <div class="alert alert-info" style="border-radius: 1rem;">
@@ -1120,6 +1164,30 @@ $(document).ready(function() {
         delay: 4000
       });
     }
+  });
+});
+</script>
+
+<!-- ==================== TAB NAVIGATION WITH URL HASH ==================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // 1️⃣ Auto-open the correct tab if there's a hash in the URL
+  const hash = window.location.hash;
+  if (hash) {
+    const triggerEl = document.querySelector(`button[data-bs-target="${hash}"]`);
+    if (triggerEl) {
+      const tab = new bootstrap.Tab(triggerEl);
+      tab.show();
+    }
+  }
+
+  // 2️⃣ When the user switches tabs, update the hash in the URL
+  const tabButtons = document.querySelectorAll('button[data-bs-toggle="pill"]');
+  tabButtons.forEach(btn => {
+    btn.addEventListener('shown.bs.tab', function (e) {
+      const target = e.target.getAttribute('data-bs-target');
+      history.replaceState(null, null, target);
+    });
   });
 });
 </script>

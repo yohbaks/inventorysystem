@@ -160,6 +160,7 @@ class KeyboardDetails(models.Model):
 
     keyboard_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     keyboard_model_db = models.CharField(max_length=255)
+    keyboard_photo = models.ImageField(upload_to="keyboard_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -181,6 +182,7 @@ class MouseDetails(models.Model):
 
     mouse_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     mouse_model_db = models.CharField(max_length=255, null=True)
+    mouse_photo = models.ImageField(upload_to="mouse_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -203,6 +205,7 @@ class UPSDetails(models.Model):
     ups_brand_db = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
     ups_model_db = models.CharField(max_length=255)
     ups_capacity_db = models.CharField(max_length=255, null=True)
+    ups_photo = models.ImageField(upload_to="ups_photos/", null=True, blank=True)
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -540,6 +543,7 @@ class DocumentsDetails(models.Model):
     docs_Dateinspected = models.CharField(max_length=100, blank=True, null=True)
     docs_Supplier = models.CharField(max_length=100, blank=True, null=True)
     docs_Status = models.CharField(max_length=100, blank=True, null=True)
+    docs_photo = models.ImageField(upload_to="document_photos/", null=True, blank=True)
 
     def __str__(self):
         if self.equipment_package:
@@ -551,8 +555,21 @@ class DocumentsDetails(models.Model):
         elif self.office_supplies_package:
             return f"Docs for Office Supplies Package {self.office_supplies_package.id}"
         return "Docs (unlinked)"
-    
-    
+
+
+class DocumentPhoto(models.Model):
+    """Multiple photos for supporting documents"""
+    document = models.ForeignKey(DocumentsDetails, related_name='photos', on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to="document_photos/")
+    caption = models.CharField(max_length=255, blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return f"Photo for {self.document} - {self.uploaded_at.strftime('%Y-%m-%d %H:%M')}"
+
 
 class Employee(models.Model):
     equipment_package = models.ForeignKey(Equipment_Package, on_delete=models.CASCADE, null=True)
@@ -841,6 +858,8 @@ class LaptopDetails(models.Model):
     laptop_Office = models.CharField(max_length=100, blank=True, null=True)
     laptop_OS_keys = models.CharField(max_length=100, blank=True, null=True)
     laptop_Office_keys = models.CharField(max_length=100, blank=True, null=True)
+
+    laptop_photo = models.ImageField(upload_to="laptop_photos/", null=True, blank=True)
 
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
