@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import pm_pdf_views, views
+from inventory import pm_pdf_views, views, pm_daily_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -259,6 +259,19 @@ urlpatterns = [
     # API endpoints for AJAX
     path('pm/api/mark-complete/<int:schedule_id>/', views.api_mark_complete, name='pm_api_mark_complete'),
     path('pm/api/schedule-bulk/', views.api_schedule_bulk, name='pm_api_schedule_bulk'),
+
+    # ================================
+    # PM DAILY CHECKLIST SYSTEM (NEW)
+    # ================================
+    # Daily PM Dashboard and Completion
+    path('pm/daily/', pm_daily_views.daily_pm_dashboard, name='pm_daily_dashboard'),
+    path('pm/daily/complete/<int:schedule_id>/', pm_daily_views.complete_daily_pm, name='complete_daily_pm'),
+    path('pm/daily/view/<int:completion_id>/', pm_daily_views.view_daily_pm_completion, name='view_daily_pm_completion'),
+
+    # Daily/Weekly PDF Exports
+    path('pm/daily/export/<int:completion_id>/', pm_daily_views.export_daily_pm_pdf, name='export_daily_pm_pdf'),
+    path('pm/weekly/export/', pm_daily_views.export_weekly_pm_pdf, name='export_weekly_pm_pdf'),
+    path('pm/weekly/view/', pm_daily_views.weekly_pm_report_view, name='weekly_pm_report_view'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
