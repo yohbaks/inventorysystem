@@ -68,15 +68,11 @@ python manage.py populate_pm_templates
 
 This creates the Annex A template with all 12 items.
 
-### 2. Create Weekly Schedules
+### 2. Daily Completion
 
-At the start of each week, create schedules for Mon-Fri:
+**Schedules are created automatically!** When you access the dashboard on any weekday, the system automatically creates schedules for the entire week (Mon-Fri).
 
-- Go to admin or use the "Create Weekly Schedules" button
-- This creates 5 schedule records (one for each weekday)
-- Excludes Saturday and Sunday automatically
-
-### 3. Daily Completion
+No manual schedule creation needed!
 
 **Each day:**
 1. Navigate to PM Daily Dashboard
@@ -85,7 +81,7 @@ At the start of each week, create schedules for Mon-Fri:
 4. Add problems/actions if needed
 5. Sign and submit
 
-### 4. Export Reports
+### 3. Export Reports
 
 **Daily Report:**
 - View a completed day
@@ -109,7 +105,6 @@ from inventory.pm_daily_views import (
     export_weekly_pm_pdf,
     view_daily_pm_completion,
     weekly_pm_report_view,
-    create_weekly_schedules
 )
 
 urlpatterns = [
@@ -122,9 +117,6 @@ urlpatterns = [
     # Weekly PM paths
     path('pm/weekly/export/', export_weekly_pm_pdf, name='export_weekly_pm_pdf'),
     path('pm/weekly/view/', weekly_pm_report_view, name='weekly_pm_report_view'),
-
-    # Admin
-    path('pm/admin/create-weekly-schedules/', create_weekly_schedules, name='create_weekly_schedules'),
 ]
 ```
 
@@ -217,10 +209,11 @@ If you have existing weekly completions:
 ## Summary
 
 **Remember:**
+- ✅ Schedules are created AUTOMATICALLY (Mon-Fri)
 - ✅ Complete checklist DAILY (Mon-Fri)
 - ✅ Each day creates a NEW completion record
 - ✅ Daily PDF shows ONLY that day
 - ✅ Weekly PDF combines ALL 5 days
-- ✅ Weekends are excluded
+- ✅ Weekends are excluded automatically
 - ✅ Daily tasks: Items 1-6, 12
 - ✅ Weekly tasks: Items 7-11 (dark gray)

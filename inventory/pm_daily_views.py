@@ -21,6 +21,29 @@ from .pm_daily_weekly_export import (
 )
 
 
+def auto_create_week_schedules(template, reference_date):
+    """
+    Automatically create PM schedules for the entire week (Mon-Fri)
+    This ensures schedules are always available without manual creation
+    """
+    monday, friday = get_week_start_end(reference_date)
+
+    # Create schedules for Mon-Fri only (weekday 0-4)
+    for day_offset in range(5):
+        schedule_date = monday + timedelta(days=day_offset)
+
+        # Only create if doesn't exist
+        PMChecklistSchedule.objects.get_or_create(
+            template=template,
+            scheduled_date=schedule_date,
+            defaults={
+                'due_date': schedule_date,
+                'status': 'PENDING',
+                'assigned_to': None  # Can be assigned later
+            }
+        )
+
+
 @login_required
 def daily_pm_dashboard(request):
     """Dashboard showing daily PM tasks for today"""
@@ -43,15 +66,13 @@ def daily_pm_dashboard(request):
         messages.error(request, 'PM Checklist template not found. Please run populate_pm_templates command.')
         return redirect('home')
 
-    # Get or create today's schedule
-    schedule, created = PMChecklistSchedule.objects.get_or_create(
+    # Automatically ensure schedules exist for the entire current week (Mon-Fri)
+    auto_create_week_schedules(template, today)
+
+    # Get today's schedule (now guaranteed to exist)
+    schedule = PMChecklistSchedule.objects.get(
         template=template,
-        scheduled_date=today,
-        defaults={
-            'due_date': today,
-            'status': 'PENDING',
-            'assigned_to': request.user
-        }
+        scheduled_date=today
     )
 
     # Check if already completed today
@@ -341,43 +362,8 @@ def weekly_pm_report_view(request):
 @login_required
 def create_weekly_schedules(request):
     """
-    Admin function to create PM schedules for the current week (Mon-Fri only)
-    This should be called at the start of each week
+    DEPRECATED: Schedules are now created automatically.
+    This view is kept for backwards compatibility but just redirects.
     """
-
-    if not request.user.is_staff:
-        messages.error(request, 'Only staff can create schedules.')
-        return redirect('pm_daily_dashboard')
-
-    # Get Annex A template
-    try:
-        template = PMChecklistTemplate.objects.get(annex_code='A')
-    except PMChecklistTemplate.DoesNotExist:
-        messages.error(request, 'PM Checklist template not found.')
-        return redirect('pm_daily_dashboard')
-
-    # Get current week's Monday
-    today = timezone.now().date()
-    monday, friday = get_week_start_end(today)
-
-    created_count = 0
-
-    # Create schedules for Mon-Fri only
-    for day_offset in range(5):  # 0=Monday to 4=Friday
-        schedule_date = monday + timedelta(days=day_offset)
-
-        schedule, created = PMChecklistSchedule.objects.get_or_create(
-            template=template,
-            scheduled_date=schedule_date,
-            defaults={
-                'due_date': schedule_date,
-                'status': 'PENDING',
-                'assigned_to': request.user
-            }
-        )
-
-        if created:
-            created_count += 1
-
-    messages.success(request, f'Created {created_count} schedules for week of {monday.strftime("%B %d")} - {friday.strftime("%B %d, %Y")}')
+    messages.info(request, 'Schedules are now created automatically when you access the dashboard.')
     return redirect('pm_daily_dashboard')
