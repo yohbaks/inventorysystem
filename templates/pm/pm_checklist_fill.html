@@ -5,308 +5,265 @@
 
 {% block extra_css %}
 <style>
-    .checklist-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 30px;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    .item-card {
+        background: #fff;
+        border: 1px solid #ebedf2;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
     }
-    
-    .checklist-form {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    
-    .item-row {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        border-left: 4px solid #667eea;
-        transition: all 0.3s ease;
-    }
-    
-    .item-row:hover {
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        transform: translateX(5px);
-    }
-    
+
     .item-number {
-        background: #667eea;
+        background: #1572e8;
         color: white;
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        margin-right: 15px;
+        font-size: 14px;
+        margin-right: 10px;
     }
-    
+
     .checkbox-day {
-        width: 50px;
         text-align: center;
-        margin: 0 5px;
+        margin: 0 10px;
+        display: inline-block;
     }
-    
+
     .checkbox-day label {
         display: block;
-        font-weight: bold;
+        font-weight: 600;
         margin-bottom: 5px;
-        font-size: 0.9rem;
+        font-size: 13px;
+        color: #333;
     }
-    
+
     .checkbox-day input[type="checkbox"] {
         width: 20px;
         height: 20px;
         cursor: pointer;
     }
-    
-    .signature-pad {
-        border: 2px dashed #667eea;
-        border-radius: 10px;
-        padding: 20px;
-        background: #f8f9fa;
-        text-align: center;
-    }
-    
+
     .time-check {
-        background: white;
-        padding: 10px;
-        border-radius: 5px;
-        margin: 5px 0;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .btn-submit {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        padding: 15px 40px;
-        font-size: 1.1rem;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        transition: all 0.3s ease;
-    }
-    
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        background: #f9f9f9;
+        padding: 8px;
+        border-radius: 3px;
+        margin: 3px 0;
+        border: 1px solid #eee;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="checklist-header">
-        <div class="d-flex justify-content-between align-items-center">
+<div class="container">
+    <div class="page-inner">
+        <!-- Page Header -->
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
             <div>
-                <h1 class="mb-2">
+                <h3 class="fw-bold mb-3">
                     <i class="fas fa-clipboard-list"></i>
-                    ANNEX "{{ template.annex_code }}"
-                </h1>
-                <h3>{{ template.title }}</h3>
-                <p class="mb-0"><strong>Schedule:</strong> {{ template.schedule_note }}</p>
-                {% if schedule.location %}
-                <p class="mb-0"><strong>Location:</strong> {{ schedule.location }}</p>
-                {% endif %}
+                    Fill Checklist - ANNEX "{{ template.annex_code }}"
+                </h3>
+                <h6 class="op-7 mb-2">{{ template.title }}</h6>
+                <p class="text-muted mb-0">
+                    <small><strong>Schedule:</strong> {{ template.schedule_note }}</small>
+                    {% if schedule.location %}
+                    <small class="ms-3"><strong>Location:</strong> {{ schedule.location }}</small>
+                    {% endif %}
+                </p>
             </div>
-            <div>
-                <a href="{% url 'pm_dashboard' %}" class="btn btn-light btn-lg">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+            <div class="ms-md-auto py-2 py-md-0">
+                <a href="{% url 'pm_dashboard' %}" class="btn btn-secondary btn-round">
+                    <i class="fas fa-arrow-left"></i> Back
                 </a>
             </div>
         </div>
-    </div>
-    
-    <form method="post" enctype="multipart/form-data" id="checklistForm">
-        {% csrf_token %}
-        
-        <div class="checklist-form">
-            <h4 class="mb-4">
-                <i class="fas fa-tasks"></i> Checklist Items
-            </h4>
-            
-            {% for item in items %}
-            <div class="item-row">
-                <div class="d-flex align-items-start">
-                    <div class="item-number">{{ item.item_number }}</div>
-                    <div class="flex-grow-1">
-                        <h5 class="mb-3">{{ item.task_description }}</h5>
-                        
-                        <!-- Status Checkboxes based on template type -->
-                        <div class="status-section mb-3">
-                            <label class="form-label fw-bold">Status (put ✓ if done):</label>
-                            
-                            {% if template.annex_code == 'A' %}
-                                <!-- Daily/Weekly with days -->
-                                {% if item.has_schedule_times %}
-                                    <!-- Items with scheduled times -->
-                                    <div class="time-checks">
-                                        {% for time_slot in item.schedule_times %}
-                                        <div class="time-check">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" 
-                                                       name="item_{{ item.id }}_time_{{ time_slot|lower|cut:' ' }}"
-                                                       id="item_{{ item.id }}_time_{{ forloop.counter }}">
-                                                <label class="form-check-label" for="item_{{ item.id }}_time_{{ forloop.counter }}">
-                                                    <strong>{{ time_slot }}</strong>
-                                                    {% if item.requires_value_input %}
-                                                        <input type="text" class="form-control form-control-sm d-inline-block ms-3" 
-                                                               style="width: 100px;"
-                                                               name="item_{{ item.id }}_value_{{ time_slot|lower|cut:' ' }}"
-                                                               placeholder="Value ({{ item.value_unit }})">
-                                                    {% endif %}
-                                                </label>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
+
+        <form method="post" enctype="multipart/form-data" id="checklistForm">
+            {% csrf_token %}
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0"><i class="fas fa-tasks"></i> Checklist Items</h4>
+                        <div>
+                            <label class="mb-0 me-2"><strong>Date Accomplished:</strong></label>
+                            <input type="date" class="form-control form-control-sm d-inline-block"
+                                   name="date_accomplished" required
+                                   style="width: auto;"
+                                   value="{{ today|date:'Y-m-d' }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    {% for item in items %}
+                    <div class="item-card">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="item-number">{{ item.item_number }}</div>
+                            <h6 class="mb-0 mt-1"><strong>{{ item.task_description }}</strong></h6>
+                        </div>
+
+                        <!-- Status Checkboxes -->
+                        <div class="mb-3">
+                            {% if template.annex_code == 'A' and item.has_schedule_times %}
+                                <label class="form-label"><strong>Status (put ✓ if done):</strong></label>
+                                <!-- Items with scheduled times (checked at different times of the day) -->
+                                {% for time_slot in item.schedule_times %}
+                                <div class="time-check">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="item_{{ item.id }}_time_{{ time_slot|lower|cut:' ' }}"
+                                               id="item_{{ item.id }}_time_{{ forloop.counter }}">
+                                        <label class="form-check-label" for="item_{{ item.id }}_time_{{ forloop.counter }}">
+                                            <strong>{{ time_slot }}</strong>
+                                            {% if item.requires_value_input %}
+                                                <input type="text" class="form-control form-control-sm d-inline-block ms-3"
+                                                       style="width: 100px;"
+                                                       name="item_{{ item.id }}_value_{{ time_slot|lower|cut:' ' }}"
+                                                       placeholder="Value ({{ item.value_unit }})">
+                                            {% endif %}
+                                        </label>
                                     </div>
-                                {% else %}
-                                    <!-- Regular day checkboxes -->
-                                    <div class="d-flex justify-content-start">
-                                        <div class="checkbox-day">
-                                            <label>M</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_monday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>T</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_tuesday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>W</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_wednesday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>Th</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_thursday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>F</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_friday" class="form-check-input">
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            
-                            {% elif template.annex_code == 'C' %}
-                                <!-- Weekly with week numbers -->
-                                <div class="d-flex justify-content-start">
+                                </div>
+                                {% endfor %}
+                            {% elif template.annex_code == 'A' or template.schedule_type == 'daily' %}
+                                <!-- Daily with M-F columns -->
+                                <label class="form-label"><strong>Status (put ✓ if done):</strong></label>
+                                <div class="d-flex">
                                     <div class="checkbox-day">
-                                        <label>Wk1</label>
+                                        <label>M</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_monday" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>T</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_tuesday" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>W</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_wednesday" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>Th</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_thursday" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>F</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_friday" class="form-check-input">
+                                    </div>
+                                </div>
+                            {% elif template.annex_code == 'C' or template.schedule_type == 'weekly' %}
+                                <!-- Weekly with Week 1-4 columns -->
+                                <label class="form-label"><strong>Status (put ✓ if done):</strong></label>
+                                <div class="d-flex">
+                                    <div class="checkbox-day">
+                                        <label>Week 1</label>
                                         <input type="checkbox" name="item_{{ item.id }}_week1" class="form-check-input">
                                     </div>
                                     <div class="checkbox-day">
-                                        <label>Wk2</label>
+                                        <label>Week 2</label>
                                         <input type="checkbox" name="item_{{ item.id }}_week2" class="form-check-input">
                                     </div>
                                     <div class="checkbox-day">
-                                        <label>Wk3</label>
+                                        <label>Week 3</label>
                                         <input type="checkbox" name="item_{{ item.id }}_week3" class="form-check-input">
                                     </div>
                                     <div class="checkbox-day">
-                                        <label>Wk4</label>
+                                        <label>Week 4</label>
                                         <input type="checkbox" name="item_{{ item.id }}_week4" class="form-check-input">
                                     </div>
                                 </div>
-                            
                             {% else %}
-                                <!-- Simple completion checkbox -->
+                                <!-- Simple completion checkbox for monthly/semi-annual -->
+                                <label class="form-label"><strong>Status:</strong></label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" 
+                                    <input class="form-check-input" type="checkbox"
                                            name="item_{{ item.id }}_completed"
                                            id="item_{{ item.id }}_completed">
                                     <label class="form-check-label" for="item_{{ item.id }}_completed">
-                                        Task Completed
+                                        <strong>Done</strong>
+                                        {% if item.requires_value_input %}
+                                            <input type="text" class="form-control form-control-sm d-inline-block ms-3"
+                                                   style="width: 120px;"
+                                                   name="item_{{ item.id }}_value"
+                                                   placeholder="Value ({{ item.value_unit }})">
+                                        {% endif %}
                                     </label>
                                 </div>
                             {% endif %}
                         </div>
-                        
-                        <!-- Problems Encountered -->
-                        <div class="mb-3">
-                            <label for="item_{{ item.id }}_problems" class="form-label fw-bold">
-                                <i class="fas fa-exclamation-circle text-warning"></i> Problems Encountered:
-                            </label>
-                            <textarea class="form-control" name="item_{{ item.id }}_problems" 
-                                      id="item_{{ item.id }}_problems" rows="2" 
-                                      placeholder="Describe any problems encountered..."></textarea>
+
+                        <!-- Problems and Actions -->
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label"><i class="fas fa-exclamation-circle text-warning"></i> Problems:</label>
+                                <textarea class="form-control form-control-sm" name="item_{{ item.id }}_problems" rows="2" placeholder="Describe problems..."></textarea>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label"><i class="fas fa-tools text-info"></i> Action Taken:</label>
+                                <textarea class="form-control form-control-sm" name="item_{{ item.id }}_action" rows="2" placeholder="Describe action..."></textarea>
+                            </div>
                         </div>
-                        
-                        <!-- Action Taken -->
-                        <div class="mb-3">
-                            <label for="item_{{ item.id }}_action" class="form-label fw-bold">
-                                <i class="fas fa-tools text-info"></i> Action Taken:
-                            </label>
-                            <textarea class="form-control" name="item_{{ item.id }}_action" 
-                                      id="item_{{ item.id }}_action" rows="2" 
-                                      placeholder="Describe action taken..."></textarea>
-                        </div>
-                        
+
                         <!-- Photo Uploads -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-camera text-success"></i> Photo Evidence (Optional):
-                            </label>
+                        <div class="mb-0">
+                            <label class="form-label"><i class="fas fa-camera text-success"></i> Photos (Optional):</label>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <input type="file" class="form-control" name="item_{{ item.id }}_photo1" 
-                                           accept="image/*">
+                                    <input type="file" class="form-control form-control-sm" name="item_{{ item.id }}_photo1" accept="image/*">
                                 </div>
                                 <div class="col-md-4">
-                                    <input type="file" class="form-control" name="item_{{ item.id }}_photo2" 
-                                           accept="image/*">
+                                    <input type="file" class="form-control form-control-sm" name="item_{{ item.id }}_photo2" accept="image/*">
                                 </div>
                                 <div class="col-md-4">
-                                    <input type="file" class="form-control" name="item_{{ item.id }}_photo3" 
-                                           accept="image/*">
+                                    <input type="file" class="form-control form-control-sm" name="item_{{ item.id }}_photo3" accept="image/*">
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
+
+                    <!-- General Notes -->
+                    <div class="mt-3 mb-3">
+                        <label class="form-label"><strong><i class="fas fa-sticky-note"></i> General Notes:</strong></label>
+                        <textarea class="form-control" name="general_notes" rows="3" placeholder="Any additional notes or observations..."></textarea>
+                    </div>
+
+                    <!-- Signature Section -->
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5><i class="fas fa-signature"></i> Signature</h5>
+                            <p class="text-muted small mb-3">Please provide your signature and printed name</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Upload Signature Image:</label>
+                                    <input type="file" class="form-control" name="signature_image" accept="image/*">
+                                    <small class="text-muted">Or use your device's camera to capture signature</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Printed Name: <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="printed_name"
+                                           placeholder="Enter your full name" required
+                                           value="{{ request.user.get_full_name|default:request.user.username }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check-circle"></i> Submit Checklist
+                        </button>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
-            
-            <!-- General Notes -->
-            <div class="mt-4 mb-4">
-                <h5><i class="fas fa-sticky-note"></i> General Notes</h5>
-                <textarea class="form-control" name="general_notes" rows="4" 
-                          placeholder="Any additional notes or observations..."></textarea>
-            </div>
-            
-            <!-- Signature Section -->
-            <div class="signature-pad">
-                <h5><i class="fas fa-signature"></i> Signature</h5>
-                <p class="text-muted mb-3">Please provide your signature and printed name</p>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="signature_image" class="form-label fw-bold">Upload Signature Image:</label>
-                        <input type="file" class="form-control" name="signature_image" id="signature_image" 
-                               accept="image/*">
-                        <small class="text-muted">Or use your device's camera to capture signature</small>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="printed_name" class="form-label fw-bold">Printed Name:</label>
-                        <input type="text" class="form-control" name="printed_name" id="printed_name" 
-                               placeholder="Enter your full name" required
-                               value="{{ request.user.get_full_name|default:request.user.username }}">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Submit Button -->
-            <div class="text-center mt-5">
-                <button type="submit" class="btn btn-primary btn-submit btn-lg">
-                    <i class="fas fa-check-circle"></i> Submit Checklist
-                </button>
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
 <script>
