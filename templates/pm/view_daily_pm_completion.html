@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}View Daily PM Completion - {{ day_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Header Card -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <h3>PM Checklist Completion - {{ day_name }}</h3>
+                    <h5>{{ completion.completion_date|date:"F d, Y" }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Completed By:</strong> {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</p>
+                            <p><strong>Printed Name:</strong> {{ completion.printed_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Completion Time:</strong> {{ completion.created_at|date:"h:i A" }}</p>
+                            <p><strong>Template:</strong> {{ completion.schedule.template.name }} ({{ completion.schedule.template.annex_code }})</p>
+                        </div>
+                    </div>
+
+                    <div class="btn-group mt-3" role="group">
+                        <a href="{% url 'export_daily_pm_pdf' completion.id %}" class="btn btn-success">
+                            <i class="fas fa-file-pdf"></i> Export Daily PDF
+                        </a>
+                        <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checklist Items Card -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4>Checklist Items</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th style="width: 5%">No.</th>
+                                <th style="width: 35%">Task Description</th>
+                                <th style="width: 10%">Status</th>
+                                <th style="width: 50%">Problems / Action Taken</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item_comp in item_completions %}
+                            <tr {% if item_comp.item.item_number >= 7 and item_comp.item.item_number <= 11 %}class="table-secondary"{% endif %}>
+                                <td class="text-center">
+                                    <strong>{{ item_comp.item.item_number }}</strong>
+                                    {% if item_comp.item.item_number >= 7 and item_comp.item.item_number <= 11 %}
+                                        <br><small class="badge badge-dark">WEEKLY</small>
+                                    {% else %}
+                                        <br><small class="badge badge-info">DAILY</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ item_comp.item.task_description|linebreaks }}
+                                    {% if item_comp.item.has_schedule_times %}
+                                        <div class="mt-2">
+                                            <strong>Times:</strong>
+                                            <span class="badge badge-light">{{ item_comp.item.schedule_times }}</span>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if weekday == 0 %}
+                                        {% if item_comp.monday %}
+                                            <span class="badge badge-success" style="font-size: 1.2em;">✓ Done</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Not Done</span>
+                                        {% endif %}
+                                    {% elif weekday == 1 %}
+                                        {% if item_comp.tuesday %}
+                                            <span class="badge badge-success" style="font-size: 1.2em;">✓ Done</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Not Done</span>
+                                        {% endif %}
+                                    {% elif weekday == 2 %}
+                                        {% if item_comp.wednesday %}
+                                            <span class="badge badge-success" style="font-size: 1.2em;">✓ Done</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Not Done</span>
+                                        {% endif %}
+                                    {% elif weekday == 3 %}
+                                        {% if item_comp.thursday %}
+                                            <span class="badge badge-success" style="font-size: 1.2em;">✓ Done</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Not Done</span>
+                                        {% endif %}
+                                    {% elif weekday == 4 %}
+                                        {% if item_comp.friday %}
+                                            <span class="badge badge-success" style="font-size: 1.2em;">✓ Done</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Not Done</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item_comp.problems_encountered or item_comp.action_taken %}
+                                        {% if item_comp.problems_encountered %}
+                                            <div class="mb-2">
+                                                <strong class="text-danger">Problems:</strong>
+                                                <p class="mb-0">{{ item_comp.problems_encountered }}</p>
+                                            </div>
+                                        {% endif %}
+                                        {% if item_comp.action_taken %}
+                                            <div>
+                                                <strong class="text-primary">Action Taken:</strong>
+                                                <p class="mb-0">{{ item_comp.action_taken }}</p>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">No issues reported</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="card mt-3">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Summary</h5>
+                </div>
+                <div class="card-body">
+                    {% with total=item_completions|length %}
+                    {% with completed=item_completions|length %}
+                    <p><strong>Total Items:</strong> {{ total }}</p>
+                    <p><strong>Day:</strong> {{ day_name }}, {{ completion.completion_date|date:"F d, Y" }}</p>
+                    <p class="mb-0"><strong>Status:</strong> <span class="badge badge-success">Completed</span></p>
+                    {% endwith %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-secondary {
+        background-color: #e9ecef !important;
+    }
+</style>
+{% endblock %}

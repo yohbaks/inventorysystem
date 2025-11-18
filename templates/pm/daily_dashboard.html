@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Daily PM Checklist{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    {% if is_weekend %}
+        <!-- Weekend Message -->
+        <div class="alert alert-info text-center">
+            <h3>Weekend - No PM Checklist</h3>
+            <p>Today is {{ today|date:"l, F d, Y" }}</p>
+            <p>The PM checklist system operates Monday through Friday only.</p>
+            <p>Enjoy your weekend!</p>
+        </div>
+    {% else %}
+        <!-- Weekday - Show Dashboard -->
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Daily PM Checklist - {{ today_name }}, {{ today|date:"F d, Y" }}</h2>
+                <hr>
+            </div>
+        </div>
+
+        <!-- Week Progress -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col">
+                                <div class="day-status {% if days_completed.monday %}completed{% endif %}">
+                                    <strong>Monday</strong><br>
+                                    {% if days_completed.monday %}
+                                        <span class="badge badge-success">✓ Done</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="day-status {% if days_completed.tuesday %}completed{% endif %}">
+                                    <strong>Tuesday</strong><br>
+                                    {% if days_completed.tuesday %}
+                                        <span class="badge badge-success">✓ Done</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="day-status {% if days_completed.wednesday %}completed{% endif %}">
+                                    <strong>Wednesday</strong><br>
+                                    {% if days_completed.wednesday %}
+                                        <span class="badge badge-success">✓ Done</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="day-status {% if days_completed.thursday %}completed{% endif %}">
+                                    <strong>Thursday</strong><br>
+                                    {% if days_completed.thursday %}
+                                        <span class="badge badge-success">✓ Done</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="day-status {% if days_completed.friday %}completed{% endif %}">
+                                    <strong>Friday</strong><br>
+                                    {% if days_completed.friday %}
+                                        <span class="badge badge-success">✓ Done</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Checklist Card -->
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4>Today's PM Checklist - {{ today_name }}</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if is_completed %}
+                            <!-- Already Completed -->
+                            <div class="alert alert-success">
+                                <h5>✓ Checklist Completed</h5>
+                                <p>The PM checklist for {{ today_name }}, {{ today|date:"F d, Y" }} has been completed.</p>
+                                <p><strong>Completed by:</strong> {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</p>
+                                <p><strong>Time:</strong> {{ completion.created_at|date:"h:i A" }}</p>
+                            </div>
+
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'view_daily_pm_completion' completion.id %}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View Completion
+                                </a>
+                                <a href="{% url 'export_daily_pm_pdf' completion.id %}" class="btn btn-success">
+                                    <i class="fas fa-file-pdf"></i> Export Daily PDF
+                                </a>
+                            </div>
+                        {% else %}
+                            <!-- Not Yet Completed -->
+                            <div class="alert alert-warning">
+                                <h5>Pending Completion</h5>
+                                <p>The PM checklist for {{ today_name }} has not been completed yet.</p>
+                                <p>Please complete today's preventive maintenance tasks.</p>
+                            </div>
+
+                            <a href="{% url 'complete_daily_pm' schedule.id %}" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-clipboard-check"></i> Complete Today's Checklist
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Report Link -->
+        <div class="row mt-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5>Weekly Report</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>View or export the aggregated weekly PM report (Monday - Friday).</p>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'weekly_pm_report_view' %}" class="btn btn-info">
+                                <i class="fas fa-chart-bar"></i> View Weekly Report
+                            </a>
+                            <a href="{% url 'export_weekly_pm_pdf' %}" class="btn btn-success">
+                                <i class="fas fa-file-pdf"></i> Export Weekly PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .day-status {
+        padding: 15px;
+        border-radius: 5px;
+        margin: 5px;
+        transition: all 0.3s;
+    }
+    .day-status.completed {
+        background-color: #d4edda;
+        border: 2px solid #28a745;
+    }
+</style>
+{% endblock %}

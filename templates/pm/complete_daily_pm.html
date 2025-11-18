@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete PM Checklist - {{ today_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>PREVENTIVE MAINTENANCE CHECKLIST</h3>
+                    <h5>{{ today_name }}, {{ today|date:"F d, Y" }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="pm-checklist-form">
+                        {% csrf_token %}
+
+                        <div class="alert alert-info">
+                            <strong>Instructions:</strong>
+                            <ul>
+                                <li>Check the box for each task you have completed</li>
+                                <li>Note any problems encountered and actions taken</li>
+                                <li>Items 1-6 and 12 are DAILY tasks (should be done every day)</li>
+                                <li>Items 7-11 are WEEKLY tasks (done once per week)</li>
+                            </ul>
+                        </div>
+
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 5%">No.</th>
+                                    <th style="width: 40%">Task Description</th>
+                                    <th style="width: 10%">Done</th>
+                                    <th style="width: 45%">Problems Encountered / Action Taken</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr {% if item.item_number >= 7 and item.item_number <= 11 %}class="table-secondary"{% endif %}>
+                                    <td class="text-center">
+                                        <strong>{{ item.item_number }}</strong>
+                                        {% if item.item_number >= 7 and item.item_number <= 11 %}
+                                            <br><small class="badge badge-dark">WEEKLY</small>
+                                        {% else %}
+                                            <br><small class="badge badge-info">DAILY</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ item.task_description|linebreaks }}
+                                        {% if item.has_schedule_times %}
+                                            <div class="mt-2">
+                                                <strong>Times:</strong>
+                                                <span class="badge badge-light">{{ item.schedule_times }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox"
+                                                   class="custom-control-input"
+                                                   id="item_{{ item.id }}"
+                                                   name="item_{{ item.id }}">
+                                            <label class="custom-control-label" for="item_{{ item.id }}">
+                                                <i class="fas fa-check text-success"></i>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-2">
+                                            <label for="problems_{{ item.id }}" class="small">Problems:</label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="problems_{{ item.id }}"
+                                                      name="problems_{{ item.id }}"
+                                                      rows="2"
+                                                      placeholder="Describe any problems..."></textarea>
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label for="action_{{ item.id }}" class="small">Action Taken:</label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="action_{{ item.id }}"
+                                                      name="action_{{ item.id }}"
+                                                      rows="2"
+                                                      placeholder="Describe action taken..."></textarea>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div class="form-group mt-4">
+                            <label for="printed_name"><strong>Printed Name:</strong></label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="printed_name"
+                                   name="printed_name"
+                                   required
+                                   value="{{ request.user.get_full_name|default:request.user.username }}"
+                                   placeholder="Enter your full name">
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <strong>Note:</strong> This completion will automatically be recorded for <strong>{{ today_name }}</strong>.
+                            You cannot select a different day. The system automatically knows which day it is.
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success btn-lg btn-block">
+                                <i class="fas fa-save"></i> Submit Checklist for {{ today_name }}
+                            </button>
+                            <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-secondary btn-lg btn-block">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('pm-checklist-form').addEventListener('submit', function(e) {
+    var printedName = document.getElementById('printed_name').value.trim();
+    if (!printedName) {
+        e.preventDefault();
+        alert('Please enter your printed name before submitting.');
+        return false;
+    }
+
+    var confirmed = confirm('Are you sure you want to submit this PM checklist for {{ today_name }}?');
+    if (!confirmed) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+
+<style>
+    .table-secondary {
+        background-color: #e9ecef !important;
+    }
+
+    .custom-control-input:checked ~ .custom-control-label i {
+        font-size: 1.5em;
+    }
+</style>
+{% endblock %}
