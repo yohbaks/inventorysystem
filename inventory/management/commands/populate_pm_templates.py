@@ -36,88 +36,110 @@ class Command(BaseCommand):
         template, created = PMChecklistTemplate.objects.get_or_create(
             annex_code='A',
             defaults={
-                'title': 'Annex A - Datacenter Daily/Weekly Preventive Maintenance',
-                'frequency': 'DAILY',
-                'description': 'Daily and weekly preventive maintenance checks for datacenter equipment',
-                'schedule_note': 'Monday - Friday, multiple times per day',
+                'title': 'Preventive Maintenance Checklist/Activities for the Datacenter (Daily/Weekly)',
+                'frequency': 'WEEKLY',
+                'description': 'Daily and weekly preventive maintenance checks for datacenter - Daily tasks M-F, Weekly tasks once per week',
+                'schedule_note': 'Mondays - Fridays',
                 'is_active': True
             }
         )
 
-        if created:
+        # Update title if template already exists
+        if not created:
+            template.title = 'Preventive Maintenance Checklist/Activities for the Datacenter (Daily/Weekly)'
+            template.schedule_note = 'Mondays - Fridays'
+            template.frequency = 'WEEKLY'
+            template.save()
+            # Clear existing items to recreate them
+            template.items.all().delete()
+            self.stdout.write(self.style.WARNING('Updating Annex A template and items'))
+        else:
             self.stdout.write(self.style.SUCCESS('Created Annex A template'))
 
-            # Add items for Annex A
-            items = [
-                {
-                    'item_number': 1,
-                    'task_description': 'Check server room temperature and humidity levels',
-                    'has_schedule_times': True,
-                    'schedule_times': ['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM'],
-                    'requires_value_input': True,
-                    'value_unit': '°C / %RH'
-                },
-                {
-                    'item_number': 2,
-                    'task_description': 'Verify UPS status and battery levels',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM', '2:00 PM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 3,
-                    'task_description': 'Check cooling system operation and airflow',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM', '3:00 PM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 4,
-                    'task_description': 'Monitor server rack temperatures',
-                    'has_schedule_times': True,
-                    'schedule_times': ['10:00 AM', '2:00 PM'],
-                    'requires_value_input': True,
-                    'value_unit': '°C'
-                },
-                {
-                    'item_number': 5,
-                    'task_description': 'Verify fire suppression system status',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 6,
-                    'task_description': 'Check physical security (doors, locks, access logs)',
-                    'has_schedule_times': True,
-                    'schedule_times': ['8:00 AM', '4:00 PM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 7,
-                    'task_description': 'Inspect cable management and connections',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 8,
-                    'task_description': 'Review system monitoring alerts and logs',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM', '1:00 PM', '4:00 PM'],
-                    'requires_value_input': False
-                },
-            ]
+        # Add items for Annex A - matching exact template
+        # Note: Item numbering follows the template exactly (skips item 4, has 2 parts for item 2)
+        items = [
+            {
+                'item_number': 1,
+                'task_description': 'Check if WAN connectivity is up',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 2,
+                'task_description': 'Check if the telephone system is up and running\nCheck if all servers are up and running',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 3,
+                'task_description': "Check if servers' utilization (processor, memory and storage) is below 80%",
+                'has_schedule_times': True,
+                'schedule_times': ['9 AM', '2 PM'],
+                'requires_value_input': False
+            },
+            {
+                'item_number': 5,
+                'task_description': 'Check if the temperature level in the network room is between 20°C to 27°C (68°F to 80.6°F)',
+                'has_schedule_times': True,
+                'schedule_times': ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
+                'requires_value_input': False
+            },
+            {
+                'item_number': 6,
+                'task_description': 'Check if the humidity level in the network room is between 30% to 60%',
+                'has_schedule_times': True,
+                'schedule_times': ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
+                'requires_value_input': False
+            },
+            {
+                'item_number': 7,
+                'task_description': "Check if servers' anti-virus definition files are up-to-date",
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 8,
+                'task_description': "Check if server's event logs for critical warnings or errors",
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 9,
+                'task_description': 'Check for signs of water leaks',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 10,
+                'task_description': 'Check for signs of holes on the ceiling and walls',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 11,
+                'task_description': 'Check for signs of pest infestation',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 12,
+                'task_description': 'Remove any fire hazards.',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+        ]
 
-            for item_data in items:
-                PMChecklistItem.objects.create(
-                    template=template,
-                    **item_data,
-                    order=item_data['item_number']
-                )
+        for item_data in items:
+            PMChecklistItem.objects.create(
+                template=template,
+                **item_data,
+                order=item_data['item_number']
+            )
 
-            self.stdout.write(f'  Added {len(items)} items to Annex A')
-        else:
-            self.stdout.write(self.style.WARNING('Annex A template already exists'))
+        self.stdout.write(f'  Added {len(items)} items to Annex A')
+        self.stdout.write(self.style.SUCCESS('  Items 1-6, 12: Daily tasks (M-F)'))
+        self.stdout.write(self.style.SUCCESS('  Items 7-11: Weekly tasks (once per week, dark gray shading)'))
 
     def create_annex_b(self):
         """Create Annex B - Datacenter (Monthly) template"""

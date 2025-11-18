@@ -146,13 +146,16 @@ def generate_pm_checklist_pdf(completion):
         ]
 
         # Add VERY dark gray shading for weekly tasks (items 7-11)
-        # These are rows 8-12 (accounting for 2 header rows)
+        # Weekly tasks start at row index 2 (after 2 header rows) + position in filtered items
         weekly_task_color = colors.Color(0.45, 0.45, 0.45)  # Dark gray matching template
-        for row_num in range(8, 13):  # Rows for items 7-11
-            if row_num < len(table_data):
-                table_style_list.append(('BACKGROUND', (0, row_num), (-1, row_num), weekly_task_color))
+
+        # Find which rows contain items 7-11
+        for idx, item_comp in enumerate(item_completions):
+            row_index = idx + 2  # +2 for the 2 header rows
+            if item_comp.item.item_number in [7, 8, 9, 10, 11]:
+                table_style_list.append(('BACKGROUND', (0, row_index), (-1, row_index), weekly_task_color))
                 # Make text white on dark background
-                table_style_list.append(('TEXTCOLOR', (0, row_num), (-1, row_num), colors.white))
+                table_style_list.append(('TEXTCOLOR', (0, row_index), (-1, row_index), colors.white))
     else:
         table_style_list = [
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
@@ -268,10 +271,11 @@ def build_annex_a_table(completion):
         item = item_comp.item
 
         # Task description with time schedule
-        task_text = item.task_description
+        # Convert newlines to <br/> for proper PDF rendering
+        task_text = item.task_description.replace('\n', '<br/>')
         if item.has_schedule_times and item.schedule_times:
             time_list = "<br/>".join(item.schedule_times)
-            task_text = f"{item.task_description}<br/><br/>{time_list}"
+            task_text = f"{task_text}<br/><br/>{time_list}"
 
         # Status checkmarks for each day
         mon = "✓" if item_comp.monday else ""
