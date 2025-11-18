@@ -27,25 +27,6 @@
         margin-right: 10px;
     }
 
-    .checkbox-day {
-        text-align: center;
-        margin: 0 8px;
-        display: inline-block;
-    }
-
-    .checkbox-day label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 5px;
-        font-size: 12px;
-    }
-
-    .checkbox-day input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-
     .time-check {
         background: #f9f9f9;
         padding: 8px;
@@ -99,84 +80,41 @@
 
                         <!-- Status Checkboxes -->
                         <div class="mb-3">
-                            <label class="form-label"><strong>Status:</strong></label>
-
-                            {% if template.annex_code == 'A' %}
-                                {% if item.has_schedule_times %}
-                                    <!-- Items with scheduled times -->
-                                    {% for time_slot in item.schedule_times %}
-                                    <div class="time-check">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox"
-                                                   name="item_{{ item.id }}_time_{{ time_slot|lower|cut:' ' }}"
-                                                   id="item_{{ item.id }}_time_{{ forloop.counter }}">
-                                            <label class="form-check-label" for="item_{{ item.id }}_time_{{ forloop.counter }}">
-                                                <strong>{{ time_slot }}</strong>
-                                                {% if item.requires_value_input %}
-                                                    <input type="text" class="form-control form-control-sm d-inline-block ms-3"
-                                                           style="width: 100px;"
-                                                           name="item_{{ item.id }}_value_{{ time_slot|lower|cut:' ' }}"
-                                                           placeholder="Value ({{ item.value_unit }})">
-                                                {% endif %}
-                                            </label>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <!-- Regular day checkboxes -->
-                                    <div class="d-flex">
-                                        <div class="checkbox-day">
-                                            <label>Mon</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_monday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>Tue</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_tuesday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>Wed</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_wednesday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>Thu</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_thursday" class="form-check-input">
-                                        </div>
-                                        <div class="checkbox-day">
-                                            <label>Fri</label>
-                                            <input type="checkbox" name="item_{{ item.id }}_friday" class="form-check-input">
-                                        </div>
-                                    </div>
-                                {% endif %}
-
-                            {% elif template.annex_code == 'C' %}
-                                <!-- Weekly with week numbers -->
-                                <div class="d-flex">
-                                    <div class="checkbox-day">
-                                        <label>Week 1</label>
-                                        <input type="checkbox" name="item_{{ item.id }}_week1" class="form-check-input">
-                                    </div>
-                                    <div class="checkbox-day">
-                                        <label>Week 2</label>
-                                        <input type="checkbox" name="item_{{ item.id }}_week2" class="form-check-input">
-                                    </div>
-                                    <div class="checkbox-day">
-                                        <label>Week 3</label>
-                                        <input type="checkbox" name="item_{{ item.id }}_week3" class="form-check-input">
-                                    </div>
-                                    <div class="checkbox-day">
-                                        <label>Week 4</label>
-                                        <input type="checkbox" name="item_{{ item.id }}_week4" class="form-check-input">
+                            {% if template.annex_code == 'A' and item.has_schedule_times %}
+                                <label class="form-label"><strong>Status:</strong></label>
+                                <!-- Items with scheduled times (checked at different times of the day) -->
+                                {% for time_slot in item.schedule_times %}
+                                <div class="time-check">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="item_{{ item.id }}_time_{{ time_slot|lower|cut:' ' }}"
+                                               id="item_{{ item.id }}_time_{{ forloop.counter }}">
+                                        <label class="form-check-label" for="item_{{ item.id }}_time_{{ forloop.counter }}">
+                                            <strong>{{ time_slot }}</strong>
+                                            {% if item.requires_value_input %}
+                                                <input type="text" class="form-control form-control-sm d-inline-block ms-3"
+                                                       style="width: 100px;"
+                                                       name="item_{{ item.id }}_value_{{ time_slot|lower|cut:' ' }}"
+                                                       placeholder="Value ({{ item.value_unit }})">
+                                            {% endif %}
+                                        </label>
                                     </div>
                                 </div>
-
+                                {% endfor %}
                             {% else %}
-                                <!-- Simple completion checkbox -->
+                                <!-- Simple daily completion checkbox -->
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
                                            name="item_{{ item.id }}_completed"
                                            id="item_{{ item.id }}_completed">
                                     <label class="form-check-label" for="item_{{ item.id }}_completed">
-                                        Task Completed
+                                        <strong>Done</strong>
+                                        {% if item.requires_value_input %}
+                                            <input type="text" class="form-control form-control-sm d-inline-block ms-3"
+                                                   style="width: 120px;"
+                                                   name="item_{{ item.id }}_value"
+                                                   placeholder="Value ({{ item.value_unit }})">
+                                        {% endif %}
                                     </label>
                                 </div>
                             {% endif %}
