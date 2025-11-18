@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update PM Issue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-inner">
+        <!-- Page Header -->
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+            <div>
+                <h3 class="fw-bold mb-3">Update PM Issue</h3>
+                <h6 class="op-7 mb-2">Update Issue Status and Assignment</h6>
+            </div>
+            <div class="ms-md-auto py-2 py-md-0">
+                <a href="{% url 'pm_issues' %}" class="btn btn-secondary btn-round">
+                    <i class="fas fa-arrow-left"></i> Back to Issues
+                </a>
+            </div>
+        </div>
+
+        <!-- Issue Update Form -->
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card card-round">
+                    <div class="card-header">
+                        <div class="card-title">Issue Details</div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Issue Information -->
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle"></i> Issue Information</h5>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Checklist:</strong> {{ issue.item_completion.completion.schedule.template.title }}<br>
+                                    <strong>Annex:</strong> {{ issue.item_completion.completion.schedule.template.annex_code }}<br>
+                                    <strong>Item:</strong> {{ issue.item_completion.item.item_number }}. {{ issue.item_completion.item.description }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Reported By:</strong> {{ issue.reported_by.get_full_name|default:issue.reported_by.username }}<br>
+                                    <strong>Reported At:</strong> {{ issue.reported_at|date:"M d, Y H:i" }}<br>
+                                    {% if issue.resolved_by %}
+                                        <strong>Resolved By:</strong> {{ issue.resolved_by.get_full_name|default:issue.resolved_by.username }}<br>
+                                        <strong>Resolved At:</strong> {{ issue.resolved_at|date:"M d, Y H:i" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <hr>
+                            <strong>Problem Description:</strong><br>
+                            {{ issue.problem_description }}
+                            <hr>
+                            <strong>Action Taken:</strong><br>
+                            {{ issue.action_taken|default:"No action taken yet" }}
+                        </div>
+
+                        <!-- Update Form -->
+                        <form method="POST">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label class="form-label">Status <span class="text-danger">*</span></label>
+                                <select name="status" class="form-control" required>
+                                    <option value="OPEN" {% if issue.status == 'OPEN' %}selected{% endif %}>Open</option>
+                                    <option value="IN_PROGRESS" {% if issue.status == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                    <option value="RESOLVED" {% if issue.status == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                                    <option value="CLOSED" {% if issue.status == 'CLOSED' %}selected{% endif %}>Closed</option>
+                                </select>
+                                <small class="form-text text-muted">Update the current status of this issue</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Priority <span class="text-danger">*</span></label>
+                                <select name="priority" class="form-control" required>
+                                    <option value="LOW" {% if issue.priority == 'LOW' %}selected{% endif %}>Low</option>
+                                    <option value="MEDIUM" {% if issue.priority == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                                    <option value="HIGH" {% if issue.priority == 'HIGH' %}selected{% endif %}>High</option>
+                                    <option value="CRITICAL" {% if issue.priority == 'CRITICAL' %}selected{% endif %}>Critical</option>
+                                </select>
+                                <small class="form-text text-muted">Adjust the priority level as needed</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Assign To</label>
+                                <select name="assigned_to" class="form-control">
+                                    <option value="">Unassigned</option>
+                                    {% for user in users %}
+                                        <option value="{{ user.id }}" {% if issue.assigned_to_id == user.id %}selected{% endif %}>
+                                            {{ user.get_full_name|default:user.username }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">Assign this issue to a team member</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Resolution Notes</label>
+                                <textarea name="resolution" class="form-control" rows="4" placeholder="Enter resolution details or notes...">{{ issue.resolution }}</textarea>
+                                <small class="form-text text-muted">Add notes about how the issue was resolved</small>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'pm_issues' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Update Issue
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
