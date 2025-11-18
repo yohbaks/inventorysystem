@@ -221,14 +221,14 @@
             </li>
 
             <!-- ==================== UPDATED PREVENTIVE MAINTENANCE SECTION ==================== -->
-            <li class="nav-item {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}active{% endif %}">
+            <li class="nav-item {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuPM"
-                 class="nav-link {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}true{% else %}false{% endif %}">
+                 class="nav-link {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view' %}{% else %}collapsed{% endif %}"
+                 aria-expanded="{% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view' %}true{% else %}false{% endif %}">
                 <i class="fas fa-wrench"></i>
                 <p>Preventive Maintenance</p><span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update' %}show{% endif %}" id="menuPM">
+              <div class="collapse {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_dashboard pm_checklist_list pm_checklist_fill pm_checklist_view pm_schedule_create pm_reports pm_generate_report pm_issues pm_issue_update pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view' %}show{% endif %}" id="menuPM">
                 <ul class="nav nav-collapse">
                   <!-- Original PM Links -->
                   <li class="{% if request.resolver_match.url_name == 'pm_overview' %}active{% endif %}">
@@ -258,6 +258,19 @@
                   </li>
                   <li class="{% if request.resolver_match.url_name == 'pm_issues' %}active{% endif %}">
                     <a href="{% url 'pm_issues' %}"><span class="sub-item">⚠️ Issues Log</span></a>
+                  </li>
+
+                  <!-- NEW Daily Datacenter PM Section -->
+                  <li class="nav-section">
+                    <span class="sidebar-mini-icon"><i class="fa fa-calendar-day"></i></span>
+                    <h4 class="text-section" style="font-size: 11px; margin-top: 10px; margin-bottom: 5px;">Daily Datacenter PM</h4>
+                  </li>
+
+                  <li class="{% if request.resolver_match.url_name == 'pm_daily_dashboard' %}active{% endif %}">
+                    <a href="{% url 'pm_daily_dashboard' %}"><span class="sub-item">📅 Today's Checklist</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name == 'weekly_pm_report_view' %}active{% endif %}">
+                    <a href="{% url 'weekly_pm_report_view' %}"><span class="sub-item">📊 Weekly Report</span></a>
                   </li>
                 </ul>
               </div>
