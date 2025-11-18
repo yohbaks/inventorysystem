@@ -191,6 +191,150 @@
               </div>
 
               {% if laptop_details %}
+
+              <!-- Laptop Photo Display with Zoom -->
+              {% if laptop_details.laptop_photo %}
+              <div class="laptop-photo-zoom-wrapper mb-4" style="position: relative;">
+                <div class="laptop-photo-zoom-container" id="laptopPhotoZoom" style="position: relative; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); cursor: crosshair;">
+                  <div style="position: relative; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <!-- Main Image -->
+                    <img id="laptopMainImage"
+                         src="{{ laptop_details.laptop_photo.url }}"
+                         alt="Laptop Photo"
+                         style="width: 100%; height: 100%; object-fit: cover; opacity: 0.95; display: block;">
+
+                    <!-- Zoom Lens -->
+                    <div id="laptopZoomLens" style="position: absolute; width: 100px; height: 100px; border: 3px solid #667eea; background: rgba(102, 126, 234, 0.2); display: none; pointer-events: none; z-index: 10;"></div>
+
+                    <!-- Info Overlay -->
+                    <div id="laptopPhotoInfo" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%); padding: 2rem 1.5rem 1rem; transition: opacity 0.3s;">
+                      <div style="color: white;">
+                        <i class="fas fa-laptop" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                        <h3 style="margin: 0; font-weight: 700; font-size: 1.5rem;">{{ laptop_details.computer_name }}</h3>
+                        <p style="margin: 0; opacity: 0.9;">{{ laptop_details.brand_name }} {{ laptop_details.model }}</p>
+                        <small style="opacity: 0.7; font-size: 0.875rem;"><i class="fas fa-search-plus"></i> Hover to zoom</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zoomed Image Container (outside overflow container) -->
+                <div id="laptopZoomResult" style="position: absolute; left: calc(100% + 20px); top: 0; width: 400px; height: 400px; border: 3px solid #667eea; background: white; display: none; z-index: 1000; border-radius: 0.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); overflow: hidden;">
+                  <img id="laptopZoomImage" src="{{ laptop_details.laptop_photo.url }}" style="position: absolute;">
+                </div>
+              </div>
+
+              <style>
+                .laptop-photo-zoom-container:hover #laptopPhotoInfo {
+                  opacity: 0.3;
+                }
+
+                .laptop-photo-zoom-container:hover {
+                  cursor: crosshair;
+                }
+
+                @media (max-width: 1200px) {
+                  #laptopZoomResult {
+                    left: 50% !important;
+                    top: calc(100% + 20px) !important;
+                    transform: translateX(-50%);
+                  }
+                }
+
+                @media (max-width: 768px) {
+                  #laptopZoomResult {
+                    display: none !important;
+                  }
+                }
+              </style>
+
+              <script>
+              (function() {
+                // Wait for image to load
+                const mainImage = document.getElementById('laptopMainImage');
+                if (!mainImage) return;
+
+                function initLaptopZoom() {
+                  const container = document.getElementById('laptopPhotoZoom');
+                  const zoomLens = document.getElementById('laptopZoomLens');
+                  const zoomResult = document.getElementById('laptopZoomResult');
+                  const zoomImage = document.getElementById('laptopZoomImage');
+
+                  if (!container || !mainImage || !zoomLens || !zoomResult || !zoomImage) {
+                    console.log('Laptop zoom elements not found');
+                    return;
+                  }
+
+                  let cx, cy;
+
+                  // Calculate zoom ratios
+                  function calculateZoom() {
+                    cx = zoomResult.offsetWidth / zoomLens.offsetWidth;
+                    cy = zoomResult.offsetHeight / zoomLens.offsetHeight;
+                    zoomImage.style.width = (mainImage.offsetWidth * cx) + "px";
+                    zoomImage.style.height = (mainImage.offsetHeight * cy) + "px";
+                  }
+
+                  // Show zoom on mouse enter
+                  container.addEventListener('mouseenter', function() {
+                    calculateZoom();
+                    zoomLens.style.display = 'block';
+                    zoomResult.style.display = 'block';
+                  });
+
+                  // Hide zoom on mouse leave
+                  container.addEventListener('mouseleave', function() {
+                    zoomLens.style.display = 'none';
+                    zoomResult.style.display = 'none';
+                  });
+
+                  // Move zoom lens and update zoomed image
+                  container.addEventListener('mousemove', function(e) {
+                    const rect = container.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    let y = e.clientY - rect.top;
+
+                    // Prevent lens from going outside image
+                    let lensX = x - (zoomLens.offsetWidth / 2);
+                    let lensY = y - (zoomLens.offsetHeight / 2);
+
+                    const maxX = container.offsetWidth - zoomLens.offsetWidth;
+                    const maxY = container.offsetHeight - zoomLens.offsetHeight;
+
+                    if (lensX < 0) lensX = 0;
+                    if (lensY < 0) lensY = 0;
+                    if (lensX > maxX) lensX = maxX;
+                    if (lensY > maxY) lensY = maxY;
+
+                    // Position the lens
+                    zoomLens.style.left = lensX + 'px';
+                    zoomLens.style.top = lensY + 'px';
+
+                    // Update zoomed image position
+                    zoomImage.style.left = '-' + (lensX * cx) + 'px';
+                    zoomImage.style.top = '-' + (lensY * cy) + 'px';
+                  });
+
+                  // Recalculate on window resize
+                  window.addEventListener('resize', function() {
+                    if (zoomLens.style.display === 'block') {
+                      calculateZoom();
+                    }
+                  });
+
+                  console.log('Laptop zoom initialized successfully');
+                }
+
+                // Initialize when image is loaded
+                if (mainImage.complete) {
+                  initLaptopZoom();
+                } else {
+                  mainImage.addEventListener('load', initLaptopZoom);
+                }
+              })();
+              </script>
+              {% endif %}
+
               <div class="spec-grid">
                 <div class="spec-item">
                   <div class="spec-label">Serial Number</div>
