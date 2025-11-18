@@ -293,7 +293,7 @@ def view_daily_pm_completion(request, completion_id):
         'weekday': weekday,
     }
 
-    return render(request, 'pm/view_daily_completion.html', context)
+    return render(request, 'pm/view_daily_pm_completion.html', context)
 
 
 @login_required
