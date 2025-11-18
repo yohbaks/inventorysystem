@@ -137,6 +137,7 @@
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Laptop Specifications</h2>
+                {% include "photo/laptop_photo.html" %}
                 <div class="d-flex gap-2">
                   {% if laptop_details and not laptop_details.is_disposed %}
                     <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editLaptopModal">
@@ -476,9 +477,6 @@
             <div class="modern-card">
               <div class="card-header-modern">
                 <h2 class="card-title-modern">Documents Details</h2>
-                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">
-                  <i class="fa fa-edit"></i> Edit
-                </button>
               </div>
 
               {% if documents_details %}
@@ -513,6 +511,17 @@
                     {% endif %}
                   </div>
                 </div>
+              </div>
+
+              <!-- Photo Slider -->
+              {% with documents_detailse=documents_details %}
+                {% include "photo/documents_photo.html" %}
+              {% endwith %}
+
+              <div class="mt-4">
+                <button class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#editDocumentsModal">
+                  <i class="fa fa-edit"></i> Edit
+                </button>
               </div>
               {% else %}
               <div class="alert alert-info" style="border-radius: 1rem;">

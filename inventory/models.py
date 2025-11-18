@@ -859,6 +859,8 @@ class LaptopDetails(models.Model):
     laptop_OS_keys = models.CharField(max_length=100, blank=True, null=True)
     laptop_Office_keys = models.CharField(max_length=100, blank=True, null=True)
 
+    laptop_photo = models.ImageField(upload_to="laptop_photos/", null=True, blank=True)
+
     is_disposed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
 

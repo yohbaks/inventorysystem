@@ -4329,6 +4329,18 @@ def delete_document_photo(request, photo_id):
         return redirect('/')
 
 
+@require_POST
+def upload_laptop_photo(request, laptop_id):
+    """Upload photo for laptop"""
+    from inventory.models import LaptopDetails
+
+    laptop = get_object_or_404(LaptopDetails, id=laptop_id)
+    if 'photo' in request.FILES:
+        laptop.laptop_photo = request.FILES['photo']
+        laptop.save()
+    return redirect(f'/laptop_details_view/{laptop.laptop_package.id}/#pills-laptop')
+
+
 def export_salvage_excel(request):
     wb = Workbook()
     ws = wb.active
