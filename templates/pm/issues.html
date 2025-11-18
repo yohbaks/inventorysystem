@@ -3,164 +3,164 @@
 
 {% block title %}PM Issues{% endblock %}
 
-{% block content %}
-<div class="container">
-    <div class="page-inner">
-        <!-- Page Header -->
-        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-            <div>
-                <h3 class="fw-bold mb-3">PM Issue Log</h3>
-                <h6 class="op-7 mb-2">Problems Encountered During Preventive Maintenance</h6>
-            </div>
-            <div class="ms-md-auto py-2 py-md-0">
-                <a href="{% url 'pm_dashboard' %}" class="btn btn-secondary btn-round">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
-            </div>
-        </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pm_modern.css' %}">
+{% endblock %}
 
-        <!-- Filters -->
-        <div class="row mb-3">
-            <div class="col-md-12">
-                <div class="card card-round">
-                    <div class="card-body">
-                        <form method="GET" class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Status Filter</label>
-                                <select name="status" class="form-control">
-                                    <option value="">All Statuses</option>
-                                    <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
-                                    <option value="IN_PROGRESS" {% if status_filter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                                    <option value="RESOLVED" {% if status_filter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
-                                    <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Priority Filter</label>
-                                <select name="priority" class="form-control">
-                                    <option value="">All Priorities</option>
-                                    <option value="CRITICAL" {% if priority_filter == 'CRITICAL' %}selected{% endif %}>Critical</option>
-                                    <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
-                                    <option value="MEDIUM" {% if priority_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
-                                    <option value="LOW" {% if priority_filter == 'LOW' %}selected{% endif %}>Low</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-filter"></i> Apply Filters
-                                </button>
-                                <a href="{% url 'pm_issues' %}" class="btn btn-secondary">
-                                    <i class="fas fa-redo"></i> Clear
-                                </a>
-                            </div>
-                        </form>
+{% block content %}
+<div class="pm-page">
+    <div class="container">
+        <div class="page-inner">
+            <!-- Header -->
+            <div class="pm-header">
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <h3>PM Issue Log</h3>
+                        <h6>Problems Encountered During Preventive Maintenance</h6>
+                    </div>
+                    <div class="mt-3 mt-md-0">
+                        <a href="{% url 'pm_dashboard' %}" class="btn btn-outline-light btn-pm">
+                            <i class="fas fa-arrow-left me-2"></i>Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Issues List -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card card-round">
-                    <div class="card-header">
-                        <div class="card-head-row">
-                            <div class="card-title">Issues ({{ issues.count }})</div>
-                        </div>
+            <!-- Filters -->
+            <div class="pm-filter-bar">
+                <form method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="pm-form-label small">Status</label>
+                        <select name="status" class="pm-form-control">
+                            <option value="">All Statuses</option>
+                            <option value="OPEN" {% if status_filter == 'OPEN' %}selected{% endif %}>Open</option>
+                            <option value="IN_PROGRESS" {% if status_filter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                            <option value="RESOLVED" {% if status_filter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                            <option value="CLOSED" {% if status_filter == 'CLOSED' %}selected{% endif %}>Closed</option>
+                        </select>
                     </div>
-                    <div class="card-body">
-                        {% if issues %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Priority</th>
-                                        <th>Status</th>
-                                        <th>Checklist</th>
-                                        <th>Item</th>
-                                        <th>Problem Description</th>
-                                        <th>Action Taken</th>
-                                        <th>Reported By</th>
-                                        <th>Assigned To</th>
-                                        <th>Reported At</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for issue in issues %}
-                                    <tr>
-                                        <td>
-                                            {% if issue.priority == 'CRITICAL' %}
-                                                <span class="badge badge-danger">Critical</span>
-                                            {% elif issue.priority == 'HIGH' %}
-                                                <span class="badge badge-warning">High</span>
-                                            {% elif issue.priority == 'MEDIUM' %}
-                                                <span class="badge badge-info">Medium</span>
-                                            {% else %}
-                                                <span class="badge badge-secondary">Low</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if issue.status == 'OPEN' %}
-                                                <span class="badge badge-danger">Open</span>
-                                            {% elif issue.status == 'IN_PROGRESS' %}
-                                                <span class="badge badge-warning">In Progress</span>
-                                            {% elif issue.status == 'RESOLVED' %}
-                                                <span class="badge badge-success">Resolved</span>
-                                            {% else %}
-                                                <span class="badge badge-secondary">Closed</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {{ issue.item_completion.completion.schedule.template.title }}
-                                            <br>
-                                            <small class="text-muted">Annex {{ issue.item_completion.completion.schedule.template.annex_code }}</small>
-                                        </td>
-                                        <td>
-                                            <small>{{ issue.item_completion.item.item_number }}. {{ issue.item_completion.item.description|truncatewords:5 }}</small>
-                                        </td>
-                                        <td>
-                                            {{ issue.problem_description|truncatewords:10 }}
-                                        </td>
-                                        <td>
-                                            <small>{{ issue.action_taken|truncatewords:10|default:"N/A" }}</small>
-                                        </td>
-                                        <td>
-                                            {{ issue.reported_by.get_full_name|default:issue.reported_by.username }}<br>
-                                        </td>
-                                        <td>
-                                            {% if issue.assigned_to %}
-                                                {{ issue.assigned_to.get_full_name|default:issue.assigned_to.username }}
-                                            {% else %}
-                                                <span class="text-muted">Unassigned</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {{ issue.reported_at|date:"M d, Y H:i" }}
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'pm_issue_update' issue.id %}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-edit"></i> Update
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                    <div class="col-md-4">
+                        <label class="pm-form-label small">Priority</label>
+                        <select name="priority" class="pm-form-control">
+                            <option value="">All Priorities</option>
+                            <option value="CRITICAL" {% if priority_filter == 'CRITICAL' %}selected{% endif %}>Critical</option>
+                            <option value="HIGH" {% if priority_filter == 'HIGH' %}selected{% endif %}>High</option>
+                            <option value="MEDIUM" {% if priority_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                            <option value="LOW" {% if priority_filter == 'LOW' %}selected{% endif %}>Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-pm-primary me-2">
+                            <i class="fas fa-filter me-2"></i>Filter
+                        </button>
+                        <a href="{% url 'pm_issues' %}" class="btn btn-pm-secondary">
+                            <i class="fas fa-redo me-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Issues List -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="pm-card">
+                        <div class="pm-card-header">
+                            <h5><i class="fas fa-tools me-2"></i>Issues ({{ issues.count }})</h5>
                         </div>
-                        {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-tools fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">No Issues Found</h5>
-                            <p class="text-muted">
-                                {% if status_filter or priority_filter %}
-                                    No issues match your filter criteria.
-                                {% else %}
-                                    No issues have been reported yet.
-                                {% endif %}
-                            </p>
+                        <div class="p-0">
+                            {% if issues %}
+                            <div class="table-responsive">
+                                <table class="pm-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>Checklist</th>
+                                            <th>Problem</th>
+                                            <th>Reported</th>
+                                            <th>Assigned</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for issue in issues %}
+                                        <tr>
+                                            <td>
+                                                {% if issue.priority == 'CRITICAL' %}
+                                                    <span class="badge-pm badge-pm-danger">Critical</span>
+                                                {% elif issue.priority == 'HIGH' %}
+                                                    <span class="badge-pm badge-pm-warning">High</span>
+                                                {% elif issue.priority == 'MEDIUM' %}
+                                                    <span class="badge-pm badge-pm-info">Medium</span>
+                                                {% else %}
+                                                    <span class="badge-pm badge-pm-dark">Low</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if issue.status == 'OPEN' %}
+                                                    <span class="badge badge-danger">Open</span>
+                                                {% elif issue.status == 'IN_PROGRESS' %}
+                                                    <span class="badge badge-warning">In Progress</span>
+                                                {% elif issue.status == 'RESOLVED' %}
+                                                    <span class="badge badge-success">Resolved</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">Closed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ issue.item_completion.completion.schedule.template.title|truncatewords:4 }}</strong>
+                                                    <br>
+                                                    <small class="text-muted">Annex {{ issue.item_completion.completion.schedule.template.annex_code }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 300px;">
+                                                    {{ issue.problem_description }}
+                                                </div>
+                                                {% if issue.action_taken %}
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-tools me-1"></i>{{ issue.action_taken|truncatewords:8 }}
+                                                    </small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    <i class="far fa-user me-1"></i>{{ issue.reported_by.get_full_name|default:issue.reported_by.username }}<br>
+                                                    <i class="far fa-clock me-1"></i>{{ issue.reported_at|date:"M d, Y" }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                {% if issue.assigned_to %}
+                                                    <small>{{ issue.assigned_to.get_full_name|default:issue.assigned_to.username }}</small>
+                                                {% else %}
+                                                    <span class="text-muted small">Unassigned</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'pm_issue_update' issue.id %}" class="btn btn-sm btn-pm-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="pm-empty-state">
+                                <i class="fas fa-tools"></i>
+                                <h6>No Issues Found</h6>
+                                <p>
+                                    {% if status_filter or priority_filter %}
+                                        No issues match your filter criteria
+                                    {% else %}
+                                        No issues have been reported yet
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>

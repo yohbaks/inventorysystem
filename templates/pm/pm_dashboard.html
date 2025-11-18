@@ -3,380 +3,463 @@
 
 {% block title %}PM Checklist Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .pm-dashboard {
+        background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .dashboard-header {
+        background: var(--primary-gradient);
+        border-radius: 16px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    }
+
+    .dashboard-header h3 {
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.75rem;
+    }
+
+    .dashboard-header h6 {
+        opacity: 0.95;
+        margin: 0.5rem 0 0 0;
+        font-weight: 400;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--primary-gradient);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card.warning::before { background: var(--warning-gradient); }
+    .stat-card.danger::before { background: var(--danger-gradient); }
+    .stat-card.success::before { background: var(--success-gradient); }
+    .stat-card.info::before { background: var(--info-gradient); }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon.warning { background: linear-gradient(135deg, #f093fb20 0%, #f5576c20 100%); color: #f5576c; }
+    .stat-icon.danger { background: linear-gradient(135deg, #fa709a20 0%, #fee14020 100%); color: #fa709a; }
+    .stat-icon.success { background: linear-gradient(135deg, #11998e20 0%, #38ef7d20 100%); color: #11998e; }
+    .stat-icon.info { background: linear-gradient(135deg, #4facfe20 0%, #00f2fe20 100%); color: #4facfe; }
+
+    .stat-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0.5rem 0;
+    }
+
+    .stat-label {
+        color: #718096;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 1.125rem;
+    }
+
+    .list-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f7fafc;
+        transition: background 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .list-item:last-child {
+        border-bottom: none;
+    }
+
+    .list-item:hover {
+        background: #f8f9fa;
+    }
+
+    .badge-modern {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+    .badge-danger { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+    .badge-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+    .badge-info { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+    .badge-primary { background: var(--primary-gradient); color: white; }
+
+    .btn-modern {
+        padding: 0.625rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary-modern {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .btn-secondary-modern {
+        background: #f7fafc;
+        color: #4a5568;
+    }
+
+    .empty-state {
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #cbd5e0;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h6 {
+        color: #718096;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #a0aec0;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="page-inner">
-        <!-- Page Header -->
-        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
-            <div>
-                <h3 class="fw-bold mb-3">PM Checklist Dashboard</h3>
-                <h6 class="op-7 mb-2">Preventive Maintenance Management System</h6>
+<div class="pm-dashboard">
+    <div class="container">
+        <div class="page-inner">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <h3>PM Checklist Dashboard</h3>
+                        <h6>Preventive Maintenance Management System</h6>
+                    </div>
+                    <div class="mt-3 mt-md-0">
+                        <a href="{% url 'pm_schedule_create' %}" class="btn btn-light btn-modern">
+                            <i class="fas fa-plus me-2"></i>Schedule New Checklist
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="ms-md-auto py-2 py-md-0">
-                <a href="{% url 'pm_schedule_create' %}" class="btn btn-primary btn-round">
-                    <i class="fas fa-plus"></i> Schedule New Checklist
-                </a>
-            </div>
-        </div>
 
-        <!-- Statistics Cards Row -->
-        <div class="row row-card-no-pd">
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-5">
-                                <div class="icon-big text-center">
-                                    <i class="icon-clock text-warning"></i>
-                                </div>
-                            </div>
-                            <div class="col-7 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">Pending</p>
-                                    <h4 class="card-title">{{ stats.pending_count|default:"0" }}</h4>
-                                </div>
-                            </div>
+            <!-- Statistics Cards -->
+            <div class="row">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card warning">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-clock"></i>
                         </div>
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value">{{ stats.pending_count|default:"0" }}</div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-5">
-                                <div class="icon-big text-center">
-                                    <i class="icon-exclamation text-danger"></i>
-                                </div>
-                            </div>
-                            <div class="col-7 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">Overdue</p>
-                                    <h4 class="card-title">{{ stats.overdue_count|default:"0" }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-5">
-                                <div class="icon-big text-center">
-                                    <i class="fas fa-check-circle text-success"></i>
-                                </div>
-                            </div>
-                            <div class="col-7 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">Completed Today</p>
-                                    <h4 class="card-title">{{ stats.completed_today_count|default:"0" }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-sm-6 col-md-3">
-                <div class="card card-stats card-round">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-5">
-                                <div class="icon-big text-center">
-                                    <i class="fas fa-tools text-info"></i>
-                                </div>
-                            </div>
-                            <div class="col-7 col-stats">
-                                <div class="numbers">
-                                    <p class="card-category">Open Issues</p>
-                                    <h4 class="card-title">{{ stats.open_issues_count|default:"0" }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Content Row -->
-        <div class="row mt-4">
-            <!-- Pending Checklists -->
-            <div class="col-md-6">
-                <div class="card card-round">
-                    <div class="card-header">
-                        <div class="card-head-row">
-                            <div class="card-title">
-                                <i class="fas fa-clipboard-list me-2"></i>Pending Checklists
-                            </div>
-                            <div class="card-tools">
-                                <a href="{% url 'pm_checklist_list' %}?status=PENDING" class="btn btn-label-primary btn-round btn-sm">
-                                    <span class="btn-label">
-                                        <i class="fa fa-eye"></i>
-                                    </span>
-                                    View All
-                                </a>
-                            </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card danger">
+                        <div class="stat-icon danger">
+                            <i class="fas fa-exclamation-triangle"></i>
                         </div>
+                        <div class="stat-label">Overdue</div>
+                        <div class="stat-value">{{ stats.overdue_count|default:"0" }}</div>
                     </div>
-                    <div class="card-body">
-                        {% if pending_checklists %}
-                            {% for schedule in pending_checklists %}
-                            <div class="d-flex mb-3 pb-3 border-bottom">
-                                <div class="flex-1">
-                                    <div class="mb-2">
-                                        <span class="badge badge-{% if schedule.template.annex_code == 'A' %}primary{% elif schedule.template.annex_code == 'B' %}info{% elif schedule.template.annex_code == 'C' %}success{% else %}warning{% endif %}">
-                                            Annex {{ schedule.template.annex_code }}
-                                        </span>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card success">
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-label">Completed Today</div>
+                        <div class="stat-value">{{ stats.completed_today_count|default:"0" }}</div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card info">
+                        <div class="stat-icon info">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-label">Open Issues</div>
+                        <div class="stat-value">{{ stats.open_issues_count|default:"0" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Sections -->
+            <div class="row">
+                <!-- Pending Checklists -->
+                <div class="col-lg-6">
+                    <div class="content-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-clock me-2"></i>Pending Checklists</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if pending_schedules %}
+                                {% for schedule in pending_schedules|slice:":5" %}
+                                <div class="list-item">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="badge-modern badge-primary me-2">{{ schedule.template.annex_code }}</span>
+                                            <strong>{{ schedule.template.title|truncatewords:5 }}</strong>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="far fa-calendar me-1"></i>Due: {{ schedule.due_date|date:"M d, Y" }}
+                                        </small>
                                     </div>
-                                    <h5 class="fw-bold mb-1">{{ schedule.template.title }}</h5>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-calendar me-1"></i>Due: {{ schedule.due_date|date:"M d, Y" }}
-                                        {% if schedule.assigned_to %}
-                                        <span class="ms-2">
-                                            <i class="fas fa-user me-1"></i>{{ schedule.assigned_to.get_full_name|default:schedule.assigned_to.username }}
-                                        </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="ms-3">
-                                    <a href="{% url 'pm_checklist_fill' schedule.id %}" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-edit"></i> Fill
+                                    <a href="{% url 'pm_checklist_fill' schedule.id %}" class="btn btn-sm btn-primary-modern">
+                                        <i class="fas fa-edit"></i>
                                     </a>
                                 </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                <h5 class="fw-bold">All Clear!</h5>
-                                <p class="text-muted">No pending checklists at the moment</p>
-                            </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-check-double"></i>
+                                    <h6>All Caught Up!</h6>
+                                    <p>No pending checklists at the moment</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if pending_schedules.count > 5 %}
+                        <div class="card-footer bg-light text-center py-2">
+                            <a href="{% url 'pm_checklist_list' %}?status=PENDING" class="text-decoration-none">
+                                View All {{ pending_schedules.count }} Pending
+                            </a>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
-            </div>
 
-            <!-- Overdue Checklists -->
-            <div class="col-md-6">
-                <div class="card card-round">
-                    <div class="card-header">
-                        <div class="card-head-row">
-                            <div class="card-title">
-                                <i class="fas fa-exclamation-triangle me-2"></i>Overdue Checklists
-                            </div>
-                            <div class="card-tools">
-                                <a href="{% url 'pm_checklist_list' %}?status=OVERDUE" class="btn btn-label-danger btn-round btn-sm">
-                                    <span class="btn-label">
-                                        <i class="fa fa-eye"></i>
-                                    </span>
-                                    View All
-                                </a>
-                            </div>
+                <!-- Overdue Checklists -->
+                <div class="col-lg-6">
+                    <div class="content-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Overdue Checklists</h5>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        {% if overdue_checklists %}
-                            {% for schedule in overdue_checklists %}
-                            <div class="d-flex mb-3 pb-3 border-bottom border-danger">
-                                <div class="flex-1">
-                                    <div class="mb-2">
-                                        <span class="badge badge-{% if schedule.template.annex_code == 'A' %}primary{% elif schedule.template.annex_code == 'B' %}info{% elif schedule.template.annex_code == 'C' %}success{% else %}warning{% endif %}">
-                                            Annex {{ schedule.template.annex_code }}
-                                        </span>
-                                        <span class="badge badge-danger ms-1">OVERDUE</span>
+                        <div class="card-body p-0">
+                            {% if overdue_schedules %}
+                                {% for schedule in overdue_schedules|slice:":5" %}
+                                <div class="list-item">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="badge-modern badge-danger me-2">{{ schedule.template.annex_code }}</span>
+                                            <strong>{{ schedule.template.title|truncatewords:5 }}</strong>
+                                        </div>
+                                        <small class="text-danger">
+                                            <i class="far fa-calendar-times me-1"></i>Overdue since: {{ schedule.due_date|date:"M d, Y" }}
+                                        </small>
                                     </div>
-                                    <h5 class="fw-bold mb-1 text-danger">{{ schedule.template.title }}</h5>
-                                    <div class="text-danger small">
-                                        <i class="fas fa-calendar-times me-1"></i>Due: {{ schedule.due_date|date:"M d, Y" }} 
-                                        <span class="fw-bold">({{ schedule.due_date|timesince }} ago)</span>
-                                    </div>
-                                </div>
-                                <div class="ms-3">
-                                    <a href="{% url 'pm_checklist_fill' schedule.id %}" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-bolt"></i> Now
+                                    <a href="{% url 'pm_checklist_fill' schedule.id %}" class="btn btn-sm btn-primary-modern">
+                                        <i class="fas fa-edit"></i>
                                     </a>
                                 </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-smile fa-3x text-success mb-3"></i>
-                                <h5 class="fw-bold">Perfect!</h5>
-                                <p class="text-muted">No overdue checklists</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Second Row -->
-        <div class="row mt-4">
-            <!-- Completed Today -->
-            <div class="col-md-6">
-                <div class="card card-round">
-                    <div class="card-header">
-                        <div class="card-head-row">
-                            <div class="card-title">
-                                <i class="fas fa-history me-2"></i>Completed Today
-                            </div>
-                            <div class="card-tools">
-                                <a href="{% url 'pm_checklist_list' %}?status=COMPLETED" class="btn btn-label-success btn-round btn-sm">
-                                    <span class="btn-label">
-                                        <i class="fa fa-eye"></i>
-                                    </span>
-                                    View All
-                                </a>
-                            </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-thumbs-up"></i>
+                                    <h6>Great Job!</h6>
+                                    <p>No overdue checklists</p>
+                                </div>
+                            {% endif %}
                         </div>
-                    </div>
-                    <div class="card-body">
-                        {% if completed_today %}
-                            {% for completion in completed_today %}
-                            <div class="d-flex mb-3 pb-3 border-bottom border-success">
-                                <div class="flex-1">
-                                    <div class="mb-2">
-                                        <span class="badge badge-{% if completion.schedule.template.annex_code == 'A' %}primary{% elif completion.schedule.template.annex_code == 'B' %}info{% elif completion.schedule.template.annex_code == 'C' %}success{% else %}warning{% endif %}">
-                                            Annex {{ completion.schedule.template.annex_code }}
-                                        </span>
-                                    </div>
-                                    <h6 class="fw-bold mb-1">{{ completion.schedule.template.title }}</h6>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-user-check me-1"></i>{{ completion.completed_by.get_full_name|default:completion.completed_by.username }}
-                                        <span class="ms-2">
-                                            <i class="fas fa-clock me-1"></i>{{ completion.completion_time|time:"g:i A" }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="ms-3">
-                                    <div class="btn-group-vertical">
-                                        <a href="{% url 'pm_checklist_view' completion.id %}" class="btn btn-info btn-sm mb-1">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <a href="{% url 'pm_export_checklist_pdf' completion.id %}" class="btn btn-secondary btn-sm">
-                                            <i class="fas fa-file-pdf"></i> PDF
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                                <h5 class="fw-bold">No completions yet</h5>
-                                <p class="text-muted">Checklists completed today will appear here</p>
-                            </div>
+                        {% if overdue_schedules.count > 5 %}
+                        <div class="card-footer bg-light text-center py-2">
+                            <a href="{% url 'pm_checklist_list' %}?status=OVERDUE" class="text-decoration-none">
+                                View All {{ overdue_schedules.count }} Overdue
+                            </a>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <!-- Open Issues -->
-            <div class="col-md-6">
-                <div class="card card-round">
-                    <div class="card-header">
-                        <div class="card-head-row">
-                            <div class="card-title">
-                                <i class="fas fa-wrench me-2"></i>Open Issues
-                            </div>
-                            <div class="card-tools">
-                                <a href="{% url 'pm_issues' %}" class="btn btn-label-warning btn-round btn-sm">
-                                    <span class="btn-label">
-                                        <i class="fa fa-eye"></i>
-                                    </span>
-                                    View All
-                                </a>
-                            </div>
+            <div class="row">
+                <!-- Completed Today -->
+                <div class="col-lg-6">
+                    <div class="content-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-check-circle me-2"></i>Completed Today</h5>
                         </div>
-                    </div>
-                    <div class="card-body">
-                        {% if open_issues %}
-                            {% for issue in open_issues %}
-                            <div class="d-flex mb-3 pb-3 border-bottom">
-                                <div class="flex-1">
-                                    <div class="mb-2">
-                                        {% if issue.priority == 'CRITICAL' %}
-                                            <span class="badge badge-danger">Critical</span>
-                                        {% elif issue.priority == 'HIGH' %}
-                                            <span class="badge badge-warning">High</span>
-                                        {% elif issue.priority == 'MEDIUM' %}
-                                            <span class="badge badge-info">Medium</span>
-                                        {% else %}
-                                            <span class="badge badge-secondary">Low</span>
-                                        {% endif %}
+                        <div class="card-body p-0">
+                            {% if completed_today %}
+                                {% for completion in completed_today|slice:":5" %}
+                                <div class="list-item">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="badge-modern badge-success me-2">{{ completion.schedule.template.annex_code }}</span>
+                                            <strong>{{ completion.schedule.template.title|truncatewords:5 }}</strong>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="far fa-user me-1"></i>{{ completion.completed_by.get_full_name|default:completion.completed_by.username }}
+                                        </small>
                                     </div>
-                                    <h6 class="fw-bold mb-1">{{ issue.issue_title }}</h6>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-user me-1"></i>{{ issue.reported_by.get_full_name|default:issue.reported_by.username }}
-                                        <span class="ms-2">
-                                            <i class="fas fa-calendar me-1"></i>{{ issue.reported_at|date:"M d, Y" }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="ms-3">
-                                    <a href="{% url 'pm_issue_update' issue.id %}" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Update
+                                    <a href="{% url 'pm_checklist_view' completion.id %}" class="btn btn-sm btn-secondary-modern">
+                                        <i class="fas fa-eye"></i>
                                     </a>
                                 </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-thumbs-up fa-3x text-success mb-3"></i>
-                                <h5 class="fw-bold">Excellent!</h5>
-                                <p class="text-muted">No open issues to resolve</p>
-                            </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="far fa-calendar-check"></i>
+                                    <h6>No Completions Today</h6>
+                                    <p>Start completing checklists</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Open Issues -->
+                <div class="col-lg-6">
+                    <div class="content-card">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-tools me-2"></i>Open Issues</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if open_issues %}
+                                {% for issue in open_issues|slice:":5" %}
+                                <div class="list-item">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            {% if issue.priority == 'CRITICAL' %}
+                                                <span class="badge-modern badge-danger me-2">Critical</span>
+                                            {% elif issue.priority == 'HIGH' %}
+                                                <span class="badge-modern badge-warning me-2">High</span>
+                                            {% else %}
+                                                <span class="badge-modern badge-info me-2">{{ issue.get_priority_display }}</span>
+                                            {% endif %}
+                                            <strong>{{ issue.problem_description|truncatewords:5 }}</strong>
+                                        </div>
+                                        <small class="text-muted">
+                                            <i class="far fa-clock me-1"></i>{{ issue.reported_at|timesince }} ago
+                                        </small>
+                                    </div>
+                                    <a href="{% url 'pm_issue_update' issue.id %}" class="btn btn-sm btn-secondary-modern">
+                                        <i class="fas fa-wrench"></i>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-check-circle"></i>
+                                    <h6>No Open Issues</h6>
+                                    <p>All issues have been resolved</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if open_issues.count > 5 %}
+                        <div class="card-footer bg-light text-center py-2">
+                            <a href="{% url 'pm_issues' %}" class="text-decoration-none">
+                                View All {{ open_issues.count }} Issues
+                            </a>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Quick Actions Card -->
-        <div class="row mt-4">
-            <div class="col-md-12">
-                <div class="card card-round">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-bolt me-2"></i>Quick Actions
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6 col-md-3 mb-3">
-                                <a href="{% url 'pm_schedule_create' %}" class="btn btn-primary btn-lg btn-block">
-                                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
-                                    <br>Schedule Checklist
-                                </a>
-                            </div>
-                            <div class="col-6 col-md-3 mb-3">
-                                <a href="{% url 'pm_generate_report' %}" class="btn btn-success btn-lg btn-block">
-                                    <i class="fas fa-file-pdf fa-2x mb-2"></i>
-                                    <br>Generate Report
-                                </a>
-                            </div>
-                            <div class="col-6 col-md-3 mb-3">
-                                <a href="{% url 'pm_checklist_list' %}" class="btn btn-info btn-lg btn-block">
-                                    <i class="fas fa-list fa-2x mb-2"></i>
-                                    <br>View All Checklists
-                                </a>
-                            </div>
-                            <div class="col-6 col-md-3 mb-3">
-                                <a href="{% url 'pm_reports' %}" class="btn btn-secondary btn-lg btn-block">
-                                    <i class="fas fa-folder fa-2x mb-2"></i>
-                                    <br>View Reports
-                                </a>
-                            </div>
+            <!-- Quick Actions -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="content-card">
+                        <div class="card-body text-center py-4">
+                            <h6 class="mb-3">Quick Actions</h6>
+                            <a href="{% url 'pm_checklist_list' %}" class="btn btn-secondary-modern me-2 mb-2">
+                                <i class="fas fa-list me-2"></i>All Checklists
+                            </a>
+                            <a href="{% url 'pm_reports' %}" class="btn btn-secondary-modern me-2 mb-2">
+                                <i class="fas fa-chart-bar me-2"></i>Reports
+                            </a>
+                            <a href="{% url 'pm_issues' %}" class="btn btn-secondary-modern me-2 mb-2">
+                                <i class="fas fa-exclamation-circle me-2"></i>Issues
+                            </a>
+                            <a href="{% url 'pm_schedule_create' %}" class="btn btn-primary-modern mb-2">
+                                <i class="fas fa-calendar-plus me-2"></i>Schedule New
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}
