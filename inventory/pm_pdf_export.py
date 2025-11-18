@@ -100,16 +100,16 @@ def generate_pm_checklist_pdf(completion):
     
     # Create table
     if template.annex_code == 'A':
-        col_widths = [15*mm, 80*mm, 55*mm, 40*mm]
+        col_widths = [12*mm, 85*mm, 45*mm, 48*mm]
     elif template.annex_code == 'C':
         col_widths = [15*mm, 80*mm, 45*mm, 50*mm]
     else:
         col_widths = [15*mm, 100*mm, 35*mm, 40*mm]
     
     table = Table(table_data, colWidths=col_widths, repeatRows=1)
-    
+
     # Table style
-    table_style = TableStyle([
+    table_style_list = [
         ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
@@ -121,9 +121,18 @@ def generate_pm_checklist_pdf(completion):
         ('TOPPADDING', (0, 1), (-1, -1), 5),
         ('BOTTOMPADDING', (0, 1), (-1, -1), 5),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.Color(0.95, 0.95, 0.95)]),
-    ])
-    
+    ]
+
+    # For Annex A, add gray shading for weekly tasks (items 7-11)
+    if template.annex_code == 'A':
+        # Items 7-11 are weekly tasks (rows 7-11 in table_data, index 7-11)
+        # Add gray background for weekly task rows
+        weekly_task_color = colors.Color(0.7, 0.7, 0.7)  # Medium gray
+        for row_num in range(7, 12):  # Rows 7-11 (items 7-11)
+            if row_num < len(table_data):
+                table_style_list.append(('BACKGROUND', (0, row_num), (-1, row_num), weekly_task_color))
+
+    table_style = TableStyle(table_style_list)
     table.setStyle(table_style)
     elements.append(table)
     elements.append(Spacer(1, 20))
@@ -163,37 +172,52 @@ def generate_pm_checklist_pdf(completion):
 
 def build_annex_a_table(completion):
     """Build table for Annex A (Daily/Weekly)"""
-    
+
+    from reportlab.platypus import Paragraph
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.lib.enums import TA_LEFT
+
     item_completions = completion.item_completions.all().select_related('item').order_by('item__item_number')
-    
-    # Header row
+
+    # Create style for task descriptions
+    task_style = ParagraphStyle(
+        'TaskStyle',
+        fontName='Helvetica',
+        fontSize=8,
+        leading=10,
+        leftIndent=0,
+        rightIndent=0,
+    )
+
+    # Header row - match exact template format
     header = [
-        'Item\nNo.',
-        'Task',
-        'Status\n(put ✓ if done)\nM    T    W    Th    F',
-        'Problems\nEncountered/Action'
+        Paragraph('<b>Item<br/>No.</b>', task_style),
+        Paragraph('<b>Task</b>', task_style),
+        Paragraph('<b>Status<br/>(put ✓ if done)</b><br/>M      T      W      Th      F', task_style),
+        Paragraph('<b>Problems<br/>Encountered/Action</b>', task_style)
     ]
-    
+
     table_data = [header]
-    
+
     for item_comp in item_completions:
         item = item_comp.item
-        
+
         # Task description with time schedule if applicable
         task_text = item.task_description
         if item.has_schedule_times and item.schedule_times:
-            task_text += "\n\n"
-            for time_slot in item.schedule_times:
-                task_text += f"{time_slot}\n"
-        
-        # Status checkmarks
+            # Add time schedules inline
+            time_list = "<br/>".join(item.schedule_times)
+            task_text = f"{item.task_description}<br/><br/>{time_list}"
+
+        # Status checkmarks - aligned under M, T, W, Th, F
         status_text = ""
         if item.has_schedule_times and item_comp.time_completions:
             # For items with time schedules, show time completion status
+            status_lines = []
             for time_slot in item.schedule_times:
                 is_done = item_comp.time_completions.get(time_slot, False)
-                status_text += "✓  " if is_done else "   "
-                status_text += "\n"
+                status_lines.append("✓" if is_done else "")
+            status_text = "<br/>".join(status_lines)
         else:
             # For regular items, show day completion status
             mon = "✓" if item_comp.monday else ""
@@ -201,24 +225,25 @@ def build_annex_a_table(completion):
             wed = "✓" if item_comp.wednesday else ""
             thu = "✓" if item_comp.thursday else ""
             fri = "✓" if item_comp.friday else ""
-            status_text = f"{mon}    {tue}    {wed}    {thu}    {fri}"
-        
+            # Use spaces to align checkmarks under days
+            status_text = f"{mon}        {tue}        {wed}        {thu}        {fri}"
+
         # Problems/Actions
         problems_text = ""
         if item_comp.problems_encountered:
             problems_text += item_comp.problems_encountered
         if item_comp.action_taken:
             if problems_text:
-                problems_text += "\n\nAction: "
+                problems_text += "<br/><br/>Action: "
             problems_text += item_comp.action_taken
-        
+
         table_data.append([
-            str(item.item_number),
-            task_text,
-            status_text,
-            problems_text
+            Paragraph(str(item.item_number), task_style),
+            Paragraph(task_text, task_style),
+            Paragraph(status_text, task_style),
+            Paragraph(problems_text, task_style) if problems_text else ""
         ])
-    
+
     return table_data
 
 
