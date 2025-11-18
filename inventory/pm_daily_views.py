@@ -138,7 +138,7 @@ def complete_daily_pm(request, schedule_id):
                     printed_name=request.POST.get('printed_name', '')
                 )
 
-                # Determine which day field to use
+                # Determine which day this is (0=Monday, 4=Friday)
                 weekday = schedule.scheduled_date.weekday()
                 day_fields = {
                     0: 'monday',
@@ -151,6 +151,7 @@ def complete_daily_pm(request, schedule_id):
 
                 # Create item completions
                 for item in items:
+                    # Check if item was completed (checkbox checked)
                     item_key = f'item_{item.id}'
                     is_completed = request.POST.get(item_key) == 'on'
 
@@ -158,17 +159,24 @@ def complete_daily_pm(request, schedule_id):
                     problems = request.POST.get(f'problems_{item.id}', '').strip()
                     action = request.POST.get(f'action_{item.id}', '').strip()
 
-                    # Create item completion
+                    # Build item completion data
+                    # AUTOMATICALLY set only TODAY's day field
                     item_completion_data = {
                         'completion': completion,
                         'item': item,
                         'problems_encountered': problems,
                         'action_taken': action,
+                        # All days default to False
+                        'monday': False,
+                        'tuesday': False,
+                        'wednesday': False,
+                        'thursday': False,
+                        'friday': False,
                     }
 
-                    # Set the appropriate day boolean
-                    if day_field:
-                        item_completion_data[day_field] = is_completed
+                    # Set ONLY today's day field if item was completed
+                    if day_field and is_completed:
+                        item_completion_data[day_field] = True
 
                     PMChecklistItemCompletion.objects.create(**item_completion_data)
 
