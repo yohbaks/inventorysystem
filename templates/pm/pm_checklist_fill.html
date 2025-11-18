@@ -4,615 +4,315 @@
 {% block title %}Fill PM Checklist - {{ template.annex_code }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pm_modern.css' %}">
 <style>
-    .fill-checklist-page {
-        background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
-
-    .checklist-header-fill {
-        background: var(--primary-gradient);
-        border-radius: 16px;
-        padding: 2rem;
+    .checklist-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
-
-    .checklist-header-fill h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .checklist-header-fill h3 {
-        font-size: 1.25rem;
-        font-weight: 400;
-        opacity: 0.95;
-    }
-
-    .checklist-item-card {
+    
+    .checklist-form {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.25rem;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    
+    .item-row {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
         border-left: 4px solid #667eea;
         transition: all 0.3s ease;
     }
-
-    .checklist-item-card:hover {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        transform: translateX(3px);
+    
+    .item-row:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateX(5px);
     }
-
-    .item-header {
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .item-badge {
-        background: var(--primary-gradient);
-        color: white;
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1.125rem;
-        flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .item-title {
-        flex: 1;
-        font-size: 1.0625rem;
-        font-weight: 600;
-        color: #2d3748;
-        line-height: 1.5;
-        margin: 0;
-    }
-
-    .status-section {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .status-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #4a5568;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.75rem;
-        display: block;
-    }
-
-    .day-checkboxes {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    .day-checkbox {
-        background: white;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.625rem 1rem;
-        text-align: center;
-        min-width: 60px;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .day-checkbox:hover {
-        border-color: #667eea;
-        background: #f7f9ff;
-    }
-
-    .day-checkbox label {
-        display: block;
-        font-weight: 600;
-        font-size: 0.75rem;
-        color: #4a5568;
-        margin-bottom: 0.25rem;
-        cursor: pointer;
-    }
-
-    .day-checkbox input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        accent-color: #667eea;
-    }
-
-    .time-check-item {
-        background: white;
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        transition: all 0.2s ease;
-    }
-
-    .time-check-item:hover {
-        border-color: #667eea;
-        background: #f7f9ff;
-    }
-
-    .time-check-item input[type="checkbox"] {
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        accent-color: #667eea;
-    }
-
-    .time-label {
-        font-weight: 600;
-        color: #2d3748;
-        min-width: 80px;
-    }
-
-    .value-input {
-        border: 2px solid #e2e8f0;
-        border-radius: 6px;
-        padding: 0.375rem 0.75rem;
-        width: 120px;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-    }
-
-    .value-input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .form-section {
-        margin-bottom: 1rem;
-    }
-
-    .form-section-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #4a5568;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .form-section-label i {
-        font-size: 1rem;
-    }
-
-    .modern-textarea {
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.75rem;
-        width: 100%;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-        resize: vertical;
-    }
-
-    .modern-textarea:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .photo-upload-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 0.75rem;
-    }
-
-    .photo-upload-box {
-        position: relative;
-    }
-
-    .photo-upload-box input[type="file"] {
-        border: 2px dashed #cbd5e0;
-        border-radius: 8px;
-        padding: 2rem 1rem;
-        width: 100%;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: #f8f9fa;
-    }
-
-    .photo-upload-box input[type="file"]:hover {
-        border-color: #667eea;
-        background: #f7f9ff;
-    }
-
-    .signature-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 2rem;
-        margin: 2rem 0;
-    }
-
-    .signature-section h5 {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .modern-input {
-        border: 2px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        width: 100%;
-        font-size: 0.9375rem;
-        transition: all 0.2s ease;
-    }
-
-    .modern-input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .submit-section {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    }
-
-    .btn-submit-modern {
-        background: var(--primary-gradient);
-        border: none;
-        color: white;
-        padding: 1rem 3rem;
-        font-size: 1.125rem;
-        font-weight: 600;
-        border-radius: 10px;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-    .btn-submit-modern:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-    }
-
-    .progress-indicator {
-        background: white;
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .progress-text {
-        font-weight: 600;
-        color: #4a5568;
-    }
-
-    .quick-fill-btn {
-        background: #f7fafc;
-        border: 1px solid #e2e8f0;
-        color: #4a5568;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .quick-fill-btn:hover {
+    
+    .item-number {
         background: #667eea;
         color: white;
-        border-color: #667eea;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
     }
-
-    @media (max-width: 768px) {
-        .checklist-header-fill h1 {
-            font-size: 1.5rem;
-        }
-
-        .day-checkboxes {
-            justify-content: center;
-        }
-
-        .photo-upload-grid {
-            grid-template-columns: 1fr;
-        }
+    
+    .checkbox-day {
+        width: 50px;
+        text-align: center;
+        margin: 0 5px;
+    }
+    
+    .checkbox-day label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .checkbox-day input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .signature-pad {
+        border: 2px dashed #667eea;
+        border-radius: 10px;
+        padding: 20px;
+        background: #f8f9fa;
+        text-align: center;
+    }
+    
+    .time-check {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="fill-checklist-page">
-    <div class="container">
-        <!-- Header -->
-        <div class="checklist-header-fill">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <h1>
-                        <i class="fas fa-clipboard-check me-2"></i>
-                        ANNEX "{{ template.annex_code }}"
-                    </h1>
-                    <h3>{{ template.title }}</h3>
-                    <div class="mt-2" style="opacity: 0.9;">
-                        <small><i class="fas fa-calendar me-2"></i>{{ template.schedule_note }}</small>
-                        {% if schedule.location %}
-                            <small class="ms-3"><i class="fas fa-map-marker-alt me-2"></i>{{ schedule.location }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-                <div>
-                    <a href="{% url 'pm_dashboard' %}" class="btn btn-light btn-pm">
-                        <i class="fas fa-arrow-left me-2"></i>Dashboard
-                    </a>
-                </div>
+<div class="container-fluid py-4">
+    <div class="checklist-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="mb-2">
+                    <i class="fas fa-clipboard-list"></i>
+                    ANNEX "{{ template.annex_code }}"
+                </h1>
+                <h3>{{ template.title }}</h3>
+                <p class="mb-0"><strong>Schedule:</strong> {{ template.schedule_note }}</p>
+                {% if schedule.location %}
+                <p class="mb-0"><strong>Location:</strong> {{ schedule.location }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'pm_dashboard' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
             </div>
         </div>
-
-        <form method="post" enctype="multipart/form-data" id="checklistForm">
-            {% csrf_token %}
-
-            <!-- Progress Indicator -->
-            <div class="progress-indicator">
-                <div class="progress-text">
-                    <i class="fas fa-tasks me-2"></i>
-                    <span id="itemCount">{{ items.count }}</span> Items to Complete
-                </div>
-                <button type="button" class="quick-fill-btn" onclick="quickFillAll()">
-                    <i class="fas fa-check-double me-2"></i>Quick Fill All
-                </button>
-            </div>
-
-            <!-- Checklist Items -->
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" id="checklistForm">
+        {% csrf_token %}
+        
+        <div class="checklist-form">
+            <h4 class="mb-4">
+                <i class="fas fa-tasks"></i> Checklist Items
+            </h4>
+            
             {% for item in items %}
-            <div class="checklist-item-card">
-                <div class="item-header">
-                    <div class="item-badge">{{ item.item_number }}</div>
-                    <h6 class="item-title">{{ item.task_description }}</h6>
-                </div>
-
-                <!-- Status Section -->
-                <div class="status-section">
-                    <span class="status-label">
-                        <i class="fas fa-check-circle me-1"></i> Status (Check if completed)
-                    </span>
-
-                    {% if template.annex_code == 'A' %}
-                        {% if item.has_schedule_times %}
-                            <!-- Items with scheduled times -->
-                            <div>
-                                {% for time_slot in item.schedule_times %}
-                                <div class="time-check-item">
-                                    <input type="checkbox"
-                                           name="item_{{ item.id }}_time_{{ time_slot|lower|cut:' ' }}"
-                                           id="item_{{ item.id }}_time_{{ forloop.counter }}">
-                                    <label class="time-label mb-0" for="item_{{ item.id }}_time_{{ forloop.counter }}">
-                                        {{ time_slot }}
+            <div class="item-row">
+                <div class="d-flex align-items-start">
+                    <div class="item-number">{{ item.item_number }}</div>
+                    <div class="flex-grow-1">
+                        <h5 class="mb-3">{{ item.task_description }}</h5>
+                        
+                        <!-- Status Checkboxes based on template type -->
+                        <div class="status-section mb-3">
+                            <label class="form-label fw-bold">Status (put ✓ if done):</label>
+                            
+                            {% if template.annex_code == 'A' %}
+                                <!-- Daily/Weekly with days -->
+                                {% if item.has_schedule_times %}
+                                    <!-- Items with scheduled times -->
+                                    <div class="time-checks">
+                                        {% for time_slot in item.schedule_times %}
+                                        <div class="time-check">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       name="item_{{ item.id }}_time_{{ time_slot|lower|cut:' ' }}"
+                                                       id="item_{{ item.id }}_time_{{ forloop.counter }}">
+                                                <label class="form-check-label" for="item_{{ item.id }}_time_{{ forloop.counter }}">
+                                                    <strong>{{ time_slot }}</strong>
+                                                    {% if item.requires_value_input %}
+                                                        <input type="text" class="form-control form-control-sm d-inline-block ms-3" 
+                                                               style="width: 100px;"
+                                                               name="item_{{ item.id }}_value_{{ time_slot|lower|cut:' ' }}"
+                                                               placeholder="Value ({{ item.value_unit }})">
+                                                    {% endif %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <!-- Regular day checkboxes -->
+                                    <div class="d-flex justify-content-start">
+                                        <div class="checkbox-day">
+                                            <label>M</label>
+                                            <input type="checkbox" name="item_{{ item.id }}_monday" class="form-check-input">
+                                        </div>
+                                        <div class="checkbox-day">
+                                            <label>T</label>
+                                            <input type="checkbox" name="item_{{ item.id }}_tuesday" class="form-check-input">
+                                        </div>
+                                        <div class="checkbox-day">
+                                            <label>W</label>
+                                            <input type="checkbox" name="item_{{ item.id }}_wednesday" class="form-check-input">
+                                        </div>
+                                        <div class="checkbox-day">
+                                            <label>Th</label>
+                                            <input type="checkbox" name="item_{{ item.id }}_thursday" class="form-check-input">
+                                        </div>
+                                        <div class="checkbox-day">
+                                            <label>F</label>
+                                            <input type="checkbox" name="item_{{ item.id }}_friday" class="form-check-input">
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            
+                            {% elif template.annex_code == 'C' %}
+                                <!-- Weekly with week numbers -->
+                                <div class="d-flex justify-content-start">
+                                    <div class="checkbox-day">
+                                        <label>Wk1</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_week1" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>Wk2</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_week2" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>Wk3</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_week3" class="form-check-input">
+                                    </div>
+                                    <div class="checkbox-day">
+                                        <label>Wk4</label>
+                                        <input type="checkbox" name="item_{{ item.id }}_week4" class="form-check-input">
+                                    </div>
+                                </div>
+                            
+                            {% else %}
+                                <!-- Simple completion checkbox -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="item_{{ item.id }}_completed"
+                                           id="item_{{ item.id }}_completed">
+                                    <label class="form-check-label" for="item_{{ item.id }}_completed">
+                                        Task Completed
                                     </label>
-                                    {% if item.requires_value_input %}
-                                        <input type="text"
-                                               class="value-input"
-                                               name="item_{{ item.id }}_value_{{ time_slot|lower|cut:' ' }}"
-                                               placeholder="{{ item.value_unit }}">
-                                    {% endif %}
                                 </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <!-- Regular day checkboxes -->
-                            <div class="day-checkboxes">
-                                <div class="day-checkbox">
-                                    <label for="item_{{ item.id }}_monday">Mon</label>
-                                    <input type="checkbox" name="item_{{ item.id }}_monday" id="item_{{ item.id }}_monday">
-                                </div>
-                                <div class="day-checkbox">
-                                    <label for="item_{{ item.id }}_tuesday">Tue</label>
-                                    <input type="checkbox" name="item_{{ item.id }}_tuesday" id="item_{{ item.id }}_tuesday">
-                                </div>
-                                <div class="day-checkbox">
-                                    <label for="item_{{ item.id }}_wednesday">Wed</label>
-                                    <input type="checkbox" name="item_{{ item.id }}_wednesday" id="item_{{ item.id }}_wednesday">
-                                </div>
-                                <div class="day-checkbox">
-                                    <label for="item_{{ item.id }}_thursday">Thu</label>
-                                    <input type="checkbox" name="item_{{ item.id }}_thursday" id="item_{{ item.id }}_thursday">
-                                </div>
-                                <div class="day-checkbox">
-                                    <label for="item_{{ item.id }}_friday">Fri</label>
-                                    <input type="checkbox" name="item_{{ item.id }}_friday" id="item_{{ item.id }}_friday">
-                                </div>
-                            </div>
-                        {% endif %}
-
-                    {% elif template.annex_code == 'C' %}
-                        <!-- Weekly with week numbers -->
-                        <div class="day-checkboxes">
-                            <div class="day-checkbox">
-                                <label for="item_{{ item.id }}_week1">Week 1</label>
-                                <input type="checkbox" name="item_{{ item.id }}_week1" id="item_{{ item.id }}_week1">
-                            </div>
-                            <div class="day-checkbox">
-                                <label for="item_{{ item.id }}_week2">Week 2</label>
-                                <input type="checkbox" name="item_{{ item.id }}_week2" id="item_{{ item.id }}_week2">
-                            </div>
-                            <div class="day-checkbox">
-                                <label for="item_{{ item.id }}_week3">Week 3</label>
-                                <input type="checkbox" name="item_{{ item.id }}_week3" id="item_{{ item.id }}_week3">
-                            </div>
-                            <div class="day-checkbox">
-                                <label for="item_{{ item.id }}_week4">Week 4</label>
-                                <input type="checkbox" name="item_{{ item.id }}_week4" id="item_{{ item.id }}_week4">
-                            </div>
+                            {% endif %}
                         </div>
-
-                    {% else %}
-                        <!-- Simple completion checkbox -->
-                        <div class="time-check-item">
-                            <input type="checkbox"
-                                   name="item_{{ item.id }}_completed"
-                                   id="item_{{ item.id }}_completed">
-                            <label class="time-label mb-0" for="item_{{ item.id }}_completed">
-                                Task Completed
+                        
+                        <!-- Problems Encountered -->
+                        <div class="mb-3">
+                            <label for="item_{{ item.id }}_problems" class="form-label fw-bold">
+                                <i class="fas fa-exclamation-circle text-warning"></i> Problems Encountered:
                             </label>
+                            <textarea class="form-control" name="item_{{ item.id }}_problems" 
+                                      id="item_{{ item.id }}_problems" rows="2" 
+                                      placeholder="Describe any problems encountered..."></textarea>
                         </div>
-                    {% endif %}
-                </div>
-
-                <!-- Problems & Actions -->
-                <div class="row">
-                    <div class="col-md-6 form-section">
-                        <label class="form-section-label">
-                            <i class="fas fa-exclamation-triangle text-warning"></i>
-                            Problems Encountered
-                        </label>
-                        <textarea class="modern-textarea"
-                                  name="item_{{ item.id }}_problems"
-                                  rows="2"
-                                  placeholder="Describe any issues..."></textarea>
-                    </div>
-                    <div class="col-md-6 form-section">
-                        <label class="form-section-label">
-                            <i class="fas fa-wrench text-info"></i>
-                            Action Taken
-                        </label>
-                        <textarea class="modern-textarea"
-                                  name="item_{{ item.id }}_action"
-                                  rows="2"
-                                  placeholder="Describe actions..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Photo Uploads -->
-                <div class="form-section">
-                    <label class="form-section-label">
-                        <i class="fas fa-camera text-success"></i>
-                        Photo Evidence (Optional)
-                    </label>
-                    <div class="photo-upload-grid">
-                        <div class="photo-upload-box">
-                            <input type="file" name="item_{{ item.id }}_photo1" accept="image/*">
+                        
+                        <!-- Action Taken -->
+                        <div class="mb-3">
+                            <label for="item_{{ item.id }}_action" class="form-label fw-bold">
+                                <i class="fas fa-tools text-info"></i> Action Taken:
+                            </label>
+                            <textarea class="form-control" name="item_{{ item.id }}_action" 
+                                      id="item_{{ item.id }}_action" rows="2" 
+                                      placeholder="Describe action taken..."></textarea>
                         </div>
-                        <div class="photo-upload-box">
-                            <input type="file" name="item_{{ item.id }}_photo2" accept="image/*">
-                        </div>
-                        <div class="photo-upload-box">
-                            <input type="file" name="item_{{ item.id }}_photo3" accept="image/*">
+                        
+                        <!-- Photo Uploads -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-camera text-success"></i> Photo Evidence (Optional):
+                            </label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="file" class="form-control" name="item_{{ item.id }}_photo1" 
+                                           accept="image/*">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="file" class="form-control" name="item_{{ item.id }}_photo2" 
+                                           accept="image/*">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="file" class="form-control" name="item_{{ item.id }}_photo3" 
+                                           accept="image/*">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             {% endfor %}
-
+            
             <!-- General Notes -->
-            <div class="checklist-item-card">
-                <h6 class="form-section-label" style="font-size: 1rem; margin-bottom: 1rem;">
-                    <i class="fas fa-sticky-note"></i>
-                    General Notes
-                </h6>
-                <textarea class="modern-textarea"
-                          name="general_notes"
-                          rows="4"
-                          placeholder="Add any additional observations or comments..."></textarea>
+            <div class="mt-4 mb-4">
+                <h5><i class="fas fa-sticky-note"></i> General Notes</h5>
+                <textarea class="form-control" name="general_notes" rows="4" 
+                          placeholder="Any additional notes or observations..."></textarea>
             </div>
-
+            
             <!-- Signature Section -->
-            <div class="signature-section">
-                <h5>
-                    <i class="fas fa-signature"></i>
-                    Signature & Verification
-                </h5>
-                <p class="text-muted mb-3">Complete your checklist by providing your signature</p>
-
-                <div class="row g-3">
+            <div class="signature-pad">
+                <h5><i class="fas fa-signature"></i> Signature</h5>
+                <p class="text-muted mb-3">Please provide your signature and printed name</p>
+                
+                <div class="row">
                     <div class="col-md-6">
-                        <label class="form-section-label">Upload Signature Image</label>
-                        <input type="file"
-                               class="modern-input"
-                               name="signature_image"
+                        <label for="signature_image" class="form-label fw-bold">Upload Signature Image:</label>
+                        <input type="file" class="form-control" name="signature_image" id="signature_image" 
                                accept="image/*">
-                        <small class="text-muted d-block mt-2">
-                            <i class="fas fa-info-circle"></i> Use camera or upload existing signature
-                        </small>
+                        <small class="text-muted">Or use your device's camera to capture signature</small>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-section-label">Printed Name *</label>
-                        <input type="text"
-                               class="modern-input"
-                               name="printed_name"
-                               placeholder="Enter your full name"
-                               required
+                        <label for="printed_name" class="form-label fw-bold">Printed Name:</label>
+                        <input type="text" class="form-control" name="printed_name" id="printed_name" 
+                               placeholder="Enter your full name" required
                                value="{{ request.user.get_full_name|default:request.user.username }}">
                     </div>
                 </div>
             </div>
-
+            
             <!-- Submit Button -->
-            <div class="submit-section">
-                <h6 class="mb-3" style="color: #4a5568;">Ready to submit your checklist?</h6>
-                <button type="submit" class="btn-submit-modern">
-                    <i class="fas fa-paper-plane me-2"></i>
-                    Submit Checklist
+            <div class="text-center mt-5">
+                <button type="submit" class="btn btn-primary btn-submit btn-lg">
+                    <i class="fas fa-check-circle"></i> Submit Checklist
                 </button>
-                <p class="text-muted mt-3 mb-0">
-                    <small>Please review all entries before submitting</small>
-                </p>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 <script>
 document.getElementById('checklistForm').addEventListener('submit', function(e) {
     if (!confirm('Are you sure you want to submit this checklist? Please ensure all information is correct.')) {
         e.preventDefault();
-    }
-});
-
-function quickFillAll() {
-    if (confirm('This will check all completion boxes. Continue?')) {
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.checked = true;
-        });
-    }
-}
-
-// Update item count based on checked items
-document.addEventListener('change', function(e) {
-    if (e.target.type === 'checkbox') {
-        const totalItems = {{ items.count }};
-        const cards = document.querySelectorAll('.checklist-item-card');
-        let completed = 0;
-
-        cards.forEach(card => {
-            const checkboxes = card.querySelectorAll('input[type="checkbox"]');
-            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-            if (anyChecked) completed++;
-        });
-
-        document.getElementById('itemCount').textContent = totalItems - completed;
     }
 });
 </script>
