@@ -4231,46 +4231,56 @@ def dashboard_view_chart(request):
 #photo upload for monitor
 @require_POST
 def upload_monitor_photo(request, monitor_id):
+    from django.contrib import messages
     monitor = get_object_or_404(MonitorDetails, id=monitor_id)
     if 'photo' in request.FILES:
         monitor.monitor_photo = request.FILES['photo']
         monitor.save()
+        messages.success(request, 'Monitor photo uploaded successfully!')
     return redirect(f'/desktop_details_view/{monitor.equipment_package.id}/#pills-monitor')
 
 
 @require_POST
 def upload_desktop_photo(request, desktop_id):
+    from django.contrib import messages
     desktop = get_object_or_404(DesktopDetails, id=desktop_id)
     if 'photo' in request.FILES:
         desktop.desktop_photo = request.FILES['photo']
         desktop.save()
+        messages.success(request, 'Desktop photo uploaded successfully!')
     return redirect(f'/desktop_details_view/{desktop.equipment_package.id}/#pills-desktop')
 
 
 @require_POST
 def upload_keyboard_photo(request, keyboard_id):
+    from django.contrib import messages
     keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
     if 'photo' in request.FILES:
         keyboard.keyboard_photo = request.FILES['photo']
         keyboard.save()
+        messages.success(request, 'Keyboard photo uploaded successfully!')
     return redirect(f'/desktop_details_view/{keyboard.equipment_package.id}/#pills-keyboard')
 
 
 @require_POST
 def upload_mouse_photo(request, mouse_id):
+    from django.contrib import messages
     mouse = get_object_or_404(MouseDetails, id=mouse_id)
     if 'photo' in request.FILES:
         mouse.mouse_photo = request.FILES['photo']
         mouse.save()
+        messages.success(request, 'Mouse photo uploaded successfully!')
     return redirect(f'/desktop_details_view/{mouse.equipment_package.id}/#pills-mouse')
 
 
 @require_POST
 def upload_ups_photo(request, ups_id):
+    from django.contrib import messages
     ups = get_object_or_404(UPSDetails, id=ups_id)
     if 'photo' in request.FILES:
         ups.ups_photo = request.FILES['photo']
         ups.save()
+        messages.success(request, 'UPS photo uploaded successfully!')
     return redirect(f'/desktop_details_view/{ups.equipment_package.id}/#pills-ups')
 
 
@@ -4278,18 +4288,26 @@ def upload_ups_photo(request, ups_id):
 def upload_document_photo(request, document_id):
     """Upload multiple photos for supporting documents"""
     from inventory.models import DocumentPhoto
+    from django.contrib import messages
 
     document = get_object_or_404(DocumentsDetails, id=document_id)
 
     # Handle multiple file uploads
     photos = request.FILES.getlist('photos')
     if photos:
+        count = 0
         for photo in photos:
             DocumentPhoto.objects.create(
                 document=document,
                 photo=photo,
                 caption=request.POST.get('caption', '')
             )
+            count += 1
+
+        if count == 1:
+            messages.success(request, 'Document photo uploaded successfully!')
+        else:
+            messages.success(request, f'{count} document photos uploaded successfully!')
 
     # Redirect based on which package type this document belongs to
     if document.equipment_package:
@@ -4308,6 +4326,7 @@ def upload_document_photo(request, document_id):
 def delete_document_photo(request, photo_id):
     """Delete a document photo"""
     from inventory.models import DocumentPhoto
+    from django.contrib import messages
 
     photo = get_object_or_404(DocumentPhoto, id=photo_id)
     document = photo.document
@@ -4315,6 +4334,8 @@ def delete_document_photo(request, photo_id):
     # Delete the photo file and database record
     photo.photo.delete()
     photo.delete()
+
+    messages.success(request, 'Document photo deleted successfully!')
 
     # Redirect based on which package type this document belongs to
     if document.equipment_package:
@@ -4333,11 +4354,13 @@ def delete_document_photo(request, photo_id):
 def upload_laptop_photo(request, laptop_id):
     """Upload photo for laptop"""
     from inventory.models import LaptopDetails
+    from django.contrib import messages
 
     laptop = get_object_or_404(LaptopDetails, id=laptop_id)
     if 'photo' in request.FILES:
         laptop.laptop_photo = request.FILES['photo']
         laptop.save()
+        messages.success(request, 'Laptop photo uploaded successfully!')
     return redirect(f'/laptops/{laptop.laptop_package.id}/#pills-laptop')
 
 
