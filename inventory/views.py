@@ -4308,17 +4308,6 @@ def upload_monitor_photo(request, monitor_id):
 
 
 @require_POST
-def upload_desktop_photo(request, desktop_id):
-    from django.contrib import messages
-    desktop = get_object_or_404(DesktopDetails, id=desktop_id)
-    if 'photo' in request.FILES:
-        desktop.desktop_photo = request.FILES['photo']
-        desktop.save()
-        messages.success(request, 'Desktop photo uploaded successfully!')
-    return redirect(f'/desktop_details_view/{desktop.equipment_package.id}/#pills-desktop')
-
-
-@require_POST
 def upload_keyboard_photo(request, keyboard_id):
     from django.contrib import messages
     keyboard = get_object_or_404(KeyboardDetails, id=keyboard_id)
