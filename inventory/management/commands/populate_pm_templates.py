@@ -37,8 +37,8 @@ class Command(BaseCommand):
             annex_code='A',
             defaults={
                 'title': 'Preventive Maintenance Checklist/Activities for the Datacenter (Daily/Weekly)',
-                'frequency': 'WEEKLY',
-                'description': 'Daily and weekly preventive maintenance checks for datacenter - Daily tasks M-F, Weekly tasks once per week',
+                'frequency': 'DAILY',
+                'description': 'Daily preventive maintenance checks for datacenter (Mon-Fri). Complete each day, weekly report aggregates all 5 days.',
                 'schedule_note': 'Mondays - Fridays',
                 'is_active': True
             }
@@ -48,7 +48,8 @@ class Command(BaseCommand):
         if not created:
             template.title = 'Preventive Maintenance Checklist/Activities for the Datacenter (Daily/Weekly)'
             template.schedule_note = 'Mondays - Fridays'
-            template.frequency = 'WEEKLY'
+            template.frequency = 'DAILY'
+            template.description = 'Daily preventive maintenance checks for datacenter (Mon-Fri). Complete each day, weekly report aggregates all 5 days.'
             template.save()
             # Clear existing items to recreate them
             template.items.all().delete()
