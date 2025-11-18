@@ -69,11 +69,20 @@ def daily_pm_dashboard(request):
     # Automatically ensure schedules exist for the entire current week (Mon-Fri)
     auto_create_week_schedules(template, today)
 
-    # Get today's schedule (now guaranteed to exist)
-    schedule = PMChecklistSchedule.objects.get(
+    # Get today's schedule - use first() to handle any duplicates
+    schedule = PMChecklistSchedule.objects.filter(
         template=template,
         scheduled_date=today
-    )
+    ).first()
+
+    if not schedule:
+        # Create one if somehow it doesn't exist
+        schedule = PMChecklistSchedule.objects.create(
+            template=template,
+            scheduled_date=today,
+            due_date=today,
+            status='PENDING'
+        )
 
     # Check if already completed today
     try:
