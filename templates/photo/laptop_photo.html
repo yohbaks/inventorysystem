@@ -6,25 +6,25 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-end">
       <li>
-        <form action="{% url 'upload_laptop_photo' laptop_details.id %}" method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <input type="file" name="photo" class="d-none" id="uploadLaptopPhotoInput" onchange="this.form.submit()">
-          <label for="uploadLaptopPhotoInput" class="dropdown-item">Upload Photo</label>
-        </form>
+        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#uploadLaptopPhotoModal">
+          <i class="fas fa-upload"></i> Upload Photo
+        </a>
       </li>
       <li>
         {% if laptop_details.laptop_photo %}
           <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#laptopPhotoModal">
-            View Photo
+            <i class="fas fa-eye"></i> View Photo
           </a>
         {% else %}
-          <span class="dropdown-item text-muted">No Photo</span>
+          <span class="dropdown-item text-muted">
+            <i class="fas fa-times-circle"></i> No Photo
+          </span>
         {% endif %}
       </li>
     </ul>
   </div>
 
-  <!-- Laptop Photo Modal -->
+  <!-- Laptop Photo View Modal -->
   <div class="modal fade" id="laptopPhotoModal" tabindex="-1" aria-labelledby="laptopPhotoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">

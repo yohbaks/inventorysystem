@@ -156,6 +156,7 @@ urlpatterns = [
 
     #photo upload for laptop
     path('upload_laptop_photo/<int:laptop_id>/', views.upload_laptop_photo, name='upload_laptop_photo'),
+    path('delete_laptop_photo/<int:laptop_id>/', views.delete_laptop_photo, name='delete_laptop_photo'),
 
     #profile
     path("account/profile/", views.profile_view, name="profile"),

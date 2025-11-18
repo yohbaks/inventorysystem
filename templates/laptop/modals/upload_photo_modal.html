@@ -1,0 +1,296 @@
+<!-- Laptop Photo Upload Modal -->
+<div class="modal fade" id="uploadLaptopPhotoModal" tabindex="-1" aria-labelledby="uploadLaptopPhotoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form id="uploadLaptopPhotoForm" method="POST" enctype="multipart/form-data"
+      action="{% if laptop_details %}{% url 'upload_laptop_photo' laptop_id=laptop_details.id %}{% else %}#{% endif %}">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+          <h5 class="modal-title" id="uploadLaptopPhotoModalLabel">
+            <i class="fas fa-camera"></i> Laptop Photo
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Current Photo Preview -->
+          {% if laptop_details.laptop_photo %}
+          <div class="mb-4 text-center">
+            <label class="form-label fw-bold">Current Photo</label>
+            <div style="position: relative; max-width: 100%; margin: 0 auto; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <img src="{{ laptop_details.laptop_photo.url }}"
+                   alt="Current Laptop Photo"
+                   style="width: 100%; height: auto; display: block;">
+            </div>
+          </div>
+          {% else %}
+          <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle"></i> No photo uploaded yet. Upload one below!
+          </div>
+          {% endif %}
+
+          <!-- Upload New Photo -->
+          <div class="mb-3">
+            <label for="laptop_photo" class="form-label fw-bold">
+              <i class="fas fa-upload"></i> Upload New Photo
+            </label>
+            <input type="file"
+                   class="form-control form-control-lg"
+                   id="laptop_photo"
+                   name="photo"
+                   accept="image/*"
+                   required>
+            <small class="text-muted d-block mt-2">
+              <i class="fas fa-check-circle text-success"></i> Supported: JPG, PNG, GIF (max 5MB)
+            </small>
+          </div>
+
+          <!-- Image Preview -->
+          <div id="laptopImagePreview" class="mt-3" style="display: none;">
+            <label class="form-label fw-bold">Preview</label>
+            <div style="position: relative; max-width: 100%; margin: 0 auto; border-radius: 1rem; overflow: hidden; border: 2px dashed #667eea;">
+              <img id="laptopPreviewImage"
+                   src="#"
+                   alt="Preview"
+                   style="width: 100%; height: auto; display: block;">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          {% if laptop_details.laptop_photo %}
+          <button type="button"
+                  class="btn btn-danger me-auto"
+                  onclick="deleteLaptopPhoto({{ laptop_details.id }})">
+            <i class="fas fa-trash"></i> Remove Photo
+          </button>
+          {% endif %}
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload Photo
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function() {
+  // CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Image preview functionality
+  const photoInput = document.getElementById('laptop_photo');
+  if (photoInput) {
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('laptopPreviewImage').src = e.target.result;
+          document.getElementById('laptopImagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // Handle form submission with AJAX
+  const uploadForm = document.getElementById('uploadLaptopPhotoForm');
+  if (uploadForm) {
+    uploadForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const formData = new FormData(this);
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalHtml = submitBtn.innerHTML;
+
+      // Disable submit button and show loading
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Uploading...';
+
+      // Use jQuery AJAX
+      $.ajax({
+        url: uploadForm.getAttribute('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        success: function(response) {
+          if (response.success) {
+            // Hide the modal
+            $('#uploadLaptopPhotoModal').modal('hide');
+
+            // Show success notification
+            $.notify({
+              title: "✅ Success",
+              message: response.message || "Photo uploaded successfully!",
+              icon: "fa fa-check-circle"
+            }, {
+              type: "success",
+              placement: { from: "bottom", align: "right" },
+              delay: 2000,
+              z_index: 9999
+            });
+
+            // Reload page after short delay to show new photo
+            setTimeout(function() {
+              window.location.href = window.location.pathname + '#pills-laptop';
+              window.location.reload();
+            }, 800);
+          } else {
+            // Show error notification
+            $.notify({
+              title: "⚠️ Upload Failed",
+              message: response.error || "Failed to upload photo",
+              icon: "fa fa-exclamation-triangle"
+            }, {
+              type: "danger",
+              placement: { from: "bottom", align: "right" },
+              delay: 4000,
+              z_index: 9999
+            });
+
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalHtml;
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Upload error:', error);
+
+          // Show error notification
+          $.notify({
+            title: "❌ Server Error",
+            message: xhr.responseJSON?.error || "An unexpected error occurred while uploading",
+            icon: "fa fa-times-circle"
+          }, {
+            type: "danger",
+            placement: { from: "bottom", align: "right" },
+            delay: 4000,
+            z_index: 9999
+          });
+
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalHtml;
+        }
+      });
+
+      return false;
+    });
+  }
+
+  // Reset form when modal is closed
+  $('#uploadLaptopPhotoModal').on('hidden.bs.modal', function() {
+    const form = document.getElementById('uploadLaptopPhotoForm');
+    if (form) {
+      form.reset();
+      const preview = document.getElementById('laptopImagePreview');
+      if (preview) preview.style.display = 'none';
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Photo';
+      }
+    }
+  });
+})();
+
+// Delete photo function
+function deleteLaptopPhoto(laptopId) {
+  if (!confirm('Are you sure you want to remove this photo? This action cannot be undone.')) {
+    return;
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  $.ajax({
+    url: `/delete_laptop_photo/${laptopId}/`,
+    type: 'POST',
+    headers: {
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    success: function(response) {
+      if (response.success) {
+        // Hide modal
+        $('#uploadLaptopPhotoModal').modal('hide');
+
+        // Show success notification
+        $.notify({
+          title: "✅ Success",
+          message: response.message || "Photo deleted successfully!",
+          icon: "fa fa-check-circle"
+        }, {
+          type: "success",
+          placement: { from: "bottom", align: "right" },
+          delay: 2000,
+          z_index: 9999
+        });
+
+        // Reload page after short delay
+        setTimeout(function() {
+          window.location.href = window.location.pathname + '#pills-laptop';
+          window.location.reload();
+        }, 800);
+      } else {
+        $.notify({
+          title: "⚠️ Delete Failed",
+          message: response.error || "Failed to delete photo",
+          icon: "fa fa-exclamation-triangle"
+        }, {
+          type: "danger",
+          placement: { from: "bottom", align: "right" },
+          delay: 4000,
+          z_index: 9999
+        });
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Delete error:', error);
+
+      $.notify({
+        title: "❌ Server Error",
+        message: xhr.responseJSON?.error || "An unexpected error occurred while deleting",
+        icon: "fa fa-times-circle"
+      }, {
+        type: "danger",
+        placement: { from: "bottom", align: "right" },
+        delay: 4000,
+        z_index: 9999
+      });
+    }
+  });
+}
+</script>

@@ -4410,14 +4410,60 @@ def delete_document_photo(request, photo_id):
 def upload_laptop_photo(request, laptop_id):
     """Upload photo for laptop"""
     from inventory.models import LaptopDetails
-    from django.contrib import messages
+    from django.http import JsonResponse
 
-    laptop = get_object_or_404(LaptopDetails, id=laptop_id)
-    if 'photo' in request.FILES:
+    try:
+        laptop = get_object_or_404(LaptopDetails, id=laptop_id)
+
+        if 'photo' not in request.FILES:
+            return JsonResponse({
+                'success': False,
+                'error': 'No photo file provided.'
+            }, status=400)
+
         laptop.laptop_photo = request.FILES['photo']
         laptop.save()
-        messages.success(request, 'Laptop photo uploaded successfully!')
-    return redirect(f'/laptops/{laptop.laptop_package.id}/#pills-laptop')
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Laptop photo uploaded successfully!',
+            'photo_url': laptop.laptop_photo.url if laptop.laptop_photo else None
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to upload photo: {str(e)}'
+        }, status=500)
+
+
+@require_POST
+def delete_laptop_photo(request, laptop_id):
+    """Delete photo for laptop"""
+    from inventory.models import LaptopDetails
+    from django.http import JsonResponse
+
+    try:
+        laptop = get_object_or_404(LaptopDetails, id=laptop_id)
+
+        if laptop.laptop_photo:
+            laptop.laptop_photo.delete(save=False)
+            laptop.laptop_photo = None
+            laptop.save()
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Laptop photo deleted successfully!'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'No photo to delete.'
+            }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Failed to delete photo: {str(e)}'
+        }, status=500)
 
 
 def export_salvage_excel(request):
