@@ -297,8 +297,8 @@ def build_daily_table(completion):
     for item_comp in item_completions:
         item = item_comp.item
 
-        # Check if this is a weekly item (7-9) that's only done on Friday
-        is_weekly_friday_only = item.item_number in [7, 8, 9]
+        # Check if this is a weekly item (6-8) that's only done on Friday
+        is_weekly_friday_only = item.item_number in [6, 7, 8]
         is_disabled_today = is_weekly_friday_only and weekday != 4  # Not Friday
 
         # Task description
@@ -511,14 +511,14 @@ def create_annex_a_table_style(completion):
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
     ]
 
-    # Dark gray for weekly tasks (items 7-11)
+    # Dark gray for weekly tasks (items 6-10)
     # Only shade columns 0-6 (Item No, Task, M, T, W, Th, F)
     # Leave column 7 (Problems) unshaded
     weekly_task_color = colors.Color(0.45, 0.45, 0.45)
 
     for idx, item_comp in enumerate(item_completions):
         row_index = idx + 2
-        if item_comp.item.item_number in [7, 8, 9, 10, 11]:
+        if item_comp.item.item_number in [6, 7, 8, 9, 10]:
             # Shade only columns 0-6, not column 7 (Problems)
             table_style_list.append(('BACKGROUND', (0, row_index), (6, row_index), weekly_task_color))
             table_style_list.append(('TEXTCOLOR', (0, row_index), (6, row_index), colors.white))
@@ -564,14 +564,14 @@ def create_annex_a_table_style_for_weekly(template):
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
     ]
 
-    # Dark gray for weekly tasks (items 7-11)
+    # Dark gray for weekly tasks (items 6-10)
     # Only shade columns 0-6 (Item No, Task, M, T, W, Th, F)
     # Leave column 7 (Problems) unshaded
     weekly_task_color = colors.Color(0.45, 0.45, 0.45)
 
     for idx, item in enumerate(items):
         row_index = idx + 2
-        if item.item_number in [7, 8, 9, 10, 11]:
+        if item.item_number in [6, 7, 8, 9, 10]:
             # Shade only columns 0-6, not column 7 (Problems)
             table_style_list.append(('BACKGROUND', (0, row_index), (6, row_index), weekly_task_color))
             table_style_list.append(('TEXTCOLOR', (0, row_index), (6, row_index), colors.white))

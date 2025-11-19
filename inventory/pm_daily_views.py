@@ -127,10 +127,10 @@ def complete_daily_pm(request, schedule_id):
     schedule = get_object_or_404(PMChecklistSchedule, id=schedule_id)
     template = schedule.template
 
-    # Check if already completed
+    # Check if already completed - allow editing to update readings throughout the day
+    existing_completion = None
     if hasattr(schedule, 'completion'):
-        messages.warning(request, 'This checklist has already been completed.')
-        return redirect('pm_daily_dashboard')
+        existing_completion = schedule.completion
 
     # Get all items for this template
     items = PMChecklistItem.objects.filter(template=template, is_active=True).order_by('item_number')
@@ -138,13 +138,21 @@ def complete_daily_pm(request, schedule_id):
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Create completion
-                completion = PMChecklistCompletion.objects.create(
-                    schedule=schedule,
-                    completed_by=request.user,
-                    completion_date=schedule.scheduled_date,
-                    printed_name=request.POST.get('printed_name', '')
-                )
+                # Update existing completion or create new one
+                if existing_completion:
+                    completion = existing_completion
+                    completion.completed_by = request.user
+                    completion.printed_name = request.POST.get('printed_name', '')
+                    completion.save()
+                    # Delete old item completions to replace with new ones
+                    completion.item_completions.all().delete()
+                else:
+                    completion = PMChecklistCompletion.objects.create(
+                        schedule=schedule,
+                        completed_by=request.user,
+                        completion_date=schedule.scheduled_date,
+                        printed_name=request.POST.get('printed_name', '')
+                    )
 
                 # Determine which day this is (0=Monday, 4=Friday)
                 weekday = schedule.scheduled_date.weekday()
@@ -163,9 +171,9 @@ def complete_daily_pm(request, schedule_id):
                     item_key = f'item_{item.id}'
                     is_completed = request.POST.get(item_key) == 'on'
 
-                    # For items with scheduled times (3, 5, 6), collect readings
+                    # For items with scheduled times (3, 4, 5), collect readings
                     action = ''
-                    if item.has_schedule_times and item.item_number in [3, 5, 6]:
+                    if item.has_schedule_times and item.item_number in [3, 4, 5]:
                         readings = []
                         for idx, time in enumerate(item.schedule_times):
                             reading_key = f'reading_{item.id}_{idx}'
@@ -197,9 +205,9 @@ def complete_daily_pm(request, schedule_id):
                         'friday': False,
                     }
 
-                    # Weekly tasks (items 7-9) are ONLY done on Friday
+                    # Weekly tasks (items 6-8) are ONLY done on Friday
                     # For Mon-Thu, skip marking these items even if checked
-                    if item.item_number in [7, 8, 9] and weekday != 4:
+                    if item.item_number in [6, 7, 8] and weekday != 4:
                         # Don't mark weekly items on Mon-Thu, but still save the record
                         is_completed = False
 
@@ -224,6 +232,50 @@ def complete_daily_pm(request, schedule_id):
     weekday = schedule.scheduled_date.weekday()
     is_friday = weekday == 4
 
+    # Pre-populate form with existing data if available
+    # Attach existing data to each item object
+    if existing_completion:
+        item_completions_dict = {ic.item.id: ic for ic in existing_completion.item_completions.all()}
+        for item in items:
+            if item.id in item_completions_dict:
+                item_comp = item_completions_dict[item.id]
+
+                # Attach checkbox state
+                item.is_checked = False
+                if weekday == 0 and item_comp.monday:
+                    item.is_checked = True
+                elif weekday == 1 and item_comp.tuesday:
+                    item.is_checked = True
+                elif weekday == 2 and item_comp.wednesday:
+                    item.is_checked = True
+                elif weekday == 3 and item_comp.thursday:
+                    item.is_checked = True
+                elif weekday == 4 and item_comp.friday:
+                    item.is_checked = True
+
+                # Attach problems and action
+                item.existing_problems = item_comp.problems_encountered or ''
+                item.existing_action = item_comp.action_taken or ''
+
+                # Extract readings for scheduled items
+                item.existing_readings = []
+                if item_comp.action_taken and item.has_schedule_times:
+                    readings = item_comp.action_taken.split('\n')
+                    for reading in readings:
+                        if ': ' in reading:
+                            item.existing_readings.append(reading.split(': ', 1)[1])
+            else:
+                item.is_checked = False
+                item.existing_problems = ''
+                item.existing_action = ''
+                item.existing_readings = []
+    else:
+        for item in items:
+            item.is_checked = False
+            item.existing_problems = ''
+            item.existing_action = ''
+            item.existing_readings = []
+
     context = {
         'schedule': schedule,
         'template': template,
@@ -232,6 +284,7 @@ def complete_daily_pm(request, schedule_id):
         'today_name': schedule.scheduled_date.strftime('%A'),
         'weekday': weekday,
         'is_friday': is_friday,
+        'existing_completion': existing_completion,
     }
 
     return render(request, 'pm/complete_daily_pm.html', context)

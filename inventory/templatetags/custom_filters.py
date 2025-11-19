@@ -31,3 +31,12 @@ def peso_format(value):
         return "₱{:,.2f}".format(value)
     except:
         return value
+
+
+@register.filter
+def index(sequence, position):
+    """Access list item by index"""
+    try:
+        return sequence[int(position)]
+    except (IndexError, TypeError, ValueError):
+        return ""
