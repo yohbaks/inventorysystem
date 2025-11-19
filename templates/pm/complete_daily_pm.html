@@ -82,7 +82,7 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if item.has_schedule_times and item.item_number in "3,5,6"|split:"," %}
+                                        {% if item.has_schedule_times and item.item_number == 3 or item.item_number == 5 or item.item_number == 6 %}
                                             <!-- Multiple readings for scheduled items -->
                                             <div class="scheduled-readings">
                                                 <label class="small font-weight-bold">Record Readings:</label>
