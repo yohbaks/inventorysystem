@@ -304,8 +304,8 @@ def build_daily_table(completion):
         # Task description
         task_text = item.task_description.replace('\n', '<br/>')
         if item.has_schedule_times and item.schedule_times:
-            time_list = "<br/>".join(item.schedule_times)
-            task_text = f"{task_text}<br/><br/>{time_list}"
+            time_list = ", ".join(item.schedule_times)
+            task_text = f"{task_text}<br/><br/><b>Times:</b> {time_list}"
 
         # Add note for weekly items on non-Friday days
         if is_disabled_today:
@@ -416,8 +416,8 @@ def build_weekly_table(template, week_completions):
         # Task description
         task_text = item.task_description.replace('\n', '<br/>')
         if item.has_schedule_times and item.schedule_times:
-            time_list = "<br/>".join(item.schedule_times)
-            task_text = f"{task_text}<br/><br/>{time_list}"
+            time_list = ", ".join(item.schedule_times)
+            task_text = f"{task_text}<br/><br/><b>Times:</b> {time_list}"
 
         # Checkmarks for each day
         checks = ["", "", "", "", ""]  # M, T, W, Th, F
