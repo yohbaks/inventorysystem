@@ -22,7 +22,7 @@
             </div>
         </div>
 
-        <!-- Week Progress -->
+        <!-- Week Overview -->
         <div class="row mb-4">
             <div class="col-md-12">
                 <div class="card">
@@ -30,100 +30,66 @@
                         <h5>Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col">
-                                <div class="day-status {% if days_completed.monday %}completed{% endif %}">
-                                    <strong>Monday</strong><br>
-                                    {% if days_completed.monday %}
-                                        <span class="badge badge-success">✓ Done</span>
-                                    {% else %}
-                                        <span class="badge badge-secondary">Pending</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="day-status {% if days_completed.tuesday %}completed{% endif %}">
-                                    <strong>Tuesday</strong><br>
-                                    {% if days_completed.tuesday %}
-                                        <span class="badge badge-success">✓ Done</span>
-                                    {% else %}
-                                        <span class="badge badge-secondary">Pending</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="day-status {% if days_completed.wednesday %}completed{% endif %}">
-                                    <strong>Wednesday</strong><br>
-                                    {% if days_completed.wednesday %}
-                                        <span class="badge badge-success">✓ Done</span>
-                                    {% else %}
-                                        <span class="badge badge-secondary">Pending</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="day-status {% if days_completed.thursday %}completed{% endif %}">
-                                    <strong>Thursday</strong><br>
-                                    {% if days_completed.thursday %}
-                                        <span class="badge badge-success">✓ Done</span>
-                                    {% else %}
-                                        <span class="badge badge-secondary">Pending</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="day-status {% if days_completed.friday %}completed{% endif %}">
-                                    <strong>Friday</strong><br>
-                                    {% if days_completed.friday %}
-                                        <span class="badge badge-success">✓ Done</span>
-                                    {% else %}
-                                        <span class="badge badge-secondary">Pending</span>
-                                    {% endif %}
+                        <p class="mb-3"><i class="fas fa-info-circle"></i> <strong>Note:</strong> You can complete any day from this week, including missed days.</p>
+
+                        {% for day in week_days %}
+                        <div class="card mb-3 {% if day.is_today %}border-primary{% endif %}">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <!-- Day Info -->
+                                    <div class="col-md-3">
+                                        <h5 class="mb-1">
+                                            {{ day.day_name }}
+                                            {% if day.is_today %}
+                                                <span class="badge badge-primary">Today</span>
+                                            {% elif day.is_past %}
+                                                <span class="badge badge-secondary">Past</span>
+                                            {% elif day.is_future %}
+                                                <span class="badge badge-light">Future</span>
+                                            {% endif %}
+                                        </h5>
+                                        <small class="text-muted">{{ day.date|date:"F d, Y" }}</small>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="col-md-4">
+                                        {% if day.is_completed %}
+                                            <div class="alert alert-success mb-0">
+                                                <i class="fas fa-check-circle"></i> <strong>Completed</strong><br>
+                                                <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
+                                                <small>at {{ day.completion.created_at|date:"h:i A" }}</small>
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-warning mb-0">
+                                                <i class="fas fa-clock"></i> <strong>Pending</strong><br>
+                                                <small>Not yet completed</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="col-md-5 text-right">
+                                        {% if day.is_completed %}
+                                            <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="btn btn-success btn-sm">
+                                                <i class="fas fa-file-pdf"></i> Export PDF
+                                            </a>
+                                        {% else %}
+                                            {% if day.schedule %}
+                                                <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-clipboard-check"></i> Complete Checklist
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">No schedule</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Today's Checklist Card -->
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h4>Today's PM Checklist - {{ today_name }}</h4>
-                    </div>
-                    <div class="card-body">
-                        {% if is_completed %}
-                            <!-- Already Completed -->
-                            <div class="alert alert-success">
-                                <h5>✓ Checklist Completed</h5>
-                                <p>The PM checklist for {{ today_name }}, {{ today|date:"F d, Y" }} has been completed.</p>
-                                <p><strong>Completed by:</strong> {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</p>
-                                <p><strong>Time:</strong> {{ completion.created_at|date:"h:i A" }}</p>
-                            </div>
-
-                            <div class="btn-group" role="group">
-                                <a href="{% url 'view_daily_pm_completion' completion.id %}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> View Completion
-                                </a>
-                                <a href="{% url 'export_daily_pm_pdf' completion.id %}" class="btn btn-success">
-                                    <i class="fas fa-file-pdf"></i> Export Daily PDF
-                                </a>
-                            </div>
-                        {% else %}
-                            <!-- Not Yet Completed -->
-                            <div class="alert alert-warning">
-                                <h5>Pending Completion</h5>
-                                <p>The PM checklist for {{ today_name }} has not been completed yet.</p>
-                                <p>Please complete today's preventive maintenance tasks.</p>
-                            </div>
-
-                            <a href="{% url 'complete_daily_pm' schedule.id %}" class="btn btn-primary btn-lg btn-block">
-                                <i class="fas fa-clipboard-check"></i> Complete Today's Checklist
-                            </a>
-                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -154,15 +120,14 @@
 </div>
 
 <style>
-    .day-status {
-        padding: 15px;
-        border-radius: 5px;
-        margin: 5px;
-        transition: all 0.3s;
+    .border-primary {
+        border-left: 4px solid #007bff !important;
     }
-    .day-status.completed {
-        background-color: #d4edda;
-        border: 2px solid #28a745;
+    .card {
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 </style>
 {% endblock %}

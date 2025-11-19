@@ -69,51 +69,50 @@ def daily_pm_dashboard(request):
     # Automatically ensure schedules exist for the entire current week (Mon-Fri)
     auto_create_week_schedules(template, today)
 
-    # Get today's schedule - use first() to handle any duplicates
-    schedule = PMChecklistSchedule.objects.filter(
-        template=template,
-        scheduled_date=today
-    ).first()
-
-    if not schedule:
-        # Create one if somehow it doesn't exist
-        schedule = PMChecklistSchedule.objects.create(
-            template=template,
-            scheduled_date=today,
-            due_date=today,
-            status='PENDING'
-        )
-
-    # Check if already completed today
-    try:
-        completion = PMChecklistCompletion.objects.get(schedule=schedule)
-        is_completed = True
-    except PMChecklistCompletion.DoesNotExist:
-        completion = None
-        is_completed = False
-
     # Get this week's completions for progress tracking
     monday, friday = get_week_start_end(today)
     week_completions = get_week_completions(template, today)
 
-    # Days completed this week
-    days_completed = {
-        'monday': 0 in week_completions,
-        'tuesday': 1 in week_completions,
-        'wednesday': 2 in week_completions,
-        'thursday': 3 in week_completions,
-        'friday': 4 in week_completions,
-    }
+    # Build list of all 5 days with their schedules and completion status
+    week_days = []
+    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+
+    for day_offset in range(5):
+        day_date = monday + timedelta(days=day_offset)
+
+        # Get schedule for this day
+        day_schedule = PMChecklistSchedule.objects.filter(
+            template=template,
+            scheduled_date=day_date
+        ).first()
+
+        # Check if completed
+        day_completion = None
+        is_day_completed = False
+        if day_schedule:
+            try:
+                day_completion = PMChecklistCompletion.objects.get(schedule=day_schedule)
+                is_day_completed = True
+            except PMChecklistCompletion.DoesNotExist:
+                pass
+
+        week_days.append({
+            'date': day_date,
+            'day_name': day_names[day_offset],
+            'is_today': day_date == today,
+            'schedule': day_schedule,
+            'completion': day_completion,
+            'is_completed': is_day_completed,
+            'is_past': day_date < today,
+            'is_future': day_date > today,
+        })
 
     context = {
         'is_weekend': False,
         'today': today,
         'today_name': today.strftime('%A'),
         'template': template,
-        'schedule': schedule,
-        'completion': completion,
-        'is_completed': is_completed,
-        'days_completed': days_completed,
+        'week_days': week_days,
         'monday': monday,
         'friday': friday,
     }
