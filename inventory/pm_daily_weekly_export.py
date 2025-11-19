@@ -512,13 +512,16 @@ def create_annex_a_table_style(completion):
     ]
 
     # Dark gray for weekly tasks (items 7-11)
+    # Only shade columns 0-6 (Item No, Task, M, T, W, Th, F)
+    # Leave column 7 (Problems) unshaded
     weekly_task_color = colors.Color(0.45, 0.45, 0.45)
 
     for idx, item_comp in enumerate(item_completions):
         row_index = idx + 2
         if item_comp.item.item_number in [7, 8, 9, 10, 11]:
-            table_style_list.append(('BACKGROUND', (0, row_index), (-1, row_index), weekly_task_color))
-            table_style_list.append(('TEXTCOLOR', (0, row_index), (-1, row_index), colors.white))
+            # Shade only columns 0-6, not column 7 (Problems)
+            table_style_list.append(('BACKGROUND', (0, row_index), (6, row_index), weekly_task_color))
+            table_style_list.append(('TEXTCOLOR', (0, row_index), (6, row_index), colors.white))
 
     return TableStyle(table_style_list)
 
@@ -562,13 +565,16 @@ def create_annex_a_table_style_for_weekly(template):
     ]
 
     # Dark gray for weekly tasks (items 7-11)
+    # Only shade columns 0-6 (Item No, Task, M, T, W, Th, F)
+    # Leave column 7 (Problems) unshaded
     weekly_task_color = colors.Color(0.45, 0.45, 0.45)
 
     for idx, item in enumerate(items):
         row_index = idx + 2
         if item.item_number in [7, 8, 9, 10, 11]:
-            table_style_list.append(('BACKGROUND', (0, row_index), (-1, row_index), weekly_task_color))
-            table_style_list.append(('TEXTCOLOR', (0, row_index), (-1, row_index), colors.white))
+            # Shade only columns 0-6, not column 7 (Problems)
+            table_style_list.append(('BACKGROUND', (0, row_index), (6, row_index), weekly_task_color))
+            table_style_list.append(('TEXTCOLOR', (0, row_index), (6, row_index), colors.white))
 
     return TableStyle(table_style_list)
 
