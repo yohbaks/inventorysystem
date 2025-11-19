@@ -57,8 +57,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS('Created Annex A template'))
 
-        # Add items for Annex A - matching exact template
-        # Note: Item numbering follows the template exactly (skips item 4, has 2 parts for item 2)
+        # Add items for Annex A - properly numbered 1-11 without gaps
         items = [
             {
                 'item_number': 1,
@@ -80,51 +79,51 @@ class Command(BaseCommand):
                 'requires_value_input': False
             },
             {
-                'item_number': 5,
+                'item_number': 4,
                 'task_description': 'Check if the temperature level in the network room is between 20°C to 27°C (68°F to 80.6°F)',
                 'has_schedule_times': True,
                 'schedule_times': ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
                 'requires_value_input': False
             },
             {
-                'item_number': 6,
+                'item_number': 5,
                 'task_description': 'Check if the humidity level in the network room is between 30% to 60%',
                 'has_schedule_times': True,
                 'schedule_times': ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
                 'requires_value_input': False
             },
             {
-                'item_number': 7,
+                'item_number': 6,
                 'task_description': "Check if servers' anti-virus definition files are up-to-date",
                 'has_schedule_times': False,
                 'requires_value_input': False
             },
             {
-                'item_number': 8,
+                'item_number': 7,
                 'task_description': "Check if server's event logs for critical warnings or errors",
                 'has_schedule_times': False,
                 'requires_value_input': False
             },
             {
-                'item_number': 9,
+                'item_number': 8,
                 'task_description': 'Check for signs of water leaks',
                 'has_schedule_times': False,
                 'requires_value_input': False
             },
             {
-                'item_number': 10,
+                'item_number': 9,
                 'task_description': 'Check for signs of holes on the ceiling and walls',
                 'has_schedule_times': False,
                 'requires_value_input': False
             },
             {
-                'item_number': 11,
+                'item_number': 10,
                 'task_description': 'Check for signs of pest infestation',
                 'has_schedule_times': False,
                 'requires_value_input': False
             },
             {
-                'item_number': 12,
+                'item_number': 11,
                 'task_description': 'Remove any fire hazards.',
                 'has_schedule_times': False,
                 'requires_value_input': False
