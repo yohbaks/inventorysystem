@@ -56,8 +56,8 @@
                                         {{ item.task_description|linebreaks }}
                                         {% if item.has_schedule_times %}
                                             <div class="mt-2">
-                                                <strong>Times:</strong>
-                                                <span class="badge badge-light">{{ item.schedule_times }}</span>
+                                                <strong>Scheduled Times:</strong>
+                                                <span class="badge badge-light">{{ item.schedule_times|join:", " }}</span>
                                             </div>
                                         {% endif %}
                                         {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}
@@ -82,24 +82,61 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <div class="form-group mb-2">
-                                            <label for="problems_{{ item.id }}" class="small">Problems:</label>
-                                            <textarea class="form-control form-control-sm"
-                                                      id="problems_{{ item.id }}"
-                                                      name="problems_{{ item.id }}"
-                                                      rows="2"
-                                                      placeholder="Describe any problems..."
-                                                      {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
-                                        </div>
-                                        <div class="form-group mb-0">
-                                            <label for="action_{{ item.id }}" class="small">Action Taken:</label>
-                                            <textarea class="form-control form-control-sm"
-                                                      id="action_{{ item.id }}"
-                                                      name="action_{{ item.id }}"
-                                                      rows="2"
-                                                      placeholder="Describe action taken..."
-                                                      {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
-                                        </div>
+                                        {% if item.has_schedule_times and item.item_number in "3,5,6"|split:"," %}
+                                            <!-- Multiple readings for scheduled items -->
+                                            <div class="scheduled-readings">
+                                                <label class="small font-weight-bold">Record Readings:</label>
+                                                {% for time in item.schedule_times %}
+                                                <div class="input-group input-group-sm mb-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="width: 80px;">{{ time }}</span>
+                                                    </div>
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           name="reading_{{ item.id }}_{{ forloop.counter0 }}"
+                                                           placeholder="{% if item.item_number == 3 %}e.g., OK or 75%{% elif item.item_number == 5 %}e.g., 24°C{% elif item.item_number == 6 %}e.g., 45%{% endif %}"
+                                                           {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}>
+                                                </div>
+                                                {% endfor %}
+                                                <small class="text-muted">
+                                                    {% if item.item_number == 3 %}Enter utilization % or status (OK/High)
+                                                    {% elif item.item_number == 5 %}Enter temperature (e.g., 24°C or 75°F)
+                                                    {% elif item.item_number == 6 %}Enter humidity % (e.g., 45%)
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+
+                                            <!-- Problems field -->
+                                            <div class="form-group mb-0 mt-3">
+                                                <label for="problems_{{ item.id }}" class="small">Problems/Notes:</label>
+                                                <textarea class="form-control form-control-sm"
+                                                          id="problems_{{ item.id }}"
+                                                          name="problems_{{ item.id }}"
+                                                          rows="2"
+                                                          placeholder="Any issues or additional notes..."
+                                                          {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
+                                            </div>
+                                        {% else %}
+                                            <!-- Standard problems/actions for non-scheduled items -->
+                                            <div class="form-group mb-2">
+                                                <label for="problems_{{ item.id }}" class="small">Problems:</label>
+                                                <textarea class="form-control form-control-sm"
+                                                          id="problems_{{ item.id }}"
+                                                          name="problems_{{ item.id }}"
+                                                          rows="2"
+                                                          placeholder="Describe any problems..."
+                                                          {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label for="action_{{ item.id }}" class="small">Action Taken:</label>
+                                                <textarea class="form-control form-control-sm"
+                                                          id="action_{{ item.id }}"
+                                                          name="action_{{ item.id }}"
+                                                          rows="2"
+                                                          placeholder="Describe action taken..."
+                                                          {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
+                                            </div>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}

@@ -163,9 +163,24 @@ def complete_daily_pm(request, schedule_id):
                     item_key = f'item_{item.id}'
                     is_completed = request.POST.get(item_key) == 'on'
 
-                    # Problems and actions
+                    # For items with scheduled times (3, 5, 6), collect readings
+                    action = ''
+                    if item.has_schedule_times and item.item_number in [3, 5, 6]:
+                        readings = []
+                        for idx, time in enumerate(item.schedule_times):
+                            reading_key = f'reading_{item.id}_{idx}'
+                            reading_value = request.POST.get(reading_key, '').strip()
+                            if reading_value:
+                                readings.append(f"{time}: {reading_value}")
+
+                        if readings:
+                            action = '\n'.join(readings)
+                    else:
+                        # Standard action field for other items
+                        action = request.POST.get(f'action_{item.id}', '').strip()
+
+                    # Problems field
                     problems = request.POST.get(f'problems_{item.id}', '').strip()
-                    action = request.POST.get(f'action_{item.id}', '').strip()
 
                     # Build item completion data
                     # AUTOMATICALLY set only TODAY's day field
