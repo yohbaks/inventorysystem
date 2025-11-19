@@ -182,6 +182,12 @@ def complete_daily_pm(request, schedule_id):
                         'friday': False,
                     }
 
+                    # Weekly tasks (items 7-9) are ONLY done on Friday
+                    # For Mon-Thu, skip marking these items even if checked
+                    if item.item_number in [7, 8, 9] and weekday != 4:
+                        # Don't mark weekly items on Mon-Thu, but still save the record
+                        is_completed = False
+
                     # Set ONLY today's day field if item was completed
                     if day_field and is_completed:
                         item_completion_data[day_field] = True
@@ -199,12 +205,18 @@ def complete_daily_pm(request, schedule_id):
             messages.error(request, f'Error completing checklist: {str(e)}')
             return redirect('complete_daily_pm', schedule_id=schedule_id)
 
+    # Get weekday (0=Monday, 4=Friday)
+    weekday = schedule.scheduled_date.weekday()
+    is_friday = weekday == 4
+
     context = {
         'schedule': schedule,
         'template': template,
         'items': items,
         'today': schedule.scheduled_date,
         'today_name': schedule.scheduled_date.strftime('%A'),
+        'weekday': weekday,
+        'is_friday': is_friday,
     }
 
     return render(request, 'pm/complete_daily_pm.html', context)

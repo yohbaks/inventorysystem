@@ -297,39 +297,50 @@ def build_daily_table(completion):
     for item_comp in item_completions:
         item = item_comp.item
 
+        # Check if this is a weekly item (7-9) that's only done on Friday
+        is_weekly_friday_only = item.item_number in [7, 8, 9]
+        is_disabled_today = is_weekly_friday_only and weekday != 4  # Not Friday
+
         # Task description
         task_text = item.task_description.replace('\n', '<br/>')
         if item.has_schedule_times and item.schedule_times:
             time_list = "<br/>".join(item.schedule_times)
             task_text = f"{task_text}<br/><br/>{time_list}"
 
+        # Add note for weekly items on non-Friday days
+        if is_disabled_today:
+            task_text += "<br/><br/><i>(Completed on Friday)</i>"
+
         # Checkmarks - only fill the current day's column
         checks = ["", "", "", "", ""]  # M, T, W, Th, F
 
-        # Determine if this item was completed today
-        is_completed = False
-        if weekday == 0:
-            is_completed = item_comp.monday
-        elif weekday == 1:
-            is_completed = item_comp.tuesday
-        elif weekday == 2:
-            is_completed = item_comp.wednesday
-        elif weekday == 3:
-            is_completed = item_comp.thursday
-        elif weekday == 4:
-            is_completed = item_comp.friday
+        # For weekly items (7-9), don't show checkmark on Mon-Thu
+        if not is_disabled_today:
+            # Determine if this item was completed today
+            is_completed = False
+            if weekday == 0:
+                is_completed = item_comp.monday
+            elif weekday == 1:
+                is_completed = item_comp.tuesday
+            elif weekday == 2:
+                is_completed = item_comp.wednesday
+            elif weekday == 3:
+                is_completed = item_comp.thursday
+            elif weekday == 4:
+                is_completed = item_comp.friday
 
-        if is_completed:
-            checks[weekday] = "✓"
+            if is_completed:
+                checks[weekday] = "✓"
 
-        # Problems/Actions
+        # Problems/Actions - don't show for disabled items
         problems_text = ""
-        if item_comp.problems_encountered:
-            problems_text += item_comp.problems_encountered
-        if item_comp.action_taken:
-            if problems_text:
-                problems_text += "<br/><br/>Action: "
-            problems_text += item_comp.action_taken
+        if not is_disabled_today:
+            if item_comp.problems_encountered:
+                problems_text += item_comp.problems_encountered
+            if item_comp.action_taken:
+                if problems_text:
+                    problems_text += "<br/><br/>Action: "
+                problems_text += item_comp.action_taken
 
         table_data.append([
             Paragraph(str(item.item_number), center_style),

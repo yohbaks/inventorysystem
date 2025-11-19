@@ -21,8 +21,11 @@
                             <ul>
                                 <li>Check the box for each task you have completed</li>
                                 <li>Note any problems encountered and actions taken</li>
-                                <li>Items 1-6 and 12 are DAILY tasks (should be done every day)</li>
-                                <li>Items 7-11 are WEEKLY tasks (done once per week)</li>
+                                <li>Items 1-6, 10-12 are DAILY tasks (should be done every day)</li>
+                                <li><strong>Items 7-9 are WEEKLY tasks (done only on Friday)</strong></li>
+                                {% if not is_friday %}
+                                    <li class="text-warning"><strong>Note:</strong> Items 7-9 are disabled today. They will be available on Friday.</li>
+                                {% endif %}
                             </ul>
                         </div>
 
@@ -37,10 +40,15 @@
                             </thead>
                             <tbody>
                                 {% for item in items %}
-                                <tr {% if item.item_number >= 7 and item.item_number <= 11 %}class="table-secondary"{% endif %}>
+                                {% with is_weekly_item=item.item_number >= 7 and item.item_number <= 9 %}
+                                {% with is_disabled=is_weekly_item and not is_friday %}
+                                <tr {% if item.item_number >= 7 and item.item_number <= 11 %}class="table-secondary"{% endif %}
+                                    {% if is_disabled %}style="opacity: 0.6;"{% endif %}>
                                     <td class="text-center">
                                         <strong>{{ item.item_number }}</strong>
-                                        {% if item.item_number >= 7 and item.item_number <= 11 %}
+                                        {% if is_weekly_item %}
+                                            <br><small class="badge badge-dark">WEEKLY (Friday Only)</small>
+                                        {% elif item.item_number >= 10 and item.item_number <= 11 %}
                                             <br><small class="badge badge-dark">WEEKLY</small>
                                         {% else %}
                                             <br><small class="badge badge-info">DAILY</small>
@@ -54,17 +62,26 @@
                                                 <span class="badge badge-light">{{ item.schedule_times }}</span>
                                             </div>
                                         {% endif %}
+                                        {% if is_disabled %}
+                                            <div class="mt-2">
+                                                <small class="text-muted"><i class="fas fa-info-circle"></i> This task will be available on Friday</small>
+                                            </div>
+                                        {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox"
-                                                   class="custom-control-input"
-                                                   id="item_{{ item.id }}"
-                                                   name="item_{{ item.id }}">
-                                            <label class="custom-control-label" for="item_{{ item.id }}">
-                                                <i class="fas fa-check text-success"></i>
-                                            </label>
-                                        </div>
+                                        {% if is_disabled %}
+                                            <i class="fas fa-lock text-muted"></i>
+                                        {% else %}
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox"
+                                                       class="custom-control-input"
+                                                       id="item_{{ item.id }}"
+                                                       name="item_{{ item.id }}">
+                                                <label class="custom-control-label" for="item_{{ item.id }}">
+                                                    <i class="fas fa-check text-success"></i>
+                                                </label>
+                                            </div>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <div class="form-group mb-2">
@@ -73,7 +90,8 @@
                                                       id="problems_{{ item.id }}"
                                                       name="problems_{{ item.id }}"
                                                       rows="2"
-                                                      placeholder="Describe any problems..."></textarea>
+                                                      placeholder="Describe any problems..."
+                                                      {% if is_disabled %}disabled{% endif %}></textarea>
                                         </div>
                                         <div class="form-group mb-0">
                                             <label for="action_{{ item.id }}" class="small">Action Taken:</label>
@@ -81,10 +99,13 @@
                                                       id="action_{{ item.id }}"
                                                       name="action_{{ item.id }}"
                                                       rows="2"
-                                                      placeholder="Describe action taken..."></textarea>
+                                                      placeholder="Describe action taken..."
+                                                      {% if is_disabled %}disabled{% endif %}></textarea>
                                         </div>
                                     </td>
                                 </tr>
+                                {% endwith %}
+                                {% endwith %}
                                 {% endfor %}
                             </tbody>
                         </table>
