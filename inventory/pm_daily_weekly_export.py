@@ -297,8 +297,8 @@ def build_daily_table(completion):
     for item_comp in item_completions:
         item = item_comp.item
 
-        # Check if this is a weekly item (6-8, 11) that's only done on Friday
-        is_weekly_friday_only = item.item_number in [6, 7, 8, 11]
+        # Check if this is a weekly item (6-11) that's only done on Friday
+        is_weekly_friday_only = item.item_number in [6, 7, 8, 9, 10, 11]
         is_disabled_today = is_weekly_friday_only and weekday != 4  # Not Friday
 
         # Task description
