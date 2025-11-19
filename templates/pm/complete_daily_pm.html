@@ -49,10 +49,10 @@
                             <tbody>
                                 {% for item in items %}
                                 <tr {% if item.item_number >= 6 and item.item_number <= 11 %}class="table-secondary"{% endif %}
-                                    {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}style="opacity: 0.6;"{% endif %}>
+                                    {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}style="opacity: 0.6;"{% endif %}{% endif %}>
                                     <td class="text-center">
                                         <strong>{{ item.item_number }}</strong>
-                                        {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 %}
+                                        {% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}
                                             <br><small class="badge badge-dark">WEEKLY (Friday Only)</small>
                                         {% elif item.item_number >= 9 and item.item_number <= 10 %}
                                             <br><small class="badge badge-dark">WEEKLY</small>
@@ -68,14 +68,14 @@
                                                 <span class="badge badge-light">{{ item.schedule_times|join:", " }}</span>
                                             </div>
                                         {% endif %}
-                                        {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}
+                                        {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}
                                             <div class="mt-2">
                                                 <small class="text-muted"><i class="fas fa-info-circle"></i> This task will be available on Friday</small>
                                             </div>
-                                        {% endif %}
+                                        {% endif %}{% endif %}
                                     </td>
                                     <td class="text-center">
-                                        {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}
+                                        {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}
                                             <i class="fas fa-lock text-muted"></i>
                                         {% else %}
                                             <div class="custom-control custom-checkbox">
@@ -88,7 +88,7 @@
                                                     <i class="fas fa-check text-success"></i>
                                                 </label>
                                             </div>
-                                        {% endif %}
+                                        {% endif %}{% endif %}
                                     </td>
                                     <td>
                                         {% if item.has_schedule_times and item.item_number == 3 or item.item_number == 4 or item.item_number == 5 %}
@@ -105,7 +105,7 @@
                                                            name="reading_{{ item.id }}_{{ forloop.counter0 }}"
                                                            value="{% if forloop.counter0 < item.existing_readings|length %}{{ item.existing_readings|index:forloop.counter0 }}{% endif %}"
                                                            placeholder="{% if item.item_number == 3 %}e.g., OK or 75%{% elif item.item_number == 4 %}e.g., 24°C{% elif item.item_number == 5 %}e.g., 45%{% endif %}"
-                                                           {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}disabled{% endif %}>
+                                                           {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}disabled{% endif %}{% endif %}>
                                                 </div>
                                                 {% endfor %}
                                                 <small class="text-muted">
@@ -124,7 +124,7 @@
                                                           name="problems_{{ item.id }}"
                                                           rows="2"
                                                           placeholder="Any issues or additional notes..."
-                                                          {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}disabled{% endif %}></textarea>
+                                                          {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}disabled{% endif %}{% endif %}></textarea>
                                             </div>
                                         {% else %}
                                             <!-- Standard problems/actions for non-scheduled items -->
@@ -135,7 +135,7 @@
                                                           name="problems_{{ item.id }}"
                                                           rows="2"
                                                           placeholder="Describe any problems..."
-                                                          {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}disabled{% endif %}></textarea>
+                                                          {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}disabled{% endif %}{% endif %}></textarea>
                                             </div>
                                             <div class="form-group mb-0">
                                                 <label for="action_{{ item.id }}" class="small">Action Taken:</label>
@@ -144,7 +144,7 @@
                                                           name="action_{{ item.id }}"
                                                           rows="2"
                                                           placeholder="Describe action taken..."
-                                                          {% if item.item_number >= 6 and item.item_number <= 8 or item.item_number == 11 and not is_friday %}disabled{% endif %}></textarea>
+                                                          {% if not is_friday %}{% if item.item_number == 6 or item.item_number == 7 or item.item_number == 8 or item.item_number == 11 %}disabled{% endif %}{% endif %}></textarea>
                                             </div>
                                         {% endif %}
                                     </td>
