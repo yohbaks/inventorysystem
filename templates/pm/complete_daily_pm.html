@@ -40,13 +40,11 @@
                             </thead>
                             <tbody>
                                 {% for item in items %}
-                                {% with is_weekly_item=item.item_number >= 7 and item.item_number <= 9 %}
-                                {% with is_disabled=is_weekly_item and not is_friday %}
                                 <tr {% if item.item_number >= 7 and item.item_number <= 11 %}class="table-secondary"{% endif %}
-                                    {% if is_disabled %}style="opacity: 0.6;"{% endif %}>
+                                    {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}style="opacity: 0.6;"{% endif %}>
                                     <td class="text-center">
                                         <strong>{{ item.item_number }}</strong>
-                                        {% if is_weekly_item %}
+                                        {% if item.item_number >= 7 and item.item_number <= 9 %}
                                             <br><small class="badge badge-dark">WEEKLY (Friday Only)</small>
                                         {% elif item.item_number >= 10 and item.item_number <= 11 %}
                                             <br><small class="badge badge-dark">WEEKLY</small>
@@ -62,14 +60,14 @@
                                                 <span class="badge badge-light">{{ item.schedule_times }}</span>
                                             </div>
                                         {% endif %}
-                                        {% if is_disabled %}
+                                        {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}
                                             <div class="mt-2">
                                                 <small class="text-muted"><i class="fas fa-info-circle"></i> This task will be available on Friday</small>
                                             </div>
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        {% if is_disabled %}
+                                        {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}
                                             <i class="fas fa-lock text-muted"></i>
                                         {% else %}
                                             <div class="custom-control custom-checkbox">
@@ -91,7 +89,7 @@
                                                       name="problems_{{ item.id }}"
                                                       rows="2"
                                                       placeholder="Describe any problems..."
-                                                      {% if is_disabled %}disabled{% endif %}></textarea>
+                                                      {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
                                         </div>
                                         <div class="form-group mb-0">
                                             <label for="action_{{ item.id }}" class="small">Action Taken:</label>
@@ -100,12 +98,10 @@
                                                       name="action_{{ item.id }}"
                                                       rows="2"
                                                       placeholder="Describe action taken..."
-                                                      {% if is_disabled %}disabled{% endif %}></textarea>
+                                                      {% if item.item_number >= 7 and item.item_number <= 9 and not is_friday %}disabled{% endif %}></textarea>
                                         </div>
                                     </td>
                                 </tr>
-                                {% endwith %}
-                                {% endwith %}
                                 {% endfor %}
                             </tbody>
                         </table>
