@@ -205,9 +205,9 @@ def complete_daily_pm(request, schedule_id):
                         'friday': False,
                     }
 
-                    # Weekly tasks (items 6-8) are ONLY done on Friday
+                    # Weekly tasks (items 6-8, 11) are ONLY done on Friday
                     # For Mon-Thu, skip marking these items even if checked
-                    if item.item_number in [6, 7, 8] and weekday != 4:
+                    if item.item_number in [6, 7, 8, 11] and weekday != 4:
                         # Don't mark weekly items on Mon-Thu, but still save the record
                         is_completed = False
 

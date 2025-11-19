@@ -138,8 +138,9 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(f'  Added {len(items)} items to Annex A')
-        self.stdout.write(self.style.SUCCESS('  Items 1-6, 12: Daily tasks (M-F)'))
-        self.stdout.write(self.style.SUCCESS('  Items 7-11: Weekly tasks (once per week, dark gray shading)'))
+        self.stdout.write(self.style.SUCCESS('  Items 1-2, 9-10: Daily tasks (M-F)'))
+        self.stdout.write(self.style.SUCCESS('  Items 3-5: Daily with multiple readings'))
+        self.stdout.write(self.style.SUCCESS('  Items 6-8, 11: Weekly Friday-only tasks (gray shading)'))
 
     def create_annex_b(self):
         """Create Annex B - Datacenter (Monthly) template"""
