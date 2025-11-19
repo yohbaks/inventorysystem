@@ -297,8 +297,8 @@ def build_daily_table(completion):
     for item_comp in item_completions:
         item = item_comp.item
 
-        # Check if this is a weekly item (6-8) that's only done on Friday
-        is_weekly_friday_only = item.item_number in [6, 7, 8]
+        # Check if this is a weekly item (6-8, 11) that's only done on Friday
+        is_weekly_friday_only = item.item_number in [6, 7, 8, 11]
         is_disabled_today = is_weekly_friday_only and weekday != 4  # Not Friday
 
         # Task description
@@ -314,7 +314,7 @@ def build_daily_table(completion):
         # Checkmarks - only fill the current day's column
         checks = ["", "", "", "", ""]  # M, T, W, Th, F
 
-        # For weekly items (7-9), don't show checkmark on Mon-Thu
+        # For weekly Friday-only items (6-8, 11), don't show checkmark on Mon-Thu
         if not is_disabled_today:
             # Determine if this item was completed today
             is_completed = False
@@ -518,7 +518,7 @@ def create_annex_a_table_style(completion):
 
     for idx, item_comp in enumerate(item_completions):
         row_index = idx + 2
-        if item_comp.item.item_number in [6, 7, 8, 9, 10]:
+        if item_comp.item.item_number in [6, 7, 8, 9, 10, 11]:
             # Shade only columns 0-6, not column 7 (Problems)
             table_style_list.append(('BACKGROUND', (0, row_index), (6, row_index), weekly_task_color))
             table_style_list.append(('TEXTCOLOR', (0, row_index), (6, row_index), colors.white))
@@ -571,7 +571,7 @@ def create_annex_a_table_style_for_weekly(template):
 
     for idx, item in enumerate(items):
         row_index = idx + 2
-        if item.item_number in [6, 7, 8, 9, 10]:
+        if item.item_number in [6, 7, 8, 9, 10, 11]:
             # Shade only columns 0-6, not column 7 (Problems)
             table_style_list.append(('BACKGROUND', (0, row_index), (6, row_index), weekly_task_color))
             table_style_list.append(('TEXTCOLOR', (0, row_index), (6, row_index), colors.white))
