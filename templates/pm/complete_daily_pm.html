@@ -171,8 +171,8 @@
                                                           {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}>{{ item.existing_action }}</textarea>
                                             </div>
 
-                                            <!-- Downtime Logging Button (for critical equipment items 2, 3, 4, 5) -->
-                                            {% if item.item_number == 2 or item.item_number == 3 or item.item_number == 4 or item.item_number == 5 %}
+                                            <!-- Downtime Logging Button (for critical equipment items 1 and 2) -->
+                                            {% if item.item_number == 1 or item.item_number == 2 %}
                                             {% if item.completion_id %}
                                             <div class="mt-2">
                                                 <button type="button"
