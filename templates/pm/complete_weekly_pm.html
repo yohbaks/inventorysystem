@@ -53,17 +53,27 @@
                                                 <i class="fas fa-list"></i> View {{ smart_suggestions.item1.total_checks }} Daily Check(s)
                                             </button>
                                             {% endif %}
-                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="1" data-problems="{{ smart_suggestions.item1.suggested_problems }}" data-action="{{ smart_suggestions.item1.suggested_action }}">
-                                                <i class="fas fa-magic"></i> Auto-fill Problems & Action
+                                            <button class="btn btn-sm btn-success autofill-selected-btn" type="button" data-item="1" data-action="{{ smart_suggestions.item1.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Selected
                                             </button>
 
                                             <div class="collapse mt-2" id="item1Details">
                                                 <div class="card bg-light">
                                                     <div class="card-body">
-                                                        <div style="max-height: 200px; overflow-y: auto;">
-                                                            <table class="table table-sm table-striped">
+                                                        <div class="mb-2">
+                                                            <button type="button" class="btn btn-xs btn-outline-primary select-all-item1" onclick="selectAllItem1Checks(true)">Select All</button>
+                                                            <button type="button" class="btn btn-xs btn-outline-secondary deselect-all-item1" onclick="selectAllItem1Checks(false)">Deselect All</button>
+                                                            <small class="text-muted ml-2">
+                                                                <i class="fas fa-info-circle"></i> Check the entries you want to include in auto-fill
+                                                            </small>
+                                                        </div>
+                                                        <div style="max-height: 250px; overflow-y: auto;">
+                                                            <table class="table table-sm table-striped table-hover">
                                                                 <thead>
                                                                     <tr>
+                                                                        <th style="width: 40px;">
+                                                                            <input type="checkbox" id="checkAllItem1" title="Select/Deselect All" onchange="toggleAllItem1Checks(this)">
+                                                                        </th>
                                                                         <th>Date</th>
                                                                         <th>Status</th>
                                                                         <th>Details</th>
@@ -72,6 +82,13 @@
                                                                 <tbody>
                                                                     {% for check in smart_suggestions.item1.equipment_checks %}
                                                                     <tr class="{% if check.status == 'Issue' %}table-warning{% endif %}">
+                                                                        <td>
+                                                                            <input type="checkbox"
+                                                                                   class="item1-check"
+                                                                                   data-date="{{ check.date }}"
+                                                                                   data-details="{{ check.details }}"
+                                                                                   {% if check.status == 'Issue' and 'working properly' not in check.details|lower and 'no issues' not in check.details|lower and 'operational' not in check.details|lower %}checked{% endif %}>
+                                                                        </td>
                                                                         <td>{{ check.date }}</td>
                                                                         <td><span class="badge badge-{% if check.status == 'Running' %}success{% else %}warning{% endif %}">{{ check.status }}</span></td>
                                                                         <td><small>{{ check.details }}</small></td>
@@ -298,8 +315,94 @@
 </div>
 
 <script>
+// Helper functions for Item #1 checkboxes
+function toggleAllItem1Checks(checkbox) {
+    const checkboxes = document.querySelectorAll('.item1-check');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+function selectAllItem1Checks(select) {
+    const checkboxes = document.querySelectorAll('.item1-check');
+    checkboxes.forEach(cb => cb.checked = select);
+    document.getElementById('checkAllItem1').checked = select;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-fill action buttons
+    // Auto-fill SELECTED entries button (Item #1)
+    const autofillSelectedButtons = document.querySelectorAll('.autofill-selected-btn');
+
+    autofillSelectedButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemNumber = this.dataset.item;
+            const suggestedAction = this.dataset.action;
+
+            if (itemNumber === '1') {
+                // Get all checked entries for Item #1
+                const checkedBoxes = document.querySelectorAll('.item1-check:checked');
+
+                if (checkedBoxes.length === 0) {
+                    alert('Please select at least one entry to auto-fill');
+                    return;
+                }
+
+                // Build problems text from selected entries
+                let problemsText = '';
+                checkedBoxes.forEach((checkbox, index) => {
+                    const date = checkbox.dataset.date;
+                    const details = checkbox.dataset.details;
+                    problemsText += `${date}: ${details}`;
+                    if (index < checkedBoxes.length - 1) {
+                        problemsText += '\n';
+                    }
+                });
+
+                // Fill the form fields
+                {% for item in items %}
+                if ('{{ item.item_number }}' === itemNumber) {
+                    // Fill Problems field
+                    const problemsTextarea = document.getElementById('problems_{{ item.id }}');
+                    if (problemsTextarea && problemsText) {
+                        const currentProblems = problemsTextarea.value.trim();
+                        if (currentProblems) {
+                            problemsTextarea.value = currentProblems + '\n\n[Week {{ week_number }}]\n' + problemsText;
+                        } else {
+                            problemsTextarea.value = '[Week {{ week_number }}]\n' + problemsText;
+                        }
+
+                        // Visual feedback
+                        problemsTextarea.classList.add('border-success');
+                        setTimeout(() => {
+                            problemsTextarea.classList.remove('border-success');
+                        }, 2000);
+                    }
+
+                    // Fill Action field
+                    const actionTextarea = document.getElementById('action_{{ item.id }}');
+                    if (actionTextarea) {
+                        const currentText = actionTextarea.value.trim();
+                        if (currentText) {
+                            actionTextarea.value = currentText + '\n\n[Week {{ week_number }}] ' + suggestedAction;
+                        } else {
+                            actionTextarea.value = '[Week {{ week_number }}] ' + suggestedAction;
+                        }
+
+                        // Scroll and focus
+                        actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        actionTextarea.focus();
+
+                        // Visual feedback
+                        actionTextarea.classList.add('border-success');
+                        setTimeout(() => {
+                            actionTextarea.classList.remove('border-success');
+                        }, 2000);
+                    }
+                }
+                {% endfor %}
+            }
+        });
+    });
+
+    // Auto-fill action buttons (for Items 2, 3, 4 - old behavior)
     const autofillButtons = document.querySelectorAll('.autofill-btn');
 
     autofillButtons.forEach(button => {
