@@ -401,6 +401,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Handle modal close buttons manually
+    const closeModalButtons = document.querySelectorAll('[data-dismiss="modal"]');
+    closeModalButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            $('#downtimeModal').modal('hide');
+        });
+    });
+
     // Handle downtime form submission
     document.getElementById('submitDowntimeBtn').addEventListener('click', function() {
         const form = document.getElementById('downtimeForm');
