@@ -247,10 +247,10 @@
                                     <td>
                                         <div class="form-group mb-2">
                                             <label for="problems_{{ item.id }}" class="small">Problems:</label>
-                                            <textarea class="form-control form-control-sm"
+                                            <textarea class="form-control"
                                                       id="problems_{{ item.id }}"
                                                       name="problems_{{ item.id }}"
-                                                      rows="2"
+                                                      rows="6"
                                                       placeholder="Describe any problems for Week {{ week_number }}..."></textarea>
                                             {% if item.existing_problems %}
                                             <small class="text-muted">
@@ -261,10 +261,10 @@
                                         </div>
                                         <div class="form-group mb-0">
                                             <label for="action_{{ item.id }}" class="small">Action Taken:</label>
-                                            <textarea class="form-control form-control-sm"
+                                            <textarea class="form-control"
                                                       id="action_{{ item.id }}"
                                                       name="action_{{ item.id }}"
-                                                      rows="2"
+                                                      rows="6"
                                                       placeholder="Describe action taken for Week {{ week_number }}..."></textarea>
                                             {% if item.existing_action %}
                                             <small class="text-muted">
