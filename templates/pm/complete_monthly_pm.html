@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Monthly PM - {{ month_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> {{ template.title }}
+                    </h4>
+                    <h6>{{ month_name }}</h6>
+                </div>
+
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if existing_completion %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> <strong>Update Mode:</strong> This checklist was already completed. You can update it here.
+                        </div>
+                        {% endif %}
+
+                        <!-- Smart Suggestions -->
+                        {% if smart_suggestions.has_critical_alerts %}
+                        <div class="alert alert-warning">
+                            <strong><i class="fas fa-exclamation-triangle"></i> Alert for Item #1:</strong><br>
+                            {{ smart_suggestions.summary }}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-info-circle"></i> Info for Item #1:</strong><br>
+                            {{ smart_suggestions.summary }}
+                        </div>
+                        {% endif %}
+
+                        <div class="alert alert-info">
+                            <strong>Instructions:</strong>
+                            <ul>
+                                <li>Check the box (✓) for each task you have completed</li>
+                                <li>Note any problems encountered and actions taken</li>
+                                <li>Schedule: Complete during 1st week of the month</li>
+                            </ul>
+                        </div>
+
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 5%">Item No.</th>
+                                    <th style="width: 45%">Task</th>
+                                    <th style="width: 10%">Status<br>(put ✓ if done)</th>
+                                    <th style="width: 40%">Problems Encountered/Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="text-center">
+                                        <strong>{{ item.item_number }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ item.task_description|linebreaks }}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox"
+                                                   class="custom-control-input"
+                                                   id="item_{{ item.id }}"
+                                                   name="item_{{ item.id }}"
+                                                   {% if item.is_checked %}checked{% endif %}>
+                                            <label class="custom-control-label" for="item_{{ item.id }}">
+                                                <i class="fas fa-check text-success"></i>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-2">
+                                            <label for="problems_{{ item.id }}" class="small">Problems:</label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="problems_{{ item.id }}"
+                                                      name="problems_{{ item.id }}"
+                                                      rows="2"
+                                                      placeholder="Describe any problems...">{{ item.existing_problems }}</textarea>
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label for="action_{{ item.id }}" class="small">Action Taken:</label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="action_{{ item.id }}"
+                                                      name="action_{{ item.id }}"
+                                                      rows="2"
+                                                      placeholder="Describe action taken...">{{ item.existing_action }}</textarea>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Signature Section -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Accomplished by:</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="printed_name">Printed Name:</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="printed_name"
+                                           name="printed_name"
+                                           value="{% if existing_completion %}{{ existing_completion.printed_name }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
+                                           required>
+                                    <small class="form-text text-muted">Your name will appear on the PDF</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {% if existing_completion %}Update{% else %}Submit{% endif %} Checklist
+                            </button>
+                            <a href="{% url 'monthly_pm_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

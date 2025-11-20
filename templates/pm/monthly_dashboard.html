@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Annex B - Monthly PM Checklist{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt"></i> {{ template.title }}
+                    </h4>
+                    <small>{{ template.schedule_note }}</small>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ template.description }}</p>
+                </div>
+            </div>
+
+            <!-- Current Month Status -->
+            <div class="card">
+                <div class="card-header {% if is_completed %}bg-success{% elif is_overdue %}bg-danger{% else %}bg-warning{% endif %} text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks"></i> {{ current_month }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Status Column -->
+                        <div class="col-md-4">
+                            <h6>Status:</h6>
+                            {% if is_completed %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle"></i> <strong>Completed</strong><br>
+                                    <small>by {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</small><br>
+                                    <small>on {{ completion.completion_date|date:"F d, Y" }}</small>
+                                </div>
+                            {% elif is_overdue %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle"></i> <strong>Overdue</strong><br>
+                                    <small>Due: {{ due_date|date:"F d, Y" }}</small>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-clock"></i> <strong>Pending</strong><br>
+                                    <small>Due: {{ due_date|date:"F d, Y" }}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Smart Suggestions Column -->
+                        <div class="col-md-4">
+                            <h6>Smart Suggestions (from Daily Data):</h6>
+                            <div class="alert {% if smart_suggestions.has_critical_alerts %}alert-warning{% else %}alert-info{% endif %}">
+                                <small><i class="fas fa-info-circle"></i> {{ smart_suggestions.summary }}</small>
+                            </div>
+                        </div>
+
+                        <!-- Actions Column -->
+                        <div class="col-md-4 text-right">
+                            {% if is_completed %}
+                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-edit"></i> Update
+                                </a><br><br>
+                                <a href="{% url 'export_monthly_pm_pdf' completion.id %}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </a>
+                            {% else %}
+                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-clipboard-check"></i> Complete Checklist
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

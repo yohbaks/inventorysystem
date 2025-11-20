@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Week {{ week_number }} - {{ month_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> {{ template.title }}
+                    </h4>
+                    <h6>{{ month_name}} - Week {{ week_number }}</h6>
+                    <small>{{ friday_date|date:"F d, Y (l)" }}</small>
+                </div>
+
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if completion %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> <strong>Update Mode:</strong> You are updating Week {{ week_number }}. Your changes will be saved.
+                        </div>
+                        {% endif %}
+
+                        <!-- Smart Suggestions -->
+                        {% if smart_suggestions.has_water_leaks %}
+                        <div class="alert alert-warning">
+                            <strong><i class="fas fa-exclamation-triangle"></i> Alert for Item #2:</strong><br>
+                            {{ smart_suggestions.summary }}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-info-circle"></i> Info for Item #2:</strong><br>
+                            {{ smart_suggestions.summary }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Location Field -->
+                        <div class="form-group">
+                            <label for="location"><strong>Location of FD/BD:</strong></label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="location"
+                                   name="location"
+                                   value="{{ existing_location }}"
+                                   placeholder="e.g., 2nd Floor East Wing"
+                                   required>
+                            <small class="form-text text-muted">Specify which Floor/Building Distributor this checklist is for</small>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <strong>Instructions:</strong>
+                            <ul>
+                                <li>Check the box (✓) in the Wk{{ week_number }} column for each completed task</li>
+                                <li>Note any problems encountered and actions taken</li>
+                                <li>This checklist should be completed every Friday</li>
+                            </ul>
+                        </div>
+
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 5%">Item No.</th>
+                                    <th style="width: 45%">Task</th>
+                                    <th style="width: 10%">Wk{{ week_number }}<br>(put ✓ if done)</th>
+                                    <th style="width: 40%">Problems Encountered/Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="text-center">
+                                        <strong>{{ item.item_number }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ item.task_description|linebreaks }}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox"
+                                                   class="custom-control-input"
+                                                   id="item_{{ item.id }}"
+                                                   name="item_{{ item.id }}"
+                                                   {% if item.is_checked %}checked{% endif %}>
+                                            <label class="custom-control-label" for="item_{{ item.id }}">
+                                                <i class="fas fa-check text-success"></i>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-2">
+                                            <label for="problems_{{ item.id }}" class="small">Problems:</label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="problems_{{ item.id }}"
+                                                      name="problems_{{ item.id }}"
+                                                      rows="2"
+                                                      placeholder="Describe any problems for Week {{ week_number }}..."></textarea>
+                                            {% if item.existing_problems %}
+                                            <small class="text-muted">
+                                                <strong>Previous notes:</strong><br>
+                                                {{ item.existing_problems|linebreaksbr }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label for="action_{{ item.id }}" class="small">Action Taken:</label>
+                                            <textarea class="form-control form-control-sm"
+                                                      id="action_{{ item.id }}"
+                                                      name="action_{{ item.id }}"
+                                                      rows="2"
+                                                      placeholder="Describe action taken for Week {{ week_number }}..."></textarea>
+                                            {% if item.existing_action %}
+                                            <small class="text-muted">
+                                                <strong>Previous actions:</strong><br>
+                                                {{ item.existing_action|linebreaksbr }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Signature Section -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Accomplished by:</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="printed_name">Printed Name:</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="printed_name"
+                                           name="printed_name"
+                                           value="{% if completion %}{{ completion.printed_name }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
+                                           required>
+                                    <small class="form-text text-muted">Your name will appear on the PDF</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {% if completion %}Update{% else %}Submit{% endif %} Week {{ week_number }}
+                            </button>
+                            <a href="{% url 'weekly_fdbd_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

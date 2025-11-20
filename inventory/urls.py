@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import views, pm_daily_views
+from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -234,17 +234,32 @@ urlpatterns = [
 
 
     # ================================
-    # PM DAILY CHECKLIST SYSTEM
+    # PM CHECKLIST SYSTEM
     # ================================
-    # Daily PM Dashboard and Completion
+    # Main PM Dashboard (All Forms)
+    path('pm/', pm_main_dashboard.pm_main_dashboard, name='pm_main_dashboard'),
+
+    # ANNEX A - Daily PM Dashboard and Completion
     path('pm/daily/', pm_daily_views.daily_pm_dashboard, name='pm_daily_dashboard'),
     path('pm/daily/complete/<int:schedule_id>/', pm_daily_views.complete_daily_pm, name='complete_daily_pm'),
     path('pm/daily/view/<int:completion_id>/', pm_daily_views.view_daily_pm_completion, name='view_daily_pm_completion'),
 
-    # Daily/Weekly PDF Exports
+    # Daily/Weekly PDF Exports (Annex A)
     path('pm/daily/export/<int:completion_id>/', pm_daily_views.export_daily_pm_pdf, name='export_daily_pm_pdf'),
     path('pm/weekly/export/', pm_daily_views.export_weekly_pm_pdf, name='export_weekly_pm_pdf'),
     path('pm/weekly/view/', pm_daily_views.weekly_pm_report_view, name='weekly_pm_report_view'),
+
+    # ================================
+    # ANNEX B - Monthly PM Dashboard and Completion
+    path('pm/monthly/', pm_monthly_views.monthly_pm_dashboard, name='monthly_pm_dashboard'),
+    path('pm/monthly/complete/<int:schedule_id>/', pm_monthly_views.complete_monthly_pm, name='complete_monthly_pm'),
+    path('pm/monthly/export/<int:completion_id>/', pm_monthly_weekly_export.export_monthly_pm_pdf, name='export_monthly_pm_pdf'),
+
+    # ================================
+    # ANNEX C - Weekly FD/BD (4 weeks/month) PM Dashboard and Completion
+    path('pm/weekly-fdbd/', pm_weekly_views.weekly_pm_dashboard, name='weekly_fdbd_dashboard'),
+    path('pm/weekly-fdbd/complete/<int:schedule_id>/<int:week_number>/', pm_weekly_views.complete_weekly_pm, name='complete_weekly_pm'),
+    path('pm/weekly-fdbd/export/<int:completion_id>/', pm_monthly_weekly_export.export_weekly_pm_pdf, name='export_weekly_fdbd_pdf'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
