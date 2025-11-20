@@ -460,6 +460,16 @@ def weekly_pm_report_view(request):
 
         aggregated_data.append(item_data)
 
+    # Calculate week navigation dates
+    today = timezone.now().date()
+    prev_week = monday - timedelta(days=7)
+    next_week = monday + timedelta(days=7)
+
+    # Determine if this is current or past week
+    current_monday, current_friday = get_week_start_end(today)
+    is_current_week = (monday == current_monday)
+    is_past_week = (monday < current_monday)
+
     context = {
         'template': template,
         'monday': monday,
@@ -467,6 +477,11 @@ def weekly_pm_report_view(request):
         'week_completions': week_completions,
         'aggregated_data': aggregated_data,
         'reference_date': reference_date,
+        'prev_week': prev_week,
+        'next_week': next_week,
+        'is_current_week': is_current_week,
+        'is_past_week': is_past_week,
+        'today': today,
     }
 
     return render(request, 'pm/weekly_report_view.html', context)

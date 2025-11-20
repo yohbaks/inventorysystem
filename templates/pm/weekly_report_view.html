@@ -14,10 +14,62 @@
                     <h4>Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</h4>
                 </div>
                 <div class="card-body">
+                    <!-- Week Navigation -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="btn-toolbar justify-content-between" role="toolbar">
+                                <!-- Previous/Next Week Navigation -->
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'weekly_pm_report_view' %}?date={{ prev_week|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-chevron-left"></i> Previous Week
+                                    </a>
+                                    <a href="{% url 'weekly_pm_report_view' %}" class="btn btn-primary">
+                                        <i class="fas fa-calendar-day"></i> Current Week
+                                    </a>
+                                    {% if not is_current_week %}
+                                    <a href="{% url 'weekly_pm_report_view' %}?date={{ next_week|date:'Y-m-d' }}" class="btn btn-outline-primary">
+                                        Next Week <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                    {% else %}
+                                    <button class="btn btn-outline-secondary" disabled>
+                                        Next Week <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Date Picker -->
+                                <div class="input-group" style="width: 300px;">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input type="date"
+                                           class="form-control"
+                                           id="weekDatePicker"
+                                           value="{{ reference_date|date:'Y-m-d' }}"
+                                           max="{{ today|date:'Y-m-d' }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-info" type="button" onclick="goToWeek()">
+                                            <i class="fas fa-search"></i> Go
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-8">
                             <p><strong>Template:</strong> {{ template.name }} ({{ template.annex_code }})</p>
-                            <p class="mb-0"><strong>Schedule:</strong> Monday - Friday</p>
+                            <p><strong>Schedule:</strong> Monday - Friday</p>
+                            {% if is_past_week %}
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-history"></i> <strong>Historical Report</strong> - Viewing data from a previous week. Use the navigation above to view other weeks.
+                            </div>
+                            {% elif is_current_week %}
+                            <div class="alert alert-success mb-0">
+                                <i class="fas fa-calendar-check"></i> <strong>Current Week</strong> - Use "Previous Week" button or date picker to view historical reports.
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="col-md-4 text-right">
                             <a href="{% url 'export_weekly_pm_pdf' %}?date={{ reference_date|date:'Y-m-d' }}" class="btn btn-success btn-lg">
@@ -200,6 +252,24 @@
         </div>
     </div>
 </div>
+
+<script>
+function goToWeek() {
+    const dateInput = document.getElementById('weekDatePicker');
+    const selectedDate = dateInput.value;
+
+    if (selectedDate) {
+        window.location.href = "{% url 'weekly_pm_report_view' %}?date=" + selectedDate;
+    }
+}
+
+// Allow Enter key to submit
+document.getElementById('weekDatePicker').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        goToWeek();
+    }
+});
+</script>
 
 <style>
     .day-box {
