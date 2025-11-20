@@ -282,6 +282,7 @@ def get_weekly_smart_suggestions(friday_date):
             'total_checks': 0,
             'issues_count': 0,
             'summary': '',
+            'suggested_problems': '',  # NEW: Problems from daily checklists
             'suggested_action': ''
         },
 
@@ -386,6 +387,18 @@ def get_weekly_smart_suggestions(friday_date):
         # === Process Item #1 (Equipment Running) ===
         if suggestions['item1']['has_issues']:
             suggestions['item1']['summary'] = f"⚠️ Equipment issues on {suggestions['item1']['issues_count']} day(s) this week"
+
+            # Build suggested problems from daily issues
+            problem_lines = []
+            for check in suggestions['item1']['equipment_checks']:
+                if check['status'] == 'Issue' and check['details'] != 'All equipment operational':
+                    problem_lines.append(f"{check['date']}: {check['details']}")
+
+            if problem_lines:
+                suggestions['item1']['suggested_problems'] = '\n'.join(problem_lines)
+            else:
+                suggestions['item1']['suggested_problems'] = f"Equipment issues detected on {suggestions['item1']['issues_count']} day(s) this week"
+
             suggestions['item1']['suggested_action'] = (
                 "Verify all FD/BD equipment is powered on and running. "
                 "Check for tripped breakers or disconnected cables. "
@@ -396,6 +409,7 @@ def get_weekly_smart_suggestions(friday_date):
                 suggestions['item1']['summary'] = f"✓ All equipment running normally ({suggestions['item1']['total_checks']} checks)"
             else:
                 suggestions['item1']['summary'] = "No equipment data available for this week"
+            suggestions['item1']['suggested_problems'] = ""
             suggestions['item1']['suggested_action'] = "Visual inspection: Verify all equipment power and status lights"
 
         # === Process Item #2 (Water Leaks) ===
