@@ -266,6 +266,9 @@ def complete_daily_pm(request, schedule_id):
                 item.existing_problems = item_comp.problems_encountered or ''
                 item.existing_action = item_comp.action_taken or ''
 
+                # Attach completion ID for downtime logging
+                item.completion_id = item_comp.id
+
                 # Extract readings for scheduled items
                 item.existing_readings = []
                 if item_comp.action_taken and item.has_schedule_times:
@@ -278,12 +281,14 @@ def complete_daily_pm(request, schedule_id):
                 item.existing_problems = ''
                 item.existing_action = ''
                 item.existing_readings = []
+                item.completion_id = None
     else:
         for item in items:
             item.is_checked = False
             item.existing_problems = ''
             item.existing_action = ''
             item.existing_readings = []
+            item.completion_id = None
 
     # Check if this is a late submission
     today_actual = timezone.now().date()

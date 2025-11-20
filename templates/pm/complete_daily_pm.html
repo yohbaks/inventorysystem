@@ -170,6 +170,21 @@
                                                           placeholder="Describe action taken..."
                                                           {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}>{{ item.existing_action }}</textarea>
                                             </div>
+
+                                            <!-- Downtime Logging Button (for critical equipment items 2, 3, 4, 5) -->
+                                            {% if item.item_number == 2 or item.item_number == 3 or item.item_number == 4 or item.item_number == 5 %}
+                                            {% if item.completion_id %}
+                                            <div class="mt-2">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger downtime-log-btn"
+                                                        data-item-completion-id="{{ item.completion_id }}"
+                                                        data-item-number="{{ item.item_number }}"
+                                                        data-item-description="{{ item.task_description|striptags|truncatewords:5 }}">
+                                                    <i class="fas fa-exclamation-circle"></i> Log Downtime
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                            {% endif %}
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -208,6 +223,141 @@
     </div>
 </div>
 
+<!-- Downtime Logging Modal -->
+<div class="modal fade" id="downtimeModal" tabindex="-1" role="dialog" aria-labelledby="downtimeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="downtimeModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Log Equipment Downtime Event
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="downtimeForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="downtime_item_completion_id" name="item_completion_id">
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Quick Log:</strong> Record equipment downtime to track service interruptions and analyze trends.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="occurrence_date"><strong>Date of Downtime:</strong></label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="occurrence_date"
+                                       name="occurrence_date"
+                                       value="{{ today|date:'Y-m-d' }}"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="start_time"><strong>Start Time:</strong></label>
+                                <input type="time"
+                                       class="form-control"
+                                       id="start_time"
+                                       name="start_time"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="end_time">End Time:</label>
+                                <input type="time"
+                                       class="form-control"
+                                       id="end_time"
+                                       name="end_time">
+                                <small class="text-muted">Leave blank if ongoing</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="equipment_name"><strong>Equipment/System Name:</strong></label>
+                        <input type="text"
+                               class="form-control"
+                               id="equipment_name"
+                               name="equipment_name"
+                               placeholder="e.g., Server-01, Main AC Unit, UPS-A"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="severity"><strong>Severity Level:</strong></label>
+                        <select class="form-control" id="severity" name="severity" required>
+                            <option value="MINOR">Minor - No service impact</option>
+                            <option value="MODERATE" selected>Moderate - Partial impact</option>
+                            <option value="MAJOR">Major - Significant impact</option>
+                            <option value="CRITICAL">Critical - Complete service loss</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cause_description"><strong>Cause/Description:</strong></label>
+                        <textarea class="form-control"
+                                  id="cause_description"
+                                  name="cause_description"
+                                  rows="3"
+                                  placeholder="Describe what caused the downtime..."
+                                  required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resolution_notes">Resolution/Action Taken:</label>
+                        <textarea class="form-control"
+                                  id="resolution_notes"
+                                  name="resolution_notes"
+                                  rows="2"
+                                  placeholder="What was done to resolve the issue..."></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label for="services_affected">Services Affected:</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="services_affected"
+                                       name="services_affected"
+                                       placeholder="e.g., Email, File Server, Cooling">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="users_affected_count">Users Affected:</label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="users_affected_count"
+                                       name="users_affected_count"
+                                       placeholder="Number"
+                                       min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-magic"></i> <strong>Auto-fill:</strong> This information will be automatically added to the "Problems" field in your checklist.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="submitDowntimeBtn">
+                    <i class="fas fa-save"></i> Log Downtime Event
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.getElementById('pm-checklist-form').addEventListener('submit', function(e) {
     var printedName = document.getElementById('printed_name').value.trim();
@@ -222,6 +372,87 @@ document.getElementById('pm-checklist-form').addEventListener('submit', function
         e.preventDefault();
         return false;
     }
+});
+
+// Downtime Logging Modal Functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle "Log Downtime" button clicks
+    const downtimeButtons = document.querySelectorAll('.downtime-log-btn');
+
+    downtimeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemCompletionId = this.dataset.itemCompletionId;
+            const itemNumber = this.dataset.itemNumber;
+            const itemDescription = this.dataset.itemDescription;
+
+            // Set the item completion ID in the hidden field
+            document.getElementById('downtime_item_completion_id').value = itemCompletionId;
+
+            // Update modal title with item context
+            document.getElementById('downtimeModalLabel').innerHTML =
+                '<i class="fas fa-exclamation-triangle"></i> Log Downtime - Item #' + itemNumber + ': ' + itemDescription;
+
+            // Reset form
+            document.getElementById('downtimeForm').reset();
+            document.getElementById('occurrence_date').value = '{{ today|date:"Y-m-d" }}';
+
+            // Show modal
+            $('#downtimeModal').modal('show');
+        });
+    });
+
+    // Handle downtime form submission
+    document.getElementById('submitDowntimeBtn').addEventListener('click', function() {
+        const form = document.getElementById('downtimeForm');
+        const formData = new FormData(form);
+        const itemCompletionId = document.getElementById('downtime_item_completion_id').value;
+
+        // Validate required fields
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Disable submit button to prevent double-submission
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging...';
+
+        // Get CSRF token
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Submit via AJAX
+        fetch(`/pm/downtime/log/${itemCompletionId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal
+                $('#downtimeModal').modal('hide');
+
+                // Show success message
+                alert('✓ Downtime event logged successfully!\n\nDuration: ' + data.duration + '\n\nThe downtime information has been added to the Problems field. Remember to submit your checklist to save all changes.');
+
+                // Optionally reload the page to show updated data
+                // window.location.reload();
+            } else {
+                alert('Error logging downtime: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to log downtime event. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable submit button
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-save"></i> Log Downtime Event';
+        });
+    });
 });
 </script>
 

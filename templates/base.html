@@ -221,14 +221,14 @@
             </li>
 
             <!-- ==================== PREVENTIVE MAINTENANCE SECTION ==================== -->
-            <li class="nav-item {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm' %}active{% endif %}">
+            <li class="nav-item {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm downtime_analytics' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuPM"
-                 class="nav-link {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm' %}true{% else %}false{% endif %}">
+                 class="nav-link {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm downtime_analytics' %}{% else %}collapsed{% endif %}"
+                 aria-expanded="{% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm downtime_analytics' %}true{% else %}false{% endif %}">
                 <i class="fas fa-wrench"></i>
                 <p>Preventive Maintenance</p><span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm' %}show{% endif %}" id="menuPM">
+              <div class="collapse {% if request.resolver_match.url_name in 'pm_overview section_schedule_list pm_main_dashboard pm_daily_dashboard complete_daily_pm view_daily_pm_completion weekly_pm_report_view monthly_pm_dashboard complete_monthly_pm weekly_fdbd_dashboard complete_weekly_pm downtime_analytics' %}show{% endif %}" id="menuPM">
                 <ul class="nav nav-collapse">
                   <!-- Equipment PM Links -->
                   <li class="{% if request.resolver_match.url_name == 'pm_overview' %}active{% endif %}">
@@ -264,6 +264,16 @@
                   <!-- Annex C - Weekly FD/BD -->
                   <li class="{% if request.resolver_match.url_name == 'weekly_fdbd_dashboard' %}active{% endif %}">
                     <a href="{% url 'weekly_fdbd_dashboard' %}"><span class="sub-item">📋 Annex C - Weekly FD/BD</span></a>
+                  </li>
+
+                  <!-- Analytics Section -->
+                  <li class="nav-section">
+                    <span class="sidebar-mini-icon"><i class="fa fa-chart-line"></i></span>
+                    <h4 class="text-section" style="font-size: 11px; margin-top: 10px; margin-bottom: 5px;">Analytics</h4>
+                  </li>
+
+                  <li class="{% if request.resolver_match.url_name == 'downtime_analytics' %}active{% endif %}">
+                    <a href="{% url 'downtime_analytics' %}"><span class="sub-item">📉 Downtime Analytics</span></a>
                   </li>
                 </ul>
               </div>

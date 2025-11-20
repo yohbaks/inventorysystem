@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard
+from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard, pm_downtime_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -262,5 +262,9 @@ urlpatterns = [
     path('pm/weekly-fdbd/complete/<int:schedule_id>/<int:week_number>/', pm_weekly_views.complete_weekly_pm, name='complete_weekly_pm'),
     path('pm/weekly-fdbd/export/<int:completion_id>/', pm_monthly_weekly_export.export_weekly_pm_pdf, name='export_weekly_fdbd_pdf'),
 
+    # ================================
+    # Equipment Downtime Tracking
+    path('pm/downtime/log/<int:item_completion_id>/', pm_downtime_views.log_downtime_event, name='log_downtime_event'),
+    path('pm/downtime/analytics/', pm_downtime_views.downtime_analytics_dashboard, name='downtime_analytics'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1617,6 +1617,94 @@ class PMChecklistItemCompletion(models.Model):
         return f"{self.completion} - Item {self.item.item_number}"
 
 
+class EquipmentDowntimeEvent(models.Model):
+    """Track equipment downtime events for analysis and reporting"""
+
+    SEVERITY_CHOICES = [
+        ('MINOR', 'Minor - No service impact'),
+        ('MODERATE', 'Moderate - Partial impact'),
+        ('MAJOR', 'Major - Significant impact'),
+        ('CRITICAL', 'Critical - Complete service loss'),
+    ]
+
+    # Link to checklist item completion
+    item_completion = models.ForeignKey(
+        PMChecklistItemCompletion,
+        on_delete=models.CASCADE,
+        related_name='downtime_events'
+    )
+
+    # Downtime details
+    occurrence_date = models.DateField(help_text="Date when downtime occurred")
+    start_time = models.TimeField(help_text="When the downtime started")
+    end_time = models.TimeField(null=True, blank=True, help_text="When service was restored (leave blank if ongoing)")
+    duration_minutes = models.IntegerField(null=True, blank=True, help_text="Total downtime in minutes")
+
+    # Equipment/System affected
+    equipment_name = models.CharField(max_length=200, help_text="e.g., Main Server, UPS Unit A, AC Unit 2")
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default='MODERATE')
+
+    # Cause and resolution
+    cause_description = models.TextField(help_text="What caused the downtime?")
+    resolution_notes = models.TextField(blank=True, help_text="How was it resolved?")
+
+    # Impact
+    services_affected = models.TextField(blank=True, help_text="Which services/systems were impacted?")
+    users_affected_count = models.IntegerField(null=True, blank=True, help_text="Approximate number of users affected")
+
+    # Tracking
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reported_downtime_events')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Follow-up
+    requires_followup = models.BooleanField(default=False)
+    followup_notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-occurrence_date', '-start_time']
+        indexes = [
+            models.Index(fields=['-occurrence_date']),
+            models.Index(fields=['equipment_name']),
+            models.Index(fields=['severity']),
+        ]
+
+    def __str__(self):
+        return f"{self.equipment_name} - {self.occurrence_date} {self.start_time} ({self.severity})"
+
+    def get_duration_display(self):
+        """Get human-readable duration"""
+        if self.duration_minutes:
+            hours = self.duration_minutes // 60
+            minutes = self.duration_minutes % 60
+            if hours > 0:
+                return f"{hours}h {minutes}m"
+            return f"{minutes}m"
+        return "Ongoing" if not self.end_time else "Unknown"
+
+    def calculate_duration(self):
+        """Auto-calculate duration if start and end times are set"""
+        if self.start_time and self.end_time:
+            from datetime import datetime, timedelta
+            start = datetime.combine(self.occurrence_date, self.start_time)
+            end = datetime.combine(self.occurrence_date, self.end_time)
+
+            # Handle case where end time is next day
+            if end < start:
+                end += timedelta(days=1)
+
+            delta = end - start
+            self.duration_minutes = int(delta.total_seconds() / 60)
+            return self.duration_minutes
+        return None
+
+    def save(self, *args, **kwargs):
+        # Auto-calculate duration if not set
+        if self.start_time and self.end_time and not self.duration_minutes:
+            self.calculate_duration()
+        super().save(*args, **kwargs)
+
+
 class PMChecklistReport(models.Model):
     """Monthly/Period reports compilation"""
     

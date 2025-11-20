@@ -13,7 +13,8 @@ from .models import (
     OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies, DocumentPhoto,
     # New PM Checklist Models
     PMChecklistTemplate, PMChecklistItem, PMChecklistSchedule,
-    PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport, PMIssueLog
+    PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport, PMIssueLog,
+    EquipmentDowntimeEvent
 )
 
 # Register your models here.
@@ -68,4 +69,5 @@ admin.site.register(PMChecklistSchedule)
 admin.site.register(PMChecklistCompletion)
 admin.site.register(PMChecklistItemCompletion)
 admin.site.register(PMChecklistReport)
+admin.site.register(EquipmentDowntimeEvent)
 admin.site.register(PMIssueLog)

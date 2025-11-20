@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Equipment Downtime Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Equipment Downtime Analytics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Date Range Filter -->
+                    <form method="get" class="form-inline">
+                        <label class="mr-2"><strong>Date Range:</strong></label>
+                        <input type="date"
+                               name="date_from"
+                               class="form-control mr-2"
+                               value="{{ start_date|date:'Y-m-d' }}">
+                        <span class="mr-2">to</span>
+                        <input type="date"
+                               name="date_to"
+                               class="form-control mr-2"
+                               value="{{ end_date|date:'Y-m-d' }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Apply Filter
+                        </button>
+                        <a href="{% url 'downtime_analytics' %}" class="btn btn-secondary ml-2">
+                            <i class="fas fa-redo"></i> Reset (Last 30 Days)
+                        </a>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h2 class="text-warning mb-0">
+                                <i class="fas fa-exclamation-triangle"></i> {{ total_events }}
+                            </h2>
+                            <p class="text-muted mb-0">Total Downtime Events</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-danger">
+                        <div class="card-body text-center">
+                            <h2 class="text-danger mb-0">
+                                <i class="fas fa-clock"></i> {{ total_downtime_hours }}h
+                            </h2>
+                            <p class="text-muted mb-0">Total Downtime Hours</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <h2 class="text-info mb-0">
+                                <i class="fas fa-stopwatch"></i> {{ avg_duration_minutes }}m
+                            </h2>
+                            <p class="text-muted mb-0">Average Duration</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Severity Breakdown -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-circle"></i> Events by Severity</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if severity_breakdown %}
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Severity</th>
+                                        <th class="text-center">Count</th>
+                                        <th class="text-right">Total Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in severity_breakdown %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-{% if item.severity == 'CRITICAL' %}danger{% elif item.severity == 'MAJOR' %}warning{% elif item.severity == 'MODERATE' %}info{% else %}secondary{% endif %} badge-lg">
+                                                {{ item.severity }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center"><strong>{{ item.count }}</strong></td>
+                                        <td class="text-right">
+                                            {% if item.total_duration %}
+                                                {{ item.total_duration|floatformat:0 }} min ({{ item.total_duration|floatformat:0|add:"0"|floatformat:0|divisibleby:60 }}h {{ item.total_duration|add:"0"|floatformat:0|divisibleby:60 }}m)
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="text-muted text-center my-5">No downtime events in selected period</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipment Breakdown (Top 10) -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="fas fa-server"></i> Top 10 Equipment by Incidents</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if equipment_breakdown %}
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Equipment</th>
+                                        <th class="text-center">Incidents</th>
+                                        <th class="text-right">Total Downtime</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in equipment_breakdown %}
+                                    <tr>
+                                        <td><strong>{{ item.equipment_name }}</strong></td>
+                                        <td class="text-center">
+                                            <span class="badge badge-primary">{{ item.count }}</span>
+                                        </td>
+                                        <td class="text-right">
+                                            {% if item.total_duration %}
+                                                {% widthratio item.total_duration 60 1 %}h {% widthratio item.total_duration 1 1 %}m
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="text-muted text-center my-5">No equipment data available</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Breakdown Chart -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Daily Downtime Trend</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if daily_breakdown %}
+                            <div style="overflow-x: auto;">
+                                <table class="table table-sm table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th class="text-center">Events</th>
+                                            <th class="text-right">Total Duration (min)</th>
+                                            <th style="width: 40%;">Visual</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for day in daily_breakdown %}
+                                        <tr>
+                                            <td><strong>{{ day.day|date:"M d, Y" }}</strong></td>
+                                            <td class="text-center">
+                                                <span class="badge badge-warning">{{ day.count }}</span>
+                                            </td>
+                                            <td class="text-right">{{ day.total_duration|default:"0" }} min</td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-danger"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.total_duration 480 100 %}%"
+                                                         aria-valuenow="{{ day.total_duration }}"
+                                                         aria-valuemin="0"
+                                                         aria-valuemax="480">
+                                                        {% if day.total_duration > 30 %}{{ day.total_duration }} min{% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center my-5">No daily data available</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Events -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-fire"></i> Recent Critical Events</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if critical_events %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date/Time</th>
+                                            <th>Equipment</th>
+                                            <th>Duration</th>
+                                            <th>Cause</th>
+                                            <th>Resolution</th>
+                                            <th>Impact</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for event in critical_events %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ event.occurrence_date|date:"M d, Y" }}</strong><br>
+                                                <small class="text-muted">{{ event.start_time|time:"H:i" }}
+                                                {% if event.end_time %} - {{ event.end_time|time:"H:i" }}{% endif %}</small>
+                                            </td>
+                                            <td><strong>{{ event.equipment_name }}</strong></td>
+                                            <td>
+                                                <span class="badge badge-danger">{{ event.get_duration_display }}</span>
+                                            </td>
+                                            <td>{{ event.cause_description|truncatewords:10 }}</td>
+                                            <td>{{ event.resolution_notes|truncatewords:8|default:"Not resolved" }}</td>
+                                            <td>
+                                                {% if event.users_affected_count %}
+                                                    <i class="fas fa-users"></i> {{ event.users_affected_count }} users<br>
+                                                {% endif %}
+                                                <small class="text-muted">{{ event.services_affected|default:"N/A" }}</small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> <strong>No critical events!</strong> No critical downtime events in the selected period.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Events (All) -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="fas fa-list"></i> Recent Downtime Events (Last 20)</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_events %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date/Time</th>
+                                            <th>Equipment</th>
+                                            <th>Severity</th>
+                                            <th>Duration</th>
+                                            <th>Cause</th>
+                                            <th>Reported By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for event in recent_events %}
+                                        <tr>
+                                            <td>
+                                                {{ event.occurrence_date|date:"M d" }}<br>
+                                                <small>{{ event.start_time|time:"H:i" }}</small>
+                                            </td>
+                                            <td><strong>{{ event.equipment_name }}</strong></td>
+                                            <td>
+                                                <span class="badge badge-{% if event.severity == 'CRITICAL' %}danger{% elif event.severity == 'MAJOR' %}warning{% elif event.severity == 'MODERATE' %}info{% else %}secondary{% endif %}">
+                                                    {{ event.severity }}
+                                                </span>
+                                            </td>
+                                            <td>{{ event.get_duration_display }}</td>
+                                            <td><small>{{ event.cause_description|truncatewords:12 }}</small></td>
+                                            <td><small>{{ event.reported_by.get_full_name|default:event.reported_by.username }}</small></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center my-5">
+                                <i class="fas fa-check-circle text-success fa-3x mb-3"></i><br>
+                                No downtime events recorded in the selected period.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col-md-12">
+                    <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+                    </a>
+                    <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-primary">
+                        <i class="fas fa-clipboard-check"></i> Go to Daily Checklists
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-lg {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .progress {
+        background-color: #e9ecef;
+    }
+
+    .table thead th {
+        border-top: none;
+    }
+</style>
+{% endblock %}
