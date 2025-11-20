@@ -99,9 +99,11 @@
                                         {% endif %}{% endif %}
                                     </td>
                                     <td class="text-center">
-                                        {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}
+                                        {% if not is_friday and item.item_number >= 6 and item.item_number <= 11 %}
+                                            <!-- Weekly items locked on Mon-Thu -->
                                             <i class="fas fa-lock text-muted"></i>
                                         {% else %}
+                                            <!-- All items on Friday, items 1-5 on Mon-Thu -->
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox"
                                                        class="custom-control-input"
@@ -112,7 +114,7 @@
                                                     <i class="fas fa-check text-success"></i>
                                                 </label>
                                             </div>
-                                        {% endif %}{% endif %}
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {% if item.has_schedule_times and item.item_number == 3 or item.item_number == 4 or item.item_number == 5 %}
