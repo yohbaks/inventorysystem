@@ -51,13 +51,8 @@ def daily_pm_dashboard(request):
     today = timezone.now().date()
     weekday = today.weekday()
 
-    # Don't show on weekends
-    if weekday >= 5:  # Saturday or Sunday
-        context = {
-            'is_weekend': True,
-            'today': today
-        }
-        return render(request, 'pm/daily_dashboard.html', context)
+    # Allow viewing on weekends, but show message
+    is_weekend = weekday >= 5  # Saturday or Sunday
 
     # Get Annex A template (Daily/Weekly datacenter checklist)
     try:
@@ -89,10 +84,22 @@ def daily_pm_dashboard(request):
         # Check if completed
         day_completion = None
         is_day_completed = False
+        is_late_submission = False
+        days_late = 0
+
         if day_schedule:
             try:
                 day_completion = PMChecklistCompletion.objects.get(schedule=day_schedule)
                 is_day_completed = True
+
+                # Check if it was a late submission
+                actual_submission_date = day_completion.created_at.date()
+                scheduled_date = day_schedule.scheduled_date
+
+                if actual_submission_date > scheduled_date:
+                    is_late_submission = True
+                    days_late = (actual_submission_date - scheduled_date).days
+
             except PMChecklistCompletion.DoesNotExist:
                 pass
 
@@ -105,10 +112,12 @@ def daily_pm_dashboard(request):
             'is_completed': is_day_completed,
             'is_past': day_date < today,
             'is_future': day_date > today,
+            'is_late_submission': is_late_submission,
+            'days_late': days_late,
         })
 
     context = {
-        'is_weekend': False,
+        'is_weekend': is_weekend,
         'today': today,
         'today_name': today.strftime('%A'),
         'template': template,
@@ -276,6 +285,11 @@ def complete_daily_pm(request, schedule_id):
             item.existing_action = ''
             item.existing_readings = []
 
+    # Check if this is a late submission
+    today_actual = timezone.now().date()
+    is_late_submission = schedule.scheduled_date < today_actual
+    days_late = (today_actual - schedule.scheduled_date).days if is_late_submission else 0
+
     context = {
         'schedule': schedule,
         'template': template,
@@ -285,6 +299,9 @@ def complete_daily_pm(request, schedule_id):
         'weekday': weekday,
         'is_friday': is_friday,
         'existing_completion': existing_completion,
+        'is_late_submission': is_late_submission,
+        'days_late': days_late,
+        'today_actual': today_actual,
     }
 
     return render(request, 'pm/complete_daily_pm.html', context)
@@ -463,3 +480,82 @@ def create_weekly_schedules(request):
     """
     messages.info(request, 'Schedules are now created automatically when you access the dashboard.')
     return redirect('pm_daily_dashboard')
+
+
+@login_required
+def backfill_pm_checklist(request):
+    """
+    Backfill PM checklist for a past date
+    WARNING: This should only be used as an exception - PM checklists should be completed on schedule!
+    """
+
+    today = timezone.now().date()
+
+    # Get Annex A template
+    try:
+        template = PMChecklistTemplate.objects.get(annex_code='A')
+    except PMChecklistTemplate.DoesNotExist:
+        messages.error(request, 'PM Checklist template not found.')
+        return redirect('pm_daily_dashboard')
+
+    if request.method == 'POST':
+        selected_date_str = request.POST.get('backfill_date')
+
+        try:
+            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+
+            # Validation: Don't allow future dates
+            if selected_date > today:
+                messages.error(request, 'Cannot backfill future dates. Please select a past date.')
+                return redirect('backfill_pm_checklist')
+
+            # Validation: Don't allow weekends
+            if selected_date.weekday() >= 5:
+                messages.error(request, 'Cannot backfill weekend dates. PM checklists are for Monday-Friday only.')
+                return redirect('backfill_pm_checklist')
+
+            # Check if date is too far in the past (limit to 60 days)
+            days_ago = (today - selected_date).days
+            if days_ago > 60:
+                messages.warning(request, f'Warning: You are backfilling a checklist from {days_ago} days ago. This is highly unusual.')
+
+            # Get or create schedule for this date
+            schedule, created = PMChecklistSchedule.objects.get_or_create(
+                template=template,
+                scheduled_date=selected_date,
+                defaults={
+                    'due_date': selected_date,
+                    'status': 'PENDING',
+                }
+            )
+
+            # Check if already completed
+            if hasattr(schedule, 'completion'):
+                messages.warning(request, f'Checklist for {selected_date.strftime("%B %d, %Y")} is already completed. Redirecting to update.')
+                return redirect('complete_daily_pm', schedule_id=schedule.id)
+
+            # Redirect to completion form
+            messages.warning(
+                request,
+                f'⚠️ LATE SUBMISSION: You are filling out a checklist for {selected_date.strftime("%A, %B %d, %Y")} '
+                f'({days_ago} days late). PM checklists should be completed on schedule!'
+            )
+            return redirect('complete_daily_pm', schedule_id=schedule.id)
+
+        except ValueError:
+            messages.error(request, 'Invalid date format. Please select a valid date.')
+            return redirect('backfill_pm_checklist')
+
+    # GET request - show date picker
+    # Calculate reasonable date range (last 60 days)
+    min_date = today - timedelta(days=60)
+    max_date = today - timedelta(days=1)  # Yesterday
+
+    context = {
+        'today': today,
+        'min_date': min_date,
+        'max_date': max_date,
+        'template': template,
+    }
+
+    return render(request, 'pm/backfill_pm_checklist.html', context)

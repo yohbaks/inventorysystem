@@ -17,6 +17,23 @@
                     <form method="post" id="pm-checklist-form">
                         {% csrf_token %}
 
+                        {% if is_late_submission %}
+                        <div class="alert alert-danger border-danger" style="border-left: 5px solid #dc3545 !important;">
+                            <h5 class="alert-heading">
+                                <i class="fas fa-exclamation-triangle"></i> LATE SUBMISSION WARNING
+                            </h5>
+                            <p class="mb-2"><strong>You are filling out a checklist for a past date!</strong></p>
+                            <ul class="mb-2">
+                                <li><strong>Scheduled Date:</strong> {{ today|date:"l, F d, Y" }}</li>
+                                <li><strong>Actual Date:</strong> {{ today_actual|date:"l, F d, Y" }}</li>
+                                <li><strong>Days Late:</strong> {{ days_late }} day{{ days_late|pluralize }}</li>
+                            </ul>
+                            <p class="mb-0 text-danger">
+                                <i class="fas fa-clipboard-check"></i> <strong>Reminder:</strong> PM checklists should be completed on schedule. This entry will be marked as a late submission in all reports.
+                            </p>
+                        </div>
+                        {% endif %}
+
                         {% if existing_completion %}
                         <div class="alert alert-warning">
                             <i class="fas fa-info-circle"></i> <strong>Update Mode:</strong> This checklist was already completed. You can update readings/notes throughout the day.

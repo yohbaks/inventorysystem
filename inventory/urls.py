@@ -243,6 +243,7 @@ urlpatterns = [
     path('pm/daily/', pm_daily_views.daily_pm_dashboard, name='pm_daily_dashboard'),
     path('pm/daily/complete/<int:schedule_id>/', pm_daily_views.complete_daily_pm, name='complete_daily_pm'),
     path('pm/daily/view/<int:completion_id>/', pm_daily_views.view_daily_pm_completion, name='view_daily_pm_completion'),
+    path('pm/daily/backfill/', pm_daily_views.backfill_pm_checklist, name='backfill_pm_checklist'),
 
     # Daily/Weekly PDF Exports (Annex A)
     path('pm/daily/export/<int:completion_id>/', pm_daily_views.export_daily_pm_pdf, name='export_daily_pm_pdf'),

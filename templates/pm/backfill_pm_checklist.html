@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Backfill PM Checklist{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Backfill PM Checklist - Exception Only
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <!-- Warning Notice -->
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-exclamation-circle"></i> IMPORTANT NOTICE
+                        </h5>
+                        <p class="mb-2"><strong>PM Checklists MUST be completed on schedule (daily)!</strong></p>
+                        <p class="mb-0">This backfill feature is for <strong>EXCEPTIONAL CASES ONLY</strong>, such as:</p>
+                        <ul class="mt-2">
+                            <li>System downtime preventing timely entry</li>
+                            <li>Staff unavailability due to emergency</li>
+                            <li>Administrative corrections</li>
+                        </ul>
+                        <p class="mb-0 mt-2">
+                            <i class="fas fa-info-circle"></i> All backdated entries are tracked and marked as "Late Submission" in reports.
+                        </p>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="alert alert-info">
+                        <h6 class="mb-2"><i class="fas fa-info-circle"></i> Instructions:</h6>
+                        <ol class="mb-0">
+                            <li>Select the past date you need to fill out</li>
+                            <li>Click "Continue to Checklist"</li>
+                            <li>Complete the checklist as you would normally</li>
+                            <li>The entry will be marked as a late submission</li>
+                        </ol>
+                    </div>
+
+                    <!-- Date Selection Form -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="mb-3">Select Past Date</h6>
+
+                                <div class="form-group">
+                                    <label for="backfill_date"><strong>Date to Backfill:</strong></label>
+                                    <input type="date"
+                                           class="form-control form-control-lg"
+                                           id="backfill_date"
+                                           name="backfill_date"
+                                           min="{{ min_date|date:'Y-m-d' }}"
+                                           max="{{ max_date|date:'Y-m-d' }}"
+                                           required>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-calendar-alt"></i> You can select dates from the last 60 days ({{ min_date|date:"M d" }} to {{ max_date|date:"M d, Y" }})
+                                    </small>
+                                    <small class="form-text text-warning">
+                                        <i class="fas fa-ban"></i> Weekends are not allowed (Mon-Fri only)
+                                    </small>
+                                </div>
+
+                                <div class="alert alert-warning mt-3">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <strong>Reminder:</strong> Regular PM schedule is Monday through Friday. Complete checklists on time to maintain proper maintenance records.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-forward"></i> Continue to Checklist
+                            </button>
+                            <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Why This Exists Section -->
+                    <div class="card mt-4 bg-light border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-question-circle"></i> Why does this feature exist?</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">While PM checklists should always be completed on schedule, we understand that exceptional circumstances may occur:</p>
+                            <ul class="mb-2">
+                                <li><strong>System Issues:</strong> Server downtime, network outages, or system maintenance</li>
+                                <li><strong>Personnel Issues:</strong> Emergency absences, medical leave, or understaffing</li>
+                                <li><strong>Administrative:</strong> Catching up on missed documentation with proper authorization</li>
+                            </ul>
+                            <p class="mb-0 text-danger">
+                                <i class="fas fa-clipboard-check"></i> <strong>Best Practice:</strong> Always complete PM checklists on the scheduled date to ensure proper equipment maintenance and accurate records.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('backfill_date');
+
+    // Disable weekend selection
+    dateInput.addEventListener('input', function() {
+        const selectedDate = new Date(this.value);
+        const dayOfWeek = selectedDate.getDay();
+
+        // 0 = Sunday, 6 = Saturday
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            alert('Weekend dates are not allowed. Please select a weekday (Monday-Friday).');
+            this.value = '';
+        }
+    });
+
+    // Show warning for dates older than 7 days
+    dateInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        const today = new Date();
+        const diffTime = Math.abs(today - selectedDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 7) {
+            const confirmMsg = `You selected a date from ${diffDays} days ago. This is unusual for PM checklists. Do you want to continue?`;
+            if (!confirm(confirmMsg)) {
+                this.value = '';
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.card.border-warning {
+    border-width: 3px !important;
+}
+
+.alert-danger {
+    border-left: 5px solid #dc3545;
+}
+
+.alert-warning {
+    border-left: 5px solid #ffc107;
+}
+
+.alert-info {
+    border-left: 5px solid #17a2b8;
+}
+
+input[type="date"] {
+    font-size: 1.1rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+</style>
+{% endblock %}
