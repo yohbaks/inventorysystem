@@ -26,18 +26,154 @@
                         </div>
                         {% endif %}
 
-                        <!-- Smart Suggestions -->
-                        {% if smart_suggestions.has_water_leaks %}
-                        <div class="alert alert-warning">
-                            <strong><i class="fas fa-exclamation-triangle"></i> Alert for Item #2:</strong><br>
-                            {{ smart_suggestions.summary }}
+                        <!-- Smart Suggestions with Dropdowns -->
+                        <div class="alert {% if smart_suggestions.has_any_alerts %}alert-warning{% else %}alert-success{% endif %}">
+                            <h5 class="alert-heading">
+                                <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
+                                Smart Suggestions for Week {{ week_number }} ({{ smart_suggestions.week_date_range }})
+                            </h5>
+                            <p class="mb-2"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
+
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
+                                <i class="fas fa-chevron-down"></i> View Detailed Insights
+                            </button>
+
+                            <div class="collapse mt-3" id="smartSuggestionsDetails">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <!-- Item #1: Equipment Running -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-server"></i> Item #1: Equipment Status
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item1.summary }}</p>
+
+                                            {% if smart_suggestions.item1.equipment_checks %}
+                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item1Details">
+                                                <i class="fas fa-list"></i> View {{ smart_suggestions.item1.total_checks }} Daily Check(s)
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="1" data-action="{{ smart_suggestions.item1.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item1Details">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <div style="max-height: 200px; overflow-y: auto;">
+                                                            <table class="table table-sm table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Date</th>
+                                                                        <th>Status</th>
+                                                                        <th>Details</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for check in smart_suggestions.item1.equipment_checks %}
+                                                                    <tr class="{% if check.status == 'Issue' %}table-warning{% endif %}">
+                                                                        <td>{{ check.date }}</td>
+                                                                        <td><span class="badge badge-{% if check.status == 'Running' %}success{% else %}warning{% endif %}">{{ check.status }}</span></td>
+                                                                        <td><small>{{ check.details }}</small></td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #2: Water Leaks -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-tint"></i> Item #2: Water Leak Detection
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item2.summary }}</p>
+
+                                            {% if smart_suggestions.item2.has_water_leaks %}
+                                            <button class="btn btn-sm btn-danger" type="button" data-toggle="collapse" data-target="#item2Details">
+                                                <i class="fas fa-exclamation-triangle"></i> View {{ smart_suggestions.item2.total_incidents }} Incident(s)
+                                            </button>
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="2" data-action="{{ smart_suggestions.item2.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item2Details">
+                                                <div class="card bg-light border-danger">
+                                                    <div class="card-body">
+                                                        <h6 class="text-danger">Water Leak Incidents:</h6>
+                                                        {% for incident in smart_suggestions.item2.leak_incidents %}
+                                                        <div class="alert alert-{% if incident.severity == 'Critical' %}danger{% else %}warning{% endif %} mb-2">
+                                                            <strong>{{ incident.date }}</strong> - <span class="badge badge-{% if incident.severity == 'Critical' %}danger{% else %}warning{% endif %}">{{ incident.severity }}</span>
+                                                            <br><strong>Location:</strong> {{ incident.location }}
+                                                            <br><strong>Details:</strong> {{ incident.details }}
+                                                            <br><strong>Action:</strong> {{ incident.action }}
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <p class="text-success"><small><i class="fas fa-check"></i> {{ smart_suggestions.item2.suggested_action }}</small></p>
+                                            {% endif %}
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #3: FD/BD Security -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-lock"></i> Item #3: FD/BD Security Check
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item3.summary }}</p>
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="3" data-action="{{ smart_suggestions.item3.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #4: Obstructions -->
+                                        <div class="mb-0">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-boxes"></i> Item #4: Obstruction Check
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item4.summary }}</p>
+
+                                            {% if smart_suggestions.item4.has_previous_notes %}
+                                            <button class="btn btn-sm btn-warning" type="button" data-toggle="collapse" data-target="#item4Details">
+                                                <i class="fas fa-history"></i> View Previous Obstruction Notes
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item4Details">
+                                                <div class="card bg-light border-warning">
+                                                    <div class="card-body">
+                                                        <h6 class="text-warning">Previous Obstructions (This Month):</h6>
+                                                        <ul class="list-unstyled">
+                                                            {% for obstruction in smart_suggestions.item4.previous_obstructions %}
+                                                            <li class="mb-2">
+                                                                <strong>Week {{ obstruction.week }}:</strong> {{ obstruction.details }}
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        <p class="text-info"><small><i class="fas fa-info-circle"></i> Verify these locations are now clear</small></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="4" data-action="{{ smart_suggestions.item4.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        {% else %}
-                        <div class="alert alert-info">
-                            <strong><i class="fas fa-info-circle"></i> Info for Item #2:</strong><br>
-                            {{ smart_suggestions.summary }}
-                        </div>
-                        {% endif %}
 
                         <!-- Location Field -->
                         <div class="form-group">
@@ -160,4 +296,81 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-fill action buttons
+    const autofillButtons = document.querySelectorAll('.autofill-btn');
+
+    autofillButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemNumber = this.dataset.item;
+            const suggestedAction = this.dataset.action;
+
+            // Find the corresponding action textarea
+            {% for item in items %}
+            if ('{{ item.item_number }}' === itemNumber) {
+                const actionTextarea = document.getElementById('action_{{ item.id }}');
+                if (actionTextarea) {
+                    // Append suggested action (don't overwrite existing text)
+                    const currentText = actionTextarea.value.trim();
+                    if (currentText) {
+                        actionTextarea.value = currentText + '\n\n[Week {{ week_number }}] ' + suggestedAction;
+                    } else {
+                        actionTextarea.value = '[Week {{ week_number }}] ' + suggestedAction;
+                    }
+
+                    // Scroll to the textarea
+                    actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    actionTextarea.focus();
+
+                    // Visual feedback
+                    actionTextarea.classList.add('border-success');
+                    setTimeout(() => {
+                        actionTextarea.classList.remove('border-success');
+                    }, 2000);
+                }
+            }
+            {% endfor %}
+        });
+    });
+
+    // Toggle chevron icon on collapse
+    const collapseButtons = document.querySelectorAll('[data-toggle="collapse"]');
+    collapseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+            if (icon) {
+                if (icon.classList.contains('fa-chevron-down')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.border-success {
+    border-width: 2px !important;
+    transition: border-color 0.3s ease;
+}
+
+.autofill-btn:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.collapse {
+    transition: height 0.3s ease;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+</style>
 {% endblock %}

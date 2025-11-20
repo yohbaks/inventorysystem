@@ -272,12 +272,46 @@ def get_fridays_in_month(year, month):
 
 
 def get_weekly_smart_suggestions(friday_date):
-    """Get smart suggestions from daily data for weekly checklist"""
+    """Get comprehensive smart suggestions from daily data for all weekly items"""
 
     suggestions = {
-        'has_water_leaks': False,
-        'water_leak_dates': [],
-        'summary': ''
+        # Item #1: Equipment Running
+        'item1': {
+            'has_issues': False,
+            'equipment_checks': [],  # {date, status, details}
+            'total_checks': 0,
+            'issues_count': 0,
+            'summary': '',
+            'suggested_action': ''
+        },
+
+        # Item #2: Water Leaks
+        'item2': {
+            'has_water_leaks': False,
+            'leak_incidents': [],  # {date, location, severity, action}
+            'total_incidents': 0,
+            'summary': '',
+            'suggested_action': ''
+        },
+
+        # Item #3: FD/BD Security
+        'item3': {
+            'summary': '',
+            'suggested_action': 'Verify all FD/BD doors are properly locked and secured'
+        },
+
+        # Item #4: Obstructions
+        'item4': {
+            'has_previous_notes': False,
+            'previous_obstructions': [],  # From previous weeks
+            'summary': '',
+            'suggested_action': ''
+        },
+
+        # Overall
+        'has_any_alerts': False,
+        'overall_summary': '',
+        'week_date_range': ''
     }
 
     try:
@@ -285,8 +319,8 @@ def get_weekly_smart_suggestions(friday_date):
         daily_template = PMChecklistTemplate.objects.get(annex_code='A', is_active=True)
 
         # Get the week range (Monday to Friday of this week)
-        # friday_date is the Friday, so go back 4 days to get Monday
         monday_date = friday_date - timedelta(days=4)
+        suggestions['week_date_range'] = f"{monday_date.strftime('%b %d')} - {friday_date.strftime('%b %d')}"
 
         # Get daily completions for this week
         daily_schedules = PMChecklistSchedule.objects.filter(
@@ -294,31 +328,168 @@ def get_weekly_smart_suggestions(friday_date):
             scheduled_date__gte=monday_date,
             scheduled_date__lte=friday_date,
             status='COMPLETED'
-        )
+        ).order_by('scheduled_date')
 
-        # Check Item #8 (water leaks) from daily checklists
+        total_days_checked = daily_schedules.count()
+
+        # Analyze daily checklists for this week
         for schedule in daily_schedules:
             try:
                 completion = schedule.completion
                 item_completions = completion.item_completions.all()
+                date_str = schedule.scheduled_date.strftime('%b %d (%a)')
 
                 for item_comp in item_completions:
-                    # Item #8: Check for signs of water leaks
-                    if item_comp.item.item_number == 8:
-                        if item_comp.problems_encountered or 'leak' in (item_comp.action_taken or '').lower():
-                            suggestions['has_water_leaks'] = True
-                            suggestions['water_leak_dates'].append(schedule.scheduled_date.strftime('%b %d'))
-            except:
-                pass
+                    # Item #2: Check if servers/network equipment are up (for Item #1 suggestion)
+                    if item_comp.item.item_number == 2:
+                        status = 'Running' if item_comp.is_completed else 'Issue'
+                        details = item_comp.problems_encountered or 'All equipment operational'
 
-        # Build summary
-        if suggestions['has_water_leaks']:
-            dates_str = ', '.join(suggestions['water_leak_dates'])
-            suggestions['summary'] = f"Water leaks reported on: {dates_str} (from daily checklists)"
+                        suggestions['item1']['equipment_checks'].append({
+                            'date': date_str,
+                            'status': status,
+                            'details': details
+                        })
+                        suggestions['item1']['total_checks'] += 1
+
+                        if item_comp.problems_encountered or not item_comp.is_completed:
+                            suggestions['item1']['has_issues'] = True
+                            suggestions['item1']['issues_count'] += 1
+
+                    # Item #8: Check for water leaks (for Item #2 suggestion)
+                    if item_comp.item.item_number == 8:
+                        problems = item_comp.problems_encountered or ''
+                        action = item_comp.action_taken or ''
+
+                        # Check for leak-related keywords
+                        leak_keywords = ['leak', 'water', 'moisture', 'wet', 'drip', 'flood']
+                        has_leak = any(keyword in problems.lower() or keyword in action.lower()
+                                      for keyword in leak_keywords)
+
+                        if has_leak or problems:
+                            # Determine severity
+                            severity = 'Critical' if any(kw in problems.lower() for kw in ['flood', 'major']) else 'Minor'
+
+                            suggestions['item2']['leak_incidents'].append({
+                                'date': date_str,
+                                'location': 'FD/BD area',  # Could be enhanced with location parsing
+                                'severity': severity,
+                                'details': problems or 'Leak detected',
+                                'action': action or 'None recorded'
+                            })
+                            suggestions['item2']['has_water_leaks'] = True
+                            suggestions['item2']['total_incidents'] += 1
+
+            except Exception as e:
+                continue
+
+        # === Process Item #1 (Equipment Running) ===
+        if suggestions['item1']['has_issues']:
+            suggestions['item1']['summary'] = f"⚠️ Equipment issues on {suggestions['item1']['issues_count']} day(s) this week"
+            suggestions['item1']['suggested_action'] = (
+                "Verify all FD/BD equipment is powered on and running. "
+                "Check for tripped breakers or disconnected cables. "
+                "Review equipment status indicators."
+            )
         else:
-            suggestions['summary'] = "No water leaks reported in datacenter this week"
+            if suggestions['item1']['total_checks'] > 0:
+                suggestions['item1']['summary'] = f"✓ All equipment running normally ({suggestions['item1']['total_checks']} checks)"
+            else:
+                suggestions['item1']['summary'] = "No equipment data available for this week"
+            suggestions['item1']['suggested_action'] = "Visual inspection: Verify all equipment power and status lights"
+
+        # === Process Item #2 (Water Leaks) ===
+        if suggestions['item2']['has_water_leaks']:
+            critical_count = sum(1 for incident in suggestions['item2']['leak_incidents']
+                               if incident['severity'] == 'Critical')
+
+            if critical_count > 0:
+                suggestions['item2']['summary'] = f"🚨 CRITICAL: {critical_count} major leak(s) detected this week!"
+            else:
+                suggestions['item2']['summary'] = f"⚠️ {suggestions['item2']['total_incidents']} leak incident(s) detected"
+
+            suggestions['item2']['suggested_action'] = (
+                "IMMEDIATE: Check all FD/BD areas for signs of water. "
+                "Inspect ceiling, walls, and floor for moisture. "
+                "Check AC units and plumbing for leaks. "
+                "Report to facilities immediately if found."
+            )
+        else:
+            suggestions['item2']['summary'] = f"✓ No water leaks reported ({total_days_checked} daily checks)"
+            suggestions['item2']['suggested_action'] = "Routine inspection: Check for any signs of moisture or water damage"
+
+        # === Process Item #3 (FD/BD Locked) ===
+        suggestions['item3']['summary'] = "Verify all FD/BD enclosures are properly secured"
+
+        # === Process Item #4 (Obstructions) ===
+        # Get previous week's data from the same monthly schedule
+        try:
+            weekly_template = PMChecklistTemplate.objects.get(annex_code='C', is_active=True)
+            year = friday_date.year
+            month = friday_date.month
+            first_day_of_month = datetime(year, month, 1).date()
+
+            previous_schedule = PMChecklistSchedule.objects.filter(
+                template=weekly_template,
+                scheduled_date=first_day_of_month
+            ).first()
+
+            if previous_schedule and hasattr(previous_schedule, 'completion'):
+                prev_completion = previous_schedule.completion
+                # Look for item #4 completions from previous weeks
+                for item_comp in prev_completion.item_completions.all():
+                    if item_comp.item.item_number == 4:
+                        # Check previous weeks for obstruction notes
+                        for wk in range(1, 5):
+                            week_field = f'week{wk}'
+                            problems = item_comp.problems_encountered or ''
+                            if getattr(item_comp, week_field, False) and 'obstruction' in problems.lower():
+                                suggestions['item4']['has_previous_notes'] = True
+                                suggestions['item4']['previous_obstructions'].append({
+                                    'week': wk,
+                                    'details': problems
+                                })
+
+            if suggestions['item4']['has_previous_notes']:
+                suggestions['item4']['summary'] = f"⚠️ Previous obstruction(s) noted - verify cleared"
+                suggestions['item4']['suggested_action'] = (
+                    "Check previous obstruction locations are now clear. "
+                    "Inspect top, sides, and back of all FD/BD units. "
+                    "Remove any boxes, equipment, or debris blocking airflow."
+                )
+            else:
+                suggestions['item4']['summary'] = "Routine check: Ensure clear access and airflow"
+                suggestions['item4']['suggested_action'] = (
+                    "Verify minimum 3-foot clearance around all equipment. "
+                    "Remove any stored items or obstructions. "
+                    "Check ventilation paths are clear."
+                )
+
+        except Exception as e:
+            suggestions['item4']['summary'] = "Check for any obstructions around equipment"
+            suggestions['item4']['suggested_action'] = "Clear all obstructions from FD/BD areas"
+
+        # === Overall Summary ===
+        suggestions['has_any_alerts'] = (
+            suggestions['item1']['has_issues'] or
+            suggestions['item2']['has_water_leaks'] or
+            suggestions['item4']['has_previous_notes']
+        )
+
+        if suggestions['has_any_alerts']:
+            alert_parts = []
+            if suggestions['item1']['has_issues']:
+                alert_parts.append(f"{suggestions['item1']['issues_count']} equipment issue(s)")
+            if suggestions['item2']['has_water_leaks']:
+                alert_parts.append(f"{suggestions['item2']['total_incidents']} water leak(s)")
+            if suggestions['item4']['has_previous_notes']:
+                alert_parts.append("previous obstructions")
+
+            suggestions['overall_summary'] = f"⚠️ Alerts: {', '.join(alert_parts)}"
+        else:
+            suggestions['overall_summary'] = f"✓ All normal for week of {suggestions['week_date_range']}"
 
     except Exception as e:
-        suggestions['summary'] = "Unable to retrieve daily checklist data"
+        suggestions['overall_summary'] = f"Unable to retrieve checklist data: {str(e)}"
 
     return suggestions

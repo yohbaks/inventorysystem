@@ -25,18 +25,175 @@
                         </div>
                         {% endif %}
 
-                        <!-- Smart Suggestions -->
-                        {% if smart_suggestions.has_critical_alerts %}
-                        <div class="alert alert-warning">
-                            <strong><i class="fas fa-exclamation-triangle"></i> Alert for Item #1:</strong><br>
-                            {{ smart_suggestions.summary }}
+                        <!-- Smart Suggestions with Dropdowns -->
+                        <div class="alert {% if smart_suggestions.has_any_alerts %}alert-warning{% else %}alert-success{% endif %}">
+                            <h5 class="alert-heading">
+                                <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
+                                Smart Suggestions from Daily Checklists
+                            </h5>
+                            <p class="mb-2"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
+
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
+                                <i class="fas fa-chevron-down"></i> View Detailed Insights
+                            </button>
+
+                            <div class="collapse mt-3" id="smartSuggestionsDetails">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <!-- Item #1: Network Equipment -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-network-wired"></i> Item #1: Network Equipment Alerts
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item1.summary }}</p>
+
+                                            {% if smart_suggestions.item1.has_alerts %}
+                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item1Details">
+                                                <i class="fas fa-list"></i> View {{ smart_suggestions.item1.total_alerts }} Alert(s)
+                                            </button>
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="1" data-action="{{ smart_suggestions.item1.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item1Details">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        {% if smart_suggestions.item1.server_issues %}
+                                                        <h6 class="text-danger"><i class="fas fa-server"></i> Server/Network Issues:</h6>
+                                                        <ul class="list-unstyled">
+                                                            {% for issue in smart_suggestions.item1.server_issues %}
+                                                            <li class="mb-2">
+                                                                <strong>{{ issue.date }}:</strong> {{ issue.details }}
+                                                                <br><small class="text-muted">Action: {{ issue.action }}</small>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        {% endif %}
+
+                                                        {% if smart_suggestions.item1.event_log_errors %}
+                                                        <h6 class="text-warning mt-3"><i class="fas fa-exclamation-circle"></i> Event Log Errors:</h6>
+                                                        <ul class="list-unstyled">
+                                                            {% for error in smart_suggestions.item1.event_log_errors %}
+                                                            <li class="mb-2">
+                                                                <strong>{{ error.date }}:</strong> {{ error.details }}
+                                                                <br><small class="text-muted">Action: {{ error.action }}</small>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <p class="text-success"><small><i class="fas fa-check"></i> {{ smart_suggestions.item1.suggested_action }}</small></p>
+                                            {% endif %}
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #3: UPS Health -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-battery-full"></i> Item #3: UPS Health Status
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item3.summary }}</p>
+
+                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item3Details">
+                                                <i class="fas fa-chart-line"></i> View UPS Trend
+                                            </button>
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="3" data-action="{{ smart_suggestions.item3.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item3Details">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <p><strong>Trend:</strong>
+                                                            <span class="badge badge-{% if smart_suggestions.item3.trend == 'improving' %}success{% elif smart_suggestions.item3.trend == 'degrading' %}danger{% else %}info{% endif %}">
+                                                                {{ smart_suggestions.item3.trend|upper }}
+                                                            </span>
+                                                        </p>
+                                                        <p><strong>Average Health:</strong> {{ smart_suggestions.item3.average_health|floatformat:0 }}%</p>
+
+                                                        {% if smart_suggestions.item3.ups_readings %}
+                                                        <h6 class="mt-3">Recent Readings:</h6>
+                                                        <div style="max-height: 200px; overflow-y: auto;">
+                                                            <table class="table table-sm table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Date</th>
+                                                                        <th>Status</th>
+                                                                        <th>Notes</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for reading in smart_suggestions.item3.ups_readings %}
+                                                                    <tr>
+                                                                        <td>{{ reading.date }}</td>
+                                                                        <td><span class="badge badge-{% if reading.status == 'Good' %}success{% else %}warning{% endif %}">{{ reading.status }}</span></td>
+                                                                        <td><small>{{ reading.notes }}</small></td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #4: Generator Status -->
+                                        <div class="mb-0">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-plug"></i> Item #4: Generator Status
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item4.summary }}</p>
+
+                                            {% if smart_suggestions.item4.generator_readings %}
+                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item4Details">
+                                                <i class="fas fa-history"></i> View Test History ({{ smart_suggestions.item4.tests_this_month }} test{{ smart_suggestions.item4.tests_this_month|pluralize }})
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="4" data-action="{{ smart_suggestions.item4.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item4Details">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        {% if smart_suggestions.item4.generator_readings %}
+                                                        <div style="max-height: 200px; overflow-y: auto;">
+                                                            <table class="table table-sm table-striped">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Date</th>
+                                                                        <th>Status</th>
+                                                                        <th>Notes</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for reading in smart_suggestions.item4.generator_readings %}
+                                                                    <tr>
+                                                                        <td>{{ reading.date }}</td>
+                                                                        <td><span class="badge badge-{% if reading.status == 'Operational' %}success{% else %}warning{% endif %}">{{ reading.status }}</span></td>
+                                                                        <td><small>{{ reading.notes }}</small></td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        {% else %}
-                        <div class="alert alert-info">
-                            <strong><i class="fas fa-info-circle"></i> Info for Item #1:</strong><br>
-                            {{ smart_suggestions.summary }}
-                        </div>
-                        {% endif %}
 
                         <div class="alert alert-info">
                             <strong>Instructions:</strong>
@@ -134,4 +291,78 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-fill action buttons
+    const autofillButtons = document.querySelectorAll('.autofill-btn');
+
+    autofillButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemNumber = this.dataset.item;
+            const suggestedAction = this.dataset.action;
+
+            // Find the corresponding action textarea
+            // Get all items and find the one with matching item number
+            {% for item in items %}
+            if ('{{ item.item_number }}' === itemNumber) {
+                const actionTextarea = document.getElementById('action_{{ item.id }}');
+                if (actionTextarea) {
+                    // Append suggested action (don't overwrite existing text)
+                    const currentText = actionTextarea.value.trim();
+                    if (currentText) {
+                        actionTextarea.value = currentText + '\n\n' + suggestedAction;
+                    } else {
+                        actionTextarea.value = suggestedAction;
+                    }
+
+                    // Scroll to the textarea
+                    actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    actionTextarea.focus();
+
+                    // Visual feedback
+                    actionTextarea.classList.add('border-success');
+                    setTimeout(() => {
+                        actionTextarea.classList.remove('border-success');
+                    }, 2000);
+                }
+            }
+            {% endfor %}
+        });
+    });
+
+    // Toggle chevron icon on collapse
+    const collapseButtons = document.querySelectorAll('[data-toggle="collapse"]');
+    collapseButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+            if (icon) {
+                if (icon.classList.contains('fa-chevron-down')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.border-success {
+    border-width: 2px !important;
+    transition: border-color 0.3s ease;
+}
+
+.autofill-btn:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.collapse {
+    transition: height 0.3s ease;
+}
+</style>
 {% endblock %}

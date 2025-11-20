@@ -168,13 +168,43 @@ def complete_monthly_pm(request, schedule_id):
 
 
 def get_monthly_smart_suggestions(year, month):
-    """Get smart suggestions from daily data for monthly Item #1"""
+    """Get comprehensive smart suggestions from daily data for all monthly items"""
 
     suggestions = {
-        'has_critical_alerts': False,
-        'server_issues_count': 0,
-        'event_log_errors_count': 0,
-        'summary': ''
+        # Item #1: Network Equipment Alerts
+        'item1': {
+            'has_alerts': False,
+            'server_issues': [],  # {date, details, action}
+            'event_log_errors': [],  # {date, details, action}
+            'total_alerts': 0,
+            'severity': 'low',  # low, medium, high
+            'summary': '',
+            'suggested_action': ''
+        },
+
+        # Item #3: UPS Health
+        'item3': {
+            'has_issues': False,
+            'ups_readings': [],  # {date, status, notes}
+            'trend': 'stable',  # improving, stable, degrading
+            'average_health': 100,
+            'summary': '',
+            'suggested_action': ''
+        },
+
+        # Item #4: Generator Status
+        'item4': {
+            'has_issues': False,
+            'generator_readings': [],  # {date, status, notes}
+            'last_test_date': None,
+            'tests_this_month': 0,
+            'summary': '',
+            'suggested_action': ''
+        },
+
+        # Overall
+        'has_any_alerts': False,
+        'overall_summary': ''
     }
 
     try:
@@ -190,41 +220,173 @@ def get_monthly_smart_suggestions(year, month):
             scheduled_date__gte=first_day,
             scheduled_date__lte=last_day,
             status='COMPLETED'
-        )
+        ).order_by('scheduled_date')
 
-        # Check Item #2 (servers) and Item #7 (event logs) from daily checklists
+        total_days_checked = daily_schedules.count()
+        ups_health_values = []
+
+        # Analyze daily checklists
         for schedule in daily_schedules:
             try:
                 completion = schedule.completion
                 item_completions = completion.item_completions.all()
+                date_str = schedule.scheduled_date.strftime('%b %d')
 
                 for item_comp in item_completions:
-                    # Item #2: Check if servers are up
+                    # Item #2: Servers/Network Equipment
                     if item_comp.item.item_number == 2:
-                        if item_comp.problems_encountered:
-                            suggestions['server_issues_count'] += 1
-                            suggestions['has_critical_alerts'] = True
+                        if item_comp.problems_encountered or not item_comp.is_completed:
+                            suggestions['item1']['server_issues'].append({
+                                'date': date_str,
+                                'details': item_comp.problems_encountered or 'Not completed',
+                                'action': item_comp.action_taken or 'None recorded'
+                            })
+                            suggestions['item1']['has_alerts'] = True
+                            suggestions['item1']['total_alerts'] += 1
 
-                    # Item #7: Event logs for critical warnings/errors
+                    # Item #7: Event Logs
                     if item_comp.item.item_number == 7:
-                        if item_comp.problems_encountered or 'error' in (item_comp.action_taken or '').lower() or 'critical' in (item_comp.action_taken or '').lower():
-                            suggestions['event_log_errors_count'] += 1
-                            suggestions['has_critical_alerts'] = True
-            except:
-                pass
+                        problems = item_comp.problems_encountered or ''
+                        action = item_comp.action_taken or ''
 
-        # Build summary
-        if suggestions['has_critical_alerts']:
+                        # Check for critical keywords
+                        critical_keywords = ['error', 'critical', 'warning', 'failed', 'alert']
+                        is_critical = any(keyword in problems.lower() or keyword in action.lower()
+                                        for keyword in critical_keywords)
+
+                        if is_critical or problems:
+                            suggestions['item1']['event_log_errors'].append({
+                                'date': date_str,
+                                'details': problems or 'Critical event detected',
+                                'action': action or 'None recorded'
+                            })
+                            suggestions['item1']['has_alerts'] = True
+                            suggestions['item1']['total_alerts'] += 1
+
+                    # Item #3: UPS Readings
+                    if item_comp.item.item_number == 3:
+                        status = 'Good' if item_comp.is_completed else 'Issue'
+                        notes = item_comp.problems_encountered or 'Normal operation'
+
+                        suggestions['item3']['ups_readings'].append({
+                            'date': date_str,
+                            'status': status,
+                            'notes': notes
+                        })
+
+                        if item_comp.problems_encountered or not item_comp.is_completed:
+                            suggestions['item3']['has_issues'] = True
+
+                        # Track health (assume 100% if completed with no issues)
+                        health = 100 if (item_comp.is_completed and not item_comp.problems_encountered) else 70
+                        ups_health_values.append(health)
+
+                    # Item #4: Generator Check
+                    if item_comp.item.item_number == 4:
+                        status = 'Operational' if item_comp.is_completed else 'Issue'
+                        notes = item_comp.problems_encountered or 'Normal operation'
+
+                        suggestions['item4']['generator_readings'].append({
+                            'date': date_str,
+                            'status': status,
+                            'notes': notes
+                        })
+
+                        if item_comp.is_completed:
+                            suggestions['item4']['tests_this_month'] += 1
+                            suggestions['item4']['last_test_date'] = date_str
+
+                        if item_comp.problems_encountered or not item_comp.is_completed:
+                            suggestions['item4']['has_issues'] = True
+
+            except Exception as e:
+                continue
+
+        # === Process Item #1 (Network Equipment) ===
+        if suggestions['item1']['total_alerts'] > 0:
+            suggestions['item1']['severity'] = 'high' if suggestions['item1']['total_alerts'] > 5 else 'medium'
+
+            # Build detailed summary
             parts = []
-            if suggestions['server_issues_count'] > 0:
-                parts.append(f"{suggestions['server_issues_count']} server issue(s)")
-            if suggestions['event_log_errors_count'] > 0:
-                parts.append(f"{suggestions['event_log_errors_count']} event log error(s)")
-            suggestions['summary'] = f"Found {', '.join(parts)} in daily checklists this month"
+            if suggestions['item1']['server_issues']:
+                parts.append(f"{len(suggestions['item1']['server_issues'])} server/network issue(s)")
+            if suggestions['item1']['event_log_errors']:
+                parts.append(f"{len(suggestions['item1']['event_log_errors'])} event log alert(s)")
+
+            suggestions['item1']['summary'] = f"⚠️ Found {', '.join(parts)} in {total_days_checked} daily checks"
+
+            # Suggested action
+            suggestions['item1']['suggested_action'] = (
+                "Review all network equipment for hardware alarms. "
+                "Check router, switches, and servers for critical warnings. "
+                "Verify all critical systems are operational."
+            )
         else:
-            suggestions['summary'] = "No critical alerts found in daily checklists this month"
+            suggestions['item1']['summary'] = f"✓ No critical network alerts in {total_days_checked} daily checks"
+            suggestions['item1']['suggested_action'] = "Routine check: Verify status lights and monitoring dashboard"
+
+        # === Process Item #3 (UPS) ===
+        if ups_health_values:
+            suggestions['item3']['average_health'] = sum(ups_health_values) / len(ups_health_values)
+
+            # Determine trend (compare first half vs second half)
+            if len(ups_health_values) >= 4:
+                mid = len(ups_health_values) // 2
+                first_half_avg = sum(ups_health_values[:mid]) / mid
+                second_half_avg = sum(ups_health_values[mid:]) / (len(ups_health_values) - mid)
+
+                if second_half_avg > first_half_avg + 5:
+                    suggestions['item3']['trend'] = 'improving'
+                elif second_half_avg < first_half_avg - 5:
+                    suggestions['item3']['trend'] = 'degrading'
+                else:
+                    suggestions['item3']['trend'] = 'stable'
+
+        if suggestions['item3']['has_issues']:
+            suggestions['item3']['summary'] = f"⚠️ UPS issues detected ({suggestions['item3']['trend']} trend)"
+            suggestions['item3']['suggested_action'] = (
+                "Test UPS battery backup for minimum 5 minutes runtime. "
+                "Check battery levels and replace if needed. "
+                "Verify UPS alarm indicators."
+            )
+        else:
+            suggestions['item3']['summary'] = f"✓ UPS operating normally ({suggestions['item3']['trend']} trend, {suggestions['item3']['average_health']:.0f}% health)"
+            suggestions['item3']['suggested_action'] = "Perform routine 5-minute backup power test"
+
+        # === Process Item #4 (Generator) ===
+        if suggestions['item4']['has_issues']:
+            suggestions['item4']['summary'] = f"⚠️ Generator issues detected (tested {suggestions['item4']['tests_this_month']}x this month)"
+            suggestions['item4']['suggested_action'] = (
+                "Coordinate with General Services to test generator and ATS. "
+                "Verify generator can supply adequate backup power. "
+                "Check fuel levels and battery charge."
+            )
+        else:
+            if suggestions['item4']['tests_this_month'] > 0:
+                suggestions['item4']['summary'] = f"✓ Generator operational (last test: {suggestions['item4']['last_test_date']})"
+            else:
+                suggestions['item4']['summary'] = "⚠️ No generator tests recorded this month"
+
+            suggestions['item4']['suggested_action'] = "Test generator set and ATS with Equipment Management/General Services"
+
+        # === Overall Summary ===
+        suggestions['has_any_alerts'] = (
+            suggestions['item1']['has_alerts'] or
+            suggestions['item3']['has_issues'] or
+            suggestions['item4']['has_issues']
+        )
+
+        alert_count = (
+            len(suggestions['item1']['server_issues']) +
+            len(suggestions['item1']['event_log_errors'])
+        )
+
+        if suggestions['has_any_alerts']:
+            suggestions['overall_summary'] = f"⚠️ {alert_count} alert(s) require attention this month"
+        else:
+            suggestions['overall_summary'] = f"✓ All systems normal across {total_days_checked} daily checks"
 
     except Exception as e:
-        suggestions['summary'] = "Unable to retrieve daily checklist data"
+        suggestions['overall_summary'] = f"Unable to retrieve daily checklist data: {str(e)}"
 
     return suggestions
