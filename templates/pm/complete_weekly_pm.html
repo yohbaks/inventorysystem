@@ -328,6 +328,29 @@ function selectAllItem1Checks(select) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to replace or append week content
+    function updateWeekContent(textarea, weekNumber, newContent) {
+        const weekMarker = `[Week ${weekNumber}]`;
+        const currentValue = textarea.value.trim();
+
+        if (!currentValue) {
+            // Empty textarea, just add new content
+            textarea.value = weekMarker + '\n' + newContent;
+            return;
+        }
+
+        // Check if this week's content already exists
+        const weekRegex = new RegExp(`\\[Week ${weekNumber}\\][\\s\\S]*?(?=\\[Week \\d+\\]|$)`, 'g');
+
+        if (currentValue.includes(weekMarker)) {
+            // Replace existing week content
+            textarea.value = currentValue.replace(weekRegex, weekMarker + '\n' + newContent);
+        } else {
+            // Append new week content
+            textarea.value = currentValue + '\n\n' + weekMarker + '\n' + newContent;
+        }
+    }
+
     // Auto-fill SELECTED entries button (Item #1)
     const autofillSelectedButtons = document.querySelectorAll('.autofill-selected-btn');
 
@@ -362,12 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Fill Problems field
                     const problemsTextarea = document.getElementById('problems_{{ item.id }}');
                     if (problemsTextarea && problemsText) {
-                        const currentProblems = problemsTextarea.value.trim();
-                        if (currentProblems) {
-                            problemsTextarea.value = currentProblems + '\n\n[Week {{ week_number }}]\n' + problemsText;
-                        } else {
-                            problemsTextarea.value = '[Week {{ week_number }}]\n' + problemsText;
-                        }
+                        updateWeekContent(problemsTextarea, {{ week_number }}, problemsText);
 
                         // Visual feedback
                         problemsTextarea.classList.add('border-success');
@@ -379,12 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Fill Action field
                     const actionTextarea = document.getElementById('action_{{ item.id }}');
                     if (actionTextarea) {
-                        const currentText = actionTextarea.value.trim();
-                        if (currentText) {
-                            actionTextarea.value = currentText + '\n\n[Week {{ week_number }}] ' + suggestedAction;
-                        } else {
-                            actionTextarea.value = '[Week {{ week_number }}] ' + suggestedAction;
-                        }
+                        updateWeekContent(actionTextarea, {{ week_number }}, suggestedAction);
 
                         // Scroll and focus
                         actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -417,12 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fill Problems field if suggested problems exist
                 const problemsTextarea = document.getElementById('problems_{{ item.id }}');
                 if (problemsTextarea && suggestedProblems) {
-                    const currentProblems = problemsTextarea.value.trim();
-                    if (currentProblems) {
-                        problemsTextarea.value = currentProblems + '\n\n[Week {{ week_number }}]\n' + suggestedProblems;
-                    } else {
-                        problemsTextarea.value = '[Week {{ week_number }}]\n' + suggestedProblems;
-                    }
+                    updateWeekContent(problemsTextarea, {{ week_number }}, suggestedProblems);
 
                     // Visual feedback for problems
                     problemsTextarea.classList.add('border-success');
@@ -434,13 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fill Action field
                 const actionTextarea = document.getElementById('action_{{ item.id }}');
                 if (actionTextarea) {
-                    // Append suggested action (don't overwrite existing text)
-                    const currentText = actionTextarea.value.trim();
-                    if (currentText) {
-                        actionTextarea.value = currentText + '\n\n[Week {{ week_number }}] ' + suggestedAction;
-                    } else {
-                        actionTextarea.value = '[Week {{ week_number }}] ' + suggestedAction;
-                    }
+                    updateWeekContent(actionTextarea, {{ week_number }}, suggestedAction);
 
                     // Scroll to the textarea
                     actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
