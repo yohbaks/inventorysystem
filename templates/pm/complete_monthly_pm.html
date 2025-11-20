@@ -331,18 +331,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Toggle chevron icon on collapse
+    // Manual collapse handling for all collapse buttons
     const collapseButtons = document.querySelectorAll('[data-toggle="collapse"]');
     collapseButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
-            if (icon) {
-                if (icon.classList.contains('fa-chevron-down')) {
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-up');
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const targetSelector = this.getAttribute('data-target');
+            const targetElement = document.querySelector(targetSelector);
+
+            if (targetElement) {
+                // Toggle the collapse class
+                if (targetElement.classList.contains('show')) {
+                    targetElement.classList.remove('show');
+                    this.setAttribute('aria-expanded', 'false');
                 } else {
-                    icon.classList.remove('fa-chevron-up');
-                    icon.classList.add('fa-chevron-down');
+                    targetElement.classList.add('show');
+                    this.setAttribute('aria-expanded', 'true');
+                }
+
+                // Toggle chevron icon
+                const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+                if (icon) {
+                    if (icon.classList.contains('fa-chevron-down')) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    } else {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
                 }
             }
         });
@@ -362,7 +379,12 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .collapse {
-    transition: height 0.3s ease;
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.collapse.show {
+    display: block;
 }
 </style>
 {% endblock %}
