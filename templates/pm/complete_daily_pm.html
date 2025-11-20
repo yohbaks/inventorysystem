@@ -35,8 +35,17 @@
                         {% endif %}
 
                         {% if existing_completion %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-info-circle"></i> <strong>Update Mode:</strong> This checklist was already completed. You can update readings/notes throughout the day.
+                        <div class="alert alert-info border-info" style="border-left: 5px solid #17a2b8 !important;">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-edit"></i> Update Mode - Editing Existing Checklist
+                            </h6>
+                            <p class="mb-2">This checklist was already completed. All existing data has been pre-filled in the form fields below.</p>
+                            <ul class="mb-0">
+                                <li>✓ All checkboxes reflect current completion status</li>
+                                <li>✓ Problems and actions are pre-filled for your review</li>
+                                <li>✓ Readings are loaded from previous submission</li>
+                                <li><strong>Make your changes and click Submit to update</strong></li>
+                            </ul>
                         </div>
                         {% endif %}
 
@@ -139,7 +148,7 @@
                                                           name="problems_{{ item.id }}"
                                                           rows="2"
                                                           placeholder="Any issues or additional notes..."
-                                                          {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}></textarea>
+                                                          {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}>{{ item.existing_problems }}</textarea>
                                             </div>
                                         {% else %}
                                             <!-- Standard problems/actions for non-scheduled items -->
@@ -150,7 +159,7 @@
                                                           name="problems_{{ item.id }}"
                                                           rows="2"
                                                           placeholder="Describe any problems..."
-                                                          {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}></textarea>
+                                                          {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}>{{ item.existing_problems }}</textarea>
                                             </div>
                                             <div class="form-group mb-0">
                                                 <label for="action_{{ item.id }}" class="small">Action Taken:</label>
@@ -159,7 +168,7 @@
                                                           name="action_{{ item.id }}"
                                                           rows="2"
                                                           placeholder="Describe action taken..."
-                                                          {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}></textarea>
+                                                          {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}>{{ item.existing_action }}</textarea>
                                             </div>
                                         {% endif %}
                                     </td>
