@@ -3,53 +3,44 @@
 
 {% block title %}Daily PM Checklist{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pm-modern.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="modern-container">
-    <div class="container-fluid">
-        {% if is_weekend %}
-            <!-- Weekend Message -->
-            <div class="row justify-content-center">
-                <div class="col-lg-6">
-                    <div class="modern-card text-center">
-                        <div class="card-body-modern py-5">
-                            <div class="premium-info-icon-badge mx-auto mb-3" style="width: 4rem; height: 4rem;">
-                                <i class="fas fa-calendar-times" style="font-size: 2rem;"></i>
-                            </div>
-                            <h2>Weekend - No PM Checklist</h2>
-                            <p class="text-muted">{{ today|date:"l, F d, Y" }}</p>
-                            <p>The PM checklist system operates Monday through Friday only.</p>
-                            <p class="h4 mt-4"><i class="fas fa-umbrella-beach"></i> Enjoy your weekend!</p>
-                            <a href="{% url 'pm_main_dashboard' %}" class="modern-btn btn-primary mt-3">
-                                <i class="fas fa-arrow-left"></i> Back to PM Dashboard
-                            </a>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            {% if is_weekend %}
+                <!-- Weekend Message -->
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-calendar-times" style="font-size: 3rem; color: #6c757d;"></i>
                         </div>
+                        <h2>Weekend - No PM Checklist</h2>
+                        <p class="text-muted">{{ today|date:"l, F d, Y" }}</p>
+                        <p>The PM checklist system operates Monday through Friday only.</p>
+                        <p class="h4 mt-4"><i class="fas fa-umbrella-beach"></i> Enjoy your weekend!</p>
+                        <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary mt-3">
+                            <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+                        </a>
                     </div>
                 </div>
-            </div>
-        {% else %}
-            <!-- Hero Header -->
-            <div class="premium-page-header theme-pm">
-                <div class="hero-content">
-                    <div class="hero-badge">
-                        <i class="fas fa-calendar-day"></i>
-                        <span>Daily PM Checklist</span>
+            {% else %}
+                <!-- Header -->
+                <div class="card mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-calendar-day"></i> Daily PM Checklist - {{ today_name }}, {{ today|date:"F d, Y" }}
+                        </h3>
                     </div>
-                    <h1 class="hero-title">{{ today_name }}, {{ today|date:"F d, Y" }}</h1>
                 </div>
-            </div>
 
-            <!-- Week Overview -->
-            <div class="modern-card">
-                <div class="card-header-modern">
-                    <h3 class="card-title-modern">
-                        <i class="fas fa-calendar-week"></i> Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}
-                    </h3>
-                </div>
-                <div class="card-body-modern">
+                <!-- Week Overview -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-week"></i> Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i> <strong>Note:</strong> You can complete any day from this week, including missed days.
                     </div>
@@ -60,15 +51,15 @@
                                 <h6 class="mb-1"><i class="fas fa-exclamation-triangle"></i> Need to fill out a past date?</h6>
                                 <small>For exceptional cases only (system downtime, emergency absences, etc.)</small>
                             </div>
-                            <a href="{% url 'backfill_pm_checklist' %}" class="modern-btn btn-warning">
+                            <a href="{% url 'backfill_pm_checklist' %}" class="btn btn-warning">
                                 <i class="fas fa-calendar-minus"></i> Backfill Past Date
                             </a>
                         </div>
                     </div>
 
                     {% for day in week_days %}
-                    <div class="modern-card mb-3" style="{% if day.is_today %}border-left: 4px solid #667eea;{% endif %}">
-                        <div class="card-body-modern">
+                    <div class="card mb-3" style="{% if day.is_today %}border-left: 4px solid #0d6efd;{% endif %}">
+                        <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-3 mb-3 mb-md-0">
                                     <h5 class="mb-1">{{ day.day_name }}</h5>
@@ -123,18 +114,18 @@
 
                                 <div class="col-md-5 text-md-end">
                                     {% if day.is_completed %}
-                                        <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="modern-btn btn-warning btn-sm">
+                                        <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit"></i> Update
                                         </a>
-                                        <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="modern-btn btn-info btn-sm">
+                                        <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="modern-btn btn-success btn-sm">
+                                        <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="btn btn-success btn-sm">
                                             <i class="fas fa-file-pdf"></i> PDF
                                         </a>
                                     {% else %}
                                         {% if day.schedule %}
-                                            <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="modern-btn btn-primary">
+                                            <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn btn-primary">
                                                 <i class="fas fa-clipboard-check"></i> Complete Checklist
                                             </a>
                                         {% else %}
@@ -149,20 +140,23 @@
                 </div>
             </div>
 
-            <!-- Weekly Report -->
-            <div class="modern-card">
-                <div class="card-header-modern">
-                    <h3 class="card-title-modern">
-                        <i class="fas fa-chart-bar"></i> Weekly Report
-                    </h3>
                 </div>
-                <div class="card-body-modern">
+            </div>
+
+            <!-- Weekly Report -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> Weekly Report
+                    </h5>
+                </div>
+                <div class="card-body">
                     <p class="text-muted">View or export the aggregated weekly PM report (Monday - Friday).</p>
                     <div class="d-flex gap-2 flex-wrap mt-3">
-                        <a href="{% url 'weekly_pm_report_view' %}" class="modern-btn btn-info">
+                        <a href="{% url 'weekly_pm_report_view' %}" class="btn btn-info">
                             <i class="fas fa-chart-bar"></i> View Weekly Report
                         </a>
-                        <a href="{% url 'export_weekly_pm_pdf' %}" class="modern-btn btn-success">
+                        <a href="{% url 'export_weekly_pm_pdf' %}" class="btn btn-success">
                             <i class="fas fa-file-pdf"></i> Export Weekly PDF
                         </a>
                     </div>
@@ -170,11 +164,12 @@
             </div>
 
             <div class="text-center mt-4">
-                <a href="{% url 'pm_main_dashboard' %}" class="modern-btn btn-secondary">
+                <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to PM Dashboard
                 </a>
             </div>
         {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

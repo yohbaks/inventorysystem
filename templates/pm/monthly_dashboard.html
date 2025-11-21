@@ -3,31 +3,28 @@
 
 {% block title %}Annex B - Monthly PM Checklist{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pm-modern.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="modern-container">
-    <div class="container-fluid">
-        <!-- Hero Header -->
-        <div class="premium-page-header theme-pm">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>{{ template.title }}</span>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-calendar-alt"></i> {{ template.title }} - {{ current_month }}
+                    </h3>
                 </div>
-                <h1 class="hero-title">{{ current_month }}</h1>
-                <p style="opacity: 0.95; margin: 0;">{{ template.schedule_note }}</p>
+                <div class="card-body">
+                    <p class="mb-0">{{ template.schedule_note }}</p>
+                </div>
             </div>
-        </div>
 
-        <!-- Current Month Status -->
-        <div class="modern-card">
-            <div class="card-header-modern">
-                <h3 class="card-title-modern">
-                    <i class="fas fa-tasks"></i> Current Month Status
-                </h3>
+            <!-- Current Month Status -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks"></i> Current Month Status
+                    </h5>
                 <div>
                     {% if is_completed %}
                         <span class="badge bg-success rounded-pill">
@@ -44,7 +41,7 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="card-body-modern">
+            <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 mb-3 mb-md-0">
                         <h6 class="text-muted mb-3">Status</h6>
@@ -79,14 +76,14 @@
                         <h6 class="text-muted mb-3">Actions</h6>
                         <div class="d-grid gap-2">
                             {% if is_completed %}
-                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="modern-btn btn-warning">
+                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="btn btn-warning">
                                     <i class="fas fa-edit"></i> Update
                                 </a>
-                                <a href="{% url 'export_monthly_pm_pdf' completion.id %}" class="modern-btn btn-success">
+                                <a href="{% url 'export_monthly_pm_pdf' completion.id %}" class="btn btn-success">
                                     <i class="fas fa-file-pdf"></i> Export PDF
                                 </a>
                             {% else %}
-                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="modern-btn btn-primary">
+                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="btn btn-primary">
                                     <i class="fas fa-clipboard-check"></i> Complete Checklist
                                 </a>
                             {% endif %}
@@ -97,22 +94,23 @@
         </div>
 
         <!-- Description -->
-        <div class="modern-card">
-            <div class="card-header-modern">
-                <h3 class="card-title-modern">
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
                     <i class="fas fa-info-circle"></i> About This Checklist
-                </h3>
+                </h5>
             </div>
-            <div class="card-body-modern">
+            <div class="card-body">
                 <p class="mb-0">{{ template.description }}</p>
             </div>
         </div>
 
         <!-- Back Button -->
         <div class="text-center mt-4">
-            <a href="{% url 'pm_main_dashboard' %}" class="modern-btn btn-secondary">
+            <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to PM Dashboard
             </a>
+        </div>
         </div>
     </div>
 </div>
