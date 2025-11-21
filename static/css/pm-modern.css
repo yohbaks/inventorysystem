@@ -53,8 +53,9 @@
 
 .pm-container {
     background: var(--gray-50);
-    min-height: 100vh;
+    min-height: calc(100vh - 100px);
     padding: 2rem 0;
+    margin-top: 0;
 }
 
 .pm-page-header {
@@ -748,4 +749,68 @@ textarea.pm-form-control {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   Bootstrap Compatibility Fixes
+   =================================== */
+
+.pm-container .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.pm-card-body .form-control {
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+
+.pm-card-body .form-control:focus {
+    border-color: var(--purple-primary);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.pm-card-body textarea.form-control {
+    resize: vertical;
+}
+
+.pm-card-body .custom-control-input:checked ~ .custom-control-label::before {
+    background-color: var(--purple-primary);
+    border-color: var(--purple-primary);
+}
+
+/* Table fixes */
+.pm-card .table {
+    margin-bottom: 0;
+}
+
+.pm-card .table thead {
+    background: var(--purple-gradient);
+    color: white;
+}
+
+.pm-card .table thead th {
+    border: none;
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.pm-card .table td {
+    vertical-align: middle;
+}
+
+/* Button fixes */
+.pm-card .btn:not(.pm-btn) {
+    transition: all var(--transition-base);
+}
+
+.pm-card .btn-primary:not(.pm-btn) {
+    background: var(--purple-gradient);
+    border: none;
+}
+
+.pm-card .btn-primary:not(.pm-btn):hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
