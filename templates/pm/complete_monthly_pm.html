@@ -58,8 +58,20 @@
                                             <div class="collapse mt-2" id="item1Details">
                                                 <div class="card bg-light">
                                                     <div class="card-body">
+                                                        {% if smart_suggestions.item1.wan_issues %}
+                                                        <h6 class="text-danger"><i class="fas fa-globe"></i> WAN Connectivity Issues:</h6>
+                                                        <ul class="list-unstyled">
+                                                            {% for issue in smart_suggestions.item1.wan_issues %}
+                                                            <li class="mb-2">
+                                                                <strong>{{ issue.date }}:</strong> {{ issue.details }}
+                                                                <br><small class="text-muted">Action: {{ issue.action }}</small>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        {% endif %}
+
                                                         {% if smart_suggestions.item1.server_issues %}
-                                                        <h6 class="text-danger"><i class="fas fa-server"></i> Server/Network Issues:</h6>
+                                                        <h6 class="text-danger {% if smart_suggestions.item1.wan_issues %}mt-3{% endif %}"><i class="fas fa-server"></i> Server/Network Issues:</h6>
                                                         <ul class="list-unstyled">
                                                             {% for issue in smart_suggestions.item1.server_issues %}
                                                             <li class="mb-2">
@@ -87,60 +99,6 @@
                                             {% else %}
                                             <p class="text-success"><small><i class="fas fa-check"></i> {{ smart_suggestions.item1.suggested_action }}</small></p>
                                             {% endif %}
-                                        </div>
-
-                                        <hr>
-
-                                        <!-- Item #3: UPS Health -->
-                                        <div class="mb-4">
-                                            <h6 class="text-primary">
-                                                <i class="fas fa-battery-full"></i> Item #3: UPS Health Status
-                                            </h6>
-                                            <p class="mb-2">{{ smart_suggestions.item3.summary }}</p>
-
-                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item3Details">
-                                                <i class="fas fa-chart-line"></i> View UPS Trend
-                                            </button>
-                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="3" data-action="{{ smart_suggestions.item3.suggested_action }}">
-                                                <i class="fas fa-magic"></i> Auto-fill Action
-                                            </button>
-
-                                            <div class="collapse mt-2" id="item3Details">
-                                                <div class="card bg-light">
-                                                    <div class="card-body">
-                                                        <p><strong>Trend:</strong>
-                                                            <span class="badge badge-{% if smart_suggestions.item3.trend == 'improving' %}success{% elif smart_suggestions.item3.trend == 'degrading' %}danger{% else %}info{% endif %}">
-                                                                {{ smart_suggestions.item3.trend|upper }}
-                                                            </span>
-                                                        </p>
-                                                        <p><strong>Average Health:</strong> {{ smart_suggestions.item3.average_health|floatformat:0 }}%</p>
-
-                                                        {% if smart_suggestions.item3.ups_readings %}
-                                                        <h6 class="mt-3">Recent Readings:</h6>
-                                                        <div style="max-height: 200px; overflow-y: auto;">
-                                                            <table class="table table-sm table-striped">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Date</th>
-                                                                        <th>Status</th>
-                                                                        <th>Notes</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {% for reading in smart_suggestions.item3.ups_readings %}
-                                                                    <tr>
-                                                                        <td>{{ reading.date }}</td>
-                                                                        <td><span class="badge badge-{% if reading.status == 'Good' %}success{% else %}warning{% endif %}">{{ reading.status }}</span></td>
-                                                                        <td><small>{{ reading.notes }}</small></td>
-                                                                    </tr>
-                                                                    {% endfor %}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <hr>
@@ -240,7 +198,7 @@
                                             <textarea class="form-control form-control-sm"
                                                       id="problems_{{ item.id }}"
                                                       name="problems_{{ item.id }}"
-                                                      rows="2"
+                                                      rows="4"
                                                       placeholder="Describe any problems...">{{ item.existing_problems }}</textarea>
                                         </div>
                                         <div class="form-group mb-0">
@@ -248,7 +206,7 @@
                                             <textarea class="form-control form-control-sm"
                                                       id="action_{{ item.id }}"
                                                       name="action_{{ item.id }}"
-                                                      rows="2"
+                                                      rows="4"
                                                       placeholder="Describe action taken...">{{ item.existing_action }}</textarea>
                                         </div>
                                     </td>
