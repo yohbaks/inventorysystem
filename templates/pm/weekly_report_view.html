@@ -4,298 +4,546 @@
 {% block title %}Weekly PM Report{% endblock %}
 
 {% block content %}
+<style>
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+</style>
+
 <div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <!-- Header Card -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h2>WEEKLY PM REPORT</h2>
-                    <h4>Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</h4>
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-lg border-0" style="border-radius: 24px; overflow: hidden;">
+        
+        <!-- Gradient Header -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%); padding: 2rem; position: relative; overflow: hidden;">
+          <!-- Animated Background Elements -->
+          <div style="position: absolute; top: -50%; right: -10%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite;"></div>
+          <div style="position: absolute; bottom: -30%; left: -5%; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+          
+          <!-- Header Content -->
+          <div style="position: relative; z-index: 1;">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
+              <div class="d-flex align-items-center">
+                <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                  <i class="fas fa-chart-bar text-white" style="font-size: 24px;"></i>
                 </div>
-                <div class="card-body">
-                    <!-- Week Navigation -->
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="btn-toolbar justify-content-between" role="toolbar">
-                                <!-- Previous/Next Week Navigation -->
-                                <div class="btn-group" role="group">
-                                    <a href="{% url 'weekly_pm_report_view' %}?date={{ prev_week|date:'Y-m-d' }}" class="btn btn-outline-primary">
-                                        <i class="fas fa-chevron-left"></i> Previous Week
-                                    </a>
-                                    <a href="{% url 'weekly_pm_report_view' %}" class="btn btn-primary">
-                                        <i class="fas fa-calendar-day"></i> Current Week
-                                    </a>
-                                    {% if not is_current_week %}
-                                    <a href="{% url 'weekly_pm_report_view' %}?date={{ next_week|date:'Y-m-d' }}" class="btn btn-outline-primary">
-                                        Next Week <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                    {% else %}
-                                    <button class="btn btn-outline-secondary" disabled>
-                                        Next Week <i class="fas fa-chevron-right"></i>
-                                    </button>
-                                    {% endif %}
-                                </div>
+                <div>
+                  <h5 class="text-white fw-bold mb-1" style="font-size: 1.25rem;">Weekly PM Report</h5>
+                  <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</p>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                {% if is_current_week %}
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <i class="fas fa-circle text-success me-1" style="font-size: 8px; animation: pulse 2s ease-in-out infinite;"></i>
+                  Current Week
+                </span>
+                {% else %}
+                <span class="badge bg-white text-secondary px-3 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <i class="fas fa-history me-1"></i>
+                  Historical
+                </span>
+                {% endif %}
+              </div>
+            </div>
 
-                                <!-- Date Picker -->
-                                <div class="input-group" style="width: 300px;">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                    </div>
-                                    <input type="date"
-                                           class="form-control"
-                                           id="weekDatePicker"
-                                           value="{{ reference_date|date:'Y-m-d' }}"
-                                           max="{{ today|date:'Y-m-d' }}">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-info" type="button" onclick="goToWeek()">
-                                            <i class="fas fa-search"></i> Go
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Stats Bar -->
+            <div class="row g-2 mt-3">
+              <div class="col-md-3 col-6">
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Template</div>
+                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ template.annex_code }}</div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6">
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Days</div>
+                  <div class="text-white fw-bold" style="font-size: 1.25rem;">Mon-Fri</div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6">
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Completed</div>
+                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ week_completions|length }}/5</div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6">
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Total Tasks</div>
+                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ aggregated_data|length }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation & Actions Body -->
+        <div style="padding: 1.5rem; background: #fafbfc;">
+          
+          <!-- Navigation Bar -->
+          <div style="background: white; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <!-- Week Navigation -->
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'weekly_pm_report_view' %}?date={{ prev_week|date:'Y-m-d' }}" class="btn btn-sm rounded-pill" style="background: white; border: 2px solid #667eea; color: #667eea; font-weight: 600; padding: 0.5rem 1.25rem; transition: all 0.3s;">
+                  <i class="fas fa-chevron-left me-1"></i> Previous
+                </a>
+                <a href="{% url 'weekly_pm_report_view' %}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; padding: 0.5rem 1.25rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); border: none;">
+                  <i class="fas fa-calendar-day me-1"></i> Current Week
+                </a>
+                {% if not is_current_week %}
+                <a href="{% url 'weekly_pm_report_view' %}?date={{ next_week|date:'Y-m-d' }}" class="btn btn-sm rounded-pill" style="background: white; border: 2px solid #667eea; color: #667eea; font-weight: 600; padding: 0.5rem 1.25rem;">
+                  Next <i class="fas fa-chevron-right ms-1"></i>
+                </a>
+                {% endif %}
+              </div>
+
+              <!-- Date Picker -->
+              <div class="d-flex align-items-stretch" style="background: white; border: 2px solid #e5e7eb; border-radius: 10px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.5rem 0.75rem; display: flex; align-items: center;">
+                  <i class="fas fa-calendar-alt"></i>
+                </div>
+                <input type="date" id="weekDatePicker" value="{{ reference_date|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" style="border: none; padding: 0.5rem 0.75rem; outline: none; font-size: 0.875rem; font-weight: 600;">
+                <button onclick="goToWeek()" type="button" style="background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%); color: white; border: none; padding: 0.5rem 1rem; font-weight: 600; cursor: pointer;">
+                  <i class="fas fa-search me-1"></i> Go
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="background: white; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div style="font-size: 0.875rem; color: #6b7280;">
+                <i class="fas fa-file-alt me-2" style="color: #667eea;"></i>
+                <strong>{{ template.name }}</strong>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'export_weekly_pm_pdf' %}?date={{ reference_date|date:'Y-m-d' }}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); border: none;">
+                  <i class="fas fa-file-pdf me-2"></i>Export PDF
+                </a>
+                <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3); border: none;">
+                  <i class="fas fa-arrow-left me-2"></i>Back
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Week Completion Status -->
+          <div style="background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem; overflow: hidden;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%); padding: 1.25rem 1.5rem;">
+              <h5 class="text-white fw-bold mb-0" style="font-size: 1.1rem;">
+                <i class="fas fa-check-circle me-2"></i>Week Completion Status
+              </h5>
+            </div>
+
+            <!-- Days in One Row -->
+            <div style="padding: 1.5rem; background: #fafbfc;">
+              <div class="row g-3">
+                
+                <!-- Monday -->
+                <div class="col">
+                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 0 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 0 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                      {% if 0 in week_completions %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% else %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% endif %}
                     </div>
+                    
+                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Monday</h6>
+                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M d" }}</div>
+                    
+                    {% if 0 in week_completions %}
+                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                      <i class="fas fa-check"></i> Done
+                    </span>
+                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.0.completed_by.username }}</div>
+                    {% else %}
+                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                      <i class="fas fa-clock"></i> Pending
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
 
-                    <div class="row">
-                        <div class="col-md-8">
-                            <p><strong>Template:</strong> {{ template.name }} ({{ template.annex_code }})</p>
-                            <p><strong>Schedule:</strong> Monday - Friday</p>
-                            {% if is_past_week %}
-                            <div class="alert alert-info mb-0">
-                                <i class="fas fa-history"></i> <strong>Historical Report</strong> - Viewing data from a previous week. Use the navigation above to view other weeks.
+                <!-- Tuesday -->
+                <div class="col">
+                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 1 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 1 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                      {% if 1 in week_completions %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% else %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% endif %}
+                    </div>
+                    
+                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Tuesday</h6>
+                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with tuesday=monday|add:"days:1" %}{{ tuesday|date:" d" }}{% endwith %}</div>
+                    
+                    {% if 1 in week_completions %}
+                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                      <i class="fas fa-check"></i> Done
+                    </span>
+                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.1.completed_by.username }}</div>
+                    {% else %}
+                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                      <i class="fas fa-clock"></i> Pending
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Wednesday -->
+                <div class="col">
+                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 2 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 2 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                      {% if 2 in week_completions %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% else %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% endif %}
+                    </div>
+                    
+                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Wednesday</h6>
+                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with wednesday=monday|add:"days:2" %}{{ wednesday|date:" d" }}{% endwith %}</div>
+                    
+                    {% if 2 in week_completions %}
+                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                      <i class="fas fa-check"></i> Done
+                    </span>
+                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.2.completed_by.username }}</div>
+                    {% else %}
+                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                      <i class="fas fa-clock"></i> Pending
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Thursday -->
+                <div class="col">
+                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 3 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 3 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                      {% if 3 in week_completions %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% else %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% endif %}
+                    </div>
+                    
+                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Thursday</h6>
+                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with thursday=monday|add:"days:3" %}{{ thursday|date:" d" }}{% endwith %}</div>
+                    
+                    {% if 3 in week_completions %}
+                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                      <i class="fas fa-check"></i> Done
+                    </span>
+                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.3.completed_by.username }}</div>
+                    {% else %}
+                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                      <i class="fas fa-clock"></i> Pending
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Friday -->
+                <div class="col">
+                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 4 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 4 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                      {% if 4 in week_completions %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% else %}
+                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                      </div>
+                      {% endif %}
+                    </div>
+                    
+                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Friday</h6>
+                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ friday|date:"M d" }}</div>
+                    
+                    {% if 4 in week_completions %}
+                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                      <i class="fas fa-check"></i> Done
+                    </span>
+                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.4.completed_by.username }}</div>
+                    {% else %}
+                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                      <i class="fas fa-clock"></i> Pending
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Aggregated Checklist Table -->
+          <div style="background: white; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem; overflow: hidden;">
+            
+            <!-- Gradient Header -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%); padding: 2rem; position: relative; overflow: hidden;">
+              <!-- Animated Background Elements -->
+              <div style="position: absolute; top: -50%; right: -10%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite;"></div>
+              <div style="position: absolute; bottom: -30%; left: -5%; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+              
+              <!-- Header Content -->
+              <div style="position: relative; z-index: 1;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                  <div class="d-flex align-items-center">
+                    <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                      <i class="fas fa-clipboard-list text-white" style="font-size: 24px;"></i>
+                    </div>
+                    <div>
+                      <h5 class="text-white fw-bold mb-1" style="font-size: 1.25rem;">Aggregated Checklist</h5>
+                      <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">All 5 Days Summary</p>
+                    </div>
+                  </div>
+                 <div class="d-flex align-items-center gap-2">
+                
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                  <i class="fas fa-circle text-success me-1" style="font-size: 8px; animation: pulse 2s ease-in-out infinite;"></i>
+                  Current Week
+                </span>
+                
+              </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="row g-2 mt-3">
+                  <div class="col-md-3 col-6">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                      <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Total Items</div>
+                      <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ aggregated_data|length }}</div>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                      <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Daily Tasks</div>
+                      <div class="text-white fw-bold" style="font-size: 1.25rem;">
+                        {% for item_data in aggregated_data %}{% if item_data.item.item_number < 7 or item_data.item.item_number == 12 %}1{% endif %}{% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                      <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Tasks</div>
+                      <div class="text-white fw-bold" style="font-size: 1.25rem;">5</div>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                      <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Work Days</div>
+                      <div class="text-white fw-bold" style="font-size: 1.25rem;">M-F</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table Body -->
+            <div style="padding: 1.5rem; background: #fafbfc;">
+              <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table mb-0" style="font-size: 0.9rem;">
+                  <thead style="position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <tr>
+                      <th style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">No.</th>
+                      <th style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">Task Description</th>
+                      <th class="text-center" style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">M</th>
+                      <th class="text-center" style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">T</th>
+                      <th class="text-center" style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">W</th>
+                      <th class="text-center" style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">Th</th>
+                      <th class="text-center" style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">F</th>
+                      <th style="padding: 1rem 0.75rem; border-bottom: 2px solid #e5e7eb; color: #2d3748; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.75rem;">Problems / Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item_data in aggregated_data %}
+                    <tr style="{% if item_data.item.item_number >= 7 and item_data.item.item_number <= 11 %}background: linear-gradient(135deg, rgba(113, 128, 150, 0.05) 0%, rgba(74, 85, 104, 0.05) 100%);{% endif %}">
+                      <td class="text-center" style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                        <div style="font-weight: 800; font-size: 1.2rem; color: #2d3748; margin-bottom: 0.5rem;">{{ item_data.item.item_number }}</div>
+                        {% if item_data.item.item_number >= 7 and item_data.item.item_number <= 11 %}
+                        <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.25rem 0.65rem; border-radius: 12px; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; display: inline-block; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">WEEKLY</span>
+                        {% else %}
+                        <span style="background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%); color: white; padding: 0.25rem 0.65rem; border-radius: 12px; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; display: inline-block; box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);">DAILY</span>
+                        {% endif %}
+                      </td>
+                      <td style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                        <div style="color: #2d3748; font-weight: 600; margin-bottom: 0.35rem; line-height: 1.5;">{{ item_data.item.task_description|truncatewords:15 }}</div>
+                        {% if item_data.item.has_schedule_times %}
+                        <div style="color: #718096; font-size: 0.8rem; font-style: italic;">
+                          <i class="far fa-clock me-1"></i>Times: {{ item_data.item.schedule_times }}
+                        </div>
+                        {% endif %}
+                      </td>
+                      <td class="text-center" style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 700; font-size: 1.2rem; {% if item_data.completions.monday %}background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;{% else %}background: #f7fafc; color: #cbd5e0;{% endif %}">
+                        {% if item_data.completions.monday %}✓{% else %}−{% endif %}
+                      </td>
+                      <td class="text-center" style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 700; font-size: 1.2rem; {% if item_data.completions.tuesday %}background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;{% else %}background: #f7fafc; color: #cbd5e0;{% endif %}">
+                        {% if item_data.completions.tuesday %}✓{% else %}−{% endif %}
+                      </td>
+                      <td class="text-center" style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 700; font-size: 1.2rem; {% if item_data.completions.wednesday %}background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;{% else %}background: #f7fafc; color: #cbd5e0;{% endif %}">
+                        {% if item_data.completions.wednesday %}✓{% else %}−{% endif %}
+                      </td>
+                      <td class="text-center" style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 700; font-size: 1.2rem; {% if item_data.completions.thursday %}background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;{% else %}background: #f7fafc; color: #cbd5e0;{% endif %}">
+                        {% if item_data.completions.thursday %}✓{% else %}−{% endif %}
+                      </td>
+                      <td class="text-center" style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb; font-weight: 700; font-size: 1.2rem; {% if item_data.completions.friday %}background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;{% else %}background: #f7fafc; color: #cbd5e0;{% endif %}">
+                        {% if item_data.completions.friday %}✓{% else %}−{% endif %}
+                      </td>
+                      <td style="padding: 1rem 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                        {% if item_data.problems %}
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                          {% for prob in item_data.problems %}
+                          <div style="background: white; border-radius: 12px; padding: 0.875rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e5e7eb;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                              <span style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); color: white; padding: 0.25rem 0.65rem; border-radius: 12px; font-weight: 700; font-size: 0.7rem; display: inline-block; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);">{{ prob.day }}</span>
+                              <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
                             </div>
-                            {% elif is_current_week %}
-                            <div class="alert alert-success mb-0">
-                                <i class="fas fa-calendar-check"></i> <strong>Current Week</strong> - Use "Previous Week" button or date picker to view historical reports.
+                            {% if prob.problems %}
+                            <div style="color: #2d3748; font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.5rem;">
+                              <strong style="color: #1a202c;">Problem:</strong> {{ prob.problems }}
                             </div>
                             {% endif %}
+                            {% if prob.action %}
+                            <div style="color: #2d3748; font-size: 0.85rem; line-height: 1.5;">
+                              <strong style="color: #1a202c;">Action:</strong> {{ prob.action }}
+                            </div>
+                            {% endif %}
+                          </div>
+                          {% endfor %}
                         </div>
-                        <div class="col-md-4 text-right">
-                            <a href="{% url 'export_weekly_pm_pdf' %}?date={{ reference_date|date:'Y-m-d' }}" class="btn btn-success btn-lg">
-                                <i class="fas fa-file-pdf"></i> Export Weekly PDF
-                            </a>
-                            <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-primary btn-lg">
-                                <i class="fas fa-arrow-left"></i> Back to Dashboard
-                            </a>
+                        {% else %}
+                        <div class="text-center" style="color: #a0aec0; font-style: italic; font-size: 0.85rem; padding: 0.5rem;">
+                          <i class="fas fa-check-circle me-1"></i>No issues
                         </div>
-                    </div>
-                </div>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <!-- Week Completion Status -->
-            <div class="card mb-3">
-                <div class="card-header bg-info text-white">
-                    <h5>Week Completion Status</h5>
+            <!-- Card Footer -->
+            <div style="background: white; border-top: 1px solid #e5e7eb; padding: 1.25rem 1.5rem;">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div style="font-size: 0.875rem; color: #6b7280;">
+                  <i class="fas fa-info-circle me-2"></i>
+                  <span>Complete task breakdown for Monday through Friday</span>
                 </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col">
-                            <div class="day-box {% if 0 in week_completions %}completed{% else %}pending{% endif %}">
-                                <strong>Monday</strong><br>
-                                {{ monday|date:"M d" }}<br>
-                                {% if 0 in week_completions %}
-                                    <span class="badge badge-success">✓ Completed</span>
-                                    <br><small>{{ week_completions.0.completed_by.username }}</small>
-                                {% else %}
-                                    <span class="badge badge-secondary">Pending</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="day-box {% if 1 in week_completions %}completed{% else %}pending{% endif %}">
-                                <strong>Tuesday</strong><br>
-                                {{ monday|date:"M d" }}{% with tuesday=monday|add:"days:1" %}{{ tuesday|date:" d" }}{% endwith %}<br>
-                                {% if 1 in week_completions %}
-                                    <span class="badge badge-success">✓ Completed</span>
-                                    <br><small>{{ week_completions.1.completed_by.username }}</small>
-                                {% else %}
-                                    <span class="badge badge-secondary">Pending</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="day-box {% if 2 in week_completions %}completed{% else %}pending{% endif %}">
-                                <strong>Wednesday</strong><br>
-                                {{ monday|date:"M" }}{% with wednesday=monday|add:"days:2" %}{{ wednesday|date:" d" }}{% endwith %}<br>
-                                {% if 2 in week_completions %}
-                                    <span class="badge badge-success">✓ Completed</span>
-                                    <br><small>{{ week_completions.2.completed_by.username }}</small>
-                                {% else %}
-                                    <span class="badge badge-secondary">Pending</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="day-box {% if 3 in week_completions %}completed{% else %}pending{% endif %}">
-                                <strong>Thursday</strong><br>
-                                {{ monday|date:"M" }}{% with thursday=monday|add:"days:3" %}{{ thursday|date:" d" }}{% endwith %}<br>
-                                {% if 3 in week_completions %}
-                                    <span class="badge badge-success">✓ Completed</span>
-                                    <br><small>{{ week_completions.3.completed_by.username }}</small>
-                                {% else %}
-                                    <span class="badge badge-secondary">Pending</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="day-box {% if 4 in week_completions %}completed{% else %}pending{% endif %}">
-                                <strong>Friday</strong><br>
-                                {{ friday|date:"M d" }}<br>
-                                {% if 4 in week_completions %}
-                                    <span class="badge badge-success">✓ Completed</span>
-                                    <br><small>{{ week_completions.4.completed_by.username }}</small>
-                                {% else %}
-                                    <span class="badge badge-secondary">Pending</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+                <div class="d-flex gap-2">
+                  <span style="background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-weight: 700; font-size: 0.75rem; box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);">DAILY</span>
+                  <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 12px; font-weight: 700; font-size: 0.75rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">WEEKLY</span>
                 </div>
+              </div>
             </div>
+          </div>
 
-            <!-- Aggregated Checklist Items -->
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h4>Aggregated Checklist (All 5 Days)</h4>
+          <!-- Legend -->
+          <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+            <h6 style="color: #2d3748; font-weight: 700; margin-bottom: 1rem;">
+              <i class="fas fa-info-circle me-2" style="color: #667eea;"></i>Legend
+            </h6>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge" style="background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%); color: white; padding: 0.4rem 0.8rem; font-weight: 700;">DAILY</span>
+                  <span style="color: #4a5568; font-size: 0.9rem;">Tasks completed every day (Items 1-6, 12)</span>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover table-sm">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th style="width: 5%">No.</th>
-                                    <th style="width: 30%">Task Description</th>
-                                    <th style="width: 5%" class="text-center">M</th>
-                                    <th style="width: 5%" class="text-center">T</th>
-                                    <th style="width: 5%" class="text-center">W</th>
-                                    <th style="width: 5%" class="text-center">Th</th>
-                                    <th style="width: 5%" class="text-center">F</th>
-                                    <th style="width: 40%">Problems / Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item_data in aggregated_data %}
-                                <tr {% if item_data.item.item_number >= 7 and item_data.item.item_number <= 11 %}class="table-secondary"{% endif %}>
-                                    <td class="text-center">
-                                        <strong>{{ item_data.item.item_number }}</strong>
-                                        {% if item_data.item.item_number >= 7 and item_data.item.item_number <= 11 %}
-                                            <br><small class="badge badge-dark">WEEKLY</small>
-                                        {% else %}
-                                            <br><small class="badge badge-info">DAILY</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <small>{{ item_data.item.task_description|truncatewords:15 }}</small>
-                                        {% if item_data.item.has_schedule_times %}
-                                            <br><small class="text-muted">Times: {{ item_data.item.schedule_times }}</small>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-center {% if item_data.completions.monday %}bg-success text-white{% endif %}">
-                                        {% if item_data.completions.monday %}✓{% else %}-{% endif %}
-                                    </td>
-                                    <td class="text-center {% if item_data.completions.tuesday %}bg-success text-white{% endif %}">
-                                        {% if item_data.completions.tuesday %}✓{% else %}-{% endif %}
-                                    </td>
-                                    <td class="text-center {% if item_data.completions.wednesday %}bg-success text-white{% endif %}">
-                                        {% if item_data.completions.wednesday %}✓{% else %}-{% endif %}
-                                    </td>
-                                    <td class="text-center {% if item_data.completions.thursday %}bg-success text-white{% endif %}">
-                                        {% if item_data.completions.thursday %}✓{% else %}-{% endif %}
-                                    </td>
-                                    <td class="text-center {% if item_data.completions.friday %}bg-success text-white{% endif %}">
-                                        {% if item_data.completions.friday %}✓{% else %}-{% endif %}
-                                    </td>
-                                    <td>
-                                        {% if item_data.problems %}
-                                            <ul class="list-unstyled mb-0">
-                                                {% for prob in item_data.problems %}
-                                                <li class="mb-2">
-                                                    <strong class="badge badge-warning">{{ prob.day }}</strong>
-                                                    {% if prob.problems %}
-                                                        <br><small><strong>Problem:</strong> {{ prob.problems }}</small>
-                                                    {% endif %}
-                                                    {% if prob.action %}
-                                                        <br><small><strong>Action:</strong> {{ prob.action }}</small>
-                                                    {% endif %}
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% else %}
-                                            <small class="text-muted">No issues</small>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge" style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; font-weight: 700;">WEEKLY</span>
+                  <span style="color: #4a5568; font-size: 0.9rem;">Tasks completed once per week (Items 7-11)</span>
                 </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 700; font-size: 1.2rem;">✓</div>
+                  <span style="color: #4a5568; font-size: 0.9rem;">Task completed on that day</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width: 35px; height: 35px; background: #f7fafc; color: #cbd5e0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px solid #e2e8f0; font-weight: 700;">−</div>
+                  <span style="color: #4a5568; font-size: 0.9rem;">Task not completed on that day</span>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <!-- Legend -->
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h5>Legend</h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><span class="badge badge-info">DAILY</span> - Tasks that should be completed every day (Items 1-6, 12)</p>
-                            <p><span class="badge badge-dark">WEEKLY</span> - Tasks completed once per week (Items 7-11, dark gray)</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><span class="bg-success text-white px-2 py-1">✓</span> - Task completed on that day</p>
-                            <p><span class="px-2 py-1 border">-</span> - Task not completed on that day</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
+
+        <!-- Card Footer -->
+        <div style="background: white; border-top: 1px solid #e5e7eb; padding: 1.25rem 1.5rem;">
+          <div class="d-flex align-items-center justify-content-center">
+            <div style="font-size: 0.875rem; color: #6b7280; text-align: center;">
+              <i class="fas fa-info-circle me-2"></i>
+              <span>Weekly PM Report for {{ template.name }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
 function goToWeek() {
     const dateInput = document.getElementById('weekDatePicker');
     const selectedDate = dateInput.value;
-
     if (selectedDate) {
         window.location.href = "{% url 'weekly_pm_report_view' %}?date=" + selectedDate;
     }
 }
 
-// Allow Enter key to submit
 document.getElementById('weekDatePicker').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         goToWeek();
     }
 });
 </script>
-
-<style>
-    .day-box {
-        padding: 15px;
-        margin: 5px;
-        border-radius: 8px;
-        border: 2px solid #dee2e6;
-        transition: all 0.3s;
-    }
-
-    .day-box.completed {
-        background-color: #d4edda;
-        border-color: #28a745;
-    }
-
-    .day-box.pending {
-        background-color: #fff3cd;
-        border-color: #ffc107;
-    }
-
-    .table-secondary {
-        background-color: #d6d6d6 !important;
-    }
-
-    .bg-success {
-        background-color: #28a745 !important;
-    }
-</style>
 {% endblock %}
