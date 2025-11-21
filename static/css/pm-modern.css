@@ -1,169 +1,27 @@
 /* ===================================
-   PM Checklist System - Modern Purple Gradient Theme
+   PM Checklist System Styles
+   Integrates with existing modern-style.css
    =================================== */
 
-:root {
-    /* Purple Gradient Colors */
-    --purple-primary: #7c3aed;
-    --purple-secondary: #a78bfa;
-    --purple-dark: #5b21b6;
-    --purple-light: #c4b5fd;
-    --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --purple-gradient-soft: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
-    --purple-gradient-light: linear-gradient(135deg, #e9d5ff 0%, #c4b5fd 100%);
+/* Use existing CSS variables from modern-style.css */
+/* PM-specific overrides only */
 
-    /* Accent Colors */
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --info-color: #3b82f6;
-
-    /* Neutrals */
-    --white: #ffffff;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-500: #6b7280;
-    --gray-700: #374151;
-    --gray-900: #111827;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --shadow-purple: 0 10px 25px -5px rgba(124, 58, 237, 0.25);
-
-    /* Border Radius */
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-
-    /* Transitions */
-    --transition-fast: 0.15s ease-in-out;
-    --transition-base: 0.3s ease-in-out;
-    --transition-slow: 0.5s ease-in-out;
+.pm-page-content {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
-/* ===================================
-   Global PM Styles
-   =================================== */
-
-.pm-container {
-    background: var(--gray-50);
-    min-height: calc(100vh - 100px);
-    padding: 2rem 0;
-    margin-top: 0;
-}
-
-.pm-page-header {
-    background: var(--purple-gradient);
-    color: var(--white);
-    padding: 2.5rem 0;
+/* Use existing premium-page-header but add PM theme */
+.premium-page-header.theme-pm {
+    background: var(--gradient-primary);
+    border-radius: 1.5rem;
+    padding: 2.5rem 2rem;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
     margin-bottom: 2rem;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-purple);
-    position: relative;
-    overflow: hidden;
 }
 
-.pm-page-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-    opacity: 0.3;
-}
-
-.pm-page-header .pm-header-content {
-    position: relative;
-    z-index: 1;
-}
-
-.pm-page-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.pm-page-subtitle {
-    font-size: 1rem;
-    opacity: 0.95;
-    margin-top: 0.5rem;
-}
-
-/* ===================================
-   Modern Cards
-   =================================== */
-
-.pm-card {
-    background: var(--white);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    transition: all var(--transition-base);
-    border: 1px solid var(--gray-200);
-}
-
-.pm-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
-}
-
-.pm-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid var(--gray-100);
-}
-
-.pm-card-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--gray-900);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 0;
-}
-
-.pm-card-title i {
-    color: var(--purple-primary);
-    font-size: 1.5rem;
-}
-
-.pm-card-body {
-    padding: 0;
-}
-
-/* Gradient Card Variation */
-.pm-card-gradient {
-    background: var(--purple-gradient);
-    color: var(--white);
-    box-shadow: var(--shadow-purple);
-}
-
-.pm-card-gradient .pm-card-title {
-    color: var(--white);
-}
-
-.pm-card-gradient .pm-card-title i {
-    color: var(--white);
-}
-
-/* ===================================
-   Dashboard Grid
-   =================================== */
-
+/* PM Dashboard Grid - use existing grid patterns */
 .pm-dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -171,646 +29,68 @@
     margin-bottom: 2rem;
 }
 
+/* PM Cards - extend modern-card */
 .pm-stat-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
+    background: white;
+    border-radius: 1.5rem;
     padding: 1.5rem;
     box-shadow: var(--shadow-md);
-    transition: all var(--transition-base);
-    border-left: 4px solid var(--purple-primary);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--page-theme-color);
 }
 
 .pm-stat-card:hover {
-    box-shadow: var(--shadow-xl);
     transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
 }
 
-.pm-stat-icon {
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: var(--radius-lg);
-    background: var(--purple-gradient-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.pm-stat-icon i {
-    font-size: 1.75rem;
-    color: var(--purple-dark);
-}
-
-.pm-stat-label {
-    font-size: 0.875rem;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.pm-stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 0.25rem;
-}
-
-.pm-stat-description {
-    font-size: 0.875rem;
-    color: var(--gray-500);
-}
-
-/* ===================================
-   Buttons
-   =================================== */
-
-.pm-btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    text-decoration: none;
-    transition: all var(--transition-base);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.pm-btn-primary {
-    background: var(--purple-gradient);
-    color: var(--white);
-    box-shadow: var(--shadow-md);
-}
-
-.pm-btn-primary:hover {
-    box-shadow: var(--shadow-purple);
-    transform: translateY(-2px);
-    color: var(--white);
-}
-
-.pm-btn-secondary {
-    background: var(--white);
-    color: var(--purple-primary);
-    border: 2px solid var(--purple-primary);
-}
-
-.pm-btn-secondary:hover {
-    background: var(--purple-primary);
-    color: var(--white);
-}
-
-.pm-btn-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: var(--white);
-    box-shadow: var(--shadow-md);
-}
-
-.pm-btn-success:hover {
-    box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.25);
-    transform: translateY(-2px);
-    color: var(--white);
-}
-
-.pm-btn-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: var(--white);
-    box-shadow: var(--shadow-md);
-}
-
-.pm-btn-warning:hover {
-    box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.25);
-    transform: translateY(-2px);
-    color: var(--white);
-}
-
-.pm-btn-lg {
-    padding: 1rem 2rem;
-    font-size: 1.125rem;
-}
-
-.pm-btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-}
-
-/* ===================================
-   Status Badges
-   =================================== */
-
-.pm-badge {
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.pm-badge-success {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.pm-badge-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.pm-badge-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.pm-badge-info {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.pm-badge-purple {
-    background: var(--purple-gradient-light);
-    color: var(--purple-dark);
-}
-
-/* ===================================
-   Alerts / Notifications
-   =================================== */
-
-.pm-alert {
-    padding: 1.25rem;
-    border-radius: var(--radius-lg);
-    margin-bottom: 1.5rem;
-    border-left: 4px solid;
-    box-shadow: var(--shadow-sm);
-}
-
-.pm-alert-success {
-    background: #d1fae5;
-    border-color: var(--success-color);
-    color: #065f46;
-}
-
-.pm-alert-warning {
-    background: #fef3c7;
-    border-color: var(--warning-color);
-    color: #92400e;
-}
-
-.pm-alert-danger {
-    background: #fee2e2;
-    border-color: var(--danger-color);
-    color: #991b1b;
-}
-
-.pm-alert-info {
-    background: #dbeafe;
-    border-color: var(--info-color);
-    color: #1e40af;
-}
-
-.pm-alert-heading {
-    font-weight: 700;
-    font-size: 1.125rem;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* ===================================
-   Smart Suggestions Box
-   =================================== */
-
+/* Smart Suggestions - use existing card style */
 .pm-smart-suggestions {
     background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
-    border-radius: var(--radius-xl);
+    border-radius: 1.5rem;
     padding: 1.5rem;
     margin-bottom: 2rem;
-    border: 2px solid var(--purple-light);
+    border: 2px solid #c4b5fd;
     box-shadow: var(--shadow-md);
 }
 
-.pm-smart-suggestions-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.pm-smart-suggestions-icon {
-    width: 3rem;
-    height: 3rem;
-    border-radius: var(--radius-md);
-    background: var(--purple-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-purple);
-}
-
-.pm-smart-suggestions-icon i {
-    color: var(--white);
-    font-size: 1.5rem;
-}
-
-.pm-smart-suggestions-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--purple-dark);
-    margin: 0;
-}
-
-.pm-suggestion-item {
-    background: var(--white);
-    border-radius: var(--radius-lg);
+/* PM Alerts - use Bootstrap but enhance */
+.pm-alert {
+    border-radius: 1rem;
     padding: 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--gray-200);
-    transition: all var(--transition-base);
-}
-
-.pm-suggestion-item:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--purple-light);
-}
-
-.pm-suggestion-item:last-child {
-    margin-bottom: 0;
-}
-
-/* ===================================
-   Forms
-   =================================== */
-
-.pm-form-group {
     margin-bottom: 1.5rem;
+    border-left: 4px solid;
 }
 
-.pm-form-label {
-    display: block;
-    font-weight: 600;
-    color: var(--gray-700);
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
+/* Forms - minimal tweaks to Bootstrap forms */
 .pm-form-control {
-    width: 100%;
+    border-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
     padding: 0.75rem 1rem;
-    border: 2px solid var(--gray-300);
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    transition: all var(--transition-base);
-    background: var(--white);
+    transition: all 0.3s ease;
 }
 
 .pm-form-control:focus {
-    outline: none;
-    border-color: var(--purple-primary);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    border-color: var(--page-theme-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.pm-form-control::placeholder {
-    color: var(--gray-400);
-}
-
-textarea.pm-form-control {
-    resize: vertical;
-    min-height: 120px;
-}
-
-/* Checkbox Styling */
-.pm-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-}
-
-.pm-checkbox input[type="checkbox"] {
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 2px solid var(--gray-300);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-}
-
-.pm-checkbox input[type="checkbox"]:checked {
-    background: var(--purple-primary);
-    border-color: var(--purple-primary);
-}
-
-/* ===================================
-   Tables
-   =================================== */
-
-.pm-table-container {
-    background: var(--white);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    margin-bottom: 2rem;
-}
-
-.pm-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.pm-table thead {
-    background: var(--purple-gradient);
-    color: var(--white);
-}
-
-.pm-table thead th {
-    padding: 1rem;
-    text-align: left;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.875rem;
-    letter-spacing: 0.05em;
-}
-
-.pm-table tbody tr {
-    border-bottom: 1px solid var(--gray-200);
-    transition: all var(--transition-fast);
-}
-
-.pm-table tbody tr:hover {
-    background: var(--gray-50);
-}
-
-.pm-table tbody td {
-    padding: 1rem;
-    vertical-align: top;
-}
-
-.pm-table-bordered {
-    border: 1px solid var(--gray-200);
-}
-
-.pm-table-bordered td,
-.pm-table-bordered th {
-    border: 1px solid var(--gray-200);
-}
-
-/* ===================================
-   Collapse / Accordion
-   =================================== */
-
-.pm-collapse-trigger {
-    cursor: pointer;
-    user-select: none;
-    transition: all var(--transition-base);
-}
-
-.pm-collapse-trigger:hover {
-    opacity: 0.8;
-}
-
-.pm-collapse-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height var(--transition-base);
-}
-
-.pm-collapse-content.show {
-    max-height: 5000px;
-}
-
-/* ===================================
-   Progress Indicators
-   =================================== */
-
-.pm-progress {
-    height: 0.75rem;
-    background: var(--gray-200);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: 1rem;
-}
-
-.pm-progress-bar {
-    height: 100%;
-    background: var(--purple-gradient);
-    transition: width var(--transition-slow);
-    border-radius: var(--radius-md);
-}
-
-/* ===================================
-   Signature Section
-   =================================== */
-
+/* Signature Section */
 .pm-signature-section {
-    background: var(--gray-50);
-    border-radius: var(--radius-lg);
+    background: #f9fafb;
+    border-radius: 1rem;
     padding: 2rem;
     margin-top: 2rem;
-    border: 2px dashed var(--gray-300);
+    border: 2px dashed #d1d5db;
 }
 
-.pm-signature-section h6 {
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: 1.5rem;
-}
-
-/* ===================================
-   Responsive Design
-   =================================== */
-
+/* Responsive */
 @media (max-width: 768px) {
-    .pm-page-title {
-        font-size: 1.5rem;
-    }
-
     .pm-dashboard-grid {
         grid-template-columns: 1fr;
     }
 
-    .pm-btn-lg {
-        width: 100%;
-        justify-content: center;
+    .premium-page-header.theme-pm {
+        padding: 1.5rem 1rem;
     }
-
-    .pm-card {
-        padding: 1rem;
-    }
-
-    .pm-stat-value {
-        font-size: 1.5rem;
-    }
-}
-
-/* ===================================
-   Utility Classes
-   =================================== */
-
-.pm-text-center {
-    text-align: center;
-}
-
-.pm-text-purple {
-    color: var(--purple-primary);
-}
-
-.pm-bg-gradient {
-    background: var(--purple-gradient);
-}
-
-.pm-mt-1 { margin-top: 0.5rem; }
-.pm-mt-2 { margin-top: 1rem; }
-.pm-mt-3 { margin-top: 1.5rem; }
-.pm-mt-4 { margin-top: 2rem; }
-
-.pm-mb-1 { margin-bottom: 0.5rem; }
-.pm-mb-2 { margin-bottom: 1rem; }
-.pm-mb-3 { margin-bottom: 1.5rem; }
-.pm-mb-4 { margin-bottom: 2rem; }
-
-.pm-p-0 { padding: 0; }
-.pm-p-1 { padding: 0.5rem; }
-.pm-p-2 { padding: 1rem; }
-.pm-p-3 { padding: 1.5rem; }
-
-.pm-flex {
-    display: flex;
-}
-
-.pm-flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.pm-flex-between {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.pm-gap-1 { gap: 0.5rem; }
-.pm-gap-2 { gap: 1rem; }
-.pm-gap-3 { gap: 1.5rem; }
-
-/* ===================================
-   Animations
-   =================================== */
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.pm-fade-in {
-    animation: fadeIn var(--transition-base) ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.pm-slide-in {
-    animation: slideIn var(--transition-base) ease-out;
-}
-
-/* ===================================
-   Loading States
-   =================================== */
-
-.pm-loading {
-    display: inline-block;
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid var(--gray-200);
-    border-top-color: var(--purple-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ===================================
-   Bootstrap Compatibility Fixes
-   =================================== */
-
-.pm-container .container-fluid {
-    padding-left: 15px;
-    padding-right: 15px;
-}
-
-.pm-card-body .form-control {
-    border: 2px solid var(--gray-300);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-base);
-}
-
-.pm-card-body .form-control:focus {
-    border-color: var(--purple-primary);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-}
-
-.pm-card-body textarea.form-control {
-    resize: vertical;
-}
-
-.pm-card-body .custom-control-input:checked ~ .custom-control-label::before {
-    background-color: var(--purple-primary);
-    border-color: var(--purple-primary);
-}
-
-/* Table fixes */
-.pm-card .table {
-    margin-bottom: 0;
-}
-
-.pm-card .table thead {
-    background: var(--purple-gradient);
-    color: white;
-}
-
-.pm-card .table thead th {
-    border: none;
-    font-weight: 600;
-    padding: 1rem;
-}
-
-.pm-card .table td {
-    vertical-align: middle;
-}
-
-/* Button fixes */
-.pm-card .btn:not(.pm-btn) {
-    transition: all var(--transition-base);
-}
-
-.pm-card .btn-primary:not(.pm-btn) {
-    background: var(--purple-gradient);
-    border: none;
-}
-
-.pm-card .btn-primary:not(.pm-btn):hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
 }
