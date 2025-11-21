@@ -14,6 +14,22 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+/* Day card hover effects */
+.day-card {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.day-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.day-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
 </style>
 
 <div class="container-fluid mt-4">
@@ -75,167 +91,177 @@
                 
                 <!-- Monday -->
                 <div class="col">
-                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 0 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 0 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
-                    
-                    <div style="margin-bottom: 1rem;">
+                  <a href="{% if week_days_info.0.is_completed %}{% url 'view_daily_pm_completion' week_days_info.0.completion_id %}{% else %}{% url 'complete_daily_pm' week_days_info.0.schedule_id %}{% endif %}" style="text-decoration: none; display: block;">
+                    <div class="day-card" style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 0 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease; cursor: pointer;">
+                      <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 0 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+
+                      <div style="margin-bottom: 1rem;">
+                        {% if 0 in week_completions %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                          <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                          <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Monday</h6>
+                      <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M d" }}</div>
+
                       {% if 0 in week_completions %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
-                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check"></i> Done
+                      </span>
+                      <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.0.completed_by.username }}</div>
                       {% else %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
-                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                        <i class="fas fa-clock"></i> Pending
+                      </span>
                       {% endif %}
                     </div>
-                    
-                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Monday</h6>
-                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M d" }}</div>
-                    
-                    {% if 0 in week_completions %}
-                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                      <i class="fas fa-check"></i> Done
-                    </span>
-                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.0.completed_by.username }}</div>
-                    {% else %}
-                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
-                      <i class="fas fa-clock"></i> Pending
-                    </span>
-                    {% endif %}
-                  </div>
+                  </a>
                 </div>
 
                 <!-- Tuesday -->
                 <div class="col">
-                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 1 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 1 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
-                    
-                    <div style="margin-bottom: 1rem;">
+                  <a href="{% if week_days_info.1.is_completed %}{% url 'view_daily_pm_completion' week_days_info.1.completion_id %}{% else %}{% url 'complete_daily_pm' week_days_info.1.schedule_id %}{% endif %}" style="text-decoration: none; display: block;">
+                    <div class="day-card" style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 1 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease; cursor: pointer;">
+                      <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 1 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+
+                      <div style="margin-bottom: 1rem;">
+                        {% if 1 in week_completions %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                          <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                          <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Tuesday</h6>
+                      <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with tuesday=monday|add:"days:1" %}{{ tuesday|date:" d" }}{% endwith %}</div>
+
                       {% if 1 in week_completions %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
-                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check"></i> Done
+                      </span>
+                      <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.1.completed_by.username }}</div>
                       {% else %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
-                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                        <i class="fas fa-clock"></i> Pending
+                      </span>
                       {% endif %}
                     </div>
-                    
-                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Tuesday</h6>
-                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with tuesday=monday|add:"days:1" %}{{ tuesday|date:" d" }}{% endwith %}</div>
-                    
-                    {% if 1 in week_completions %}
-                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                      <i class="fas fa-check"></i> Done
-                    </span>
-                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.1.completed_by.username }}</div>
-                    {% else %}
-                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
-                      <i class="fas fa-clock"></i> Pending
-                    </span>
-                    {% endif %}
-                  </div>
+                  </a>
                 </div>
 
                 <!-- Wednesday -->
                 <div class="col">
-                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 2 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 2 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
-                    
-                    <div style="margin-bottom: 1rem;">
+                  <a href="{% if week_days_info.2.is_completed %}{% url 'view_daily_pm_completion' week_days_info.2.completion_id %}{% else %}{% url 'complete_daily_pm' week_days_info.2.schedule_id %}{% endif %}" style="text-decoration: none; display: block;">
+                    <div class="day-card" style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 2 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease; cursor: pointer;">
+                      <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 2 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+
+                      <div style="margin-bottom: 1rem;">
+                        {% if 2 in week_completions %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                          <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                          <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Wednesday</h6>
+                      <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with wednesday=monday|add:"days:2" %}{{ wednesday|date:" d" }}{% endwith %}</div>
+
                       {% if 2 in week_completions %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
-                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check"></i> Done
+                      </span>
+                      <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.2.completed_by.username }}</div>
                       {% else %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
-                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                        <i class="fas fa-clock"></i> Pending
+                      </span>
                       {% endif %}
                     </div>
-                    
-                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Wednesday</h6>
-                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with wednesday=monday|add:"days:2" %}{{ wednesday|date:" d" }}{% endwith %}</div>
-                    
-                    {% if 2 in week_completions %}
-                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                      <i class="fas fa-check"></i> Done
-                    </span>
-                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.2.completed_by.username }}</div>
-                    {% else %}
-                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
-                      <i class="fas fa-clock"></i> Pending
-                    </span>
-                    {% endif %}
-                  </div>
+                  </a>
                 </div>
 
                 <!-- Thursday -->
                 <div class="col">
-                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 3 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 3 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
-                    
-                    <div style="margin-bottom: 1rem;">
+                  <a href="{% if week_days_info.3.is_completed %}{% url 'view_daily_pm_completion' week_days_info.3.completion_id %}{% else %}{% url 'complete_daily_pm' week_days_info.3.schedule_id %}{% endif %}" style="text-decoration: none; display: block;">
+                    <div class="day-card" style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 3 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease; cursor: pointer;">
+                      <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 3 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+
+                      <div style="margin-bottom: 1rem;">
+                        {% if 3 in week_completions %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                          <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                          <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Thursday</h6>
+                      <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with thursday=monday|add:"days:3" %}{{ thursday|date:" d" }}{% endwith %}</div>
+
                       {% if 3 in week_completions %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
-                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check"></i> Done
+                      </span>
+                      <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.3.completed_by.username }}</div>
                       {% else %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
-                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                        <i class="fas fa-clock"></i> Pending
+                      </span>
                       {% endif %}
                     </div>
-                    
-                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Thursday</h6>
-                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ monday|date:"M" }}{% with thursday=monday|add:"days:3" %}{{ thursday|date:" d" }}{% endwith %}</div>
-                    
-                    {% if 3 in week_completions %}
-                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                      <i class="fas fa-check"></i> Done
-                    </span>
-                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.3.completed_by.username }}</div>
-                    {% else %}
-                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
-                      <i class="fas fa-clock"></i> Pending
-                    </span>
-                    {% endif %}
-                  </div>
+                  </a>
                 </div>
 
                 <!-- Friday -->
                 <div class="col">
-                  <div style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 4 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 4 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
-                    
-                    <div style="margin-bottom: 1rem;">
+                  <a href="{% if week_days_info.4.is_completed %}{% url 'view_daily_pm_completion' week_days_info.4.completion_id %}{% else %}{% url 'complete_daily_pm' week_days_info.4.schedule_id %}{% endif %}" style="text-decoration: none; display: block;">
+                    <div class="day-card" style="background: white; border-radius: 14px; padding: 1.25rem 1rem; text-align: center; border: 2px solid {% if 4 in week_completions %}#10b981{% else %}#f59e0b{% endif %}; position: relative; overflow: hidden; transition: all 0.3s ease; cursor: pointer;">
+                      <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: {% if 4 in week_completions %}linear-gradient(90deg, #10b981 0%, #059669 100%){% else %}linear-gradient(90deg, #f59e0b 0%, #ea580c 100%){% endif %};"></div>
+
+                      <div style="margin-bottom: 1rem;">
+                        {% if 4 in week_completions %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
+                          <i class="fas fa-check text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
+                          <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
+                        </div>
+                        {% endif %}
+                      </div>
+
+                      <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Friday</h6>
+                      <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ friday|date:"M d" }}</div>
+
                       {% if 4 in week_completions %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); margin: 0 auto;">
-                        <i class="fas fa-check text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check"></i> Done
+                      </span>
+                      <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.4.completed_by.username }}</div>
                       {% else %}
-                      <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4); margin: 0 auto;">
-                        <i class="fas fa-clock text-white" style="font-size: 20px;"></i>
-                      </div>
+                      <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
+                        <i class="fas fa-clock"></i> Pending
+                      </span>
                       {% endif %}
                     </div>
-                    
-                    <h6 style="font-size: 0.95rem; font-weight: 800; color: #2d3748; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">Friday</h6>
-                    <div style="color: #718096; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.75rem;">{{ friday|date:"M d" }}</div>
-                    
-                    {% if 4 in week_completions %}
-                    <span style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                      <i class="fas fa-check"></i> Done
-                    </span>
-                    <div style="color: #4a5568; font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem;">{{ week_completions.4.completed_by.username }}</div>
-                    {% else %}
-                    <span style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; padding: 0.4rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.3rem; box-shadow: 0 2px 8px rgba(113, 128, 150, 0.3);">
-                      <i class="fas fa-clock"></i> Pending
-                    </span>
-                    {% endif %}
-                  </div>
+                  </a>
                 </div>
 
               </div>

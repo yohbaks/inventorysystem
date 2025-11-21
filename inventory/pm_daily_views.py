@@ -475,11 +475,45 @@ def weekly_pm_report_view(request):
     is_current_week = (monday == current_monday)
     is_past_week = (monday < current_monday)
 
+    # Get schedule information for each day
+    week_days_info = {}
+    day_names = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+    for weekday in range(5):
+        day_date = monday + timedelta(days=weekday)
+        day_info = {
+            'date': day_date,
+            'day_name': day_names[weekday],
+            'is_completed': weekday in week_completions,
+        }
+
+        if weekday in week_completions:
+            # Day is completed - get completion info
+            completion = week_completions[weekday]
+            day_info['completion_id'] = completion.id
+            day_info['schedule_id'] = completion.schedule.id
+            day_info['completed_by'] = completion.completed_by
+        else:
+            # Day is pending - get or create schedule
+            schedule, created = PMChecklistSchedule.objects.get_or_create(
+                template=template,
+                scheduled_date=day_date,
+                defaults={
+                    'due_date': day_date,
+                    'status': 'PENDING'
+                }
+            )
+            day_info['schedule_id'] = schedule.id
+            day_info['completion_id'] = None
+            day_info['completed_by'] = None
+
+        week_days_info[weekday] = day_info
+
     context = {
         'template': template,
         'monday': monday,
         'friday': friday,
         'week_completions': week_completions,
+        'week_days_info': week_days_info,
         'aggregated_data': aggregated_data,
         'reference_date': reference_date,
         'prev_week': prev_week,
