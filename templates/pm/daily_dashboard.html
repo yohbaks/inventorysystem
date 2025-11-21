@@ -4,172 +4,655 @@
 {% block title %}Daily PM Checklist{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            {% if is_weekend %}
-                <!-- Weekend Message -->
-                <div class="card text-center">
-                    <div class="card-body py-5">
-                        <div class="mb-3">
-                            <i class="fas fa-calendar-times" style="font-size: 3rem; color: #6c757d;"></i>
-                        </div>
-                        <h2>Weekend - No PM Checklist</h2>
-                        <p class="text-muted">{{ today|date:"l, F d, Y" }}</p>
-                        <p>The PM checklist system operates Monday through Friday only.</p>
-                        <p class="h4 mt-4"><i class="fas fa-umbrella-beach"></i> Enjoy your weekend!</p>
-                        <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary mt-3">
-                            <i class="fas fa-arrow-left"></i> Back to PM Dashboard
-                        </a>
-                    </div>
-                </div>
-            {% else %}
-                <!-- Header -->
-                <div class="card mb-4">
-                    <div class="card-header bg-dark text-white">
-                        <h3 class="mb-0">
-                            <i class="fas fa-calendar-day"></i> Daily PM Checklist - {{ today_name }}, {{ today|date:"F d, Y" }}
-                        </h3>
-                    </div>
-                </div>
+<style>
+/* Force override all existing styles */
+#daily-pm-unique * {
+  box-sizing: border-box;
+}
 
-                <!-- Week Overview -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-calendar-week"></i> Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> You can complete any day from this week, including missed days.
-                    </div>
+#daily-pm-unique {
+  padding-top: 2rem !important;
+}
 
-                    <div class="alert alert-warning">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <div>
-                                <h6 class="mb-1"><i class="fas fa-exclamation-triangle"></i> Need to fill out a past date?</h6>
-                                <small>For exceptional cases only (system downtime, emergency absences, etc.)</small>
-                            </div>
-                            <a href="{% url 'backfill_pm_checklist' %}" class="btn btn-warning">
-                                <i class="fas fa-calendar-minus"></i> Backfill Past Date
-                            </a>
-                        </div>
-                    </div>
+#daily-pm-unique .daily-header-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 20px !important;
+  padding: 2rem 1.75rem !important;
+  margin-bottom: 2.5rem !important;
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.25) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border: none !important;
+}
 
-                    {% for day in week_days %}
-                    <div class="card mb-3" style="{% if day.is_today %}border-left: 4px solid #0d6efd;{% endif %}">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-3 mb-3 mb-md-0">
-                                    <h5 class="mb-1">{{ day.day_name }}</h5>
-                                    <small class="text-muted">{{ day.date|date:"F d, Y" }}</small>
-                                    <div class="mt-2">
-                                        {% if day.is_today %}
-                                            <span class="badge bg-primary rounded-pill">
-                                                <i class="fas fa-star"></i> Today
-                                            </span>
-                                        {% elif day.is_past %}
-                                            <span class="badge bg-secondary rounded-pill">
-                                                <i class="fas fa-history"></i> Past
-                                            </span>
-                                        {% elif day.is_future %}
-                                            <span class="badge bg-light text-dark rounded-pill">
-                                                <i class="fas fa-clock"></i> Future
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
+#daily-pm-unique .daily-header-gradient::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -50% !important;
+  right: -10% !important;
+  width: 250px !important;
+  height: 250px !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 50% !important;
+  animation: dailyFloat 8s ease-in-out infinite !important;
+}
 
-                                <div class="col-md-4 mb-3 mb-md-0">
-                                    {% if day.is_completed %}
-                                        {% if day.is_late_submission %}
-                                            <div class="alert alert-warning mb-0">
-                                                <strong><i class="fas fa-exclamation-triangle"></i> Completed (Late)</strong><br>
-                                                <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
-                                                <small>at {{ day.completion.created_at|date:"h:i A, M d" }}</small><br>
-                                                <span class="badge bg-warning mt-1">{{ day.days_late }} day{{ day.days_late|pluralize }} late</span>
-                                            </div>
-                                        {% else %}
-                                            <div class="alert alert-success mb-0">
-                                                <strong><i class="fas fa-check-circle"></i> Completed</strong><br>
-                                                <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
-                                                <small>at {{ day.completion.created_at|date:"h:i A" }}</small>
-                                            </div>
-                                        {% endif %}
-                                    {% else %}
-                                        {% if day.is_past %}
-                                            <div class="alert alert-danger mb-0">
-                                                <strong><i class="fas fa-times-circle"></i> Missing</strong><br>
-                                                <small>Not completed on schedule</small>
-                                            </div>
-                                        {% else %}
-                                            <div class="alert alert-warning mb-0">
-                                                <strong><i class="fas fa-clock"></i> Pending</strong><br>
-                                                <small>Not yet completed</small>
-                                            </div>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
+#daily-pm-unique .daily-header-gradient::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -30% !important;
+  left: -5% !important;
+  width: 180px !important;
+  height: 180px !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 50% !important;
+  animation: dailyFloat 6s ease-in-out infinite !important;
+}
 
-                                <div class="col-md-5 text-md-end">
-                                    {% if day.is_completed %}
-                                        <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i> Update
-                                        </a>
-                                        <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="btn btn-info btn-sm">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                        <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="btn btn-success btn-sm">
-                                            <i class="fas fa-file-pdf"></i> PDF
-                                        </a>
-                                    {% else %}
-                                        {% if day.schedule %}
-                                            <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn btn-primary">
-                                                <i class="fas fa-clipboard-check"></i> Complete Checklist
-                                            </a>
-                                        {% else %}
-                                            <span class="text-muted">No schedule</span>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+@keyframes dailyFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
 
-                </div>
-            </div>
+#daily-pm-unique .daily-title-text {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  color: white !important;
+  margin-bottom: 0.35rem !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
 
-            <!-- Weekly Report -->
-            <div class="card mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-bar"></i> Weekly Report
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">View or export the aggregated weekly PM report (Monday - Friday).</p>
-                    <div class="d-flex gap-2 flex-wrap mt-3">
-                        <a href="{% url 'weekly_pm_report_view' %}" class="btn btn-info">
-                            <i class="fas fa-chart-bar"></i> View Weekly Report
-                        </a>
-                        <a href="{% url 'export_weekly_pm_pdf' %}" class="btn btn-success">
-                            <i class="fas fa-file-pdf"></i> Export Weekly PDF
-                        </a>
-                    </div>
-                </div>
-            </div>
+#daily-pm-unique .daily-subtitle-text {
+  font-size: 1rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  position: relative !important;
+  z-index: 1 !important;
+  margin: 0 !important;
+}
 
-            <div class="text-center mt-4">
-                <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to PM Dashboard
-                </a>
-            </div>
-        {% endif %}
+#daily-pm-unique .daily-action-btn {
+  background: rgba(255,255,255,0.25) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255,255,255,0.3) !important;
+  color: white !important;
+  padding: 0.7rem 1.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#daily-pm-unique .daily-action-btn:hover {
+  background: white !important;
+  color: #667eea !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+  text-decoration: none !important;
+}
+
+#daily-pm-unique .weekend-card {
+  background: white !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1) !important;
+  padding: 3rem 2rem !important;
+  text-align: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+#daily-pm-unique .weekend-card::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+#daily-pm-unique .section-card {
+  background: white !important;
+  border-radius: 18px !important;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08) !important;
+  margin-bottom: 1.5rem !important;
+  overflow: hidden !important;
+  border: none !important;
+  transition: all 0.4s ease !important;
+}
+
+#daily-pm-unique .section-card:hover {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+  transform: translateY(-2px) !important;
+}
+
+#daily-pm-unique .section-card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 1.25rem 1.5rem !important;
+  border: none !important;
+}
+
+#daily-pm-unique .section-card-header.header-info {
+  background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%) !important;
+}
+
+#daily-pm-unique .section-card-header.header-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+#daily-pm-unique .section-card-header h5 {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 1.15rem !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+#daily-pm-unique .section-card-body {
+  padding: 1.5rem !important;
+}
+
+#daily-pm-unique .alert-custom {
+  border-radius: 12px !important;
+  border: none !important;
+  padding: 1rem 1.25rem !important;
+  margin-bottom: 1.25rem !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+#daily-pm-unique .alert-custom.alert-info-custom {
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
+  border-left: 4px solid #4299e1 !important;
+  color: #2563eb !important;
+}
+
+#daily-pm-unique .alert-custom.alert-warning-custom {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(234, 88, 12, 0.1) 100%) !important;
+  border-left: 4px solid #f59e0b !important;
+  color: #ea580c !important;
+}
+
+#daily-pm-unique .day-card {
+  background: white !important;
+  border-radius: 14px !important;
+  padding: 1.25rem !important;
+  margin-bottom: 1rem !important;
+  border: 2px solid #e2e8f0 !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+}
+
+#daily-pm-unique .day-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
+  transform: translateX(4px) !important;
+}
+
+#daily-pm-unique .day-card.today-card {
+  border-left: 5px solid #667eea !important;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%) !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15) !important;
+}
+
+#daily-pm-unique .day-info h5 {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #2d3748 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+#daily-pm-unique .day-info small {
+  color: #718096 !important;
+  font-size: 0.875rem !important;
+}
+
+#daily-pm-unique .status-badge {
+  padding: 0.5rem 1rem !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+#daily-pm-unique .badge-today {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+}
+
+#daily-pm-unique .badge-past {
+  background: linear-gradient(135deg, #718096 0%, #4a5568 100%) !important;
+  color: white !important;
+}
+
+#daily-pm-unique .badge-future {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%) !important;
+  color: #4a5568 !important;
+}
+
+#daily-pm-unique .status-alert {
+  border-radius: 10px !important;
+  padding: 0.875rem 1rem !important;
+  border: none !important;
+  font-size: 0.9rem !important;
+  margin: 0 !important;
+}
+
+#daily-pm-unique .status-alert.alert-success-custom {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.12) 100%) !important;
+  border-left: 3px solid #10b981 !important;
+  color: #059669 !important;
+}
+
+#daily-pm-unique .status-alert.alert-warning-status {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(234, 88, 12, 0.12) 100%) !important;
+  border-left: 3px solid #f59e0b !important;
+  color: #ea580c !important;
+}
+
+#daily-pm-unique .status-alert.alert-danger-custom {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.12) 100%) !important;
+  border-left: 3px solid #ef4444 !important;
+  color: #dc2626 !important;
+}
+
+#daily-pm-unique .status-alert.alert-pending {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(234, 88, 12, 0.12) 100%) !important;
+  border-left: 3px solid #f59e0b !important;
+  color: #ea580c !important;
+}
+
+#daily-pm-unique .action-btn-group {
+  display: flex !important;
+  gap: 0.5rem !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+}
+
+#daily-pm-unique .btn-action {
+  padding: 0.6rem 1.25rem !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  text-decoration: none !important;
+}
+
+#daily-pm-unique .btn-action.btn-primary-custom {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+#daily-pm-unique .btn-action.btn-primary-custom:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4) !important;
+}
+
+#daily-pm-unique .btn-action.btn-warning-custom {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+#daily-pm-unique .btn-action.btn-warning-custom:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.4) !important;
+}
+
+#daily-pm-unique .btn-action.btn-info-custom {
+  background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3) !important;
+}
+
+#daily-pm-unique .btn-action.btn-info-custom:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(66, 153, 225, 0.4) !important;
+}
+
+#daily-pm-unique .btn-action.btn-success-custom {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+#daily-pm-unique .btn-action.btn-success-custom:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4) !important;
+}
+
+#daily-pm-unique .weekly-report-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%) !important;
+  border-radius: 16px !important;
+  padding: 1.75rem !important;
+  border: 2px solid rgba(16, 185, 129, 0.2) !important;
+  margin-bottom: 1.5rem !important;
+}
+
+#daily-pm-unique .weekly-report-card h6 {
+  color: #059669 !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+#daily-pm-unique .weekly-report-card p {
+  color: #718096 !important;
+  margin-bottom: 1rem !important;
+}
+
+#daily-pm-unique .btn-secondary-custom {
+  background: linear-gradient(135deg, #718096 0%, #4a5568 100%) !important;
+  color: white !important;
+  padding: 0.75rem 2rem !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  text-decoration: none !important;
+  box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3) !important;
+}
+
+#daily-pm-unique .btn-secondary-custom:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(113, 128, 150, 0.4) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+#daily-pm-unique .backfill-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(234, 88, 12, 0.08) 100%) !important;
+  border-radius: 12px !important;
+  padding: 1rem 1.25rem !important;
+  border-left: 4px solid #f59e0b !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 1rem !important;
+}
+
+#daily-pm-unique .backfill-warning h6 {
+  color: #ea580c !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important;
+  font-size: 0.95rem !important;
+}
+
+#daily-pm-unique .backfill-warning small {
+  color: #f59e0b !important;
+  font-size: 0.85rem !important;
+}
+
+#daily-pm-unique .btn-backfill {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+  color: white !important;
+  padding: 0.6rem 1.25rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  text-decoration: none !important;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3) !important;
+}
+
+#daily-pm-unique .btn-backfill:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+@media (max-width: 768px) {
+  #daily-pm-unique .action-btn-group {
+    justify-content: flex-start !important;
+  }
+  
+  #daily-pm-unique .day-card {
+    padding: 1rem !important;
+  }
+  
+  #daily-pm-unique .backfill-warning {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
+
+.premium-info-note {
+    background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+    color: #4c1d95;
+    border: 1px solid #a78bfa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+    transition: all 0.3s ease;
+}
+</style>
+
+<div id="daily-pm-unique">
+  <div class="container-fluid">
+    <div class="page-inner">
+      {% if is_weekend %}
+        <!-- Weekend Message -->
+        <div class="daily-header-gradient">
+          <div class="text-center">
+            <h3 class="daily-title-text">
+              <i class="fas fa-calendar-times"></i>
+              Weekend - No PM Checklist
+            </h3>
+            <p class="daily-subtitle-text">{{ today|date:"l, F d, Y" }}</p>
+          </div>
         </div>
+
+        <div class="weekend-card">
+          <div class="mb-4">
+            <i class="fas fa-umbrella-beach" style="font-size: 4rem; color: #667eea;"></i>
+          </div>
+          <h2 style="color: #2d3748; font-weight: 700;">Enjoy Your Weekend!</h2>
+          <p style="color: #718096; font-size: 1.1rem; margin: 1.5rem 0;">
+            The PM checklist system operates Monday through Friday only.
+          </p>
+          <a href="{% url 'pm_main_dashboard' %}" class="btn-secondary-custom mt-3">
+            <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+          </a>
+        </div>
+      {% else %}
+        <!-- Header -->
+        <div class="daily-header-gradient">
+          <div class="d-flex align-items-center justify-content-between flex-wrap">
+            <div>
+              <h3 class="daily-title-text">
+                <i class="fas fa-calendar-day"></i>
+                Daily PM Checklist - {{ today_name }}
+              </h3>
+              <p class="daily-subtitle-text">{{ today|date:"F d, Y" }}</p>
+            </div>
+            <div class="mt-3 mt-md-0">
+              <a href="{% url 'pm_main_dashboard' %}" class="daily-action-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Week Overview Section -->
+        <div class="section-card">
+          <div class="section-card-header">
+            <h5>
+              <i class="fas fa-calendar-week"></i>
+              Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}
+            </h5>
+          </div>
+          <div class="section-card-body">
+            <!-- Info Alert -->
+            <div class="premium-info-note mt-3 mb-4 p-3">
+             <div class="d-flex align-items-start">
+    <div class="note-icon me-3">
+      <i class="fas fa-info-circle"></i>
     </div>
+    <div>
+      <h6 class="mb-1 fw-semibold">Important Notice</h6>
+      <p class="mb-0">
+       You can <strong>complete</strong>  any day from this week, including missed days.
+      </p>
+    </div>
+  </div>
+            </div>
+
+           
+
+            <!-- Backfill Warning -->
+            <div class="backfill-warning">
+              <div>
+                <h6><i class="fas fa-exclamation-triangle"></i> Need to fill out a past date?</h6>
+                <small>For exceptional cases only (system downtime, emergency absences, etc.)</small>
+              </div>
+              <a href="{% url 'backfill_pm_checklist' %}" class="btn-backfill">
+                <i class="fas fa-calendar-minus"></i> Backfill Past Date
+              </a>
+            </div>
+
+            <!-- Day Cards -->
+            {% for day in week_days %}
+            <div class="day-card {% if day.is_today %}today-card{% endif %}">
+              <div class="row align-items-center g-3">
+                <!-- Day Info -->
+                <div class="col-md-3">
+                  <div class="day-info">
+                    <h5>{{ day.day_name }}</h5>
+                    <small>{{ day.date|date:"F d, Y" }}</small>
+                    <div class="mt-2">
+                      {% if day.is_today %}
+                        <span class="status-badge badge-today">
+                          <i class="fas fa-star"></i> Today
+                        </span>
+                      {% elif day.is_past %}
+                        <span class="status-badge badge-past">
+                          <i class="fas fa-history"></i> Past
+                        </span>
+                      {% elif day.is_future %}
+                        <span class="status-badge badge-future">
+                          <i class="fas fa-clock"></i> Future
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-4">
+                  {% if day.is_completed %}
+                    {% if day.is_late_submission %}
+                      <div class="status-alert alert-warning-status">
+                        <div><strong><i class="fas fa-exclamation-triangle"></i> Completed (Late)</strong></div>
+                        <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
+                        <small>at {{ day.completion.created_at|date:"h:i A, M d" }}</small><br>
+                        <span class="badge bg-warning mt-1" style="font-size: 0.75rem;">{{ day.days_late }} day{{ day.days_late|pluralize }} late</span>
+                      </div>
+                    {% else %}
+                      <div class="status-alert alert-success-custom">
+                        <div><strong><i class="fas fa-check-circle"></i> Completed</strong></div>
+                        <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
+                        <small>at {{ day.completion.created_at|date:"h:i A" }}</small>
+                      </div>
+                    {% endif %}
+                  {% else %}
+                    {% if day.is_past %}
+                      <div class="status-alert alert-danger-custom">
+                        <div><strong><i class="fas fa-times-circle"></i> Missing</strong></div>
+                        <small>Not completed on schedule</small>
+                      </div>
+                    {% else %}
+                      <div class="status-alert alert-pending">
+                        <div><strong><i class="fas fa-clock"></i> Pending</strong></div>
+                        <small>Not yet completed</small>
+                      </div>
+                    {% endif %}
+                  {% endif %}
+                </div>
+
+                <!-- Actions -->
+                <div class="col-md-5">
+                  <div class="action-btn-group">
+                    {% if day.is_completed %}
+                      <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn-action btn-warning-custom">
+                        <i class="fas fa-edit"></i> Update
+                      </a>
+                      <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="btn-action btn-info-custom">
+                        <i class="fas fa-eye"></i> View
+                      </a>
+                      <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="btn-action btn-success-custom">
+                        <i class="fas fa-file-pdf"></i> PDF
+                      </a>
+                    {% else %}
+                      {% if day.schedule %}
+                        <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="btn-action btn-primary-custom">
+                          <i class="fas fa-clipboard-check"></i> Complete Checklist
+                        </a>
+                      {% else %}
+                        <span class="text-muted">No schedule</span>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Weekly Report Section -->
+        <div class="section-card">
+          <div class="section-card-header header-success">
+            <h5>
+              <i class="fas fa-chart-bar"></i>
+              Weekly Report
+            </h5>
+          </div>
+          <div class="section-card-body">
+            <p style="color: #718096; margin-bottom: 1rem;">
+              View or export the aggregated weekly PM report (Monday - Friday).
+            </p>
+            <div class="action-btn-group" style="justify-content: flex-start !important;">
+              <a href="{% url 'weekly_pm_report_view' %}" class="btn-action btn-info-custom">
+                <i class="fas fa-chart-bar"></i> View Weekly Report
+              </a>
+              <a href="{% url 'export_weekly_pm_pdf' %}" class="btn-action btn-success-custom">
+                <i class="fas fa-file-pdf"></i> Export Weekly PDF
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center mt-4 mb-4">
+          <a href="{% url 'pm_main_dashboard' %}" class="btn-secondary-custom">
+            <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}
