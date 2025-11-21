@@ -1,0 +1,96 @@
+/* ===================================
+   PM Checklist System Styles
+   Integrates with existing modern-style.css
+   =================================== */
+
+/* Use existing CSS variables from modern-style.css */
+/* PM-specific overrides only */
+
+.pm-page-content {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Use existing premium-page-header but add PM theme */
+.premium-page-header.theme-pm {
+    background: var(--gradient-primary);
+    border-radius: 1.5rem;
+    padding: 2.5rem 2rem;
+    color: white;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+    margin-bottom: 2rem;
+}
+
+/* PM Dashboard Grid - use existing grid patterns */
+.pm-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* PM Cards - extend modern-card */
+.pm-stat-card {
+    background: white;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--page-theme-color);
+}
+
+.pm-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Smart Suggestions - use existing card style */
+.pm-smart-suggestions {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 2px solid #c4b5fd;
+    box-shadow: var(--shadow-md);
+}
+
+/* PM Alerts - use Bootstrap but enhance */
+.pm-alert {
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid;
+}
+
+/* Forms - minimal tweaks to Bootstrap forms */
+.pm-form-control {
+    border-radius: 0.75rem;
+    border: 2px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.pm-form-control:focus {
+    border-color: var(--page-theme-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Signature Section */
+.pm-signature-section {
+    background: #f9fafb;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 2px dashed #d1d5db;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pm-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .premium-page-header.theme-pm {
+        padding: 1.5rem 1rem;
+    }
+}

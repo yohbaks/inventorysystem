@@ -174,20 +174,11 @@ def get_monthly_smart_suggestions(year, month):
         # Item #1: Network Equipment Alerts
         'item1': {
             'has_alerts': False,
+            'wan_issues': [],  # {date, details, action}
             'server_issues': [],  # {date, details, action}
             'event_log_errors': [],  # {date, details, action}
             'total_alerts': 0,
             'severity': 'low',  # low, medium, high
-            'summary': '',
-            'suggested_action': ''
-        },
-
-        # Item #3: UPS Health
-        'item3': {
-            'has_issues': False,
-            'ups_readings': [],  # {date, status, notes}
-            'trend': 'stable',  # improving, stable, degrading
-            'average_health': 100,
             'summary': '',
             'suggested_action': ''
         },
@@ -223,7 +214,6 @@ def get_monthly_smart_suggestions(year, month):
         ).order_by('scheduled_date')
 
         total_days_checked = daily_schedules.count()
-        ups_health_values = []
 
         # Analyze daily checklists
         for schedule in daily_schedules:
@@ -233,6 +223,17 @@ def get_monthly_smart_suggestions(year, month):
                 date_str = schedule.scheduled_date.strftime('%b %d')
 
                 for item_comp in item_completions:
+                    # Item #1: WAN Connectivity
+                    if item_comp.item.item_number == 1:
+                        if item_comp.problems_encountered or not item_comp.is_completed:
+                            suggestions['item1']['wan_issues'].append({
+                                'date': date_str,
+                                'details': item_comp.problems_encountered or 'WAN connectivity issue',
+                                'action': item_comp.action_taken or 'None recorded'
+                            })
+                            suggestions['item1']['has_alerts'] = True
+                            suggestions['item1']['total_alerts'] += 1
+
                     # Item #2: Servers/Network Equipment
                     if item_comp.item.item_number == 2:
                         if item_comp.problems_encountered or not item_comp.is_completed:
@@ -263,24 +264,6 @@ def get_monthly_smart_suggestions(year, month):
                             suggestions['item1']['has_alerts'] = True
                             suggestions['item1']['total_alerts'] += 1
 
-                    # Item #3: UPS Readings
-                    if item_comp.item.item_number == 3:
-                        status = 'Good' if item_comp.is_completed else 'Issue'
-                        notes = item_comp.problems_encountered or 'Normal operation'
-
-                        suggestions['item3']['ups_readings'].append({
-                            'date': date_str,
-                            'status': status,
-                            'notes': notes
-                        })
-
-                        if item_comp.problems_encountered or not item_comp.is_completed:
-                            suggestions['item3']['has_issues'] = True
-
-                        # Track health (assume 100% if completed with no issues)
-                        health = 100 if (item_comp.is_completed and not item_comp.problems_encountered) else 70
-                        ups_health_values.append(health)
-
                     # Item #4: Generator Check
                     if item_comp.item.item_number == 4:
                         status = 'Operational' if item_comp.is_completed else 'Issue'
@@ -308,6 +291,8 @@ def get_monthly_smart_suggestions(year, month):
 
             # Build detailed summary
             parts = []
+            if suggestions['item1']['wan_issues']:
+                parts.append(f"{len(suggestions['item1']['wan_issues'])} WAN connectivity issue(s)")
             if suggestions['item1']['server_issues']:
                 parts.append(f"{len(suggestions['item1']['server_issues'])} server/network issue(s)")
             if suggestions['item1']['event_log_errors']:
@@ -318,40 +303,12 @@ def get_monthly_smart_suggestions(year, month):
             # Suggested action
             suggestions['item1']['suggested_action'] = (
                 "Review all network equipment for hardware alarms. "
-                "Check router, switches, and servers for critical warnings. "
+                "Check WAN connectivity, router, switches, and servers for critical warnings. "
                 "Verify all critical systems are operational."
             )
         else:
             suggestions['item1']['summary'] = f"✓ No critical network alerts in {total_days_checked} daily checks"
             suggestions['item1']['suggested_action'] = "Routine check: Verify status lights and monitoring dashboard"
-
-        # === Process Item #3 (UPS) ===
-        if ups_health_values:
-            suggestions['item3']['average_health'] = sum(ups_health_values) / len(ups_health_values)
-
-            # Determine trend (compare first half vs second half)
-            if len(ups_health_values) >= 4:
-                mid = len(ups_health_values) // 2
-                first_half_avg = sum(ups_health_values[:mid]) / mid
-                second_half_avg = sum(ups_health_values[mid:]) / (len(ups_health_values) - mid)
-
-                if second_half_avg > first_half_avg + 5:
-                    suggestions['item3']['trend'] = 'improving'
-                elif second_half_avg < first_half_avg - 5:
-                    suggestions['item3']['trend'] = 'degrading'
-                else:
-                    suggestions['item3']['trend'] = 'stable'
-
-        if suggestions['item3']['has_issues']:
-            suggestions['item3']['summary'] = f"⚠️ UPS issues detected ({suggestions['item3']['trend']} trend)"
-            suggestions['item3']['suggested_action'] = (
-                "Test UPS battery backup for minimum 5 minutes runtime. "
-                "Check battery levels and replace if needed. "
-                "Verify UPS alarm indicators."
-            )
-        else:
-            suggestions['item3']['summary'] = f"✓ UPS operating normally ({suggestions['item3']['trend']} trend, {suggestions['item3']['average_health']:.0f}% health)"
-            suggestions['item3']['suggested_action'] = "Perform routine 5-minute backup power test"
 
         # === Process Item #4 (Generator) ===
         if suggestions['item4']['has_issues']:
@@ -372,11 +329,11 @@ def get_monthly_smart_suggestions(year, month):
         # === Overall Summary ===
         suggestions['has_any_alerts'] = (
             suggestions['item1']['has_alerts'] or
-            suggestions['item3']['has_issues'] or
             suggestions['item4']['has_issues']
         )
 
         alert_count = (
+            len(suggestions['item1']['wan_issues']) +
             len(suggestions['item1']['server_issues']) +
             len(suggestions['item1']['event_log_errors'])
         )

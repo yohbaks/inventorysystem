@@ -7,39 +7,49 @@
 <div class="container-fluid mt-4">
     <div class="row">
         <div class="col-md-10 offset-md-1">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-clipboard-check"></i> {{ template.title }}
-                    </h4>
-                    <h6>{{ month_name }}</h6>
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> {{ template.title }} - {{ month_name }}
+                    </h3>
                 </div>
+            </div>
 
+            <div class="card mb-4">
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
 
                         {% if existing_completion %}
                         <div class="alert alert-warning">
-                            <i class="fas fa-info-circle"></i> <strong>Update Mode:</strong> This checklist was already completed. You can update it here.
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle"></i> Update Mode
+                            </h6>
+                            This checklist was already completed. You can update it here.
                         </div>
                         {% endif %}
 
-                        <!-- Smart Suggestions with Dropdowns -->
-                        <div class="alert {% if smart_suggestions.has_any_alerts %}alert-warning{% else %}alert-success{% endif %}">
-                            <h5 class="alert-heading">
-                                <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
-                                Smart Suggestions from Daily Checklists
-                            </h5>
-                            <p class="mb-2"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
+                        <!-- Smart Suggestions -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="mr-3">
+                                        <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle text-warning{% else %}fa-lightbulb text-info{% endif %}" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">
+                                            Smart Suggestions from Daily Checklists
+                                        </h5>
+                                        <p class="mb-0"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
+                                    </div>
+                                </div>
 
-                            <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
-                                <i class="fas fa-chevron-down"></i> View Detailed Insights
-                            </button>
+                                <button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
+                                    <i class="fas fa-chevron-down"></i> View Detailed Insights
+                                </button>
 
-                            <div class="collapse mt-3" id="smartSuggestionsDetails">
-                                <div class="card">
-                                    <div class="card-body">
+                                <div class="collapse mt-3" id="smartSuggestionsDetails">
                                         <!-- Item #1: Network Equipment -->
                                         <div class="mb-4">
                                             <h6 class="text-primary">
@@ -58,8 +68,20 @@
                                             <div class="collapse mt-2" id="item1Details">
                                                 <div class="card bg-light">
                                                     <div class="card-body">
+                                                        {% if smart_suggestions.item1.wan_issues %}
+                                                        <h6 class="text-danger"><i class="fas fa-globe"></i> WAN Connectivity Issues:</h6>
+                                                        <ul class="list-unstyled">
+                                                            {% for issue in smart_suggestions.item1.wan_issues %}
+                                                            <li class="mb-2">
+                                                                <strong>{{ issue.date }}:</strong> {{ issue.details }}
+                                                                <br><small class="text-muted">Action: {{ issue.action }}</small>
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        {% endif %}
+
                                                         {% if smart_suggestions.item1.server_issues %}
-                                                        <h6 class="text-danger"><i class="fas fa-server"></i> Server/Network Issues:</h6>
+                                                        <h6 class="text-danger {% if smart_suggestions.item1.wan_issues %}mt-3{% endif %}"><i class="fas fa-server"></i> Server/Network Issues:</h6>
                                                         <ul class="list-unstyled">
                                                             {% for issue in smart_suggestions.item1.server_issues %}
                                                             <li class="mb-2">
@@ -87,60 +109,6 @@
                                             {% else %}
                                             <p class="text-success"><small><i class="fas fa-check"></i> {{ smart_suggestions.item1.suggested_action }}</small></p>
                                             {% endif %}
-                                        </div>
-
-                                        <hr>
-
-                                        <!-- Item #3: UPS Health -->
-                                        <div class="mb-4">
-                                            <h6 class="text-primary">
-                                                <i class="fas fa-battery-full"></i> Item #3: UPS Health Status
-                                            </h6>
-                                            <p class="mb-2">{{ smart_suggestions.item3.summary }}</p>
-
-                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item3Details">
-                                                <i class="fas fa-chart-line"></i> View UPS Trend
-                                            </button>
-                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="3" data-action="{{ smart_suggestions.item3.suggested_action }}">
-                                                <i class="fas fa-magic"></i> Auto-fill Action
-                                            </button>
-
-                                            <div class="collapse mt-2" id="item3Details">
-                                                <div class="card bg-light">
-                                                    <div class="card-body">
-                                                        <p><strong>Trend:</strong>
-                                                            <span class="badge badge-{% if smart_suggestions.item3.trend == 'improving' %}success{% elif smart_suggestions.item3.trend == 'degrading' %}danger{% else %}info{% endif %}">
-                                                                {{ smart_suggestions.item3.trend|upper }}
-                                                            </span>
-                                                        </p>
-                                                        <p><strong>Average Health:</strong> {{ smart_suggestions.item3.average_health|floatformat:0 }}%</p>
-
-                                                        {% if smart_suggestions.item3.ups_readings %}
-                                                        <h6 class="mt-3">Recent Readings:</h6>
-                                                        <div style="max-height: 200px; overflow-y: auto;">
-                                                            <table class="table table-sm table-striped">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Date</th>
-                                                                        <th>Status</th>
-                                                                        <th>Notes</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {% for reading in smart_suggestions.item3.ups_readings %}
-                                                                    <tr>
-                                                                        <td>{{ reading.date }}</td>
-                                                                        <td><span class="badge badge-{% if reading.status == 'Good' %}success{% else %}warning{% endif %}">{{ reading.status }}</span></td>
-                                                                        <td><small>{{ reading.notes }}</small></td>
-                                                                    </tr>
-                                                                    {% endfor %}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <hr>
@@ -190,14 +158,15 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="alert alert-info">
-                            <strong>Instructions:</strong>
-                            <ul>
+                        <div class="alert alert-info mt-3">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle"></i> Instructions
+                            </h6>
+                            <ul class="mb-0">
                                 <li>Check the box (✓) for each task you have completed</li>
                                 <li>Note any problems encountered and actions taken</li>
                                 <li>Schedule: Complete during 1st week of the month</li>
@@ -240,7 +209,7 @@
                                             <textarea class="form-control form-control-sm"
                                                       id="problems_{{ item.id }}"
                                                       name="problems_{{ item.id }}"
-                                                      rows="2"
+                                                      rows="4"
                                                       placeholder="Describe any problems...">{{ item.existing_problems }}</textarea>
                                         </div>
                                         <div class="form-group mb-0">
@@ -248,7 +217,7 @@
                                             <textarea class="form-control form-control-sm"
                                                       id="action_{{ item.id }}"
                                                       name="action_{{ item.id }}"
-                                                      rows="2"
+                                                      rows="4"
                                                       placeholder="Describe action taken...">{{ item.existing_action }}</textarea>
                                         </div>
                                     </td>
@@ -258,11 +227,11 @@
                         </table>
 
                         <!-- Signature Section -->
-                        <div class="card mt-4">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">Accomplished by:</h6>
-                            </div>
+                        <div class="card bg-light mt-4">
                             <div class="card-body">
+                                <h6 class="font-weight-bold mb-3">
+                                    <i class="fas fa-signature"></i> Accomplished by:
+                                </h6>
                                 <div class="form-group">
                                     <label for="printed_name">Printed Name:</label>
                                     <input type="text"
@@ -277,7 +246,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="mt-4">
+                        <div class="mt-4 text-center">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-save"></i> {% if existing_completion %}Update{% else %}Submit{% endif %} Checklist
                             </button>

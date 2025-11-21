@@ -4,74 +4,698 @@
 {% block title %}PM Checklists Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <!-- Header -->
-            <div class="card mb-4">
-                <div class="card-header bg-dark text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-clipboard-check"></i> Preventive Maintenance Checklists
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">Select a checklist to view or complete:</p>
-                </div>
-            </div>
-
-            <!-- PM Forms Grid -->
-            <div class="row">
-                {% for form in pm_forms %}
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-{{ form.color }}">
-                        <div class="card-header bg-{{ form.color }} text-white">
-                            <h5 class="mb-0">
-                                <i class="fas {{ form.icon }}"></i> ANNEX "{{ form.annex_code }}"
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title">{{ form.title }}</h6>
-                            <p class="card-text">{{ form.description }}</p>
-                            <hr>
-                            <p class="mb-2">
-                                <strong><i class="fas fa-clock"></i> Frequency:</strong> {{ form.frequency }}
-                            </p>
-                            <p class="mb-3">
-                                <strong><i class="fas fa-calendar-check"></i> Schedule:</strong> {{ form.schedule_note }}
-                            </p>
-
-                            {% if form.dashboard_url != '#' %}
-                            <a href="{% url form.dashboard_url %}" class="btn btn-{{ form.color }} btn-block btn-lg">
-                                <i class="fas fa-arrow-right"></i> Go to Dashboard
-                            </a>
-                            {% else %}
-                            <button class="btn btn-secondary btn-block btn-lg" disabled>
-                                <i class="fas fa-lock"></i> Coming Soon
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Back Button -->
-            <div class="mt-4">
-                <a href="/" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Home
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-    .card {
-        transition: all 0.3s ease;
-    }
-    .card:hover {
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        transform: translateY(-5px);
-    }
+/* Force override all existing styles */
+#pm-dashboard-unique * {
+  box-sizing: border-box;
+}
+
+#pm-dashboard-unique {
+  padding-top: 2rem !important;
+}
+
+#pm-dashboard-unique .pm-header-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 20px !important;
+  padding: 2rem 1.75rem !important;
+  margin-bottom: 2.5rem !important;
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.25) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+#pm-dashboard-unique .pm-header-gradient::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -50% !important;
+  right: -10% !important;
+  width: 250px !important;
+  height: 250px !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 50% !important;
+  animation: pmFloat 8s ease-in-out infinite !important;
+}
+
+#pm-dashboard-unique .pm-header-gradient::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -30% !important;
+  left: -5% !important;
+  width: 180px !important;
+  height: 180px !important;
+  background: rgba(255,255,255,0.1) !important;
+  border-radius: 50% !important;
+  animation: pmFloat 6s ease-in-out infinite !important;
+}
+
+@keyframes pmFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+#pm-dashboard-unique .pm-title-text {
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  color: white !important;
+  margin-bottom: 0.35rem !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#pm-dashboard-unique .pm-subtitle-text {
+  font-size: 1rem !important;
+  color: rgba(255,255,255,0.9) !important;
+  position: relative !important;
+  z-index: 1 !important;
+  margin: 0 !important;
+}
+
+#pm-dashboard-unique .pm-action-btn {
+  background: rgba(255,255,255,0.25) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255,255,255,0.3) !important;
+  color: white !important;
+  padding: 0.7rem 1.5rem !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#pm-dashboard-unique .pm-action-btn:hover {
+  background: white !important;
+  color: #667eea !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+  text-decoration: none !important;
+}
+
+#pm-dashboard-unique .pm-section-title-area {
+  text-align: center !important;
+  margin-bottom: 1.75rem !important;
+}
+
+#pm-dashboard-unique .pm-section-main-title {
+  font-size: 1.65rem !important;
+  font-weight: 700 !important;
+  color: #2d3748 !important;
+  margin-bottom: 0.4rem !important;
+}
+
+#pm-dashboard-unique .pm-section-sub {
+  color: #718096 !important;
+  font-size: 0.95rem !important;
+  margin: 0 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper {
+  background: white !important;
+  border-radius: 16px !important;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08) !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  height: 100% !important;
+  border: none !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background-size: 200% 100% !important;
+  animation: pmGradientShift 3s ease infinite !important;
+}
+
+/* Color scheme for Annex A - Purple */
+#pm-dashboard-unique .pm-card-wrapper.color-purple::before {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-card-top {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-annex-label {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-icon-circle {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-icon-circle::after {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-info-item {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.06) 100%) !important;
+  border-left-color: #667eea !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-info-item i {
+  color: #667eea !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-freq-badge {
+  color: #667eea !important;
+  border-color: #667eea !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-btn-go {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  box-shadow: 0 5px 18px rgba(102, 126, 234, 0.35) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-purple .pm-btn-go:hover {
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.45) !important;
+}
+
+/* Color scheme for Annex B - Blue */
+#pm-dashboard-unique .pm-card-wrapper.color-blue::before {
+  background: linear-gradient(90deg, #4299e1 0%, #2563eb 50%, #4299e1 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-card-top {
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-annex-label {
+  background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-icon-circle {
+  background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%) !important;
+  box-shadow: 0 8px 25px rgba(66, 153, 225, 0.4) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-icon-circle::after {
+  background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-info-item {
+  background: linear-gradient(135deg, rgba(66, 153, 225, 0.06) 0%, rgba(37, 99, 235, 0.06) 100%) !important;
+  border-left-color: #4299e1 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-info-item i {
+  color: #4299e1 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-freq-badge {
+  color: #4299e1 !important;
+  border-color: #4299e1 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-btn-go {
+  background: linear-gradient(135deg, #4299e1 0%, #2563eb 100%) !important;
+  box-shadow: 0 5px 18px rgba(66, 153, 225, 0.35) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-blue .pm-btn-go:hover {
+  box-shadow: 0 8px 24px rgba(66, 153, 225, 0.45) !important;
+}
+
+/* Color scheme for Annex C - Orange */
+#pm-dashboard-unique .pm-card-wrapper.color-orange::before {
+  background: linear-gradient(90deg, #f59e0b 0%, #ea580c 50%, #f59e0b 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-card-top {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(234, 88, 12, 0.08) 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-annex-label {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-icon-circle {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-icon-circle::after {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-info-item {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, rgba(234, 88, 12, 0.06) 100%) !important;
+  border-left-color: #f59e0b !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-info-item i {
+  color: #f59e0b !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-freq-badge {
+  color: #f59e0b !important;
+  border-color: #f59e0b !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-btn-go {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+  box-shadow: 0 5px 18px rgba(245, 158, 11, 0.35) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-orange .pm-btn-go:hover {
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45) !important;
+}
+
+/* Color scheme for Annex F - Green */
+#pm-dashboard-unique .pm-card-wrapper.color-green::before {
+  background: linear-gradient(90deg, #10b981 0%, #059669 50%, #10b981 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-card-top {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-annex-label {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-icon-circle {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-icon-circle::after {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-info-item {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(5, 150, 105, 0.06) 100%) !important;
+  border-left-color: #10b981 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-info-item i {
+  color: #10b981 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-freq-badge {
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-btn-go {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 5px 18px rgba(16, 185, 129, 0.35) !important;
+}
+
+#pm-dashboard-unique .pm-card-wrapper.color-green .pm-btn-go:hover {
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45) !important;
+}
+
+@keyframes pmGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+#pm-dashboard-unique .pm-card-top {
+  padding: 1.15rem !important;
+  text-align: center !important;
+  border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+}
+
+#pm-dashboard-unique .pm-annex-label {
+  display: inline-block !important;
+  color: white !important;
+  padding: 0.5rem 1.25rem !important;
+  border-radius: 25px !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.2) !important;
+  border: none !important;
+}
+
+#pm-dashboard-unique .pm-card-content {
+  padding: 1.5rem 1.15rem !important;
+}
+
+#pm-dashboard-unique .pm-icon-circle {
+  width: 65px !important;
+  height: 65px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  font-size: 1.9rem !important;
+  margin: 0 auto 1rem !important;
+  position: relative !important;
+}
+
+#pm-dashboard-unique .pm-icon-circle::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -4px !important;
+  border-radius: 50% !important;
+  filter: blur(12px) !important;
+  opacity: 0.5 !important;
+  z-index: -1 !important;
+}
+
+#pm-dashboard-unique .pm-card-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #2d3748 !important;
+  margin-bottom: 0.75rem !important;
+  text-align: center !important;
+  line-height: 1.4 !important;
+  min-height: 48px !important;
+}
+
+#pm-dashboard-unique .pm-card-desc {
+  font-size: 0.9rem !important;
+  color: #718096 !important;
+  text-align: center !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1.15rem !important;
+  min-height: 44px !important;
+}
+
+#pm-dashboard-unique .pm-info-item {
+  border-radius: 10px !important;
+  padding: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+  border-left-width: 3px !important;
+  border-left-style: solid !important;
+  text-align: center !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+}
+
+#pm-dashboard-unique .pm-info-item i {
+  font-size: 1.1rem !important;
+  margin-right: 0.5rem !important;
+  vertical-align: middle !important;
+}
+
+#pm-dashboard-unique .pm-freq-badge {
+  background: white !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  padding: 0.45rem 1rem !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+#pm-dashboard-unique .pm-sched-text {
+  color: #4a5568 !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  vertical-align: middle !important;
+}
+
+#pm-dashboard-unique .pm-btn-go {
+  color: white !important;
+  border: none !important;
+  padding: 0.75rem 1.75rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+  width: 100% !important;
+}
+
+#pm-dashboard-unique .pm-btn-go:hover {
+  transform: translateY(-2px) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+#pm-dashboard-unique .pm-btn-locked {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%) !important;
+  color: #718096 !important;
+  border: none !important;
+  padding: 0.75rem 1.75rem !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  cursor: not-allowed !important;
+  width: 100% !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+#pm-dashboard-unique .pm-overview-box {
+  background: white !important;
+  border-radius: 18px !important;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.08) !important;
+  padding: 2rem 1.5rem !important;
+  text-align: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.4s ease !important;
+  height: 100% !important;
+}
+
+#pm-dashboard-unique .pm-overview-box:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15) !important;
+}
+
+#pm-dashboard-unique .pm-overview-box::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+#pm-dashboard-unique .pm-overview-box.type-info::before {
+  background: linear-gradient(90deg, #4299e1 0%, #3182ce 100%) !important;
+}
+
+#pm-dashboard-unique .pm-overview-box.type-success::before {
+  background: linear-gradient(90deg, #48bb78 0%, #38a169 100%) !important;
+}
+
+#pm-dashboard-unique .pm-overview-icon {
+  width: 70px !important;
+  height: 70px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  font-size: 2.25rem !important;
+  margin: 0 auto 1.25rem !important;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35) !important;
+  position: relative !important;
+}
+
+#pm-dashboard-unique .pm-overview-icon::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -4px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 50% !important;
+  filter: blur(18px) !important;
+  opacity: 0.4 !important;
+  z-index: -1 !important;
+}
+
+#pm-dashboard-unique .pm-overview-icon.type-info {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%) !important;
+  box-shadow: 0 8px 25px rgba(66, 153, 225, 0.35) !important;
+}
+
+#pm-dashboard-unique .pm-overview-icon.type-info::after {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%) !important;
+}
+
+#pm-dashboard-unique .pm-overview-icon.type-success {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.35) !important;
+}
+
+#pm-dashboard-unique .pm-overview-icon.type-success::after {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+}
+
+#pm-dashboard-unique .pm-overview-title {
+  font-size: 1.45rem !important;
+  font-weight: 700 !important;
+  color: #2d3748 !important;
+  margin-bottom: 0.4rem !important;
+}
+
+#pm-dashboard-unique .pm-overview-desc {
+  color: #718096 !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+}
+
+#pm-dashboard-unique .pm-divider-line {
+  height: 2px !important;
+  background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%) !important;
+  margin: 2.5rem 0 !important;
+  border: none !important;
+}
 </style>
+
+<div id="pm-dashboard-unique">
+  <div class="container-fluid">
+    <div class="page-inner">
+      <!-- Header -->
+      <div class="pm-header-gradient">
+        <div class="d-flex align-items-center justify-content-between flex-wrap">
+          <div>
+            <h3 class="pm-title-text">
+              <i class="fas fa-clipboard-check"></i>
+              PM Checklists Dashboard
+            </h3>
+            <p class="pm-subtitle-text">Manage and monitor all your datacenter PM activities</p>
+          </div>
+          <div class="mt-3 mt-md-0">
+            <a href="{% url 'pm_main_dashboard' %}" class="pm-action-btn">
+              <i class="fas fa-chart-line"></i>
+              <span>View All Activities</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Header -->
+      <div class="pm-section-title-area">
+        <h2 class="pm-section-main-title">
+          <i class="fas fa-folder-open" style="color: #667eea;"></i>
+          Available PM Annexes
+        </h2>
+        <p class="pm-section-sub">Select a checklist to view or complete</p>
+      </div>
+
+      <!-- Annex Cards - 4 columns with different colors -->
+      <div class="row g-3 mb-4">
+        {% for form in pm_forms %}
+        <div class="col-xl-3 col-lg-6 col-md-6">
+          <div class="pm-card-wrapper 
+            {% if form.annex_code == 'A' %}color-purple
+            {% elif form.annex_code == 'B' %}color-blue
+            {% elif form.annex_code == 'C' %}color-orange
+            {% elif form.annex_code == 'F' %}color-green
+            {% endif %}">
+            <div class="pm-card-top">
+              <span class="pm-annex-label">ANNEX "{{ form.annex_code }}"</span>
+            </div>
+            
+            <div class="pm-card-content">
+              <div class="pm-icon-circle">
+                <i class="fas {{ form.icon }}"></i>
+              </div>
+              
+              <h3 class="pm-card-title">{{ form.title }}</h3>
+              <p class="pm-card-desc">{{ form.description }}</p>
+              
+              <div class="pm-info-item">
+                <i class="fas fa-clock"></i>
+                <span class="pm-freq-badge">{{ form.frequency }}</span>
+              </div>
+              
+              <div class="pm-info-item">
+                <i class="fas fa-calendar-check"></i>
+                <span class="pm-sched-text">{{ form.schedule_note }}</span>
+              </div>
+              
+              <div class="text-center mt-3">
+                {% if form.dashboard_url != '#' %}
+                <a href="{% url form.dashboard_url %}" class="pm-btn-go">
+                  <i class="fas fa-arrow-right"></i> Go to Dashboard
+                </a>
+                {% else %}
+                <button class="pm-btn-locked" disabled>
+                  <i class="fas fa-lock"></i> Coming Soon
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Divider -->
+      <div class="pm-divider-line"></div>
+
+      <!-- Section Header -->
+      <div class="pm-section-title-area">
+        <h2 class="pm-section-main-title">
+          <i class="fas fa-chart-line" style="color: #667eea;"></i>
+          Quick Overview
+        </h2>
+        <p class="pm-section-sub">Summary of PM maintenance schedules</p>
+      </div>
+
+      <!-- Overview Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="pm-overview-box">
+            <div class="pm-overview-icon">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <h4 class="pm-overview-title">Daily</h4>
+            <p class="pm-overview-desc">Mon-Fri Datacenter</p>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="pm-overview-box type-info">
+            <div class="pm-overview-icon type-info">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h4 class="pm-overview-title">Monthly</h4>
+            <p class="pm-overview-desc">1st Week Review</p>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="pm-overview-box type-success">
+            <div class="pm-overview-icon type-success">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h4 class="pm-overview-title">Proactive</h4>
+            <p class="pm-overview-desc">Maintenance Care</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back Button -->
+      <div class="text-center mt-4 mb-4">
+        <a href="/" class="btn btn-secondary btn-lg" style="padding: 0.75rem 2rem; border-radius: 10px; font-weight: 600;">
+          <i class="fas fa-arrow-left me-2"></i> Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
