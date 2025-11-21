@@ -32,9 +32,15 @@
 
 .pm-compact-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
     margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .pm-compact-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .pm-annex-badge {
