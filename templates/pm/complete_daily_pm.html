@@ -4,35 +4,29 @@
 
 {% block title %}Complete PM Checklist - {{ today_name }}{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pm-modern.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="pm-container">
-    <div class="container-fluid px-3">
-        <div class="row justify-content-center">
-            <div class="col-12">
-                <!-- Modern Header -->
-                <div class="pm-page-header pm-fade-in">
-                    <div class="pm-header-content">
-                        <h1 class="pm-page-title">
-                            <i class="fas fa-clipboard-check"></i> Preventive Maintenance Checklist
-                        </h1>
-                        <p class="pm-page-subtitle">{{ today_name }}, {{ today|date:"F d, Y" }}</p>
-                    </div>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> Preventive Maintenance Checklist - {{ today_name }}, {{ today|date:"F d, Y" }}
+                    </h3>
                 </div>
+            </div>
 
-                <div class="pm-card pm-slide-in">
-                <div class="pm-card-body">
+            <div class="card mb-4">
+                <div class="card-body">
                     <form method="post" id="pm-checklist-form">
                         {% csrf_token %}
 
                         {% if is_late_submission %}
-                        <div class="pm-alert pm-alert-danger">
-                            <div class="pm-alert-heading">
+                        <div class="alert alert-danger">
+                            <h6 class="alert-heading">
                                 <i class="fas fa-exclamation-triangle"></i> LATE SUBMISSION WARNING
-                            </div>
+                            </h6>
                             <p class="mb-2"><strong>You are filling out a checklist for a past date!</strong></p>
                             <ul class="mb-2">
                                 <li><strong>Scheduled Date:</strong> {{ today|date:"l, F d, Y" }}</li>
@@ -46,10 +40,10 @@
                         {% endif %}
 
                         {% if existing_completion %}
-                        <div class="pm-alert pm-alert-info">
-                            <div class="pm-alert-heading">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
                                 <i class="fas fa-edit"></i> Update Mode - Editing Existing Checklist
-                            </div>
+                            </h6>
                             <p class="mb-2">This checklist was already completed. All existing data has been pre-filled in the form fields below.</p>
                             <ul class="mb-0">
                                 <li>✓ All checkboxes reflect current completion status</li>
@@ -60,10 +54,10 @@
                         </div>
                         {% endif %}
 
-                        <div class="pm-alert pm-alert-info">
-                            <div class="pm-alert-heading">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
                                 <i class="fas fa-info-circle"></i> Instructions
-                            </div>
+                            </h6>
                             <ul class="mb-0">
                                 <li>Check the box for each task you have completed</li>
                                 <li>Note any problems encountered and actions taken</li>
@@ -207,42 +201,43 @@
                             </tbody>
                         </table>
 
-                        <div class="pm-signature-section">
-                            <h6 style="color: var(--gray-900); font-weight: 700; margin-bottom: 1.5rem;">
-                                <i class="fas fa-signature"></i> Accomplished by:
-                            </h6>
-                            <div class="pm-form-group">
-                                <label for="printed_name" class="pm-form-label">Printed Name:</label>
-                                <input type="text"
-                                       class="pm-form-control"
-                                       id="printed_name"
-                                       name="printed_name"
-                                       required
-                                       value="{{ request.user.get_full_name|default:request.user.username }}"
-                                       placeholder="Enter your full name">
+                        <div class="card bg-light mt-4">
+                            <div class="card-body">
+                                <h6 class="font-weight-bold mb-3">
+                                    <i class="fas fa-signature"></i> Accomplished by:
+                                </h6>
+                                <div class="form-group">
+                                    <label for="printed_name">Printed Name:</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="printed_name"
+                                           name="printed_name"
+                                           required
+                                           value="{{ request.user.get_full_name|default:request.user.username }}"
+                                           placeholder="Enter your full name">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="pm-alert pm-alert-warning pm-mt-3">
-                            <div class="pm-alert-heading">
+                        <div class="alert alert-warning mt-3">
+                            <h6 class="alert-heading">
                                 <i class="fas fa-calendar-check"></i> Auto-Dated Entry
-                            </div>
+                            </h6>
                             This completion will automatically be recorded for <strong>{{ today_name }}</strong>.
                             You cannot select a different day. The system automatically knows which day it is.
                         </div>
 
-                        <div class="pm-mt-4 text-center">
-                            <button type="submit" class="pm-btn pm-btn-success pm-btn-lg">
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
                                 <i class="fas fa-save"></i> Submit Checklist for {{ today_name }}
                             </button>
-                            <a href="{% url 'pm_daily_dashboard' %}" class="pm-btn pm-btn-secondary pm-btn-lg">
+                            <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </div>

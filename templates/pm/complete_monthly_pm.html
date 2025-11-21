@@ -3,60 +3,53 @@
 
 {% block title %}Complete Monthly PM - {{ month_name }}{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pm-modern.css' %}">
-{% endblock %}
-
 {% block content %}
-<div class="pm-container">
-    <div class="container-fluid px-3">
-        <div class="row justify-content-center">
-            <div class="col-12">
-                <!-- Modern Header -->
-                <div class="pm-page-header pm-fade-in">
-                    <div class="pm-header-content">
-                        <h1 class="pm-page-title">
-                            <i class="fas fa-clipboard-check"></i> {{ template.title }}
-                        </h1>
-                        <p class="pm-page-subtitle">{{ month_name }}</p>
-                    </div>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> {{ template.title }} - {{ month_name }}
+                    </h3>
                 </div>
+            </div>
 
-                <div class="pm-card pm-slide-in">
-                <div class="pm-card-body">
+            <div class="card mb-4">
+                <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
 
                         {% if existing_completion %}
-                        <div class="pm-alert pm-alert-warning">
-                            <div class="pm-alert-heading">
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading">
                                 <i class="fas fa-info-circle"></i> Update Mode
-                            </div>
+                            </h6>
                             This checklist was already completed. You can update it here.
                         </div>
                         {% endif %}
 
-                        <!-- Smart Suggestions with Modern Design -->
-                        <div class="pm-smart-suggestions">
-                            <div class="pm-smart-suggestions-header">
-                                <div class="pm-smart-suggestions-icon">
-                                    <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle{% else %}fa-lightbulb{% endif %}"></i>
+                        <!-- Smart Suggestions -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="mr-3">
+                                        <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle text-warning{% else %}fa-lightbulb text-info{% endif %}" style="font-size: 2rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">
+                                            Smart Suggestions from Daily Checklists
+                                        </h5>
+                                        <p class="mb-0"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h5 class="pm-smart-suggestions-title">
-                                        Smart Suggestions from Daily Checklists
-                                    </h5>
-                                    <p class="mb-0"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
-                                </div>
-                            </div>
 
-                            <button class="pm-btn pm-btn-secondary pm-btn-sm pm-mt-2" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
-                                <i class="fas fa-chevron-down"></i> View Detailed Insights
-                            </button>
+                                <button class="btn btn-secondary btn-sm" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
+                                    <i class="fas fa-chevron-down"></i> View Detailed Insights
+                                </button>
 
-                            <div class="collapse pm-mt-3" id="smartSuggestionsDetails">
-                                <div class="pm-suggestion-item">
-                                    <div style="padding: 0;">
+                                <div class="collapse mt-3" id="smartSuggestionsDetails">
                                         <!-- Item #1: Network Equipment -->
                                         <div class="mb-4">
                                             <h6 class="text-primary">
@@ -165,15 +158,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="pm-alert pm-alert-info pm-mt-3">
-                            <div class="pm-alert-heading">
+                        <div class="alert alert-info mt-3">
+                            <h6 class="alert-heading">
                                 <i class="fas fa-info-circle"></i> Instructions
-                            </div>
+                            </h6>
                             <ul class="mb-0">
                                 <li>Check the box (✓) for each task you have completed</li>
                                 <li>Note any problems encountered and actions taken</li>
@@ -235,35 +227,36 @@
                         </table>
 
                         <!-- Signature Section -->
-                        <div class="pm-signature-section">
-                            <h6 style="color: var(--gray-900); font-weight: 700; margin-bottom: 1.5rem;">
-                                <i class="fas fa-signature"></i> Accomplished by:
-                            </h6>
-                            <div class="pm-form-group">
-                                <label for="printed_name" class="pm-form-label">Printed Name:</label>
-                                <input type="text"
-                                       class="pm-form-control"
-                                       id="printed_name"
-                                       name="printed_name"
-                                       value="{% if existing_completion %}{{ existing_completion.printed_name }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
-                                       required>
-                                <small class="form-text text-muted">Your name will appear on the PDF</small>
+                        <div class="card bg-light mt-4">
+                            <div class="card-body">
+                                <h6 class="font-weight-bold mb-3">
+                                    <i class="fas fa-signature"></i> Accomplished by:
+                                </h6>
+                                <div class="form-group">
+                                    <label for="printed_name">Printed Name:</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="printed_name"
+                                           name="printed_name"
+                                           value="{% if existing_completion %}{{ existing_completion.printed_name }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
+                                           required>
+                                    <small class="form-text text-muted">Your name will appear on the PDF</small>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="pm-mt-4 text-center">
-                            <button type="submit" class="pm-btn pm-btn-primary pm-btn-lg">
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-save"></i> {% if existing_completion %}Update{% else %}Submit{% endif %} Checklist
                             </button>
-                            <a href="{% url 'monthly_pm_dashboard' %}" class="pm-btn pm-btn-secondary pm-btn-lg">
+                            <a href="{% url 'monthly_pm_dashboard' %}" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </div>
