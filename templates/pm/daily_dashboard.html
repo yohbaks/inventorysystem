@@ -8,212 +8,171 @@
 {% endblock %}
 
 {% block content %}
-<div class="pm-container">
-    <div class="container-fluid px-3">
+<div class="modern-container">
+    <div class="container-fluid">
         {% if is_weekend %}
-            <!-- Weekend Message with Modern Design -->
-            <div class="row">
-                <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-                    <div class="pm-card pm-card-gradient text-center pm-fade-in">
-                        <div class="pm-stat-icon mx-auto mb-3" style="background: rgba(255,255,255,0.3); width: 5rem; height: 5rem;">
-                            <i class="fas fa-calendar-times" style="font-size: 2.5rem; color: white;"></i>
+            <!-- Weekend Message -->
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="modern-card text-center">
+                        <div class="card-body-modern py-5">
+                            <div class="premium-info-icon-badge mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-calendar-times" style="font-size: 2rem;"></i>
+                            </div>
+                            <h2>Weekend - No PM Checklist</h2>
+                            <p class="text-muted">{{ today|date:"l, F d, Y" }}</p>
+                            <p>The PM checklist system operates Monday through Friday only.</p>
+                            <p class="h4 mt-4"><i class="fas fa-umbrella-beach"></i> Enjoy your weekend!</p>
+                            <a href="{% url 'pm_main_dashboard' %}" class="modern-btn btn-primary mt-3">
+                                <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+                            </a>
                         </div>
-                        <h2 style="color: white; margin-bottom: 1rem;">Weekend - No PM Checklist</h2>
-                        <p style="color: rgba(255,255,255,0.95); font-size: 1.125rem; margin-bottom: 0.5rem;">{{ today|date:"l, F d, Y" }}</p>
-                        <p style="color: rgba(255,255,255,0.9);">The PM checklist system operates Monday through Friday only.</p>
-                        <p style="color: rgba(255,255,255,0.9); font-size: 1.25rem; margin-top: 1.5rem;">
-                            <i class="fas fa-umbrella-beach"></i> Enjoy your weekend!
-                        </p>
-                        <a href="{% url 'pm_main_dashboard' %}" class="pm-btn pm-btn-secondary mt-3">
-                            <i class="fas fa-arrow-left"></i> Back to PM Dashboard
-                        </a>
                     </div>
                 </div>
             </div>
         {% else %}
-            <!-- Weekday - Modern Dashboard -->
-            <div class="row">
-                <div class="col-12">
-                    <!-- Modern Header with Purple Gradient -->
-                    <div class="pm-page-header pm-fade-in">
-                        <div class="pm-header-content">
-                            <h1 class="pm-page-title">
-                                <i class="fas fa-calendar-day"></i> Daily PM Checklist
-                            </h1>
-                            <p class="pm-page-subtitle">{{ today_name }}, {{ today|date:"F d, Y" }}</p>
+            <!-- Hero Header -->
+            <div class="premium-page-header theme-pm">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-calendar-day"></i>
+                        <span>Daily PM Checklist</span>
+                    </div>
+                    <h1 class="hero-title">{{ today_name }}, {{ today|date:"F d, Y" }}</h1>
+                </div>
+            </div>
+
+            <!-- Week Overview -->
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h3 class="card-title-modern">
+                        <i class="fas fa-calendar-week"></i> Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}
+                    </h3>
+                </div>
+                <div class="card-body-modern">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> You can complete any day from this week, including missed days.
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h6 class="mb-1"><i class="fas fa-exclamation-triangle"></i> Need to fill out a past date?</h6>
+                                <small>For exceptional cases only (system downtime, emergency absences, etc.)</small>
+                            </div>
+                            <a href="{% url 'backfill_pm_checklist' %}" class="modern-btn btn-warning">
+                                <i class="fas fa-calendar-minus"></i> Backfill Past Date
+                            </a>
                         </div>
                     </div>
 
-                    <!-- Week Overview Card -->
-                    <div class="pm-card pm-slide-in">
-                        <div class="pm-card-header">
-                            <h5 class="pm-card-title mb-0">
-                                <i class="fas fa-calendar-week"></i>
-                                Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}
-                            </h5>
-                        </div>
-                        <div class="pm-card-body">
-                            <div class="pm-alert pm-alert-info">
-                                <div class="pm-alert-heading">
-                                    <i class="fas fa-info-circle"></i>
-                                    Note
-                                </div>
-                                You can complete any day from this week, including missed days.
-                            </div>
-
-                            <!-- Backfill Option -->
-                            <div class="pm-alert pm-alert-warning">
-                                <div class="row align-items-center">
-                                    <div class="col-md-8">
-                                        <div class="pm-alert-heading">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            Need to fill out a past date?
-                                        </div>
-                                        <small>For exceptional cases only (system downtime, emergency absences, etc.)</small>
+                    {% for day in week_days %}
+                    <div class="modern-card mb-3" style="{% if day.is_today %}border-left: 4px solid #667eea;{% endif %}">
+                        <div class="card-body-modern">
+                            <div class="row align-items-center">
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <h5 class="mb-1">{{ day.day_name }}</h5>
+                                    <small class="text-muted">{{ day.date|date:"F d, Y" }}</small>
+                                    <div class="mt-2">
+                                        {% if day.is_today %}
+                                            <span class="badge bg-primary rounded-pill">
+                                                <i class="fas fa-star"></i> Today
+                                            </span>
+                                        {% elif day.is_past %}
+                                            <span class="badge bg-secondary rounded-pill">
+                                                <i class="fas fa-history"></i> Past
+                                            </span>
+                                        {% elif day.is_future %}
+                                            <span class="badge bg-light text-dark rounded-pill">
+                                                <i class="fas fa-clock"></i> Future
+                                            </span>
+                                        {% endif %}
                                     </div>
-                                    <div class="col-md-4 text-md-right mt-3 mt-md-0">
-                                        <a href="{% url 'backfill_pm_checklist' %}" class="pm-btn pm-btn-warning pm-btn-sm">
-                                            <i class="fas fa-calendar-minus"></i> Backfill Past Date
+                                </div>
+
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    {% if day.is_completed %}
+                                        {% if day.is_late_submission %}
+                                            <div class="alert alert-warning mb-0">
+                                                <strong><i class="fas fa-exclamation-triangle"></i> Completed (Late)</strong><br>
+                                                <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
+                                                <small>at {{ day.completion.created_at|date:"h:i A, M d" }}</small><br>
+                                                <span class="badge bg-warning mt-1">{{ day.days_late }} day{{ day.days_late|pluralize }} late</span>
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-success mb-0">
+                                                <strong><i class="fas fa-check-circle"></i> Completed</strong><br>
+                                                <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
+                                                <small>at {{ day.completion.created_at|date:"h:i A" }}</small>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if day.is_past %}
+                                            <div class="alert alert-danger mb-0">
+                                                <strong><i class="fas fa-times-circle"></i> Missing</strong><br>
+                                                <small>Not completed on schedule</small>
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-warning mb-0">
+                                                <strong><i class="fas fa-clock"></i> Pending</strong><br>
+                                                <small>Not yet completed</small>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-5 text-md-end">
+                                    {% if day.is_completed %}
+                                        <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="modern-btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i> Update
                                         </a>
-                                    </div>
+                                        <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="modern-btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="modern-btn btn-success btn-sm">
+                                            <i class="fas fa-file-pdf"></i> PDF
+                                        </a>
+                                    {% else %}
+                                        {% if day.schedule %}
+                                            <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="modern-btn btn-primary">
+                                                <i class="fas fa-clipboard-check"></i> Complete Checklist
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No schedule</span>
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
-                            </div>
-
-                            <!-- Week Days Timeline -->
-                            <div class="pm-mt-3">
-                                {% for day in week_days %}
-                                <div class="pm-card {% if day.is_today %}border-left{% endif %} mb-3 pm-fade-in" style="{% if day.is_today %}border-left: 4px solid var(--purple-primary) !important;{% endif %} animation-delay: {{ forloop.counter0 }}00ms;">
-                                    <div class="pm-card-body">
-                                        <div class="row align-items-center">
-                                            <!-- Day Info -->
-                                            <div class="col-md-3 mb-3 mb-md-0">
-                                                <h5 class="mb-1" style="color: var(--gray-900); font-weight: 700;">
-                                                    {{ day.day_name }}
-                                                </h5>
-                                                <small class="text-muted">{{ day.date|date:"F d, Y" }}</small>
-                                                <div class="mt-2">
-                                                    {% if day.is_today %}
-                                                        <span class="pm-badge pm-badge-purple">
-                                                            <i class="fas fa-star"></i> Today
-                                                        </span>
-                                                    {% elif day.is_past %}
-                                                        <span class="pm-badge" style="background: var(--gray-200); color: var(--gray-700);">
-                                                            <i class="fas fa-history"></i> Past
-                                                        </span>
-                                                    {% elif day.is_future %}
-                                                        <span class="pm-badge" style="background: var(--gray-100); color: var(--gray-500);">
-                                                            <i class="fas fa-clock"></i> Future
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-
-                                            <!-- Status -->
-                                            <div class="col-md-4 mb-3 mb-md-0">
-                                                {% if day.is_completed %}
-                                                    {% if day.is_late_submission %}
-                                                        <div class="pm-alert pm-alert-warning mb-0">
-                                                            <div class="pm-alert-heading">
-                                                                <i class="fas fa-exclamation-triangle"></i>
-                                                                Completed (Late)
-                                                            </div>
-                                                            <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
-                                                            <small>at {{ day.completion.created_at|date:"h:i A, M d" }}</small><br>
-                                                            <span class="pm-badge pm-badge-warning mt-2">
-                                                                {{ day.days_late }} day{{ day.days_late|pluralize }} late
-                                                            </span>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="pm-alert pm-alert-success mb-0">
-                                                            <div class="pm-alert-heading">
-                                                                <i class="fas fa-check-circle"></i>
-                                                                Completed
-                                                            </div>
-                                                            <small>by {{ day.completion.completed_by.get_full_name|default:day.completion.completed_by.username }}</small><br>
-                                                            <small>at {{ day.completion.created_at|date:"h:i A" }}</small>
-                                                        </div>
-                                                    {% endif %}
-                                                {% else %}
-                                                    {% if day.is_past %}
-                                                        <div class="pm-alert pm-alert-danger mb-0">
-                                                            <div class="pm-alert-heading">
-                                                                <i class="fas fa-times-circle"></i>
-                                                                Missing
-                                                            </div>
-                                                            <small>Not completed on schedule</small><br>
-                                                            <small class="text-muted">Use backfill option above</small>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="pm-alert pm-alert-warning mb-0">
-                                                            <div class="pm-alert-heading">
-                                                                <i class="fas fa-clock"></i>
-                                                                Pending
-                                                            </div>
-                                                            <small>Not yet completed</small>
-                                                        </div>
-                                                    {% endif %}
-                                                {% endif %}
-                                            </div>
-
-                                            <!-- Actions -->
-                                            <div class="col-md-5 text-md-right">
-                                                <div class="pm-flex pm-gap-1 flex-wrap justify-content-md-end">
-                                                    {% if day.is_completed %}
-                                                        <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="pm-btn pm-btn-warning pm-btn-sm" title="Update readings throughout the day">
-                                                            <i class="fas fa-edit"></i> Update
-                                                        </a>
-                                                        <a href="{% url 'view_daily_pm_completion' day.completion.id %}" class="pm-btn pm-btn-sm" style="background: var(--info-color); color: white;">
-                                                            <i class="fas fa-eye"></i> View
-                                                        </a>
-                                                        <a href="{% url 'export_daily_pm_pdf' day.completion.id %}" class="pm-btn pm-btn-success pm-btn-sm">
-                                                            <i class="fas fa-file-pdf"></i> PDF
-                                                        </a>
-                                                    {% else %}
-                                                        {% if day.schedule %}
-                                                            <a href="{% url 'complete_daily_pm' day.schedule.id %}" class="pm-btn pm-btn-primary">
-                                                                <i class="fas fa-clipboard-check"></i> Complete Checklist
-                                                            </a>
-                                                        {% else %}
-                                                            <span class="text-muted">No schedule</span>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+            </div>
 
-                    <!-- Weekly Report Card -->
-                    <div class="pm-card pm-card-gradient pm-fade-in">
-                        <div class="pm-card-header border-0">
-                            <h5 class="pm-card-title mb-0">
-                                <i class="fas fa-chart-bar"></i> Weekly Report
-                            </h5>
-                        </div>
-                        <div class="pm-card-body">
-                            <p style="color: rgba(255,255,255,0.95); margin-bottom: 1.5rem;">View or export the aggregated weekly PM report (Monday - Friday).</p>
-                            <div class="pm-flex pm-gap-2 flex-wrap">
-                                <a href="{% url 'weekly_pm_report_view' %}" class="pm-btn pm-btn-secondary">
-                                    <i class="fas fa-chart-bar"></i> View Weekly Report
-                                </a>
-                                <a href="{% url 'export_weekly_pm_pdf' %}" class="pm-btn pm-btn-success">
-                                    <i class="fas fa-file-pdf"></i> Export Weekly PDF
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Back Button -->
-                    <div class="text-center pm-mt-3">
-                        <a href="{% url 'pm_main_dashboard' %}" class="pm-btn pm-btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+            <!-- Weekly Report -->
+            <div class="modern-card">
+                <div class="card-header-modern">
+                    <h3 class="card-title-modern">
+                        <i class="fas fa-chart-bar"></i> Weekly Report
+                    </h3>
+                </div>
+                <div class="card-body-modern">
+                    <p class="text-muted">View or export the aggregated weekly PM report (Monday - Friday).</p>
+                    <div class="d-flex gap-2 flex-wrap mt-3">
+                        <a href="{% url 'weekly_pm_report_view' %}" class="modern-btn btn-info">
+                            <i class="fas fa-chart-bar"></i> View Weekly Report
+                        </a>
+                        <a href="{% url 'export_weekly_pm_pdf' %}" class="modern-btn btn-success">
+                            <i class="fas fa-file-pdf"></i> Export Weekly PDF
                         </a>
                     </div>
                 </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'pm_main_dashboard' %}" class="modern-btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+                </a>
             </div>
         {% endif %}
     </div>
