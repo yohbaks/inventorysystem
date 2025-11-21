@@ -1,0 +1,522 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Week {{ week_number }} - {{ month_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> {{ template.title }}
+                    </h4>
+                    <h6>{{ month_name}} - Week {{ week_number }}</h6>
+                    <small>{{ friday_date|date:"F d, Y (l)" }}</small>
+                </div>
+
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if completion %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> <strong>Update Mode:</strong> You are updating Week {{ week_number }}. Your changes will be saved.
+                        </div>
+                        {% endif %}
+
+                        <!-- Smart Suggestions with Dropdowns -->
+                        <div class="alert {% if smart_suggestions.has_any_alerts %}alert-warning{% else %}alert-success{% endif %}">
+                            <h5 class="alert-heading">
+                                <i class="fas {% if smart_suggestions.has_any_alerts %}fa-exclamation-triangle{% else %}fa-check-circle{% endif %}"></i>
+                                Smart Suggestions for Week {{ week_number }} ({{ smart_suggestions.week_date_range }})
+                            </h5>
+                            <p class="mb-2"><strong>{{ smart_suggestions.overall_summary }}</strong></p>
+
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-toggle="collapse" data-target="#smartSuggestionsDetails" aria-expanded="false">
+                                <i class="fas fa-chevron-down"></i> View Detailed Insights
+                            </button>
+
+                            <div class="collapse mt-3" id="smartSuggestionsDetails">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <!-- Item #1: Equipment Running -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-server"></i> Item #1: Equipment Status
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item1.summary }}</p>
+
+                                            {% if smart_suggestions.item1.equipment_checks %}
+                                            <button class="btn btn-sm btn-info" type="button" data-toggle="collapse" data-target="#item1Details">
+                                                <i class="fas fa-list"></i> View {{ smart_suggestions.item1.total_checks }} Daily Check(s)
+                                            </button>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-success autofill-selected-btn" type="button" data-item="1" data-action="{{ smart_suggestions.item1.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Selected
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item1Details">
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <div class="mb-2">
+                                                            <button type="button" class="btn btn-xs btn-outline-primary select-all-item1" onclick="selectAllItem1Checks(true)">Select All</button>
+                                                            <button type="button" class="btn btn-xs btn-outline-secondary deselect-all-item1" onclick="selectAllItem1Checks(false)">Deselect All</button>
+                                                            <small class="text-muted ml-2">
+                                                                <i class="fas fa-info-circle"></i> Check the entries you want to include in auto-fill
+                                                            </small>
+                                                        </div>
+                                                        <div style="max-height: 250px; overflow-y: auto;">
+                                                            <table class="table table-sm table-striped table-hover">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 40px;">
+                                                                            <input type="checkbox" id="checkAllItem1" title="Select/Deselect All" onchange="toggleAllItem1Checks(this)">
+                                                                        </th>
+                                                                        <th>Date</th>
+                                                                        <th>Status</th>
+                                                                        <th>Details</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for check in smart_suggestions.item1.equipment_checks %}
+                                                                    <tr class="{% if check.status == 'Issue' %}table-warning{% endif %}">
+                                                                        <td>
+                                                                            <input type="checkbox"
+                                                                                   class="item1-check"
+                                                                                   data-date="{{ check.date }}"
+                                                                                   data-details="{{ check.details }}"
+                                                                                   {% if check.status == 'Issue' and 'working properly' not in check.details|lower and 'no issues' not in check.details|lower and 'operational' not in check.details|lower %}checked{% endif %}>
+                                                                        </td>
+                                                                        <td>{{ check.date }}</td>
+                                                                        <td><span class="badge badge-{% if check.status == 'Running' %}success{% else %}warning{% endif %}">{{ check.status }}</span></td>
+                                                                        <td><small>{{ check.details }}</small></td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #2: Water Leaks -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-tint"></i> Item #2: Water Leak Detection
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item2.summary }}</p>
+
+                                            {% if smart_suggestions.item2.has_water_leaks %}
+                                            <button class="btn btn-sm btn-danger" type="button" data-toggle="collapse" data-target="#item2Details">
+                                                <i class="fas fa-exclamation-triangle"></i> View {{ smart_suggestions.item2.total_incidents }} Incident(s)
+                                            </button>
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="2" data-action="{{ smart_suggestions.item2.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item2Details">
+                                                <div class="card bg-light border-danger">
+                                                    <div class="card-body">
+                                                        <h6 class="text-danger">Water Leak Incidents:</h6>
+                                                        {% for incident in smart_suggestions.item2.leak_incidents %}
+                                                        <div class="alert alert-{% if incident.severity == 'Critical' %}danger{% else %}warning{% endif %} mb-2">
+                                                            <strong>{{ incident.date }}</strong> - <span class="badge badge-{% if incident.severity == 'Critical' %}danger{% else %}warning{% endif %}">{{ incident.severity }}</span>
+                                                            <br><strong>Location:</strong> {{ incident.location }}
+                                                            <br><strong>Details:</strong> {{ incident.details }}
+                                                            <br><strong>Action:</strong> {{ incident.action }}
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <p class="text-success"><small><i class="fas fa-check"></i> {{ smart_suggestions.item2.suggested_action }}</small></p>
+                                            {% endif %}
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #3: FD/BD Security -->
+                                        <div class="mb-4">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-lock"></i> Item #3: FD/BD Security Check
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item3.summary }}</p>
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="3" data-action="{{ smart_suggestions.item3.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+                                        </div>
+
+                                        <hr>
+
+                                        <!-- Item #4: Obstructions -->
+                                        <div class="mb-0">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-boxes"></i> Item #4: Obstruction Check
+                                            </h6>
+                                            <p class="mb-2">{{ smart_suggestions.item4.summary }}</p>
+
+                                            {% if smart_suggestions.item4.has_previous_notes %}
+                                            <button class="btn btn-sm btn-warning" type="button" data-toggle="collapse" data-target="#item4Details">
+                                                <i class="fas fa-history"></i> View Previous Obstruction Notes
+                                            </button>
+
+                                            <div class="collapse mt-2" id="item4Details">
+                                                <div class="card bg-light border-warning">
+                                                    <div class="card-body">
+                                                        <h6 class="text-warning">Previous Obstructions (This Month):</h6>
+                                                        <ul class="list-unstyled">
+                                                            {% for obstruction in smart_suggestions.item4.previous_obstructions %}
+                                                            <li class="mb-2">
+                                                                <strong>Week {{ obstruction.week }}:</strong> {{ obstruction.details }}
+                                                            </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        <p class="text-info"><small><i class="fas fa-info-circle"></i> Verify these locations are now clear</small></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                            <button class="btn btn-sm btn-success autofill-btn" type="button" data-item="4" data-action="{{ smart_suggestions.item4.suggested_action }}">
+                                                <i class="fas fa-magic"></i> Auto-fill Action
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Field -->
+                        <div class="form-group">
+                            <label for="location"><strong>Location of FD/BD:</strong></label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="location"
+                                   name="location"
+                                   value="{{ existing_location }}"
+                                   placeholder="e.g., 2nd Floor East Wing"
+                                   required>
+                            <small class="form-text text-muted">Specify which Floor/Building Distributor this checklist is for</small>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <strong>Instructions:</strong>
+                            <ul>
+                                <li>Check the box (✓) in the Wk{{ week_number }} column for each completed task</li>
+                                <li>Note any problems encountered and actions taken</li>
+                                <li>This checklist should be completed every Friday</li>
+                            </ul>
+                        </div>
+
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 5%">Item No.</th>
+                                    <th style="width: 45%">Task</th>
+                                    <th style="width: 10%">Wk{{ week_number }}<br>(put ✓ if done)</th>
+                                    <th style="width: 40%">Problems Encountered/Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="text-center">
+                                        <strong>{{ item.item_number }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ item.task_description|linebreaks }}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox"
+                                                   class="custom-control-input"
+                                                   id="item_{{ item.id }}"
+                                                   name="item_{{ item.id }}"
+                                                   {% if item.is_checked %}checked{% endif %}>
+                                            <label class="custom-control-label" for="item_{{ item.id }}">
+                                                <i class="fas fa-check text-success"></i>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-2">
+                                            <label for="problems_{{ item.id }}" class="small">Problems:</label>
+                                            <textarea class="form-control"
+                                                      id="problems_{{ item.id }}"
+                                                      name="problems_{{ item.id }}"
+                                                      rows="6"
+                                                      placeholder="Describe any problems for Week {{ week_number }}..."></textarea>
+                                            {% if item.existing_problems %}
+                                            <small class="text-muted">
+                                                <strong>Previous notes:</strong><br>
+                                                {{ item.existing_problems|linebreaksbr }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group mb-0">
+                                            <label for="action_{{ item.id }}" class="small">Action Taken:</label>
+                                            <textarea class="form-control"
+                                                      id="action_{{ item.id }}"
+                                                      name="action_{{ item.id }}"
+                                                      rows="6"
+                                                      placeholder="Describe action taken for Week {{ week_number }}..."></textarea>
+                                            {% if item.existing_action %}
+                                            <small class="text-muted">
+                                                <strong>Previous actions:</strong><br>
+                                                {{ item.existing_action|linebreaksbr }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Signature Section -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Accomplished by:</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="printed_name">Printed Name:</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="printed_name"
+                                           name="printed_name"
+                                           value="{% if completion %}{{ completion.printed_name }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}"
+                                           required>
+                                    <small class="form-text text-muted">Your name will appear on the PDF</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {% if completion %}Update{% else %}Submit{% endif %} Week {{ week_number }}
+                            </button>
+                            <a href="{% url 'weekly_fdbd_dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Helper functions for Item #1 checkboxes
+function toggleAllItem1Checks(checkbox) {
+    const checkboxes = document.querySelectorAll('.item1-check');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+function selectAllItem1Checks(select) {
+    const checkboxes = document.querySelectorAll('.item1-check');
+    checkboxes.forEach(cb => cb.checked = select);
+    document.getElementById('checkAllItem1').checked = select;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to replace or append week content
+    function updateWeekContent(textarea, weekNumber, newContent) {
+        const weekMarker = `[Week ${weekNumber}]`;
+        const currentValue = textarea.value.trim();
+
+        if (!currentValue) {
+            // Empty textarea, just add new content
+            textarea.value = weekMarker + '\n' + newContent;
+            return;
+        }
+
+        // Check if this week's content already exists
+        const weekRegex = new RegExp(`\\[Week ${weekNumber}\\][\\s\\S]*?(?=\\[Week \\d+\\]|$)`, 'g');
+
+        if (currentValue.includes(weekMarker)) {
+            // Replace existing week content
+            textarea.value = currentValue.replace(weekRegex, weekMarker + '\n' + newContent);
+        } else {
+            // Append new week content
+            textarea.value = currentValue + '\n\n' + weekMarker + '\n' + newContent;
+        }
+    }
+
+    // Auto-fill SELECTED entries button (Item #1)
+    const autofillSelectedButtons = document.querySelectorAll('.autofill-selected-btn');
+
+    autofillSelectedButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemNumber = this.dataset.item;
+            const suggestedAction = this.dataset.action;
+
+            if (itemNumber === '1') {
+                // Get all checked entries for Item #1
+                const checkedBoxes = document.querySelectorAll('.item1-check:checked');
+
+                if (checkedBoxes.length === 0) {
+                    alert('Please select at least one entry to auto-fill');
+                    return;
+                }
+
+                // Build problems text from selected entries
+                let problemsText = '';
+                checkedBoxes.forEach((checkbox, index) => {
+                    const date = checkbox.dataset.date;
+                    const details = checkbox.dataset.details;
+                    problemsText += `${date}: ${details}`;
+                    if (index < checkedBoxes.length - 1) {
+                        problemsText += '\n';
+                    }
+                });
+
+                // Fill the form fields
+                {% for item in items %}
+                if ('{{ item.item_number }}' === itemNumber) {
+                    // Fill Problems field
+                    const problemsTextarea = document.getElementById('problems_{{ item.id }}');
+                    if (problemsTextarea && problemsText) {
+                        updateWeekContent(problemsTextarea, {{ week_number }}, problemsText);
+
+                        // Visual feedback
+                        problemsTextarea.classList.add('border-success');
+                        setTimeout(() => {
+                            problemsTextarea.classList.remove('border-success');
+                        }, 2000);
+                    }
+
+                    // Fill Action field
+                    const actionTextarea = document.getElementById('action_{{ item.id }}');
+                    if (actionTextarea) {
+                        updateWeekContent(actionTextarea, {{ week_number }}, suggestedAction);
+
+                        // Scroll and focus
+                        actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        actionTextarea.focus();
+
+                        // Visual feedback
+                        actionTextarea.classList.add('border-success');
+                        setTimeout(() => {
+                            actionTextarea.classList.remove('border-success');
+                        }, 2000);
+                    }
+                }
+                {% endfor %}
+            }
+        });
+    });
+
+    // Auto-fill action buttons (for Items 2, 3, 4 - old behavior)
+    const autofillButtons = document.querySelectorAll('.autofill-btn');
+
+    autofillButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const itemNumber = this.dataset.item;
+            const suggestedProblems = this.dataset.problems || '';
+            const suggestedAction = this.dataset.action;
+
+            // Find the corresponding problems and action textareas
+            {% for item in items %}
+            if ('{{ item.item_number }}' === itemNumber) {
+                // Fill Problems field if suggested problems exist
+                const problemsTextarea = document.getElementById('problems_{{ item.id }}');
+                if (problemsTextarea && suggestedProblems) {
+                    updateWeekContent(problemsTextarea, {{ week_number }}, suggestedProblems);
+
+                    // Visual feedback for problems
+                    problemsTextarea.classList.add('border-success');
+                    setTimeout(() => {
+                        problemsTextarea.classList.remove('border-success');
+                    }, 2000);
+                }
+
+                // Fill Action field
+                const actionTextarea = document.getElementById('action_{{ item.id }}');
+                if (actionTextarea) {
+                    updateWeekContent(actionTextarea, {{ week_number }}, suggestedAction);
+
+                    // Scroll to the textarea
+                    actionTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    actionTextarea.focus();
+
+                    // Visual feedback
+                    actionTextarea.classList.add('border-success');
+                    setTimeout(() => {
+                        actionTextarea.classList.remove('border-success');
+                    }, 2000);
+                }
+            }
+            {% endfor %}
+        });
+    });
+
+    // Manual collapse handling for all collapse buttons
+    const collapseButtons = document.querySelectorAll('[data-toggle="collapse"]');
+    collapseButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const targetSelector = this.getAttribute('data-target');
+            const targetElement = document.querySelector(targetSelector);
+
+            if (targetElement) {
+                // Toggle the collapse class
+                if (targetElement.classList.contains('show')) {
+                    targetElement.classList.remove('show');
+                    this.setAttribute('aria-expanded', 'false');
+                } else {
+                    targetElement.classList.add('show');
+                    this.setAttribute('aria-expanded', 'true');
+                }
+
+                // Toggle chevron icon
+                const icon = this.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+                if (icon) {
+                    if (icon.classList.contains('fa-chevron-down')) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    } else {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.border-success {
+    border-width: 2px !important;
+    transition: border-color 0.3s ease;
+}
+
+.autofill-btn:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.collapse {
+    display: none;
+    transition: all 0.3s ease;
+}
+
+.collapse.show {
+    display: block;
+}
+
+.table-warning {
+    background-color: #fff3cd !important;
+}
+</style>
+{% endblock %}

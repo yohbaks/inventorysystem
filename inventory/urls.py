@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import pm_pdf_views, views
+from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard, pm_downtime_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -234,31 +234,37 @@ urlpatterns = [
 
 
     # ================================
-    # PM CHECKLIST - REPORTS ROUTES
+    # PM CHECKLIST SYSTEM
     # ================================
-    path('pm/', views.pm_dashboard, name='pm_dashboard'),
-    
-    # Checklist Management
-    path('pm/checklists/', views.pm_checklist_list, name='pm_checklist_list'),
-    path('pm/checklist/fill/<int:schedule_id>/', views.pm_checklist_fill, name='pm_checklist_fill'),
-    path('pm/checklist/view/<int:completion_id>/', views.pm_checklist_view, name='pm_checklist_view'),
-    path('pm/schedule/create/', views.pm_schedule_create, name='pm_schedule_create'),
-    
-    # Reports
-    path('pm/reports/', views.pm_reports, name='pm_reports'),
-    path('pm/reports/generate/', views.pm_generate_report, name='pm_generate_report'),
-    
-    # PDF Exports
-    path('pm/export/checklist/<int:completion_id>/', pm_pdf_views.export_checklist_pdf, name='pm_export_checklist_pdf'),
-    path('pm/export/report/<int:report_id>/', pm_pdf_views.export_report_pdf, name='pm_export_report_pdf'),
-    
-    # Issues
-    path('pm/issues/', views.pm_issues, name='pm_issues'),
-    path('pm/issue/<int:issue_id>/update/', views.pm_issue_update, name='pm_issue_update'),
-    
-    # API endpoints for AJAX
-    path('pm/api/mark-complete/<int:schedule_id>/', views.api_mark_complete, name='pm_api_mark_complete'),
-    path('pm/api/schedule-bulk/', views.api_schedule_bulk, name='pm_api_schedule_bulk'),
+    # Main PM Dashboard (All Forms)
+    path('pm/', pm_main_dashboard.pm_main_dashboard, name='pm_main_dashboard'),
 
+    # ANNEX A - Daily PM Dashboard and Completion
+    path('pm/daily/', pm_daily_views.daily_pm_dashboard, name='pm_daily_dashboard'),
+    path('pm/daily/complete/<int:schedule_id>/', pm_daily_views.complete_daily_pm, name='complete_daily_pm'),
+    path('pm/daily/view/<int:completion_id>/', pm_daily_views.view_daily_pm_completion, name='view_daily_pm_completion'),
+    path('pm/daily/backfill/', pm_daily_views.backfill_pm_checklist, name='backfill_pm_checklist'),
+
+    # Daily/Weekly PDF Exports (Annex A)
+    path('pm/daily/export/<int:completion_id>/', pm_daily_views.export_daily_pm_pdf, name='export_daily_pm_pdf'),
+    path('pm/weekly/export/', pm_daily_views.export_weekly_pm_pdf, name='export_weekly_pm_pdf'),
+    path('pm/weekly/view/', pm_daily_views.weekly_pm_report_view, name='weekly_pm_report_view'),
+
+    # ================================
+    # ANNEX B - Monthly PM Dashboard and Completion
+    path('pm/monthly/', pm_monthly_views.monthly_pm_dashboard, name='monthly_pm_dashboard'),
+    path('pm/monthly/complete/<int:schedule_id>/', pm_monthly_views.complete_monthly_pm, name='complete_monthly_pm'),
+    path('pm/monthly/export/<int:completion_id>/', pm_monthly_weekly_export.export_monthly_pm_pdf, name='export_monthly_pm_pdf'),
+
+    # ================================
+    # ANNEX C - Weekly FD/BD (4 weeks/month) PM Dashboard and Completion
+    path('pm/weekly-fdbd/', pm_weekly_views.weekly_pm_dashboard, name='weekly_fdbd_dashboard'),
+    path('pm/weekly-fdbd/complete/<int:schedule_id>/<int:week_number>/', pm_weekly_views.complete_weekly_pm, name='complete_weekly_pm'),
+    path('pm/weekly-fdbd/export/<int:completion_id>/', pm_monthly_weekly_export.export_weekly_pm_pdf, name='export_weekly_fdbd_pdf'),
+
+    # ================================
+    # Equipment Downtime Tracking
+    path('pm/downtime/log/<int:item_completion_id>/', pm_downtime_views.log_downtime_event, name='log_downtime_event'),
+    path('pm/downtime/analytics/', pm_downtime_views.downtime_analytics_dashboard, name='downtime_analytics'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

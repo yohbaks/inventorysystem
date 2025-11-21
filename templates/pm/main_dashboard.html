@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}PM Checklists Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <!-- Header -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> Preventive Maintenance Checklists
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">Select a checklist to view or complete:</p>
+                </div>
+            </div>
+
+            <!-- PM Forms Grid -->
+            <div class="row">
+                {% for form in pm_forms %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-{{ form.color }}">
+                        <div class="card-header bg-{{ form.color }} text-white">
+                            <h5 class="mb-0">
+                                <i class="fas {{ form.icon }}"></i> ANNEX "{{ form.annex_code }}"
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">{{ form.title }}</h6>
+                            <p class="card-text">{{ form.description }}</p>
+                            <hr>
+                            <p class="mb-2">
+                                <strong><i class="fas fa-clock"></i> Frequency:</strong> {{ form.frequency }}
+                            </p>
+                            <p class="mb-3">
+                                <strong><i class="fas fa-calendar-check"></i> Schedule:</strong> {{ form.schedule_note }}
+                            </p>
+
+                            {% if form.dashboard_url != '#' %}
+                            <a href="{% url form.dashboard_url %}" class="btn btn-{{ form.color }} btn-block btn-lg">
+                                <i class="fas fa-arrow-right"></i> Go to Dashboard
+                            </a>
+                            {% else %}
+                            <button class="btn btn-secondary btn-block btn-lg" disabled>
+                                <i class="fas fa-lock"></i> Coming Soon
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}

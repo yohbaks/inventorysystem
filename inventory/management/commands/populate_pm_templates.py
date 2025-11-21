@@ -36,256 +36,231 @@ class Command(BaseCommand):
         template, created = PMChecklistTemplate.objects.get_or_create(
             annex_code='A',
             defaults={
-                'title': 'Annex A - Datacenter Daily/Weekly Preventive Maintenance',
+                'title': 'Preventive Maintenance Checklist/Activities for the Datacenter (Daily/Weekly)',
                 'frequency': 'DAILY',
-                'description': 'Daily and weekly preventive maintenance checks for datacenter equipment',
-                'schedule_note': 'Monday - Friday, multiple times per day',
+                'description': 'Daily preventive maintenance checks for datacenter (Mon-Fri). Complete each day, weekly report aggregates all 5 days.',
+                'schedule_note': 'Mondays - Fridays',
                 'is_active': True
             }
         )
 
-        if created:
+        # Update title if template already exists
+        if not created:
+            template.title = 'Preventive Maintenance Checklist/Activities for the Datacenter (Daily/Weekly)'
+            template.schedule_note = 'Mondays - Fridays'
+            template.frequency = 'DAILY'
+            template.description = 'Daily preventive maintenance checks for datacenter (Mon-Fri). Complete each day, weekly report aggregates all 5 days.'
+            template.save()
+            # Clear existing items to recreate them
+            template.items.all().delete()
+            self.stdout.write(self.style.WARNING('Updating Annex A template and items'))
+        else:
             self.stdout.write(self.style.SUCCESS('Created Annex A template'))
 
-            # Add items for Annex A
-            items = [
-                {
-                    'item_number': 1,
-                    'task_description': 'Check server room temperature and humidity levels',
-                    'has_schedule_times': True,
-                    'schedule_times': ['8:00 AM', '10:00 AM', '12:00 PM', '2:00 PM', '4:00 PM'],
-                    'requires_value_input': True,
-                    'value_unit': '°C / %RH'
-                },
-                {
-                    'item_number': 2,
-                    'task_description': 'Verify UPS status and battery levels',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM', '2:00 PM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 3,
-                    'task_description': 'Check cooling system operation and airflow',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM', '3:00 PM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 4,
-                    'task_description': 'Monitor server rack temperatures',
-                    'has_schedule_times': True,
-                    'schedule_times': ['10:00 AM', '2:00 PM'],
-                    'requires_value_input': True,
-                    'value_unit': '°C'
-                },
-                {
-                    'item_number': 5,
-                    'task_description': 'Verify fire suppression system status',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 6,
-                    'task_description': 'Check physical security (doors, locks, access logs)',
-                    'has_schedule_times': True,
-                    'schedule_times': ['8:00 AM', '4:00 PM'],
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 7,
-                    'task_description': 'Inspect cable management and connections',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 8,
-                    'task_description': 'Review system monitoring alerts and logs',
-                    'has_schedule_times': True,
-                    'schedule_times': ['9:00 AM', '1:00 PM', '4:00 PM'],
-                    'requires_value_input': False
-                },
-            ]
+        # Add items for Annex A - properly numbered 1-11 without gaps
+        items = [
+            {
+                'item_number': 1,
+                'task_description': 'Check if WAN connectivity is up',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 2,
+                'task_description': 'Check if the telephone system is up and running\nCheck if all servers are up and running',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 3,
+                'task_description': "Check if servers' utilization (processor, memory and storage) is below 80%",
+                'has_schedule_times': True,
+                'schedule_times': ['9 AM', '2 PM'],
+                'requires_value_input': False
+            },
+            {
+                'item_number': 4,
+                'task_description': 'Check if the temperature level in the network room is between 20°C to 27°C (68°F to 80.6°F)',
+                'has_schedule_times': True,
+                'schedule_times': ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
+                'requires_value_input': False
+            },
+            {
+                'item_number': 5,
+                'task_description': 'Check if the humidity level in the network room is between 30% to 60%',
+                'has_schedule_times': True,
+                'schedule_times': ['8 AM', '10 AM', '12 PM', '2 PM', '4 PM'],
+                'requires_value_input': False
+            },
+            {
+                'item_number': 6,
+                'task_description': "Check if servers' anti-virus definition files are up-to-date",
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 7,
+                'task_description': "Check if server's event logs for critical warnings or errors",
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 8,
+                'task_description': 'Check for signs of water leaks',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 9,
+                'task_description': 'Check for signs of holes on the ceiling and walls',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 10,
+                'task_description': 'Check for signs of pest infestation',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 11,
+                'task_description': 'Remove any fire hazards.',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+        ]
 
-            for item_data in items:
-                PMChecklistItem.objects.create(
-                    template=template,
-                    **item_data,
-                    order=item_data['item_number']
-                )
+        for item_data in items:
+            PMChecklistItem.objects.create(
+                template=template,
+                **item_data,
+                order=item_data['item_number']
+            )
 
-            self.stdout.write(f'  Added {len(items)} items to Annex A')
-        else:
-            self.stdout.write(self.style.WARNING('Annex A template already exists'))
+        self.stdout.write(f'  Added {len(items)} items to Annex A')
+        self.stdout.write(self.style.SUCCESS('  Items 1-2: Daily tasks (M-F)'))
+        self.stdout.write(self.style.SUCCESS('  Items 3-5: Daily with multiple readings (M-F)'))
+        self.stdout.write(self.style.SUCCESS('  Items 6-11: Weekly Friday-only tasks (gray shading)'))
 
     def create_annex_b(self):
         """Create Annex B - Datacenter (Monthly) template"""
         template, created = PMChecklistTemplate.objects.get_or_create(
             annex_code='B',
             defaults={
-                'title': 'Annex B - Datacenter Monthly Preventive Maintenance',
+                'title': 'Preventive Maintenance Checklist/Activities for the Datacenter (Monthly)',
                 'frequency': 'MONTHLY',
                 'description': 'Monthly preventive maintenance tasks for datacenter infrastructure',
-                'schedule_note': 'First week of each month',
+                'schedule_note': '1st week of the month',
                 'is_active': True
             }
         )
 
-        if created:
+        # Update title and clear items if already exists
+        if not created:
+            template.title = 'Preventive Maintenance Checklist/Activities for the Datacenter (Monthly)'
+            template.schedule_note = '1st week of the month'
+            template.save()
+            template.items.all().delete()
+            self.stdout.write(self.style.WARNING('Updating Annex B template and items'))
+        else:
             self.stdout.write(self.style.SUCCESS('Created Annex B template'))
 
-            items = [
-                {
-                    'item_number': 1,
-                    'task_description': 'Clean and vacuum server room floors and under raised floors',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 2,
-                    'task_description': 'Clean air conditioning filters and coils',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 3,
-                    'task_description': 'Inspect and clean UPS battery terminals',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 4,
-                    'task_description': 'Test emergency power shutdown procedures',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 5,
-                    'task_description': 'Check and tighten all cable connections',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 6,
-                    'task_description': 'Inspect server rack mounting hardware',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 7,
-                    'task_description': 'Test fire alarm and suppression system',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 8,
-                    'task_description': 'Review and update equipment inventory',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 9,
-                    'task_description': 'Backup critical system configurations',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 10,
-                    'task_description': 'Inspect and clean equipment fans and vents',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-            ]
+        items = [
+            {
+                'item_number': 1,
+                'task_description': 'Check network equipment for critical hardware alarms or warnings',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 2,
+                'task_description': 'Performed complete configuration and system backup of the telephone system',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 3,
+                'task_description': 'Test UPS in the server/network room if able to sustain at least five (5) minutes of backup battery power',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 4,
+                'task_description': 'Test generator set and ATS (in coordination with the Equipment Management/General Services Office) if able to supply backup power to the server/network room',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+        ]
 
-            for item_data in items:
-                PMChecklistItem.objects.create(
-                    template=template,
-                    **item_data,
-                    order=item_data['item_number']
-                )
+        for item_data in items:
+            PMChecklistItem.objects.create(
+                template=template,
+                **item_data,
+                order=item_data['item_number']
+            )
 
-            self.stdout.write(f'  Added {len(items)} items to Annex B')
-        else:
-            self.stdout.write(self.style.WARNING('Annex B template already exists'))
+        self.stdout.write(f'  Added {len(items)} items to Annex B')
 
     def create_annex_c(self):
         """Create Annex C - Floor/Building Distributors (Weekly) template"""
         template, created = PMChecklistTemplate.objects.get_or_create(
             annex_code='C',
             defaults={
-                'title': 'Annex C - Floor/Building Distributors Weekly Preventive Maintenance',
+                'title': 'Preventive Maintenance Checklist/Activities for the Floor/Building Distributors (Weekly)',
                 'frequency': 'WEEKLY',
-                'description': 'Weekly preventive maintenance for network distribution equipment on floors/buildings',
-                'schedule_note': 'Check each week of the month',
+                'description': 'Weekly preventive maintenance for floor/building distributors - filled every Friday for 4 weeks per month',
+                'schedule_note': 'as approved by Head of Office',
                 'is_active': True
             }
         )
 
-        if created:
+        # Update title and clear items if already exists
+        if not created:
+            template.title = 'Preventive Maintenance Checklist/Activities for the Floor/Building Distributors (Weekly)'
+            template.description = 'Weekly preventive maintenance for floor/building distributors - filled every Friday for 4 weeks per month'
+            template.schedule_note = 'as approved by Head of Office'
+            template.save()
+            template.items.all().delete()
+            self.stdout.write(self.style.WARNING('Updating Annex C template and items'))
+        else:
             self.stdout.write(self.style.SUCCESS('Created Annex C template'))
 
-            items = [
-                {
-                    'item_number': 1,
-                    'task_description': 'Inspect network switch status lights and connections',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 2,
-                    'task_description': 'Check patch panel cable organization',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 3,
-                    'task_description': 'Verify WiFi access point functionality',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 4,
-                    'task_description': 'Clean distribution frame and equipment',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 5,
-                    'task_description': 'Check for unauthorized network connections',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 6,
-                    'task_description': 'Inspect distribution cabinet locks and security',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 7,
-                    'task_description': 'Test backup power for distribution equipment',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-                {
-                    'item_number': 8,
-                    'task_description': 'Document any physical damage or wear',
-                    'has_schedule_times': False,
-                    'requires_value_input': False
-                },
-            ]
+        items = [
+            {
+                'item_number': 1,
+                'task_description': 'Check if all equipment are running',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 2,
+                'task_description': 'Check for signs of water leaks',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 3,
+                'task_description': 'Check if BDs and FDs are locked',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+            {
+                'item_number': 4,
+                'task_description': 'Remove any obstructions on top, side and back of the FDs and BDs',
+                'has_schedule_times': False,
+                'requires_value_input': False
+            },
+        ]
 
-            for item_data in items:
-                PMChecklistItem.objects.create(
-                    template=template,
-                    **item_data,
-                    order=item_data['item_number']
-                )
+        for item_data in items:
+            PMChecklistItem.objects.create(
+                template=template,
+                **item_data,
+                order=item_data['item_number']
+            )
 
-            self.stdout.write(f'  Added {len(items)} items to Annex C')
-        else:
-            self.stdout.write(self.style.WARNING('Annex C template already exists'))
+        self.stdout.write(f'  Added {len(items)} items to Annex C')
+        self.stdout.write(self.style.SUCCESS('  Weekly form filled every Friday (Wk1, Wk2, Wk3, Wk4 per month)'))
 
     def create_annex_f(self):
         """Create Annex F - Datacenter (Semi-Annual) template"""
