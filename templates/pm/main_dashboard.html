@@ -3,75 +3,114 @@
 
 {% block title %}PM Checklists Dashboard{% endblock %}
 
-{% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <!-- Header -->
-            <div class="card mb-4">
-                <div class="card-header bg-dark text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-clipboard-check"></i> Preventive Maintenance Checklists
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <p class="mb-0">Select a checklist to view or complete:</p>
-                </div>
-            </div>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pm-modern.css' %}">
+{% endblock %}
 
-            <!-- PM Forms Grid -->
-            <div class="row">
-                {% for form in pm_forms %}
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 border-{{ form.color }}">
-                        <div class="card-header bg-{{ form.color }} text-white">
-                            <h5 class="mb-0">
-                                <i class="fas {{ form.icon }}"></i> ANNEX "{{ form.annex_code }}"
-                            </h5>
+{% block content %}
+<div class="pm-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-11 offset-md-0 col-lg-10 offset-lg-1">
+                <!-- Modern Header with Purple Gradient -->
+                <div class="pm-page-header pm-fade-in">
+                    <div class="pm-header-content text-center">
+                        <h1 class="pm-page-title">
+                            <i class="fas fa-clipboard-check"></i> Preventive Maintenance Checklists
+                        </h1>
+                        <p class="pm-page-subtitle">Manage and monitor all your datacenter PM activities</p>
+                    </div>
+                </div>
+
+                <!-- PM Forms Grid -->
+                <div class="pm-dashboard-grid">
+                    {% for form in pm_forms %}
+                    <div class="pm-card pm-slide-in" style="animation-delay: {{ forloop.counter0 }}00ms;">
+                        <div class="pm-card-header">
+                            <div>
+                                <div class="pm-badge pm-badge-purple mb-2">
+                                    ANNEX "{{ form.annex_code }}"
+                                </div>
+                                <h5 class="pm-card-title">
+                                    <i class="fas {{ form.icon }}"></i>
+                                    {{ form.title }}
+                                </h5>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <h6 class="card-title">{{ form.title }}</h6>
-                            <p class="card-text">{{ form.description }}</p>
-                            <hr>
-                            <p class="mb-2">
-                                <strong><i class="fas fa-clock"></i> Frequency:</strong> {{ form.frequency }}
-                            </p>
-                            <p class="mb-3">
-                                <strong><i class="fas fa-calendar-check"></i> Schedule:</strong> {{ form.schedule_note }}
-                            </p>
+                        <div class="pm-card-body">
+                            <p class="text-muted mb-3">{{ form.description }}</p>
+
+                            <div class="pm-flex pm-gap-2 pm-mb-2">
+                                <div class="pm-flex align-items-center pm-gap-1 text-muted">
+                                    <i class="fas fa-clock"></i>
+                                    <small><strong>Frequency:</strong></small>
+                                </div>
+                                <div>
+                                    <span class="pm-badge pm-badge-info">{{ form.frequency }}</span>
+                                </div>
+                            </div>
+
+                            <div class="pm-flex align-items-start pm-gap-1 text-muted pm-mb-3">
+                                <i class="fas fa-calendar-check mt-1"></i>
+                                <small><strong>Schedule:</strong> {{ form.schedule_note }}</small>
+                            </div>
 
                             {% if form.dashboard_url != '#' %}
-                            <a href="{% url form.dashboard_url %}" class="btn btn-{{ form.color }} btn-block btn-lg">
+                            <a href="{% url form.dashboard_url %}" class="pm-btn pm-btn-primary w-100">
                                 <i class="fas fa-arrow-right"></i> Go to Dashboard
                             </a>
                             {% else %}
-                            <button class="btn btn-secondary btn-block btn-lg" disabled>
+                            <button class="pm-btn pm-btn-secondary w-100" disabled>
                                 <i class="fas fa-lock"></i> Coming Soon
                             </button>
                             {% endif %}
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
 
-            <!-- Back Button -->
-            <div class="mt-4">
-                <a href="/" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Home
-                </a>
+                <!-- Quick Stats Section -->
+                <div class="pm-card pm-card-gradient pm-fade-in">
+                    <div class="pm-card-header border-0">
+                        <h5 class="pm-card-title mb-0">
+                            <i class="fas fa-chart-line"></i> Quick Overview
+                        </h5>
+                    </div>
+                    <div class="pm-card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="pm-stat-icon mx-auto" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-calendar-day" style="color: white;"></i>
+                                </div>
+                                <div class="pm-stat-value mt-2" style="color: white;">Daily</div>
+                                <div class="pm-stat-description" style="color: rgba(255,255,255,0.9);">Mon-Fri Datacenter</div>
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="pm-stat-icon mx-auto" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-calendar-alt" style="color: white;"></i>
+                                </div>
+                                <div class="pm-stat-value mt-2" style="color: white;">Monthly</div>
+                                <div class="pm-stat-description" style="color: rgba(255,255,255,0.9);">1st Week Review</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="pm-stat-icon mx-auto" style="background: rgba(255,255,255,0.2);">
+                                    <i class="fas fa-shield-alt" style="color: white;"></i>
+                                </div>
+                                <div class="pm-stat-value mt-2" style="color: white;">Proactive</div>
+                                <div class="pm-stat-description" style="color: rgba(255,255,255,0.9);">Maintenance Care</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back Button -->
+                <div class="text-center pm-mt-4">
+                    <a href="/" class="pm-btn pm-btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        transition: all 0.3s ease;
-    }
-    .card:hover {
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        transform: translateY(-5px);
-    }
-</style>
 {% endblock %}
