@@ -8,128 +8,111 @@
 {% endblock %}
 
 {% block content %}
-<div class="pm-container">
-    <div class="container-fluid px-3">
-        <div class="row justify-content-center">
-            <div class="col-12 col-lg-11 col-xl-10">
-                <!-- Modern Header with Purple Gradient -->
-                <div class="pm-page-header pm-fade-in">
-                    <div class="pm-header-content">
-                        <h1 class="pm-page-title">
-                            <i class="fas fa-calendar-alt"></i> {{ template.title }}
-                        </h1>
-                        <p class="pm-page-subtitle">{{ template.schedule_note }}</p>
-                    </div>
+<div class="modern-container">
+    <div class="container-fluid">
+        <!-- Hero Header -->
+        <div class="premium-page-header theme-pm">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ template.title }}</span>
                 </div>
+                <h1 class="hero-title">{{ current_month }}</h1>
+                <p style="opacity: 0.95; margin: 0;">{{ template.schedule_note }}</p>
+            </div>
+        </div>
 
-                <!-- Current Month Status Card -->
-                <div class="pm-card pm-slide-in">
-                    <div class="pm-card-header">
-                        <h5 class="pm-card-title mb-0">
-                            <i class="fas fa-tasks"></i> {{ current_month }}
-                        </h5>
-                        <div>
+        <!-- Current Month Status -->
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h3 class="card-title-modern">
+                    <i class="fas fa-tasks"></i> Current Month Status
+                </h3>
+                <div>
+                    {% if is_completed %}
+                        <span class="badge bg-success rounded-pill">
+                            <i class="fas fa-check-circle"></i> Completed
+                        </span>
+                    {% elif is_overdue %}
+                        <span class="badge bg-danger rounded-pill">
+                            <i class="fas fa-exclamation-circle"></i> Overdue
+                        </span>
+                    {% else %}
+                        <span class="badge bg-warning rounded-pill">
+                            <i class="fas fa-clock"></i> Pending
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body-modern">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h6 class="text-muted mb-3">Status</h6>
+                        {% if is_completed %}
+                            <div class="alert alert-success mb-0">
+                                <strong><i class="fas fa-check-circle"></i> Completed</strong><br>
+                                <small>by {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</small><br>
+                                <small>on {{ completion.completion_date|date:"F d, Y" }}</small>
+                            </div>
+                        {% elif is_overdue %}
+                            <div class="alert alert-danger mb-0">
+                                <strong><i class="fas fa-exclamation-circle"></i> Overdue</strong><br>
+                                <small>Due: {{ due_date|date:"F d, Y" }}</small>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning mb-0">
+                                <strong><i class="fas fa-clock"></i> Pending</strong><br>
+                                <small>Due: {{ due_date|date:"F d, Y" }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h6 class="text-muted mb-3">Smart Insights</h6>
+                        <div class="alert {% if smart_suggestions.has_any_alerts %}alert-warning{% else %}alert-info{% endif %} mb-0">
+                            <strong><i class="fas fa-lightbulb"></i> Daily Data Analysis</strong><br>
+                            <small>{{ smart_suggestions.overall_summary }}</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h6 class="text-muted mb-3">Actions</h6>
+                        <div class="d-grid gap-2">
                             {% if is_completed %}
-                                <span class="pm-badge pm-badge-success">
-                                    <i class="fas fa-check-circle"></i> Completed
-                                </span>
-                            {% elif is_overdue %}
-                                <span class="pm-badge pm-badge-danger">
-                                    <i class="fas fa-exclamation-circle"></i> Overdue
-                                </span>
+                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="modern-btn btn-warning">
+                                    <i class="fas fa-edit"></i> Update
+                                </a>
+                                <a href="{% url 'export_monthly_pm_pdf' completion.id %}" class="modern-btn btn-success">
+                                    <i class="fas fa-file-pdf"></i> Export PDF
+                                </a>
                             {% else %}
-                                <span class="pm-badge pm-badge-warning">
-                                    <i class="fas fa-clock"></i> Pending
-                                </span>
+                                <a href="{% url 'complete_monthly_pm' schedule.id %}" class="modern-btn btn-primary">
+                                    <i class="fas fa-clipboard-check"></i> Complete Checklist
+                                </a>
                             {% endif %}
                         </div>
                     </div>
-                    <div class="pm-card-body">
-                        <div class="row">
-                            <!-- Status Column -->
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <h6 style="color: var(--gray-700); font-weight: 700; margin-bottom: 1rem;">Status</h6>
-                                {% if is_completed %}
-                                    <div class="pm-alert pm-alert-success mb-0">
-                                        <div class="pm-alert-heading">
-                                            <i class="fas fa-check-circle"></i>
-                                            Completed
-                                        </div>
-                                        <small>by {{ completion.completed_by.get_full_name|default:completion.completed_by.username }}</small><br>
-                                        <small>on {{ completion.completion_date|date:"F d, Y" }}</small>
-                                    </div>
-                                {% elif is_overdue %}
-                                    <div class="pm-alert pm-alert-danger mb-0">
-                                        <div class="pm-alert-heading">
-                                            <i class="fas fa-exclamation-circle"></i>
-                                            Overdue
-                                        </div>
-                                        <small>Due: {{ due_date|date:"F d, Y" }}</small>
-                                    </div>
-                                {% else %}
-                                    <div class="pm-alert pm-alert-warning mb-0">
-                                        <div class="pm-alert-heading">
-                                            <i class="fas fa-clock"></i>
-                                            Pending
-                                        </div>
-                                        <small>Due: {{ due_date|date:"F d, Y" }}</small>
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <!-- Smart Suggestions Column -->
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <h6 style="color: var(--gray-700); font-weight: 700; margin-bottom: 1rem;">Smart Insights</h6>
-                                <div class="pm-alert {% if smart_suggestions.has_any_alerts %}pm-alert-warning{% else %}pm-alert-info{% endif %} mb-0">
-                                    <div class="pm-alert-heading">
-                                        <i class="fas fa-lightbulb"></i>
-                                        Daily Data Analysis
-                                    </div>
-                                    <small>{{ smart_suggestions.overall_summary }}</small>
-                                </div>
-                            </div>
-
-                            <!-- Actions Column -->
-                            <div class="col-md-4 text-md-right">
-                                <h6 style="color: var(--gray-700); font-weight: 700; margin-bottom: 1rem;">Actions</h6>
-                                <div class="pm-flex flex-column pm-gap-2">
-                                    {% if is_completed %}
-                                        <a href="{% url 'complete_monthly_pm' schedule.id %}" class="pm-btn pm-btn-warning">
-                                            <i class="fas fa-edit"></i> Update
-                                        </a>
-                                        <a href="{% url 'export_monthly_pm_pdf' completion.id %}" class="pm-btn pm-btn-success">
-                                            <i class="fas fa-file-pdf"></i> Export PDF
-                                        </a>
-                                    {% else %}
-                                        <a href="{% url 'complete_monthly_pm' schedule.id %}" class="pm-btn pm-btn-primary btn-lg">
-                                            <i class="fas fa-clipboard-check"></i> Complete Checklist
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Description Card -->
-                <div class="pm-card pm-card-gradient pm-fade-in">
-                    <div class="pm-card-header border-0">
-                        <h5 class="pm-card-title mb-0">
-                            <i class="fas fa-info-circle"></i> About This Checklist
-                        </h5>
-                    </div>
-                    <div class="pm-card-body">
-                        <p style="color: rgba(255,255,255,0.95); margin: 0;">{{ template.description }}</p>
-                    </div>
-                </div>
-
-                <!-- Back Button -->
-                <div class="text-center pm-mt-3">
-                    <a href="{% url 'pm_main_dashboard' %}" class="pm-btn pm-btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to PM Dashboard
-                    </a>
                 </div>
             </div>
+        </div>
+
+        <!-- Description -->
+        <div class="modern-card">
+            <div class="card-header-modern">
+                <h3 class="card-title-modern">
+                    <i class="fas fa-info-circle"></i> About This Checklist
+                </h3>
+            </div>
+            <div class="card-body-modern">
+                <p class="mb-0">{{ template.description }}</p>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'pm_main_dashboard' %}" class="modern-btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+            </a>
         </div>
     </div>
 </div>
