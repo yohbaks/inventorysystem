@@ -21,74 +21,13 @@
     <div class="col-12">
       <div class="card shadow-lg border-0" style="border-radius: 24px; overflow: hidden;">
         
-        <!-- Gradient Header -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ec4899 100%); padding: 2rem; position: relative; overflow: hidden;">
-          <!-- Animated Background Elements -->
-          <div style="position: absolute; top: -50%; right: -10%; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite;"></div>
-          <div style="position: absolute; bottom: -30%; left: -5%; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
-          
-          <!-- Header Content -->
-          <div style="position: relative; z-index: 1;">
-            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-3">
-              <div class="d-flex align-items-center">
-                <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                  <i class="fas fa-chart-bar text-white" style="font-size: 24px;"></i>
-                </div>
-                <div>
-                  <h5 class="text-white fw-bold mb-1" style="font-size: 1.25rem;">Weekly PM Report</h5>
-                  <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</p>
-                </div>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                {% if is_current_week %}
-                <span class="badge bg-white text-primary px-3 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                  <i class="fas fa-circle text-success me-1" style="font-size: 8px; animation: pulse 2s ease-in-out infinite;"></i>
-                  Current Week
-                </span>
-                {% else %}
-                <span class="badge bg-white text-secondary px-3 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                  <i class="fas fa-history me-1"></i>
-                  Historical
-                </span>
-                {% endif %}
-              </div>
-            </div>
-
-            <!-- Stats Bar -->
-            <div class="row g-2 mt-3">
-              <div class="col-md-3 col-6">
-                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
-                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Template</div>
-                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ template.annex_code }}</div>
-                </div>
-              </div>
-              <div class="col-md-3 col-6">
-                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
-                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Days</div>
-                  <div class="text-white fw-bold" style="font-size: 1.25rem;">Mon-Fri</div>
-                </div>
-              </div>
-              <div class="col-md-3 col-6">
-                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
-                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Completed</div>
-                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ week_completions|length }}/5</div>
-                </div>
-              </div>
-              <div class="col-md-3 col-6">
-                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
-                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Total Tasks</div>
-                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ aggregated_data|length }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+       
 
         <!-- Navigation & Actions Body -->
         <div style="padding: 1.5rem; background: #fafbfc;">
           
           <!-- Navigation Bar -->
-          <div style="background: white; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
+          <div style="background: white; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem; margin-top: 4rem">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
               <!-- Week Navigation -->
               <div class="d-flex gap-2 flex-wrap">
@@ -119,22 +58,7 @@
           </div>
 
           <!-- Action Buttons -->
-          <div style="background: white; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem;">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-              <div style="font-size: 0.875rem; color: #6b7280;">
-                <i class="fas fa-file-alt me-2" style="color: #667eea;"></i>
-                <strong>{{ template.name }}</strong>
-              </div>
-              <div class="d-flex gap-2 flex-wrap">
-                <a href="{% url 'export_weekly_pm_pdf' %}?date={{ reference_date|date:'Y-m-d' }}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); border: none;">
-                  <i class="fas fa-file-pdf me-2"></i>Export PDF
-                </a>
-                <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3); border: none;">
-                  <i class="fas fa-arrow-left me-2"></i>Back
-                </a>
-              </div>
-            </div>
-          </div>
+          
 
           <!-- Week Completion Status -->
           <div style="background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; margin-bottom: 1.5rem; overflow: hidden;">
@@ -335,18 +259,25 @@
                       <i class="fas fa-clipboard-list text-white" style="font-size: 24px;"></i>
                     </div>
                     <div>
-                      <h5 class="text-white fw-bold mb-1" style="font-size: 1.25rem;">Aggregated Checklist</h5>
-                      <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">All 5 Days Summary</p>
+                      <div>
+                  <h5 class="text-white fw-bold mb-1" style="font-size: 1.25rem;">Weekly PM Report</h5>
+                  <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">Week of {{ monday|date:"F d" }} - {{ friday|date:"F d, Y" }}</p>
+                </div>
+                
                     </div>
                   </div>
-                 <div class="d-flex align-items-center gap-2">
-                
-                <span class="badge bg-white text-primary px-3 py-2 rounded-pill" style="font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                  <i class="fas fa-circle text-success me-1" style="font-size: 8px; animation: pulse 2s ease-in-out infinite;"></i>
-                  Current Week
-                </span>
-                
+
+
+
+ <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'export_weekly_pm_pdf' %}?date={{ reference_date|date:'Y-m-d' }}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); border: none;">
+                  <i class="fas fa-file-pdf me-2"></i>Export PDF
+                </a>
+                <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-sm rounded-pill" style="background: linear-gradient(135deg, #718096 0%, #4a5568 100%); color: white; font-weight: 600; padding: 0.5rem 1.5rem; box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3); border: none;">
+                  <i class="fas fa-arrow-left me-2"></i>Back
+                </a>
               </div>
+
                 </div>
 
                 <!-- Stats Bar -->
@@ -357,14 +288,12 @@
                       <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ aggregated_data|length }}</div>
                     </div>
                   </div>
-                  <div class="col-md-3 col-6">
-                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
-                      <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Daily Tasks</div>
-                      <div class="text-white fw-bold" style="font-size: 1.25rem;">
-                        {% for item_data in aggregated_data %}{% if item_data.item.item_number < 7 or item_data.item.item_number == 12 %}1{% endif %}{% endfor %}
-                      </div>
-                    </div>
-                  </div>
+                                <div class="col-md-3 col-6">
+                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
+                  <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Completed</div>
+                  <div class="text-white fw-bold" style="font-size: 1.25rem;">{{ week_completions|length }}/5</div>
+                </div>
+              </div>
                   <div class="col-md-3 col-6">
                     <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
                       <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Weekly Tasks</div>
@@ -374,7 +303,7 @@
                   <div class="col-md-3 col-6">
                     <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.75rem; border: 1px solid rgba(255,255,255,0.2);">
                       <div class="text-white" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px;">Work Days</div>
-                      <div class="text-white fw-bold" style="font-size: 1.25rem;">M-F</div>
+                      <div class="text-white fw-bold" style="font-size: 1.25rem;">Mon-Fri</div>
                     </div>
                   </div>
                 </div>
