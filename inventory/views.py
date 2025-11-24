@@ -7056,278 +7056,105 @@ def snmr_delete(request, report_id):
 
 @login_required
 def snmr_export_excel(request, report_id):
-    """Export SNMR report to Excel - matches reference design exactly"""
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    """Export SNMR report to Excel using template - fills data into pre-formatted cells"""
+    from openpyxl import load_workbook
     from django.http import HttpResponse
+    import io
+    from copy import copy
 
     report = get_object_or_404(SNMRReport, id=report_id)
     entries = report.entries.select_related('area_category').order_by('item_number')
 
-    # Create workbook
-    wb = Workbook()
+    # Load template
+    template_path = 'static/excel_template/snmr_template.xlsx'
+    wb = load_workbook(template_path)
     ws = wb.active
-    ws.title = f"{report.month_name} {report.year}"
 
-    # Define border styles
-    thin_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin')
-    )
-    medium_left_thin_right = Border(
-        left=Side(style='medium'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin')
-    )
-    medium_border = Border(
-        left=Side(style='medium'),
-        right=Side(style='thin'),
-        top=Side(style='medium'),
-        bottom=Side(style='medium')
-    )
-    top_medium_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='medium'),
-        bottom=Side(style='medium')
-    )
-    bottom_thin = Border(bottom=Side(style='thin'))
-    top_thin = Border(top=Side(style='thin'))
-    top_bottom_thin = Border(top=Side(style='thin'), bottom=Side(style='thin'))
-
-    # Row 1: Title
-    ws['A1'] = 'Monthly Server and Network Monitoring Report'
-    ws['A1'].font = Font(bold=True, size=14)
-    ws.row_dimensions[1].height = 18.0
-
-    # Row 2: Subtitle
+    # Fill in header information
     ws['A2'] = f'For the Month of {report.period_display}'
-    ws['A2'].font = Font(bold=True, size=10)
-
-    # Row 3: Empty
-
-    # Row 4: Region and Network Administrator
-    ws['A4'] = 'Region:'
-    ws['A4'].font = Font(size=10)
-    ws['A4'].alignment = Alignment(horizontal='left')
-
-    ws.merge_cells('B4:C4')
     ws['B4'] = report.region
-    ws['B4'].font = Font(size=10)
-    ws['B4'].alignment = Alignment(horizontal='left')
-    ws['B4'].border = bottom_thin
-
-    ws['E4'] = 'Network Administrator:'
-    ws['E4'].font = Font(size=10)
-    ws['E4'].alignment = Alignment(horizontal='left')
-
-    ws['F4'] = report.network_admin_name
-    ws['F4'].font = Font(size=10)
-    ws['F4'].alignment = Alignment(horizontal='left')
-    ws['F4'].border = bottom_thin
-
-    # Row 5: Office and Contact Number
-    ws['A5'] = 'Office:'
-    ws['A5'].font = Font(size=10)
-    ws['A5'].alignment = Alignment(horizontal='left')
-
-    ws.merge_cells('B5:C5')
     ws['B5'] = report.office
-    ws['B5'].font = Font(size=10)
-    ws['B5'].alignment = Alignment(horizontal='left')
-    ws['B5'].border = top_bottom_thin
-
-    ws['E5'] = 'Contact Number:'
-    ws['E5'].font = Font(size=10)
-    ws['E5'].alignment = Alignment(horizontal='left')
-
-    ws['F5'] = report.network_admin_contact
-    ws['F5'].font = Font(size=10)
-    ws['F5'].alignment = Alignment(horizontal='left')
-    ws['F5'].border = top_bottom_thin
-
-    # Row 6: Address and Email
-    ws['A6'] = 'Address:'
-    ws['A6'].font = Font(size=10)
-    ws['A6'].alignment = Alignment(horizontal='left')
-
-    ws.merge_cells('B6:C6')
     ws['B6'] = report.address
-    ws['B6'].font = Font(size=10)
-    ws['B6'].alignment = Alignment(horizontal='left')
-    ws['B6'].border = top_bottom_thin
-
-    ws['E6'] = 'Email Address:'
-    ws['E6'].font = Font(size=10)
-    ws['E6'].alignment = Alignment(horizontal='left')
-
+    ws['F4'] = report.network_admin_name
+    ws['F5'] = report.network_admin_contact
     ws['F6'] = report.network_admin_email
-    ws['F6'].font = Font(size=10)
-    ws['F6'].alignment = Alignment(horizontal='left')
-    ws['F6'].border = top_bottom_thin
 
-    # Row 7: Empty with space in F7
-    ws['F7'] = ' '
-    ws['F7'].font = Font(size=10)
-    ws.row_dimensions[7].height = 13.5
-
-    # Rows 8-9: Table headers (merged)
-    headers = ['Item No.', 'Area', 'Status', 'Reason', 'Initial Isolation', 'Date', 'Resolution']
-    ws.row_dimensions[8].height = 14.25
-    ws.row_dimensions[9].height = 13.9
-
-    for col_num, header in enumerate(headers, 1):
-        col_letter = chr(64 + col_num)  # A=1, B=2, etc.
-        cell_ref = f'{col_letter}8'
-        merge_ref = f'{col_letter}8:{col_letter}9'
-
-        ws.merge_cells(merge_ref)
-        ws[cell_ref] = header
-        ws[cell_ref].font = Font(size=10)
-        ws[cell_ref].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-
-        # Apply borders - first column has medium left border
-        if col_num == 1:
-            ws[cell_ref].border = medium_border
-        else:
-            ws[cell_ref].border = top_medium_border
-
-    # Data rows (starting at row 10)
+    # Data starts at row 10 (template already has headers at rows 8-9)
     data_start_row = 10
+
+    # Store the template row for copying formatting
+    template_row = data_start_row
+
+    # Fill in data entries
     for idx, entry in enumerate(entries):
         row_num = data_start_row + idx
 
-        # Set row height for data rows
-        if idx == 0:
-            ws.row_dimensions[row_num].height = 97.5  # First data row is taller
-        else:
-            ws.row_dimensions[row_num].height = 15.0
+        # If we need more rows, copy the template row's formatting
+        if idx > 0:
+            # Copy row height and cell formatting from template row
+            ws.row_dimensions[row_num].height = ws.row_dimensions[template_row].height
+            for col in range(1, 8):  # Columns A to G
+                template_cell = ws.cell(row=template_row, column=col)
+                new_cell = ws.cell(row=row_num, column=col)
+                if template_cell.has_style:
+                    new_cell.font = copy(template_cell.font)
+                    new_cell.border = copy(template_cell.border)
+                    new_cell.fill = copy(template_cell.fill)
+                    new_cell.number_format = copy(template_cell.number_format)
+                    new_cell.protection = copy(template_cell.protection)
+                    new_cell.alignment = copy(template_cell.alignment)
 
-        # Item No.
-        ws.cell(row=row_num, column=1, value=entry.item_number)
-        ws.cell(row=row_num, column=1).font = Font(size=10)
-        ws.cell(row=row_num, column=1).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=1).border = medium_left_thin_right
-
-        # Area
-        ws.cell(row=row_num, column=2, value=entry.area_category.name)
-        ws.cell(row=row_num, column=2).font = Font(size=10)
-        ws.cell(row=row_num, column=2).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=2).border = thin_border
-
-        # Status
-        ws.cell(row=row_num, column=3, value=entry.status)
-        ws.cell(row=row_num, column=3).font = Font(size=10)
-        ws.cell(row=row_num, column=3).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=3).border = thin_border
-
-        # Reason (note: size 11 in reference file)
-        ws.cell(row=row_num, column=4, value=entry.reason)
-        ws.cell(row=row_num, column=4).font = Font(size=11)
-        ws.cell(row=row_num, column=4).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=4).border = thin_border
-
-        # Initial Isolation
-        ws.cell(row=row_num, column=5, value=entry.initial_isolation)
-        ws.cell(row=row_num, column=5).font = Font(size=10)
-        ws.cell(row=row_num, column=5).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=5).border = thin_border
-
-        # Date
-        ws.cell(row=row_num, column=6, value=entry.date)
-        ws.cell(row=row_num, column=6).font = Font(size=10)
-        ws.cell(row=row_num, column=6).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=6).border = thin_border
-
-        # Resolution
-        ws.cell(row=row_num, column=7, value=entry.resolution)
-        ws.cell(row=row_num, column=7).font = Font(size=10)
-        ws.cell(row=row_num, column=7).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-        ws.cell(row=row_num, column=7).border = thin_border
+        # Fill in the data for this entry
+        ws[f'A{row_num}'] = entry.item_number
+        ws[f'B{row_num}'] = entry.area_category.name
+        ws[f'C{row_num}'] = entry.status
+        ws[f'D{row_num}'] = entry.reason
+        ws[f'E{row_num}'] = entry.initial_isolation
+        ws[f'F{row_num}'] = entry.date
+        ws[f'G{row_num}'] = entry.resolution
 
     # Calculate signature section row numbers
     sig_start = data_start_row + len(entries) + 1  # One empty row after data
 
-    # Empty row before signature
-    ws.row_dimensions[sig_start].height = 27.0
+    # Find existing signature section in template and copy it down
+    # Template has signature section, we need to move it to correct position
+    # For simplicity, we'll just fill in the names at the calculated positions
 
-    # Signature labels
+    # Signature labels row
     sig_label_row = sig_start + 1
-    ws.row_dimensions[sig_label_row].height = 13.15
-    ws.merge_cells(f'A{sig_label_row}:B{sig_label_row}')
     ws[f'A{sig_label_row}'] = 'Prepared & Submitted by:'
-    ws[f'A{sig_label_row}'].font = Font(size=10)
-    ws[f'A{sig_label_row}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
-
     ws[f'E{sig_label_row}'] = 'Noted:'
-    ws[f'E{sig_label_row}'].font = Font(size=10)
-    ws[f'E{sig_label_row}'].alignment = Alignment(horizontal='left', vertical='top', wrap_text=True)
 
-    # Empty rows
-    ws.row_dimensions[sig_label_row + 1].height = 31.5
-    ws.row_dimensions[sig_label_row + 2].height = 13.15
-
-    # Names row
+    # Names row (3 rows after sig_label_row to leave space for signature)
     names_row = sig_label_row + 3
-    ws.row_dimensions[names_row].height = 15.75
+
+    # Merge cells for names
     ws.merge_cells(f'A{names_row}:D{names_row}')
     ws[f'A{names_row}'] = report.network_admin_name
-    ws[f'A{names_row}'].font = Font(bold=True, size=10)
-    ws[f'A{names_row}'].alignment = Alignment(horizontal='center', wrap_text=True)
-
-    # Apply bottom border to all cells in the merged range
-    for col in ['A', 'B', 'C', 'D']:
-        ws[f'{col}{names_row}'].border = bottom_thin
 
     ws.merge_cells(f'E{names_row}:G{names_row}')
     ws[f'E{names_row}'] = report.noted_by_name
-    ws[f'E{names_row}'].font = Font(bold=True, size=10)
-    ws[f'E{names_row}'].alignment = Alignment(horizontal='center', wrap_text=True)
-
-    # Apply bottom border to all cells in the merged range
-    for col in ['E', 'F', 'G']:
-        ws[f'{col}{names_row}'].border = bottom_thin
 
     # Positions row
     positions_row = names_row + 1
-    ws.row_dimensions[positions_row].height = 12.75
     ws.merge_cells(f'A{positions_row}:D{positions_row}')
     ws[f'A{positions_row}'] = 'Computer Maintenance Technologist II'
-    ws[f'A{positions_row}'].font = Font(size=10)
-    ws[f'A{positions_row}'].alignment = Alignment(horizontal='center', vertical='top')
-
-    # Apply top border to all cells in the merged range
-    for col in ['A', 'B', 'C', 'D']:
-        ws[f'{col}{positions_row}'].border = top_thin
 
     ws.merge_cells(f'E{positions_row}:G{positions_row}')
     ws[f'E{positions_row}'] = report.noted_by_position
-    ws[f'E{positions_row}'].font = Font(size=10)
-    ws[f'E{positions_row}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
 
-    # Apply top border to all cells in the merged range
-    for col in ['E', 'F', 'G']:
-        ws[f'{col}{positions_row}'].border = top_thin
-
-    # Adjust column widths to match reference
-    ws.column_dimensions['A'].width = 7.5703125
-    ws.column_dimensions['B'].width = 18.0
-    ws.column_dimensions['C'].width = 24.140625
-    ws.column_dimensions['D'].width = 20.85546875
-    ws.column_dimensions['E'].width = 24.42578125
-    ws.column_dimensions['F'].width = 14.7109375
-    ws.column_dimensions['G'].width = 25.28515625
+    # Save to BytesIO
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
 
     # Create response
     response = HttpResponse(
+        output,
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = f'attachment; filename="SNMR_{report.month_name}_{report.year}.xlsx"'
 
-    wb.save(response)
     return response
 
 
