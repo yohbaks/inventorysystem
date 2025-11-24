@@ -6883,7 +6883,9 @@ def generate_snmr_suggestions(report):
                 reasons = []
                 for event in category_events[:3]:  # Top 3 issues
                     if event.cause_description and event.cause_description != 'N/A':
-                        reasons.append(event.cause_description[:100])
+                        # Include the date with each reason
+                        date_prefix = event.occurrence_date.strftime('%B %d, %Y')
+                        reasons.append(f"({date_prefix}): {event.cause_description[:100]}")
 
                 if reasons:
                     suggestion['reason'] = '; '.join(reasons)
