@@ -7377,7 +7377,15 @@ def snmr_export_pdf(request, report_id):
         'CustomNormal',
         parent=styles['Normal'],
         fontSize=10,
-        textColor=colors.black
+        textColor=colors.black,
+        alignment=TA_LEFT
+    )
+    normal_center_style = ParagraphStyle(
+        'NormalCenter',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.black,
+        alignment=TA_CENTER
     )
     table_header_style = ParagraphStyle(
         'TableHeader',
@@ -7409,48 +7417,52 @@ def snmr_export_pdf(request, report_id):
     # Subtitle with period
     subtitle = Paragraph(f'For the Month of {report.period_display}', subtitle_style)
     elements.append(subtitle)
-    elements.append(Spacer(1, 0.1*inch))
+    elements.append(Spacer(1, 0.15*inch))
 
-    # Office Information Table - matching Excel layout
+    # Office Information Table - matching Excel layout exactly
+    # Build information section as a table to match Excel's grid layout
     info_data = [
         [Paragraph('Region:', normal_style),
          Paragraph(report.region, normal_style),
+         '',
          '',
          Paragraph('Network Administrator:', normal_style),
          Paragraph(report.network_admin_name, normal_style)],
         [Paragraph('Office:', normal_style),
          Paragraph(report.office, normal_style),
          '',
+         '',
          Paragraph('Contact Number:', normal_style),
          Paragraph(report.network_admin_contact or '', normal_style)],
         [Paragraph('Address:', normal_style),
          Paragraph(report.address, normal_style),
          '',
+         '',
          Paragraph('Email Address:', normal_style),
          Paragraph(report.network_admin_email or '', normal_style)]
     ]
 
-    info_table = Table(info_data, colWidths=[0.7*inch, 2*inch, 0.3*inch, 1.7*inch, 2*inch])
+    info_table = Table(info_data, colWidths=[0.7*inch, 2.3*inch, 0.2*inch, 0.3*inch, 1.7*inch, 2.3*inch])
     info_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 2),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ('TOPPADDING', (0, 0), (-1, -1), 2),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-        # Add bottom border to data fields
+        # Add bottom border to data fields only
         ('LINEBELOW', (1, 0), (1, 0), 0.5, colors.black),
-        ('LINEBELOW', (4, 0), (4, 0), 0.5, colors.black),
+        ('LINEBELOW', (5, 0), (5, 0), 0.5, colors.black),
         ('LINEBELOW', (1, 1), (1, 1), 0.5, colors.black),
-        ('LINEBELOW', (4, 1), (4, 1), 0.5, colors.black),
+        ('LINEBELOW', (5, 1), (5, 1), 0.5, colors.black),
         ('LINEBELOW', (1, 2), (1, 2), 0.5, colors.black),
-        ('LINEBELOW', (4, 2), (4, 2), 0.5, colors.black),
+        ('LINEBELOW', (5, 2), (5, 2), 0.5, colors.black),
     ]))
     elements.append(info_table)
-    elements.append(Spacer(1, 0.15*inch))
+    elements.append(Spacer(1, 0.25*inch))
 
     # Monitoring Entries Table - matching Excel format
     table_data = [
-        [Paragraph('Item No.', table_header_style),
+        [Paragraph('Item<br/>No.', table_header_style),
          Paragraph('Area', table_header_style),
          Paragraph('Status', table_header_style),
          Paragraph('Reason', table_header_style),
@@ -7461,7 +7473,7 @@ def snmr_export_pdf(request, report_id):
 
     # Add data rows
     for entry in entries:
-        # Use different font size for Reason column (11pt like Excel)
+        # Format multi-line data properly
         table_data.append([
             Paragraph(str(entry.item_number), table_cell_style),
             Paragraph(entry.area_category.name, table_cell_style),
@@ -7473,31 +7485,23 @@ def snmr_export_pdf(request, report_id):
         ])
 
     # Create table with column widths matching Excel proportions
-    col_widths = [0.55*inch, 1.3*inch, 1.75*inch, 1.5*inch, 1.75*inch, 1.05*inch, 1.8*inch]
+    col_widths = [0.6*inch, 1.2*inch, 1.0*inch, 1.7*inch, 1.5*inch, 1.2*inch, 1.5*inch]
     entries_table = Table(table_data, colWidths=col_widths)
 
-    # Style the table to match Excel
+    # Style the table to match Excel exactly
     entries_table.setStyle(TableStyle([
-        # Header styling - no background color, just borders
-        ('BACKGROUND', (0, 0), (-1, 0), colors.white),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        # All cells - white background, black text
+        ('BACKGROUND', (0, 0), (-1, -1), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-
-        # Data rows styling
-        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 1), (-1, -1), 'MIDDLE'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
 
-        # Grid lines - thin borders
+        # Grid - all borders are thin
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('LINEABOVE', (0, 0), (-1, 0), 1.5, colors.black),  # Thicker top border on header
-        ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.black),  # Thicker bottom border on header
 
         # Padding
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
@@ -7507,7 +7511,7 @@ def snmr_export_pdf(request, report_id):
     ]))
 
     elements.append(entries_table)
-    elements.append(Spacer(1, 0.4*inch))
+    elements.append(Spacer(1, 0.5*inch))
 
     # Signature section - matching Excel format
     sig_label_style = ParagraphStyle(
@@ -7515,6 +7519,12 @@ def snmr_export_pdf(request, report_id):
         parent=styles['Normal'],
         fontSize=10,
         alignment=TA_CENTER
+    )
+    sig_label_left_style = ParagraphStyle(
+        'SignatureLabelLeft',
+        parent=styles['Normal'],
+        fontSize=10,
+        alignment=TA_LEFT
     )
     sig_name_style = ParagraphStyle(
         'SignatureName',
@@ -7533,18 +7543,18 @@ def snmr_export_pdf(request, report_id):
     sig_data = [
         [Paragraph('Prepared & Submitted by:', sig_label_style),
          '',
-         Paragraph('Noted:', sig_label_style)],
+         Paragraph('Noted:', sig_label_left_style)],
         ['', '', ''],
         ['', '', ''],
-        [Paragraph(f'{report.network_admin_name}', sig_name_style),
+        [Paragraph(report.network_admin_name.upper(), sig_name_style),
          '',
-         Paragraph(f'{report.noted_by_name}', sig_name_style)],
+         Paragraph(report.noted_by_name.upper(), sig_name_style)],
         [Paragraph('Computer Maintenance Technologist II', sig_position_style),
          '',
          Paragraph(report.noted_by_position, sig_position_style)]
     ]
 
-    sig_table = Table(sig_data, colWidths=[3.5*inch, 0.5*inch, 3.5*inch], rowHeights=[0.2*inch, 0.4*inch, 0.1*inch, 0.25*inch, 0.2*inch])
+    sig_table = Table(sig_data, colWidths=[3.2*inch, 1.0*inch, 3.2*inch], rowHeights=[0.2*inch, 0.5*inch, 0.1*inch, 0.25*inch, 0.2*inch])
     sig_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
