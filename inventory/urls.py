@@ -267,4 +267,14 @@ urlpatterns = [
     path('pm/downtime/log/<int:item_completion_id>/', pm_downtime_views.log_downtime_event, name='log_downtime_event'),
     path('pm/downtime/analytics/', pm_downtime_views.downtime_analytics_dashboard, name='downtime_analytics'),
 
+    # ================================
+    # SNMR - Server and Network Monitoring Report
+    path('reports/snmr/', views.snmr_list, name='snmr_list'),
+    path('reports/snmr/create/', views.snmr_create, name='snmr_create'),
+    path('reports/snmr/<int:report_id>/', views.snmr_view, name='snmr_view'),
+    path('reports/snmr/<int:report_id>/edit/', views.snmr_edit, name='snmr_edit'),
+    path('reports/snmr/<int:report_id>/delete/', views.snmr_delete, name='snmr_delete'),
+    path('reports/snmr/<int:report_id>/export/excel/', views.snmr_export_excel, name='snmr_export_excel'),
+    path('reports/snmr/<int:report_id>/finalize/', views.snmr_finalize, name='snmr_finalize'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SNMR Report - {{ report.period_display }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-file-alt"></i> Server & Network Monitoring Report - {{ report.period_display }}</h3>
+                    <div>
+                        {% if not report.is_finalized %}
+                            <a href="{% url 'snmr_edit' report.id %}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#finalizeModal">
+                                <i class="fas fa-check"></i> Finalize Report
+                            </button>
+                        {% endif %}
+                        <a href="{% url 'snmr_export_excel' report.id %}" class="btn btn-primary">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </a>
+                        <a href="{% url 'snmr_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if report.is_finalized %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> <strong>Finalized</strong> on {{ report.finalized_at|date:"F d, Y g:i A" }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Report Header -->
+                    <div class="text-center mb-4">
+                        <h2 class="font-weight-bold">Monthly Server and Network Monitoring Report</h2>
+                        <h4>For the Month of {{ report.period_display }}</h4>
+                    </div>
+
+                    <!-- Office Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td width="30%" class="font-weight-bold">Region:</td>
+                                    <td>{{ report.region }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Office:</td>
+                                    <td>{{ report.office }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Address:</td>
+                                    <td>{{ report.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td width="40%" class="font-weight-bold">Network Administrator:</td>
+                                    <td>{{ report.network_admin_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Contact Number:</td>
+                                    <td>{{ report.network_admin_contact }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Email Address:</td>
+                                    <td>{{ report.network_admin_email }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Monitoring Entries Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 8%;">Item No.</th>
+                                    <th style="width: 15%;">Area</th>
+                                    <th style="width: 12%;">Status</th>
+                                    <th style="width: 20%;">Reason</th>
+                                    <th style="width: 18%;">Initial Isolation</th>
+                                    <th style="width: 12%;">Date</th>
+                                    <th style="width: 15%;">Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries %}
+                                <tr>
+                                    <td class="text-center">{{ entry.item_number }}</td>
+                                    <td><strong>{{ entry.area_category.name }}</strong></td>
+                                    <td>{{ entry.status }}</td>
+                                    <td>{{ entry.reason }}</td>
+                                    <td>{{ entry.initial_isolation }}</td>
+                                    <td>{{ entry.date }}</td>
+                                    <td>{{ entry.resolution }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Signature Section -->
+                    <div class="row mt-5">
+                        <div class="col-md-6 text-center">
+                            <p class="font-weight-bold">Prepared & Submitted by:</p>
+                            <br>
+                            <br>
+                            <p class="font-weight-bold text-uppercase">{{ report.network_admin_name }}</p>
+                            <p>Designated District Network Administrator</p>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <p class="font-weight-bold">Noted:</p>
+                            <br>
+                            <br>
+                            <p class="font-weight-bold text-uppercase">{{ report.noted_by_name }}</p>
+                            <p>{{ report.noted_by_position }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Finalize Modal -->
+<div class="modal fade" id="finalizeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Finalize Report</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to finalize this report?</p>
+                <p class="text-warning"><strong>Warning:</strong> Once finalized, this report cannot be edited.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'snmr_finalize' report.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Finalize</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

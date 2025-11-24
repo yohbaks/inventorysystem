@@ -2,19 +2,21 @@ from django.contrib import admin
 from .models import (
     Equipment_Package, DesktopDetails, MonitorDetails, UserDetails, DisposedMonitor,
     KeyboardDetails, DisposedKeyboard, MouseDetails, DisposedMouse,
-    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory, 
+    UPSDetails, DisposedUPS, DocumentsDetails, Employee, EndUserChangeHistory,
     AssetOwnerChangeHistory, DisposedDesktopDetail, Brand,
-    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule, 
+    PreventiveMaintenance, OfficeSection, QuarterSchedule, PMSectionSchedule,
     PMScheduleAssignment, MaintenanceChecklistItem, SalvagedMonitor,
-    SalvagedMonitorHistory, SalvagedKeyboard, SalvagedKeyboardHistory, SalvagedMouse, 
+    SalvagedMonitorHistory, SalvagedKeyboard, SalvagedKeyboardHistory, SalvagedMouse,
     SalvagedMouseHistory, SalvagedUPS, SalvagedUPSHistory,
-    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, 
+    Profile, LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage,
     PrinterDetails, DisposedPrinter, Notification,
     OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies, DocumentPhoto,
     # New PM Checklist Models
     PMChecklistTemplate, PMChecklistItem, PMChecklistSchedule,
     PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport, PMIssueLog,
-    EquipmentDowntimeEvent
+    EquipmentDowntimeEvent,
+    # SNMR Models
+    SNMRAreaCategory, SNMRReport, SNMREntry
 )
 
 # Register your models here.
@@ -71,3 +73,8 @@ admin.site.register(PMChecklistItemCompletion)
 admin.site.register(PMChecklistReport)
 admin.site.register(EquipmentDowntimeEvent)
 admin.site.register(PMIssueLog)
+
+# SNMR - Server and Network Monitoring Report
+admin.site.register(SNMRAreaCategory)
+admin.site.register(SNMRReport)
+admin.site.register(SNMREntry)

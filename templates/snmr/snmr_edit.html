@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit SNMR Report - {{ report.period_display }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-edit"></i> Edit SNMR Report - {{ report.period_display }}</h3>
+                    <div>
+                        <a href="{% url 'snmr_view' report.id %}" class="btn btn-info">
+                            <i class="fas fa-eye"></i> Preview
+                        </a>
+                        <a href="{% url 'snmr_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Office Information Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Office Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Region</label>
+                                            <input type="text" name="region" class="form-control" value="{{ report.region }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Office</label>
+                                            <input type="text" name="office" class="form-control" value="{{ report.office }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Address</label>
+                                            <input type="text" name="address" class="form-control" value="{{ report.address }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Network Administrator Information -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">Network Administrator Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Full Name</label>
+                                            <input type="text" name="network_admin_name" class="form-control" value="{{ report.network_admin_name }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Contact Number</label>
+                                            <input type="text" name="network_admin_contact" class="form-control" value="{{ report.network_admin_contact }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Email Address</label>
+                                            <input type="email" name="network_admin_email" class="form-control" value="{{ report.network_admin_email }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Noted By Information -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="mb-0">Noted By</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Full Name</label>
+                                            <input type="text" name="noted_by_name" class="form-control" value="{{ report.noted_by_name }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Position</label>
+                                            <input type="text" name="noted_by_position" class="form-control" value="{{ report.noted_by_position }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entries Section -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Network Monitoring Entries</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th style="width: 5%;">Item #</th>
+                                                <th style="width: 15%;">Area</th>
+                                                <th style="width: 15%;">Status</th>
+                                                <th style="width: 20%;">Reason</th>
+                                                <th style="width: 20%;">Initial Isolation</th>
+                                                <th style="width: 10%;">Date</th>
+                                                <th style="width: 15%;">Resolution</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in entries %}
+                                            <tr>
+                                                <td class="text-center">{{ entry.item_number }}</td>
+                                                <td><strong>{{ entry.area_category.name }}</strong></td>
+                                                <td>
+                                                    <input type="text" name="entry_{{ entry.id }}_status" class="form-control form-control-sm" value="{{ entry.status }}">
+                                                </td>
+                                                <td>
+                                                    <textarea name="entry_{{ entry.id }}_reason" class="form-control form-control-sm" rows="2">{{ entry.reason }}</textarea>
+                                                </td>
+                                                <td>
+                                                    <textarea name="entry_{{ entry.id }}_initial_isolation" class="form-control form-control-sm" rows="2">{{ entry.initial_isolation }}</textarea>
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="entry_{{ entry.id }}_date" class="form-control form-control-sm" value="{{ entry.date }}">
+                                                </td>
+                                                <td>
+                                                    <textarea name="entry_{{ entry.id }}_resolution" class="form-control form-control-sm" rows="2">{{ entry.resolution }}</textarea>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle"></i> <strong>Note:</strong> The standard areas (Wide Area Network, Admin Server, PABX, Trunkline) are always included in the report. Update the fields with actual monitoring data.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <a href="{% url 'snmr_view' report.id %}" class="btn btn-info btn-lg">
+                                <i class="fas fa-eye"></i> Preview
+                            </a>
+                            <a href="{% url 'snmr_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

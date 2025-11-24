@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SNMR Reports - Server & Network Monitoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-network-wired"></i> Server & Network Monitoring Reports (SNMR)</h3>
+                    <a href="{% url 'snmr_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create New Report
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if reports %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Period</th>
+                                        <th>Region</th>
+                                        <th>Office</th>
+                                        <th>Network Administrator</th>
+                                        <th>Created By</th>
+                                        <th>Created At</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for report in reports %}
+                                    <tr>
+                                        <td><strong>{{ report.period_display }}</strong></td>
+                                        <td>{{ report.region }}</td>
+                                        <td>{{ report.office|truncatewords:5 }}</td>
+                                        <td>{{ report.network_admin_name }}</td>
+                                        <td>{{ report.created_by.username }}</td>
+                                        <td>{{ report.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if report.is_finalized %}
+                                                <span class="badge badge-success">Finalized</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">Draft</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'snmr_view' report.id %}" class="btn btn-sm btn-info" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if not report.is_finalized %}
+                                                <a href="{% url 'snmr_edit' report.id %}" class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                {% endif %}
+                                                <a href="{% url 'snmr_export_excel' report.id %}" class="btn btn-sm btn-success" title="Export Excel">
+                                                    <i class="fas fa-file-excel"></i>
+                                                </a>
+                                                {% if not report.is_finalized %}
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ report.id }}" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal{{ report.id }}" tabindex="-1" role="dialog">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        <span>&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete the SNMR report for {{ report.period_display }}?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                    <form method="post" action="{% url 'snmr_delete' report.id %}" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> No SNMR reports found. Click "Create New Report" to get started.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

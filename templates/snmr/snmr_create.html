@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create SNMR Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-plus-circle"></i> Create New SNMR Report</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'snmr_create' %}">
+                        {% csrf_token %}
+
+                        <h5 class="mb-3">Report Period</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="month">Month <span class="text-danger">*</span></label>
+                                    <select name="month" id="month" class="form-control" required>
+                                        {% for value, name in months %}
+                                            <option value="{{ value }}" {% if value == current_month %}selected{% endif %}>{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="year">Year <span class="text-danger">*</span></label>
+                                    <select name="year" id="year" class="form-control" required>
+                                        {% for year_val in years %}
+                                            <option value="{{ year_val }}" {% if year_val == current_year %}selected{% endif %}>{{ year_val }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">Office Information</h5>
+                        <div class="form-group">
+                            <label for="region">Region <span class="text-danger">*</span></label>
+                            <input type="text" name="region" id="region" class="form-control" value="Region VIII" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="office">Office <span class="text-danger">*</span></label>
+                            <input type="text" name="office" id="office" class="form-control" value="DPWH Leyte 4th District Engineering" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address <span class="text-danger">*</span></label>
+                            <input type="text" name="address" id="address" class="form-control" value="Ormoc City Leyte" required>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">Network Administrator Information</h5>
+                        <div class="form-group">
+                            <label for="network_admin_name">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="network_admin_name" id="network_admin_name" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="network_admin_contact">Contact Number <span class="text-danger">*</span></label>
+                            <input type="text" name="network_admin_contact" id="network_admin_contact" class="form-control" placeholder="e.g., 66815 | 09219290909" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="network_admin_email">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="network_admin_email" id="network_admin_email" class="form-control" required>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">Noted By</h5>
+                        <div class="form-group">
+                            <label for="noted_by_name">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="noted_by_name" id="noted_by_name" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="noted_by_position">Position <span class="text-danger">*</span></label>
+                            <input type="text" name="noted_by_position" id="noted_by_position" class="form-control" value="District Engineer" required>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Create Report
+                            </button>
+                            <a href="{% url 'snmr_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

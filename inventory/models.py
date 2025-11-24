@@ -1780,3 +1780,129 @@ class PMIssueLog(models.Model):
     
     def __str__(self):
         return f"{self.issue_title} - {self.priority} ({self.status})"
+
+
+# ============================================
+# SERVER AND NETWORK MONITORING REPORT (SNMR)
+# ============================================
+
+class SNMRAreaCategory(models.Model):
+    """Standard categories for SNMR (Wide Area Network, Admin Server, PABX, Trunkline)"""
+
+    name = models.CharField(max_length=100, unique=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = 'SNMR Area Category'
+        verbose_name_plural = 'SNMR Area Categories'
+
+    def __str__(self):
+        return self.name
+
+
+class SNMRReport(models.Model):
+    """Monthly Server and Network Monitoring Report"""
+
+    # Report period
+    month = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
+    year = models.IntegerField(validators=[MinValueValidator(2000)])
+
+    # Office information
+    region = models.CharField(max_length=100, default='Region VIII')
+    office = models.CharField(max_length=200, default='DPWH Leyte 4th District Engineering')
+    address = models.CharField(max_length=300, default='Ormoc City Leyte')
+
+    # Network administrator information
+    network_admin_name = models.CharField(max_length=200)
+    network_admin_contact = models.CharField(max_length=100)
+    network_admin_email = models.EmailField()
+
+    # Noted by (approver)
+    noted_by_name = models.CharField(max_length=200)
+    noted_by_position = models.CharField(max_length=200, default='District Engineer')
+
+    # Report metadata
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_snmr_reports')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Generated files
+    pdf_file = models.FileField(upload_to='snmr_reports/pdf/', blank=True, null=True)
+    excel_file = models.FileField(upload_to='snmr_reports/excel/', blank=True, null=True)
+
+    # Status
+    is_finalized = models.BooleanField(default=False)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-year', '-month']
+        unique_together = ['month', 'year']
+        indexes = [
+            models.Index(fields=['-year', '-month']),
+        ]
+
+    def __str__(self):
+        from datetime import date
+        month_name = date(self.year, self.month, 1).strftime('%B')
+        return f"SNMR - {month_name} {self.year}"
+
+    @property
+    def month_name(self):
+        from datetime import date
+        return date(self.year, self.month, 1).strftime('%B')
+
+    @property
+    def period_display(self):
+        return f"{self.month_name} {self.year}"
+
+
+class SNMREntry(models.Model):
+    """Individual entries in the SNMR report"""
+
+    report = models.ForeignKey(SNMRReport, on_delete=models.CASCADE, related_name='entries')
+    area_category = models.ForeignKey(SNMRAreaCategory, on_delete=models.PROTECT, related_name='snmr_entries')
+
+    # Entry order/number
+    item_number = models.PositiveIntegerField()
+
+    # Data fields
+    status = models.CharField(max_length=200, default='Up and working')
+    reason = models.TextField(default='N/A', blank=True)
+    initial_isolation = models.TextField(default='N/A', blank=True)
+    date = models.CharField(max_length=200, default='N/A', blank=True)
+    resolution = models.TextField(default='N/A', blank=True)
+
+    # Link to downtime event (optional - can be populated from PM checklist)
+    downtime_event = models.ForeignKey(
+        EquipmentDowntimeEvent,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='snmr_entries'
+    )
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['report', 'item_number']
+        unique_together = ['report', 'item_number']
+        verbose_name = 'SNMR Entry'
+        verbose_name_plural = 'SNMR Entries'
+
+    def __str__(self):
+        return f"{self.report} - Item {self.item_number}: {self.area_category.name}"
+
+    def populate_from_downtime(self):
+        """Populate entry fields from linked downtime event"""
+        if self.downtime_event:
+            event = self.downtime_event
+            self.status = 'Down' if event.severity in ['MAJOR', 'CRITICAL'] else 'Intermittent Connection'
+            self.reason = event.cause_description
+            self.initial_isolation = event.resolution_notes or 'N/A'
+            self.date = event.occurrence_date.strftime('%B %d, %Y')
+            self.resolution = event.resolution_notes or 'Ongoing investigation'

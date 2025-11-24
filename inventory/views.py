@@ -77,7 +77,8 @@ from inventory.models import (
     LaptopPackage, LaptopDetails, DisposedLaptop, PrinterPackage, PrinterDetails, DisposedPrinter, Notification,
     OfficeSuppliesPackage, OfficeSuppliesDetails, DisposedOfficeSupplies, PMChecklistTemplate, PMChecklistItem, PMChecklistSchedule,
     PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport,
-    PMIssueLog
+    PMIssueLog, EquipmentDowntimeEvent,
+    SNMRAreaCategory, SNMRReport, SNMREntry
 )
 
 
@@ -6667,3 +6668,312 @@ def api_schedule_bulk(request):
                 'error': str(e)
             }, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+
+# ============================================
+# SERVER AND NETWORK MONITORING REPORT (SNMR)
+# ============================================
+
+@login_required
+def snmr_list(request):
+    """List all SNMR reports"""
+    reports = SNMRReport.objects.all().select_related('created_by')
+
+    context = {
+        'reports': reports,
+    }
+    return render(request, 'snmr/snmr_list.html', context)
+
+
+@login_required
+def snmr_create(request):
+    """Create a new SNMR report"""
+    if request.method == 'POST':
+        try:
+            # Get form data
+            month = int(request.POST.get('month'))
+            year = int(request.POST.get('year'))
+
+            # Check if report already exists
+            if SNMRReport.objects.filter(month=month, year=year).exists():
+                messages.error(request, f'A report for {date(year, month, 1).strftime("%B %Y")} already exists.')
+                return redirect('snmr_list')
+
+            # Create report
+            report = SNMRReport.objects.create(
+                month=month,
+                year=year,
+                region=request.POST.get('region', 'Region VIII'),
+                office=request.POST.get('office', 'DPWH Leyte 4th District Engineering'),
+                address=request.POST.get('address', 'Ormoc City Leyte'),
+                network_admin_name=request.POST.get('network_admin_name'),
+                network_admin_contact=request.POST.get('network_admin_contact'),
+                network_admin_email=request.POST.get('network_admin_email'),
+                noted_by_name=request.POST.get('noted_by_name'),
+                noted_by_position=request.POST.get('noted_by_position', 'District Engineer'),
+                created_by=request.user
+            )
+
+            # Create entries for standard areas
+            area_categories = SNMRAreaCategory.objects.filter(is_active=True).order_by('order')
+            for idx, category in enumerate(area_categories, start=1):
+                SNMREntry.objects.create(
+                    report=report,
+                    area_category=category,
+                    item_number=idx,
+                    status='Up and working',
+                    reason='N/A',
+                    initial_isolation='N/A',
+                    date='N/A',
+                    resolution='Up and working' if category.name != 'Admin Server' and category.name != 'Trunkline' else 'N/A'
+                )
+
+            # Try to populate from downtime events
+            _populate_snmr_from_downtime(report)
+
+            messages.success(request, f'SNMR report for {report.period_display} created successfully.')
+            return redirect('snmr_edit', report_id=report.id)
+
+        except Exception as e:
+            messages.error(request, f'Error creating report: {str(e)}')
+            return redirect('snmr_list')
+
+    # GET request - show form
+    current_year = timezone.now().year
+    current_month = timezone.now().month
+
+    context = {
+        'current_year': current_year,
+        'current_month': current_month,
+        'months': [
+            (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+            (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+            (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+        ],
+        'years': range(current_year - 5, current_year + 2)
+    }
+    return render(request, 'snmr/snmr_create.html', context)
+
+
+def _populate_snmr_from_downtime(report):
+    """Helper function to populate SNMR entries from downtime events"""
+    from datetime import datetime
+    from calendar import monthrange
+
+    # Get first and last day of the report month
+    first_day = datetime(report.year, report.month, 1).date()
+    last_day = datetime(report.year, report.month, monthrange(report.year, report.month)[1]).date()
+
+    # Get downtime events for this period
+    downtime_events = EquipmentDowntimeEvent.objects.filter(
+        occurrence_date__gte=first_day,
+        occurrence_date__lte=last_day
+    ).order_by('occurrence_date')
+
+    # Map equipment names to area categories (this is a simple mapping, you may need to adjust)
+    area_mapping = {
+        'wan': 'Wide Area Network',
+        'network': 'Wide Area Network',
+        'server': 'Admin Server',
+        'pabx': 'PABX',
+        'trunk': 'Trunkline',
+    }
+
+    for event in downtime_events:
+        # Try to match equipment name to area category
+        equipment_lower = event.equipment_name.lower()
+        matched_category = None
+
+        for key, category_name in area_mapping.items():
+            if key in equipment_lower:
+                try:
+                    matched_category = SNMRAreaCategory.objects.get(name=category_name)
+                    break
+                except SNMRAreaCategory.DoesNotExist:
+                    continue
+
+        if matched_category:
+            # Find or create entry for this category
+            entry = report.entries.filter(area_category=matched_category).first()
+            if entry:
+                # Update entry with downtime information
+                entry.downtime_event = event
+                entry.status = 'Down' if event.severity in ['MAJOR', 'CRITICAL'] else 'Intermittent Connection'
+                entry.reason = event.cause_description
+                entry.initial_isolation = event.resolution_notes or 'N/A'
+                entry.date = event.occurrence_date.strftime('%B %d, %Y')
+                entry.resolution = event.resolution_notes if event.end_time else 'Ongoing'
+                entry.save()
+
+
+@login_required
+def snmr_edit(request, report_id):
+    """Edit an existing SNMR report"""
+    report = get_object_or_404(SNMRReport, id=report_id)
+
+    if request.method == 'POST':
+        try:
+            # Update report details
+            report.region = request.POST.get('region')
+            report.office = request.POST.get('office')
+            report.address = request.POST.get('address')
+            report.network_admin_name = request.POST.get('network_admin_name')
+            report.network_admin_contact = request.POST.get('network_admin_contact')
+            report.network_admin_email = request.POST.get('network_admin_email')
+            report.noted_by_name = request.POST.get('noted_by_name')
+            report.noted_by_position = request.POST.get('noted_by_position')
+            report.save()
+
+            # Update entries
+            for entry in report.entries.all():
+                entry_prefix = f'entry_{entry.id}_'
+                entry.status = request.POST.get(f'{entry_prefix}status', entry.status)
+                entry.reason = request.POST.get(f'{entry_prefix}reason', entry.reason)
+                entry.initial_isolation = request.POST.get(f'{entry_prefix}initial_isolation', entry.initial_isolation)
+                entry.date = request.POST.get(f'{entry_prefix}date', entry.date)
+                entry.resolution = request.POST.get(f'{entry_prefix}resolution', entry.resolution)
+                entry.save()
+
+            messages.success(request, 'Report updated successfully.')
+            return redirect('snmr_view', report_id=report.id)
+
+        except Exception as e:
+            messages.error(request, f'Error updating report: {str(e)}')
+
+    context = {
+        'report': report,
+        'entries': report.entries.select_related('area_category').order_by('item_number')
+    }
+    return render(request, 'snmr/snmr_edit.html', context)
+
+
+@login_required
+def snmr_view(request, report_id):
+    """View SNMR report details"""
+    report = get_object_or_404(SNMRReport, id=report_id)
+    entries = report.entries.select_related('area_category').order_by('item_number')
+
+    context = {
+        'report': report,
+        'entries': entries
+    }
+    return render(request, 'snmr/snmr_view.html', context)
+
+
+@login_required
+def snmr_delete(request, report_id):
+    """Delete SNMR report"""
+    if request.method == 'POST':
+        report = get_object_or_404(SNMRReport, id=report_id)
+        period = report.period_display
+        report.delete()
+        messages.success(request, f'SNMR report for {period} deleted successfully.')
+        return redirect('snmr_list')
+    return redirect('snmr_list')
+
+
+@login_required
+def snmr_export_excel(request, report_id):
+    """Export SNMR report to Excel"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+    from django.http import HttpResponse
+
+    report = get_object_or_404(SNMRReport, id=report_id)
+    entries = report.entries.select_related('area_category').order_by('item_number')
+
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Server & Network Monitoring"
+
+    # Title
+    ws.merge_cells('A1:G1')
+    ws['A1'] = 'Monthly Server and Network Monitoring Report'
+    ws['A1'].font = Font(bold=True, size=14)
+    ws['A1'].alignment = Alignment(horizontal='center')
+
+    # Subtitle
+    ws.merge_cells('A2:G2')
+    ws['A2'] = f'For the Month of {report.period_display}'
+    ws['A2'].font = Font(bold=True, size=12)
+    ws['A2'].alignment = Alignment(horizontal='center')
+
+    # Empty row
+    ws.append([])
+
+    # Office information
+    ws.append(['Region:', report.region, None, None, 'Network Administrator:', None, report.network_admin_name])
+    ws.append(['Office:', report.office, None, None, 'Contact Number:', None, report.network_admin_contact])
+    ws.append(['Address:', report.address, None, None, 'Email Address:', None, report.network_admin_email])
+
+    # Empty row
+    ws.append([])
+
+    # Table headers
+    headers = ['Item No.', 'Area', 'Status', 'Reason', 'Initial Isolation', 'Date', 'Resolution']
+    ws.append(headers)
+
+    # Style headers
+    header_row = ws.max_row
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=header_row, column=col_num)
+        cell.font = Font(bold=True)
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        cell.fill = PatternFill(start_color='D9D9D9', end_color='D9D9D9', fill_type='solid')
+
+    # Empty row
+    ws.append([])
+
+    # Add data rows
+    for entry in entries:
+        ws.append([
+            entry.item_number,
+            entry.area_category.name,
+            entry.status,
+            entry.reason,
+            entry.initial_isolation,
+            entry.date,
+            entry.resolution
+        ])
+
+    # Empty rows
+    ws.append([])
+
+    # Signature section
+    ws.append([None, 'Prepared & Submitted by:', None, None, 'Noted:', None, None])
+    ws.append([])
+    ws.append([])
+    ws.append([None, report.network_admin_name, None, None, report.noted_by_name, None, None])
+    ws.append([None, 'Designated District Network Administrator', None, None, report.noted_by_position, None, None])
+
+    # Adjust column widths
+    ws.column_dimensions['A'].width = 10
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 40
+    ws.column_dimensions['E'].width = 40
+    ws.column_dimensions['F'].width = 20
+    ws.column_dimensions['G'].width = 40
+
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="SNMR_{report.month_name}_{report.year}.xlsx"'
+
+    wb.save(response)
+    return response
+
+
+@login_required
+def snmr_finalize(request, report_id):
+    """Finalize SNMR report (lock it from editing)"""
+    if request.method == 'POST':
+        report = get_object_or_404(SNMRReport, id=report_id)
+        report.is_finalized = True
+        report.finalized_at = timezone.now()
+        report.save()
+        messages.success(request, f'SNMR report for {report.period_display} has been finalized.')
+        return redirect('snmr_view', report_id=report.id)
+    return redirect('snmr_list')
