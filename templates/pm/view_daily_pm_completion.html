@@ -26,6 +26,9 @@
                     </div>
 
                     <div class="btn-group mt-3" role="group">
+                        <a href="{% url 'complete_daily_pm' completion.schedule.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Update
+                        </a>
                         <a href="{% url 'export_daily_pm_pdf' completion.id %}" class="btn btn-success">
                             <i class="fas fa-file-pdf"></i> Export Daily PDF
                         </a>

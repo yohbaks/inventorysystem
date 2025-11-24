@@ -179,7 +179,7 @@
                                     <tbody>
                                         {% for day in daily_breakdown %}
                                         <tr>
-                                            <td><strong>{{ day.day|date:"M d, Y" }}</strong></td>
+                                            <td><strong>{{ day.occurrence_date|date:"M d, Y" }}</strong></td>
                                             <td class="text-center">
                                                 <span class="badge badge-warning">{{ day.count }}</span>
                                             </td>

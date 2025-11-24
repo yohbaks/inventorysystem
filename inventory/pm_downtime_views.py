@@ -10,7 +10,6 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Sum, Count, Q, Avg
-from django.db.models.functions import TruncDate
 
 from .models import (
     EquipmentDowntimeEvent, PMChecklistItemCompletion,
@@ -124,12 +123,11 @@ def downtime_analytics_dashboard(request):
     ).order_by('-count')[:10]  # Top 10
 
     # Events by day (for chart)
-    daily_breakdown = downtime_events.annotate(
-        day=TruncDate('occurrence_date')
-    ).values('day').annotate(
+    # Use occurrence_date directly instead of TruncDate for better SQLite compatibility
+    daily_breakdown = downtime_events.values('occurrence_date').annotate(
         count=Count('id'),
         total_duration=Sum('duration_minutes')
-    ).order_by('day')
+    ).order_by('occurrence_date')
 
     # Recent critical events
     critical_events = downtime_events.filter(
