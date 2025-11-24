@@ -4,17 +4,24 @@
 {% block title %}SNMR Reports - Server & Network Monitoring{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3><i class="fas fa-network-wired"></i> Server & Network Monitoring Reports (SNMR)</h3>
-                    <a href="{% url 'snmr_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create New Report
-                    </a>
-                </div>
-                <div class="card-body">
+<div class="container">
+    <div class="page-inner">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+            <div>
+                <h3 class="fw-bold mb-3"><i class="fas fa-network-wired"></i> Server & Network Monitoring Reports (SNMR)</h3>
+                <h6 class="op-7 mb-2">Manage and track server and network monitoring reports</h6>
+            </div>
+            <div class="ms-md-auto py-2 py-md-0">
+                <a href="{% url 'snmr_create' %}" class="btn btn-primary btn-round">
+                    <i class="fas fa-plus"></i> Create New Report
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
                     {% if messages %}
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -111,6 +118,7 @@
                             <i class="fas fa-info-circle"></i> No SNMR reports found. Click "Create New Report" to get started.
                         </div>
                     {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
