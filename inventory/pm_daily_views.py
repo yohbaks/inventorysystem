@@ -224,7 +224,55 @@ def complete_daily_pm(request, schedule_id):
                     if day_field and is_completed:
                         item_completion_data[day_field] = True
 
-                    PMChecklistItemCompletion.objects.create(**item_completion_data)
+                    item_completion = PMChecklistItemCompletion.objects.create(**item_completion_data)
+
+                    # Handle inline downtime logging for items 1 and 2
+                    if item.item_number in [1, 2]:
+                        downtime_start = request.POST.get(f'downtime_start_{item.id}', '').strip()
+                        downtime_equipment = request.POST.get(f'downtime_equipment_{item.id}', '').strip()
+                        downtime_cause = request.POST.get(f'downtime_cause_{item.id}', '').strip()
+
+                        # Only create downtime event if essential fields are provided
+                        if downtime_start and downtime_equipment:
+                            from .models import EquipmentDowntimeEvent
+                            from datetime import datetime
+
+                            # Get downtime data
+                            downtime_date_str = request.POST.get(f'downtime_date_{item.id}', schedule.scheduled_date.strftime('%Y-%m-%d'))
+                            downtime_end = request.POST.get(f'downtime_end_{item.id}', '').strip()
+                            downtime_severity = request.POST.get(f'downtime_severity_{item.id}', 'MODERATE')
+                            downtime_resolution = request.POST.get(f'downtime_resolution_{item.id}', '').strip()
+                            downtime_services = request.POST.get(f'downtime_services_{item.id}', '').strip()
+                            downtime_users = request.POST.get(f'downtime_users_{item.id}', '').strip()
+
+                            # Create downtime event
+                            downtime_event = EquipmentDowntimeEvent.objects.create(
+                                item_completion=item_completion,
+                                occurrence_date=datetime.strptime(downtime_date_str, '%Y-%m-%d').date(),
+                                start_time=datetime.strptime(downtime_start, '%H:%M').time(),
+                                end_time=datetime.strptime(downtime_end, '%H:%M').time() if downtime_end else None,
+                                equipment_name=downtime_equipment,
+                                severity=downtime_severity if downtime_severity else 'MODERATE',
+                                cause_description=downtime_cause if downtime_cause else 'Not specified',
+                                resolution_notes=downtime_resolution,
+                                services_affected=downtime_services,
+                                users_affected_count=int(downtime_users) if downtime_users else None,
+                                reported_by=request.user
+                            )
+
+                            # Auto-populate the Problems field with downtime summary
+                            downtime_summary = f"DOWNTIME: {downtime_event.occurrence_date} {downtime_event.start_time.strftime('%H:%M')}"
+                            if downtime_event.end_time:
+                                downtime_summary += f" - {downtime_event.end_time.strftime('%H:%M')}"
+                            downtime_summary += f" | {downtime_equipment} | {downtime_severity} | {downtime_cause}"
+
+                            # Append to existing problems or create new
+                            if item_completion.problems_encountered:
+                                item_completion.problems_encountered += f"\n\n{downtime_summary}"
+                            else:
+                                item_completion.problems_encountered = downtime_summary
+
+                            item_completion.save()
 
                 # Update schedule status
                 schedule.status = 'COMPLETED'

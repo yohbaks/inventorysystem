@@ -61,6 +61,7 @@
                             <ul class="mb-0">
                                 <li>Check the box for each task you have completed</li>
                                 <li>Note any problems encountered and actions taken</li>
+                                <li><strong class="text-danger">NEW:</strong> For Items 1-2, you can now log downtime events directly by clicking "Log Downtime Event (Optional)"</li>
                                 <li>Items 1-2 are DAILY tasks (should be done every day)</li>
                                 <li>Items 3-5 have MULTIPLE READINGS throughout the day</li>
                                 <li><strong>Items 6-11 are WEEKLY tasks (done only on Friday)</strong></li>
@@ -180,16 +181,135 @@
                                                           {% if not is_friday %}{% if item.item_number >= 6 and item.item_number <= 11 %}disabled{% endif %}{% endif %}>{{ item.existing_action }}</textarea>
                                             </div>
 
-                                            <!-- Downtime Logging Button (for critical equipment items 1 and 2) -->
+                                            <!-- Downtime Logging Section (for critical equipment items 1 and 2) -->
                                             {% if item.item_number == 1 or item.item_number == 2 %}
+                                            <div class="mt-3">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        data-toggle="collapse"
+                                                        data-target="#downtime_{{ item.id }}"
+                                                        aria-expanded="false">
+                                                    <i class="fas fa-exclamation-circle"></i> Log Downtime Event (Optional)
+                                                </button>
+
+                                                <div class="collapse mt-2" id="downtime_{{ item.id }}">
+                                                    <div class="card card-body bg-light">
+                                                        <h6 class="text-danger mb-3">
+                                                            <i class="fas fa-exclamation-triangle"></i> Downtime Event Details
+                                                        </h6>
+
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label for="downtime_date_{{ item.id }}" class="small">Date:</label>
+                                                                    <input type="date"
+                                                                           class="form-control form-control-sm"
+                                                                           id="downtime_date_{{ item.id }}"
+                                                                           name="downtime_date_{{ item.id }}"
+                                                                           value="{{ today|date:'Y-m-d' }}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <label for="downtime_start_{{ item.id }}" class="small">Start Time:</label>
+                                                                    <input type="time"
+                                                                           class="form-control form-control-sm"
+                                                                           id="downtime_start_{{ item.id }}"
+                                                                           name="downtime_start_{{ item.id }}">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <div class="form-group">
+                                                                    <label for="downtime_end_{{ item.id }}" class="small">End Time:</label>
+                                                                    <input type="time"
+                                                                           class="form-control form-control-sm"
+                                                                           id="downtime_end_{{ item.id }}"
+                                                                           name="downtime_end_{{ item.id }}">
+                                                                    <small class="text-muted">Leave blank if ongoing</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="downtime_equipment_{{ item.id }}" class="small">Equipment/System:</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm"
+                                                                   id="downtime_equipment_{{ item.id }}"
+                                                                   name="downtime_equipment_{{ item.id }}"
+                                                                   placeholder="e.g., Server-01, Router, UPS-A">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="downtime_severity_{{ item.id }}" class="small">Severity:</label>
+                                                            <select class="form-control form-control-sm"
+                                                                    id="downtime_severity_{{ item.id }}"
+                                                                    name="downtime_severity_{{ item.id }}">
+                                                                <option value="">-- Select Severity --</option>
+                                                                <option value="MINOR">Minor - No service impact</option>
+                                                                <option value="MODERATE">Moderate - Partial impact</option>
+                                                                <option value="MAJOR">Major - Significant impact</option>
+                                                                <option value="CRITICAL">Critical - Complete service loss</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="downtime_cause_{{ item.id }}" class="small">Cause/Description:</label>
+                                                            <textarea class="form-control form-control-sm"
+                                                                      id="downtime_cause_{{ item.id }}"
+                                                                      name="downtime_cause_{{ item.id }}"
+                                                                      rows="2"
+                                                                      placeholder="What caused the downtime..."></textarea>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="downtime_resolution_{{ item.id }}" class="small">Resolution/Action:</label>
+                                                            <textarea class="form-control form-control-sm"
+                                                                      id="downtime_resolution_{{ item.id }}"
+                                                                      name="downtime_resolution_{{ item.id }}"
+                                                                      rows="2"
+                                                                      placeholder="How it was resolved..."></textarea>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-8">
+                                                                <div class="form-group">
+                                                                    <label for="downtime_services_{{ item.id }}" class="small">Services Affected:</label>
+                                                                    <input type="text"
+                                                                           class="form-control form-control-sm"
+                                                                           id="downtime_services_{{ item.id }}"
+                                                                           name="downtime_services_{{ item.id }}"
+                                                                           placeholder="e.g., Email, Internet, Database">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <div class="form-group mb-0">
+                                                                    <label for="downtime_users_{{ item.id }}" class="small">Users Affected:</label>
+                                                                    <input type="number"
+                                                                           class="form-control form-control-sm"
+                                                                           id="downtime_users_{{ item.id }}"
+                                                                           name="downtime_users_{{ item.id }}"
+                                                                           min="0"
+                                                                           placeholder="Count">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="alert alert-info mt-2 mb-0">
+                                                            <small><i class="fas fa-info-circle"></i> This downtime will be auto-added to the Problems field and used for SNMR smart suggestions.</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Keep modal button for updates (when completion_id exists) -->
                                             {% if item.completion_id %}
                                             <div class="mt-2">
                                                 <button type="button"
-                                                        class="btn btn-sm btn-outline-danger downtime-log-btn"
+                                                        class="btn btn-sm btn-outline-secondary downtime-log-btn"
                                                         data-item-completion-id="{{ item.completion_id }}"
                                                         data-item-number="{{ item.item_number }}"
                                                         data-item-description="{{ item.task_description|striptags|truncatewords:5 }}">
-                                                    <i class="fas fa-exclamation-circle"></i> Log Downtime
+                                                    <i class="fas fa-plus-circle"></i> Add Another Downtime Event
                                                 </button>
                                             </div>
                                             {% endif %}
