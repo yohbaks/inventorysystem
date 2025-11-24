@@ -7334,6 +7334,12 @@ def snmr_export_pdf(request, report_id):
     from django.http import HttpResponse
     import io
 
+    # Debug output
+    print("=" * 80)
+    print("SNMR PDF EXPORT - NEW VERSION WITH EXCEL MATCHING")
+    print(f"Report ID: {report_id}")
+    print("=" * 80)
+
     report = get_object_or_404(SNMRReport, id=report_id)
     entries = report.entries.select_related('area_category').order_by('item_number')
 
@@ -7489,6 +7495,7 @@ def snmr_export_pdf(request, report_id):
     entries_table = Table(table_data, colWidths=col_widths)
 
     # Style the table to match Excel exactly
+    print("DEBUG: Applying NEW table style - white background, thin borders only")
     entries_table.setStyle(TableStyle([
         # All cells - white background, black text
         ('BACKGROUND', (0, 0), (-1, -1), colors.white),
@@ -7509,6 +7516,7 @@ def snmr_export_pdf(request, report_id):
         ('TOPPADDING', (0, 0), (-1, -1), 4),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
     ]))
+    print("DEBUG: Table style applied successfully")
 
     elements.append(entries_table)
     elements.append(Spacer(1, 0.5*inch))
