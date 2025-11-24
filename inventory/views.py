@@ -7423,6 +7423,18 @@ def snmr_export_pdf(request, report_id):
     # Subtitle with period
     subtitle = Paragraph(f'For the Month of {report.period_display}', subtitle_style)
     elements.append(subtitle)
+
+    # Version indicator (for debugging - can be removed later)
+    from datetime import datetime
+    version_style = ParagraphStyle(
+        'Version',
+        parent=styles['Normal'],
+        fontSize=8,
+        textColor=colors.grey,
+        alignment=TA_CENTER
+    )
+    version_text = Paragraph(f'Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} - v2.0', version_style)
+    elements.append(version_text)
     elements.append(Spacer(1, 0.15*inch))
 
     # Office Information Table - matching Excel layout exactly
@@ -7582,9 +7594,13 @@ def snmr_export_pdf(request, report_id):
     pdf = buffer.getvalue()
     buffer.close()
 
-    # Create response
+    # Create response with cache prevention headers
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="SNMR_{report.month_name}_{report.year}.pdf"'
+    # Prevent caching to ensure fresh PDF generation
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
     response.write(pdf)
 
     return response
