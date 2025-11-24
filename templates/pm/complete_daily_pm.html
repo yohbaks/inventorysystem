@@ -378,7 +378,7 @@
                     </div>
 
                     <div class="alert alert-warning">
-                        <i class="fas fa-magic"></i> <strong>Auto-fill:</strong> This information will be automatically added to the "Problems" field in your checklist.
+                        <i class="fas fa-magic"></i> <strong>Auto-fill:</strong> This information will be automatically added to the "Problems" and "Action Taken" fields in your checklist.
                     </div>
                 </form>
             </div>
@@ -533,6 +533,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // Auto-populate the Action Taken field with resolution notes
+        const actionTextarea = document.getElementById('action_' + itemId);
+        if (actionTextarea && resolutionNotes) {
+            // Append to existing action or create new
+            if (actionTextarea.value.trim()) {
+                actionTextarea.value += '\n\n' + resolutionNotes;
+            } else {
+                actionTextarea.value = resolutionNotes;
+            }
+        }
+
         // Show indicator
         const indicator = document.getElementById('downtime_indicator_' + itemId);
         if (indicator) {
@@ -543,7 +554,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#downtimeModal').modal('hide');
 
         // Show success message
-        alert('✓ Downtime information saved!\n\nThe downtime summary has been added to the Problems field. The downtime event will be logged when you submit the checklist.');
+        alert('✓ Downtime information saved!\n\nThe downtime summary has been added to the Problems field' + (resolutionNotes ? ' and Resolution/Action has been added to the Action Taken field' : '') + '. The downtime event will be logged when you submit the checklist.');
     }
 
     function submitViaAjax(form, itemCompletionId) {
