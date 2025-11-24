@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard, pm_downtime_views
+from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard, pm_downtime_views, asir_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -278,5 +278,15 @@ urlpatterns = [
     path('reports/snmr/<int:report_id>/delete/', views.snmr_delete, name='snmr_delete'),
     path('reports/snmr/<int:report_id>/export/excel/', views.snmr_export_excel, name='snmr_export_excel'),
     path('reports/snmr/<int:report_id>/finalize/', views.snmr_finalize, name='snmr_finalize'),
+
+    # ================================
+    # ASIR - Application Systems Implementation Report
+    path('reports/asir/', asir_views.asir_list, name='asir_list'),
+    path('reports/asir/create/', asir_views.asir_create, name='asir_create'),
+    path('reports/asir/<int:report_id>/', asir_views.asir_view, name='asir_view'),
+    path('reports/asir/<int:report_id>/edit/', asir_views.asir_edit, name='asir_edit'),
+    path('reports/asir/<int:report_id>/delete/', asir_views.asir_delete, name='asir_delete'),
+    path('reports/asir/<int:report_id>/export/excel/', asir_views.asir_export_excel, name='asir_export_excel'),
+    path('reports/asir/<int:report_id>/finalize/', asir_views.asir_finalize, name='asir_finalize'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

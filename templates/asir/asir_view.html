@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ASIR Report - {{ report.period_display }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-file-alt"></i> ASIR Report - {{ report.period_display }}</h3>
+                    <div>
+                        <a href="{% url 'asir_export_excel' report.id %}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </a>
+                        {% if not report.is_finalized %}
+                        <a href="{% url 'asir_edit' report.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#finalizeModal">
+                            <i class="fas fa-lock"></i> Finalize Report
+                        </button>
+                        {% else %}
+                        <span class="badge badge-success">FINALIZED</span>
+                        {% endif %}
+                        <a href="{% url 'asir_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Report Header -->
+                    <div class="text-center mb-4">
+                        <h4>Monthly Application Systems Implementation Report</h4>
+                        <h5>For the Month of {{ report.period_display }}</h5>
+                    </div>
+
+                    <!-- Office Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Region:</th>
+                                    <td>{{ report.region }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Office:</th>
+                                    <td>{{ report.office }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Address:</th>
+                                    <td>{{ report.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Network Administrator:</th>
+                                    <td>{{ report.network_admin_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Number:</th>
+                                    <td>{{ report.network_admin_contact }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email Address:</th>
+                                    <td>{{ report.network_admin_email }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Application Systems Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 5%">Item No.</th>
+                                    <th style="width: 20%">Application Systems</th>
+                                    <th style="width: 10%">Number of Users</th>
+                                    <th style="width: 15%">Status</th>
+                                    <th style="width: 20%">Activities for the Month - Details</th>
+                                    <th style="width: 10%">Date</th>
+                                    <th style="width: 20%">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries %}
+                                <tr>
+                                    <td class="text-center">{{ entry.item_number }}</td>
+                                    <td>{{ entry.application_name }}</td>
+                                    <td class="text-center">{{ entry.number_of_users }}</td>
+                                    <td>
+                                        {% if entry.status == 'Deployed and being used' %}
+                                            <span class="badge badge-success">{{ entry.status }}</span>
+                                        {% elif entry.status == 'Down' %}
+                                            <span class="badge badge-danger">{{ entry.status }}</span>
+                                        {% elif entry.status == 'Under Maintenance' %}
+                                            <span class="badge badge-warning">{{ entry.status }}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{{ entry.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ entry.activity_details }}</td>
+                                    <td>{{ entry.activity_date }}</td>
+                                    <td>{{ entry.remarks }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Metadata -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <strong>Report Information:</strong><br>
+                                Created by: {{ report.created_by.get_full_name|default:report.created_by.username }}<br>
+                                Created at: {{ report.created_at|date:"F d, Y h:i A" }}<br>
+                                Last updated: {{ report.updated_at|date:"F d, Y h:i A" }}<br>
+                                {% if report.is_finalized %}
+                                    Status: <span class="badge badge-success">Finalized</span> on {{ report.finalized_at|date:"F d, Y h:i A" }}
+                                {% else %}
+                                    Status: <span class="badge badge-warning">Draft</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Finalize Modal -->
+<div class="modal fade" id="finalizeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Finalize Report</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to finalize this report?</p>
+                <p class="text-danger"><strong>Warning:</strong> Once finalized, the report cannot be edited anymore.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'asir_finalize' report.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-lock"></i> Finalize Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

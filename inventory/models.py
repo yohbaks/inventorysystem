@@ -1906,3 +1906,86 @@ class SNMREntry(models.Model):
             self.initial_isolation = event.resolution_notes or 'N/A'
             self.date = event.occurrence_date.strftime('%B %d, %Y')
             self.resolution = event.resolution_notes or 'Ongoing investigation'
+
+
+# ==================== ASIR (Application Systems Implementation Report) Models ====================
+
+class ASIRReport(models.Model):
+    """Monthly Application Systems Implementation Report"""
+
+    # Report period
+    month = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
+    year = models.IntegerField(validators=[MinValueValidator(2000)])
+
+    # Office information
+    region = models.CharField(max_length=100, default='VIII')
+    office = models.CharField(max_length=200, default='DPWH, Leyte Fourth District Engineering Office')
+    address = models.CharField(max_length=300, default='Ormoc City, Leyte')
+
+    # Network administrator information
+    network_admin_name = models.CharField(max_length=200, default='BOBBY L. YU')
+    network_admin_contact = models.CharField(max_length=100, default='09219290909')
+    network_admin_email = models.EmailField(default='yu.bobby@dpwh.gov.ph')
+
+    # Report metadata
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_asir_reports')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Status
+    is_finalized = models.BooleanField(default=False)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-year', '-month']
+        unique_together = ['month', 'year']
+        verbose_name = 'ASIR Report'
+        verbose_name_plural = 'ASIR Reports'
+
+    def __str__(self):
+        from datetime import date
+        return f"ASIR - {date(self.year, self.month, 1).strftime('%B %Y')}"
+
+    @property
+    def period_display(self):
+        from datetime import date
+        return date(self.year, self.month, 1).strftime('%B %Y')
+
+
+class ASIREntry(models.Model):
+    """Individual application system entries in the ASIR report"""
+
+    STATUS_CHOICES = [
+        ('Deployed and being used', 'Deployed and being used'),
+        ('Deployed but not being used', 'Deployed but not being used'),
+        ('Down', 'Down'),
+        ('Under Maintenance', 'Under Maintenance'),
+    ]
+
+    report = models.ForeignKey(ASIRReport, on_delete=models.CASCADE, related_name='entries')
+
+    # Entry order/number
+    item_number = models.PositiveIntegerField()
+
+    # Application system details
+    application_name = models.CharField(max_length=300)
+    number_of_users = models.PositiveIntegerField(default=0, blank=True)
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='Deployed and being used')
+
+    # Activities for the month
+    activity_details = models.TextField(default='None', blank=True)
+    activity_date = models.CharField(max_length=200, default='N/A', blank=True)
+    remarks = models.TextField(default='None', blank=True)
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['report', 'item_number']
+        unique_together = ['report', 'item_number']
+        verbose_name = 'ASIR Entry'
+        verbose_name_plural = 'ASIR Entries'
+
+    def __str__(self):
+        return f"{self.report} - Item {self.item_number}: {self.application_name}"

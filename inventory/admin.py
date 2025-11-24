@@ -16,7 +16,9 @@ from .models import (
     PMChecklistCompletion, PMChecklistItemCompletion, PMChecklistReport, PMIssueLog,
     EquipmentDowntimeEvent,
     # SNMR Models
-    SNMRAreaCategory, SNMRReport, SNMREntry
+    SNMRAreaCategory, SNMRReport, SNMREntry,
+    # ASIR Models
+    ASIRReport, ASIREntry
 )
 
 # Register your models here.
@@ -78,3 +80,7 @@ admin.site.register(PMIssueLog)
 admin.site.register(SNMRAreaCategory)
 admin.site.register(SNMRReport)
 admin.site.register(SNMREntry)
+
+# ASIR - Application Systems Implementation Report
+admin.site.register(ASIRReport)
+admin.site.register(ASIREntry)
