@@ -277,7 +277,6 @@ urlpatterns = [
     path('reports/snmr/<int:report_id>/edit/', views.snmr_edit, name='snmr_edit'),
     path('reports/snmr/<int:report_id>/delete/', views.snmr_delete, name='snmr_delete'),
     path('reports/snmr/<int:report_id>/export/excel/', views.snmr_export_excel, name='snmr_export_excel'),
-    path('reports/snmr/<int:report_id>/export/pdf/', views.snmr_export_pdf, name='snmr_export_pdf'),
     path('reports/snmr/<int:report_id>/finalize/', views.snmr_finalize, name='snmr_finalize'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
