@@ -1699,8 +1699,8 @@ class EquipmentDowntimeEvent(models.Model):
         return None
 
     def save(self, *args, **kwargs):
-        # Auto-calculate duration if not set
-        if self.start_time and self.end_time and not self.duration_minutes:
+        # Auto-calculate duration whenever start and end times are present
+        if self.start_time and self.end_time:
             self.calculate_duration()
         super().save(*args, **kwargs)
 

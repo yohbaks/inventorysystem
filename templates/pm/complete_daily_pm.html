@@ -493,16 +493,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function populateHiddenFields(form, itemId) {
+        // Get form data
+        const occurrenceDate = document.getElementById('occurrence_date').value;
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        const equipmentName = document.getElementById('equipment_name').value;
+        const severity = document.getElementById('severity').value;
+        const causeDescription = document.getElementById('cause_description').value;
+        const resolutionNotes = document.getElementById('resolution_notes').value;
+        const servicesAffected = document.getElementById('services_affected').value;
+        const usersAffected = document.getElementById('users_affected_count').value;
+
         // Populate hidden fields with form data
-        document.getElementById('downtime_date_' + itemId).value = document.getElementById('occurrence_date').value;
-        document.getElementById('downtime_start_' + itemId).value = document.getElementById('start_time').value;
-        document.getElementById('downtime_end_' + itemId).value = document.getElementById('end_time').value;
-        document.getElementById('downtime_equipment_' + itemId).value = document.getElementById('equipment_name').value;
-        document.getElementById('downtime_severity_' + itemId).value = document.getElementById('severity').value;
-        document.getElementById('downtime_cause_' + itemId).value = document.getElementById('cause_description').value;
-        document.getElementById('downtime_resolution_' + itemId).value = document.getElementById('resolution_notes').value;
-        document.getElementById('downtime_services_' + itemId).value = document.getElementById('services_affected').value;
-        document.getElementById('downtime_users_' + itemId).value = document.getElementById('users_affected_count').value;
+        document.getElementById('downtime_date_' + itemId).value = occurrenceDate;
+        document.getElementById('downtime_start_' + itemId).value = startTime;
+        document.getElementById('downtime_end_' + itemId).value = endTime;
+        document.getElementById('downtime_equipment_' + itemId).value = equipmentName;
+        document.getElementById('downtime_severity_' + itemId).value = severity;
+        document.getElementById('downtime_cause_' + itemId).value = causeDescription;
+        document.getElementById('downtime_resolution_' + itemId).value = resolutionNotes;
+        document.getElementById('downtime_services_' + itemId).value = servicesAffected;
+        document.getElementById('downtime_users_' + itemId).value = usersAffected;
+
+        // Auto-populate the Problems field with downtime summary
+        let downtimeSummary = `DOWNTIME: ${occurrenceDate} ${startTime}`;
+        if (endTime) {
+            downtimeSummary += ` - ${endTime}`;
+        }
+        downtimeSummary += ` | ${equipmentName} | ${severity} | ${causeDescription}`;
+
+        // Get the problems textarea and update it
+        const problemsTextarea = document.getElementById('problems_' + itemId);
+        if (problemsTextarea) {
+            // Append to existing problems or create new
+            if (problemsTextarea.value.trim()) {
+                problemsTextarea.value += '\n\n' + downtimeSummary;
+            } else {
+                problemsTextarea.value = downtimeSummary;
+            }
+        }
 
         // Show indicator
         const indicator = document.getElementById('downtime_indicator_' + itemId);
@@ -514,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#downtimeModal').modal('hide');
 
         // Show success message
-        alert('✓ Downtime information saved!\n\nThe downtime will be logged when you submit the checklist.');
+        alert('✓ Downtime information saved!\n\nThe downtime summary has been added to the Problems field. The downtime event will be logged when you submit the checklist.');
     }
 
     function submitViaAjax(form, itemCompletionId) {
