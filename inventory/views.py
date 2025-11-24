@@ -6831,7 +6831,7 @@ def generate_snmr_suggestions(report):
 
     # Keywords to match for different categories
     category_keywords = {
-        'Wide Area Network': ['wan', 'wide area', 'network', 'internet', 'connectivity', 'router', 'switch'],
+        'Wide Area Network': ['wan', 'wide area', 'network', 'internet', 'intranet', 'connectivity', 'router', 'switch', 'central office'],
         'PABX': ['pabx', 'pbx', 'phone', 'telephone', 'voip', 'extension'],
         'Admin Server': ['server', 'admin', 'mail', 'database', 'storage'],
         'Trunkline': ['trunkline', 'trunk', 'line', 'connection']
