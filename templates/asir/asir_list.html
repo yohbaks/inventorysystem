@@ -26,7 +26,7 @@
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                                 {{ message }}
-                                <button type="button" class="close" data-dismiss="alert">
+                                <button type="button" class="close" data-bs-dismiss="alert">
                                     <span>&times;</span>
                                 </button>
                             </div>
@@ -80,7 +80,7 @@
                                                     <i class="fas fa-file-excel"></i>
                                                 </a>
                                                 {% if not report.is_finalized %}
-                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ report.id }}" title="Delete">
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ report.id }}" title="Delete">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                                 {% endif %}
@@ -94,7 +94,7 @@
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title">Confirm Delete</h5>
-                                                    <button type="button" class="close" data-dismiss="modal">
+                                                    <button type="button" class="close" data-bs-dismiss="modal">
                                                         <span>&times;</span>
                                                     </button>
                                                 </div>
@@ -102,7 +102,7 @@
                                                     Are you sure you want to delete the ASIR report for {{ report.period_display }}?
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                                     <form method="post" action="{% url 'asir_delete' report.id %}" style="display: inline;">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-danger">Delete</button>

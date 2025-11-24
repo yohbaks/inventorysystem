@@ -18,7 +18,7 @@
                         <a href="{% url 'asir_edit' report.id %}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#finalizeModal">
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#finalizeModal">
                             <i class="fas fa-lock"></i> Finalize Report
                         </button>
                         {% else %}
@@ -34,7 +34,7 @@
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                                 {{ message }}
-                                <button type="button" class="close" data-dismiss="alert">
+                                <button type="button" class="close" data-bs-dismiss="alert">
                                     <span>&times;</span>
                                 </button>
                             </div>
@@ -151,7 +151,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Finalize Report</h5>
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close" data-bs-dismiss="modal">
                     <span>&times;</span>
                 </button>
             </div>
@@ -160,7 +160,7 @@
                 <p class="text-danger"><strong>Warning:</strong> Once finalized, the report cannot be edited anymore.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="post" action="{% url 'asir_finalize' report.id %}" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary">
