@@ -7149,6 +7149,192 @@ def snmr_export_excel(request, report_id):
 
 
 @login_required
+def snmr_export_pdf(request, report_id):
+    """Export SNMR report to PDF"""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    from django.http import HttpResponse
+    import io
+
+    report = get_object_or_404(SNMRReport, id=report_id)
+    entries = report.entries.select_related('area_category').order_by('item_number')
+
+    # Create PDF buffer
+    buffer = io.BytesIO()
+
+    # Create PDF document in landscape orientation for better table fit
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        rightMargin=0.5*inch,
+        leftMargin=0.5*inch,
+        topMargin=0.75*inch,
+        bottomMargin=0.75*inch
+    )
+
+    # Container for PDF elements
+    elements = []
+
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.black,
+        spaceAfter=12,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.black,
+        spaceAfter=20,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.black
+    )
+
+    # Title
+    title = Paragraph('Monthly Server and Network Monitoring Report', title_style)
+    elements.append(title)
+
+    # Subtitle with period
+    subtitle = Paragraph(f'For the Month of {report.period_display}', subtitle_style)
+    elements.append(subtitle)
+
+    # Office Information Table
+    info_data = [
+        [Paragraph('<b>Region:</b>', normal_style), Paragraph(report.region, normal_style),
+         '', Paragraph('<b>Network Administrator:</b>', normal_style), Paragraph(report.network_admin_name, normal_style)],
+        [Paragraph('<b>Office:</b>', normal_style), Paragraph(report.office, normal_style),
+         '', Paragraph('<b>Contact Number:</b>', normal_style), Paragraph(report.network_admin_contact or '', normal_style)],
+        [Paragraph('<b>Address:</b>', normal_style), Paragraph(report.address, normal_style),
+         '', Paragraph('<b>Email Address:</b>', normal_style), Paragraph(report.network_admin_email or '', normal_style)]
+    ]
+
+    info_table = Table(info_data, colWidths=[1.2*inch, 2.2*inch, 0.3*inch, 1.5*inch, 2*inch])
+    info_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(info_table)
+    elements.append(Spacer(1, 0.3*inch))
+
+    # Monitoring Entries Table Header
+    table_data = [
+        [Paragraph('<b>Item No.</b>', normal_style),
+         Paragraph('<b>Area</b>', normal_style),
+         Paragraph('<b>Status</b>', normal_style),
+         Paragraph('<b>Reason</b>', normal_style),
+         Paragraph('<b>Initial Isolation</b>', normal_style),
+         Paragraph('<b>Date</b>', normal_style),
+         Paragraph('<b>Resolution</b>', normal_style)]
+    ]
+
+    # Add data rows
+    for entry in entries:
+        table_data.append([
+            Paragraph(str(entry.item_number), normal_style),
+            Paragraph(entry.area_category.name, normal_style),
+            Paragraph(entry.status or '', normal_style),
+            Paragraph(entry.reason or '', normal_style),
+            Paragraph(entry.initial_isolation or '', normal_style),
+            Paragraph(entry.date or '', normal_style),
+            Paragraph(entry.resolution or '', normal_style)
+        ])
+
+    # Create table with column widths
+    col_widths = [0.6*inch, 1.2*inch, 1*inch, 1.8*inch, 1.8*inch, 0.9*inch, 1.8*inch]
+    entries_table = Table(table_data, colWidths=col_widths)
+
+    # Style the table
+    entries_table.setStyle(TableStyle([
+        # Header styling
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+
+        # Data rows styling
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # Center item numbers
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+
+        # Grid
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+    ]))
+
+    elements.append(entries_table)
+    elements.append(Spacer(1, 0.5*inch))
+
+    # Signature section
+    sig_style = ParagraphStyle(
+        'Signature',
+        parent=styles['Normal'],
+        fontSize=10,
+        alignment=TA_CENTER
+    )
+    sig_data = [
+        [Paragraph('<b>Prepared & Submitted by:</b>', sig_style),
+         '',
+         Paragraph('<b>Noted:</b>', sig_style)],
+        ['', '', ''],
+        ['', '', ''],
+        [Paragraph(f'<b>{report.network_admin_name}</b>', sig_style),
+         '',
+         Paragraph(f'<b>{report.noted_by_name}</b>', sig_style)],
+        [Paragraph('Designated District Network Administrator', sig_style),
+         '',
+         Paragraph(report.noted_by_position, sig_style)]
+    ]
+
+    sig_table = Table(sig_data, colWidths=[3.5*inch, 0.5*inch, 3.5*inch])
+    sig_table.setStyle(TableStyle([
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+    ]))
+    elements.append(sig_table)
+
+    # Build PDF
+    doc.build(elements)
+
+    # Get PDF from buffer
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="SNMR_{report.month_name}_{report.year}.pdf"'
+    response.write(pdf)
+
+    return response
+
+
+@login_required
 def snmr_finalize(request, report_id):
     """Finalize SNMR report (lock it from editing)"""
     if request.method == 'POST':
