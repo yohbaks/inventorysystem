@@ -7080,30 +7080,12 @@ def snmr_export_excel(request, report_id):
     ws['F5'] = report.network_admin_contact
     ws['F6'] = report.network_admin_email
 
-    # Data starts at row 10 (template already has headers at rows 8-9)
+    # Data starts at row 10 (template already has headers and formatting)
     data_start_row = 10
 
-    # Store the template row for copying formatting
-    template_row = data_start_row
-
-    # Fill in data entries
+    # Fill in data entries - just add data and enable wrapping, preserve all template formatting
     for idx, entry in enumerate(entries):
         row_num = data_start_row + idx
-
-        # If we need more rows, copy the template row's formatting
-        if idx > 0:
-            # Don't set fixed height - let it auto-adjust based on content
-            # ws.row_dimensions[row_num].height = ws.row_dimensions[template_row].height
-            for col in range(1, 8):  # Columns A to G
-                template_cell = ws.cell(row=template_row, column=col)
-                new_cell = ws.cell(row=row_num, column=col)
-                if template_cell.has_style:
-                    new_cell.font = copy(template_cell.font)
-                    new_cell.border = copy(template_cell.border)
-                    new_cell.fill = copy(template_cell.fill)
-                    new_cell.number_format = copy(template_cell.number_format)
-                    new_cell.protection = copy(template_cell.protection)
-                    new_cell.alignment = copy(template_cell.alignment)
 
         # Fill in the data for this entry
         ws[f'A{row_num}'] = entry.item_number
@@ -7114,67 +7096,20 @@ def snmr_export_excel(request, report_id):
         ws[f'F{row_num}'] = entry.date
         ws[f'G{row_num}'] = entry.resolution
 
-        # Enable text wrapping for cells with potentially long content
-        # and calculate appropriate row height
-        wrap_columns = ['B', 'C', 'D', 'E', 'G']  # Area, Status, Reason, Initial Isolation, Resolution
-        max_lines = 1
-
-        for col in wrap_columns:
+        # Enable text wrapping for all data cells to handle long content
+        # Preserve existing alignment from template
+        for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
             cell = ws[f'{col}{row_num}']
-            cell.alignment = Alignment(
-                horizontal=cell.alignment.horizontal if cell.alignment else 'left',
-                vertical='top',
-                wrap_text=True
-            )
-
-            # Calculate approximate number of lines needed based on content length
-            if cell.value:
-                content = str(cell.value)
-                # Get column width (approximate - Excel uses character units)
-                col_width = ws.column_dimensions[col].width or 10
-                # Estimate characters per line (Excel character width ≈ 7 pixels, adjust as needed)
-                chars_per_line = max(int(col_width * 1.2), 10)
-                lines_needed = max(1, len(content) // chars_per_line + (1 if len(content) % chars_per_line else 0))
-                max_lines = max(max_lines, lines_needed)
-
-        # Also wrap item number and date cells
-        ws[f'A{row_num}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
-        ws[f'F{row_num}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
-
-        # Set row height based on content (Excel default row height is 15, each line adds ~15)
-        min_height = 30  # Minimum height for readability
-        calculated_height = max(min_height, max_lines * 15)
-        ws.row_dimensions[row_num].height = calculated_height
-
-    # Calculate signature section row numbers
-    sig_start = data_start_row + len(entries) + 1  # One empty row after data
-
-    # Find existing signature section in template and copy it down
-    # Template has signature section, we need to move it to correct position
-    # For simplicity, we'll just fill in the names at the calculated positions
-
-    # Signature labels row
-    sig_label_row = sig_start + 1
-    ws[f'A{sig_label_row}'] = 'Prepared & Submitted by:'
-    ws[f'E{sig_label_row}'] = 'Noted:'
-
-    # Names row (3 rows after sig_label_row to leave space for signature)
-    names_row = sig_label_row + 3
-
-    # Merge cells for names
-    ws.merge_cells(f'A{names_row}:D{names_row}')
-    ws[f'A{names_row}'] = report.network_admin_name
-
-    ws.merge_cells(f'E{names_row}:G{names_row}')
-    ws[f'E{names_row}'] = report.noted_by_name
-
-    # Positions row
-    positions_row = names_row + 1
-    ws.merge_cells(f'A{positions_row}:D{positions_row}')
-    ws[f'A{positions_row}'] = 'Computer Maintenance Technologist II'
-
-    ws.merge_cells(f'E{positions_row}:G{positions_row}')
-    ws[f'E{positions_row}'] = report.noted_by_position
+            if cell.alignment:
+                # Preserve existing alignment but enable wrapping
+                cell.alignment = Alignment(
+                    horizontal=cell.alignment.horizontal,
+                    vertical=cell.alignment.vertical,
+                    wrap_text=True
+                )
+            else:
+                # Default alignment with wrapping if no existing alignment
+                cell.alignment = Alignment(wrap_text=True)
 
     # Save to BytesIO
     output = io.BytesIO()
