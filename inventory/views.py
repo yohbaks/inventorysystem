@@ -7058,6 +7058,7 @@ def snmr_delete(request, report_id):
 def snmr_export_excel(request, report_id):
     """Export SNMR report to Excel using template - fills data into pre-formatted cells"""
     from openpyxl import load_workbook
+    from openpyxl.styles import Alignment
     from django.http import HttpResponse
     import io
     from copy import copy
@@ -7091,8 +7092,8 @@ def snmr_export_excel(request, report_id):
 
         # If we need more rows, copy the template row's formatting
         if idx > 0:
-            # Copy row height and cell formatting from template row
-            ws.row_dimensions[row_num].height = ws.row_dimensions[template_row].height
+            # Don't set fixed height - let it auto-adjust based on content
+            # ws.row_dimensions[row_num].height = ws.row_dimensions[template_row].height
             for col in range(1, 8):  # Columns A to G
                 template_cell = ws.cell(row=template_row, column=col)
                 new_cell = ws.cell(row=row_num, column=col)
@@ -7112,6 +7113,38 @@ def snmr_export_excel(request, report_id):
         ws[f'E{row_num}'] = entry.initial_isolation
         ws[f'F{row_num}'] = entry.date
         ws[f'G{row_num}'] = entry.resolution
+
+        # Enable text wrapping for cells with potentially long content
+        # and calculate appropriate row height
+        wrap_columns = ['B', 'C', 'D', 'E', 'G']  # Area, Status, Reason, Initial Isolation, Resolution
+        max_lines = 1
+
+        for col in wrap_columns:
+            cell = ws[f'{col}{row_num}']
+            cell.alignment = Alignment(
+                horizontal=cell.alignment.horizontal if cell.alignment else 'left',
+                vertical='top',
+                wrap_text=True
+            )
+
+            # Calculate approximate number of lines needed based on content length
+            if cell.value:
+                content = str(cell.value)
+                # Get column width (approximate - Excel uses character units)
+                col_width = ws.column_dimensions[col].width or 10
+                # Estimate characters per line (Excel character width ≈ 7 pixels, adjust as needed)
+                chars_per_line = max(int(col_width * 1.2), 10)
+                lines_needed = max(1, len(content) // chars_per_line + (1 if len(content) % chars_per_line else 0))
+                max_lines = max(max_lines, lines_needed)
+
+        # Also wrap item number and date cells
+        ws[f'A{row_num}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
+        ws[f'F{row_num}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
+
+        # Set row height based on content (Excel default row height is 15, each line adds ~15)
+        min_height = 30  # Minimum height for readability
+        calculated_height = max(min_height, max_lines * 15)
+        ws.row_dimensions[row_num].height = calculated_height
 
     # Calculate signature section row numbers
     sig_start = data_start_row + len(entries) + 1  # One empty row after data
