@@ -7195,11 +7195,8 @@ def snmr_export_excel(request, report_id):
         else:
             ws[cell_ref].border = top_medium_border
 
-    # Row 10: Empty
-    ws.row_dimensions[10].height = 13.9
-
-    # Data rows (starting at row 11)
-    data_start_row = 11
+    # Data rows (starting at row 10)
+    data_start_row = 10
     for idx, entry in enumerate(entries):
         row_num = data_start_row + idx
 
@@ -7276,32 +7273,44 @@ def snmr_export_excel(request, report_id):
     # Names row
     names_row = sig_label_row + 3
     ws.row_dimensions[names_row].height = 15.75
-    ws.merge_cells(f'A{names_row}:C{names_row}')
+    ws.merge_cells(f'A{names_row}:D{names_row}')
     ws[f'A{names_row}'] = report.network_admin_name
     ws[f'A{names_row}'].font = Font(bold=True, size=10)
     ws[f'A{names_row}'].alignment = Alignment(horizontal='center', wrap_text=True)
-    ws[f'A{names_row}'].border = bottom_thin
 
-    ws.merge_cells(f'E{names_row}:F{names_row}')
+    # Apply bottom border to all cells in the merged range
+    for col in ['A', 'B', 'C', 'D']:
+        ws[f'{col}{names_row}'].border = bottom_thin
+
+    ws.merge_cells(f'E{names_row}:G{names_row}')
     ws[f'E{names_row}'] = report.noted_by_name
     ws[f'E{names_row}'].font = Font(bold=True, size=10)
     ws[f'E{names_row}'].alignment = Alignment(horizontal='center', wrap_text=True)
-    ws[f'E{names_row}'].border = bottom_thin
+
+    # Apply bottom border to all cells in the merged range
+    for col in ['E', 'F', 'G']:
+        ws[f'{col}{names_row}'].border = bottom_thin
 
     # Positions row
     positions_row = names_row + 1
     ws.row_dimensions[positions_row].height = 12.75
-    ws.merge_cells(f'A{positions_row}:C{positions_row}')
+    ws.merge_cells(f'A{positions_row}:D{positions_row}')
     ws[f'A{positions_row}'] = 'Computer Maintenance Technologist II'
     ws[f'A{positions_row}'].font = Font(size=10)
     ws[f'A{positions_row}'].alignment = Alignment(horizontal='center', vertical='top')
-    ws[f'A{positions_row}'].border = top_thin
 
-    ws.merge_cells(f'E{positions_row}:F{positions_row}')
+    # Apply top border to all cells in the merged range
+    for col in ['A', 'B', 'C', 'D']:
+        ws[f'{col}{positions_row}'].border = top_thin
+
+    ws.merge_cells(f'E{positions_row}:G{positions_row}')
     ws[f'E{positions_row}'] = report.noted_by_position
     ws[f'E{positions_row}'].font = Font(size=10)
     ws[f'E{positions_row}'].alignment = Alignment(horizontal='center', vertical='top', wrap_text=True)
-    ws[f'E{positions_row}'].border = top_thin
+
+    # Apply top border to all cells in the merged range
+    for col in ['E', 'F', 'G']:
+        ws[f'{col}{positions_row}'].border = top_thin
 
     # Adjust column widths to match reference
     ws.column_dimensions['A'].width = 7.5703125
