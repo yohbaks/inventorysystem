@@ -7324,7 +7324,7 @@ def snmr_export_excel(request, report_id):
 
 @login_required
 def snmr_export_pdf(request, report_id):
-    """Export SNMR report to PDF"""
+    """Export SNMR report to PDF - matches Excel format exactly"""
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -7340,14 +7340,14 @@ def snmr_export_pdf(request, report_id):
     # Create PDF buffer
     buffer = io.BytesIO()
 
-    # Create PDF document in landscape orientation for better table fit
+    # Create PDF document in landscape orientation
     doc = SimpleDocTemplate(
         buffer,
         pagesize=landscape(A4),
         rightMargin=0.5*inch,
         leftMargin=0.5*inch,
-        topMargin=0.75*inch,
-        bottomMargin=0.75*inch
+        topMargin=0.5*inch,
+        bottomMargin=0.5*inch
     )
 
     # Container for PDF elements
@@ -7358,26 +7358,48 @@ def snmr_export_pdf(request, report_id):
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
-        fontSize=16,
+        fontSize=14,
         textColor=colors.black,
-        spaceAfter=12,
+        spaceAfter=6,
         alignment=TA_CENTER,
         fontName='Helvetica-Bold'
     )
     subtitle_style = ParagraphStyle(
         'CustomSubtitle',
-        parent=styles['Heading2'],
-        fontSize=14,
+        parent=styles['Normal'],
+        fontSize=10,
         textColor=colors.black,
-        spaceAfter=20,
-        alignment=TA_CENTER,
+        spaceAfter=12,
+        alignment=TA_LEFT,
         fontName='Helvetica-Bold'
     )
     normal_style = ParagraphStyle(
         'CustomNormal',
         parent=styles['Normal'],
-        fontSize=9,
+        fontSize=10,
         textColor=colors.black
+    )
+    table_header_style = ParagraphStyle(
+        'TableHeader',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.black,
+        alignment=TA_CENTER,
+        fontName='Helvetica'
+    )
+    table_cell_style = ParagraphStyle(
+        'TableCell',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.black,
+        alignment=TA_CENTER
+    )
+    reason_cell_style = ParagraphStyle(
+        'ReasonCell',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.black,
+        alignment=TA_CENTER
     )
 
     # Title
@@ -7387,109 +7409,151 @@ def snmr_export_pdf(request, report_id):
     # Subtitle with period
     subtitle = Paragraph(f'For the Month of {report.period_display}', subtitle_style)
     elements.append(subtitle)
+    elements.append(Spacer(1, 0.1*inch))
 
-    # Office Information Table
+    # Office Information Table - matching Excel layout
     info_data = [
-        [Paragraph('<b>Region:</b>', normal_style), Paragraph(report.region, normal_style),
-         '', Paragraph('<b>Network Administrator:</b>', normal_style), Paragraph(report.network_admin_name, normal_style)],
-        [Paragraph('<b>Office:</b>', normal_style), Paragraph(report.office, normal_style),
-         '', Paragraph('<b>Contact Number:</b>', normal_style), Paragraph(report.network_admin_contact or '', normal_style)],
-        [Paragraph('<b>Address:</b>', normal_style), Paragraph(report.address, normal_style),
-         '', Paragraph('<b>Email Address:</b>', normal_style), Paragraph(report.network_admin_email or '', normal_style)]
+        [Paragraph('Region:', normal_style),
+         Paragraph(report.region, normal_style),
+         '',
+         Paragraph('Network Administrator:', normal_style),
+         Paragraph(report.network_admin_name, normal_style)],
+        [Paragraph('Office:', normal_style),
+         Paragraph(report.office, normal_style),
+         '',
+         Paragraph('Contact Number:', normal_style),
+         Paragraph(report.network_admin_contact or '', normal_style)],
+        [Paragraph('Address:', normal_style),
+         Paragraph(report.address, normal_style),
+         '',
+         Paragraph('Email Address:', normal_style),
+         Paragraph(report.network_admin_email or '', normal_style)]
     ]
 
-    info_table = Table(info_data, colWidths=[1.2*inch, 2.2*inch, 0.3*inch, 1.5*inch, 2*inch])
+    info_table = Table(info_data, colWidths=[0.7*inch, 2*inch, 0.3*inch, 1.7*inch, 2*inch])
     info_table.setStyle(TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 2),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        # Add bottom border to data fields
+        ('LINEBELOW', (1, 0), (1, 0), 0.5, colors.black),
+        ('LINEBELOW', (4, 0), (4, 0), 0.5, colors.black),
+        ('LINEBELOW', (1, 1), (1, 1), 0.5, colors.black),
+        ('LINEBELOW', (4, 1), (4, 1), 0.5, colors.black),
+        ('LINEBELOW', (1, 2), (1, 2), 0.5, colors.black),
+        ('LINEBELOW', (4, 2), (4, 2), 0.5, colors.black),
     ]))
     elements.append(info_table)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(Spacer(1, 0.15*inch))
 
-    # Monitoring Entries Table Header
+    # Monitoring Entries Table - matching Excel format
     table_data = [
-        [Paragraph('<b>Item No.</b>', normal_style),
-         Paragraph('<b>Area</b>', normal_style),
-         Paragraph('<b>Status</b>', normal_style),
-         Paragraph('<b>Reason</b>', normal_style),
-         Paragraph('<b>Initial Isolation</b>', normal_style),
-         Paragraph('<b>Date</b>', normal_style),
-         Paragraph('<b>Resolution</b>', normal_style)]
+        [Paragraph('Item No.', table_header_style),
+         Paragraph('Area', table_header_style),
+         Paragraph('Status', table_header_style),
+         Paragraph('Reason', table_header_style),
+         Paragraph('Initial Isolation', table_header_style),
+         Paragraph('Date', table_header_style),
+         Paragraph('Resolution', table_header_style)]
     ]
 
     # Add data rows
     for entry in entries:
+        # Use different font size for Reason column (11pt like Excel)
         table_data.append([
-            Paragraph(str(entry.item_number), normal_style),
-            Paragraph(entry.area_category.name, normal_style),
-            Paragraph(entry.status or '', normal_style),
-            Paragraph(entry.reason or '', normal_style),
-            Paragraph(entry.initial_isolation or '', normal_style),
-            Paragraph(entry.date or '', normal_style),
-            Paragraph(entry.resolution or '', normal_style)
+            Paragraph(str(entry.item_number), table_cell_style),
+            Paragraph(entry.area_category.name, table_cell_style),
+            Paragraph(entry.status or '', table_cell_style),
+            Paragraph(entry.reason or '', reason_cell_style),  # Size 11 for reason
+            Paragraph(entry.initial_isolation or '', table_cell_style),
+            Paragraph(entry.date or '', table_cell_style),
+            Paragraph(entry.resolution or '', table_cell_style)
         ])
 
-    # Create table with column widths
-    col_widths = [0.6*inch, 1.2*inch, 1*inch, 1.8*inch, 1.8*inch, 0.9*inch, 1.8*inch]
+    # Create table with column widths matching Excel proportions
+    col_widths = [0.55*inch, 1.3*inch, 1.75*inch, 1.5*inch, 1.75*inch, 1.05*inch, 1.8*inch]
     entries_table = Table(table_data, colWidths=col_widths)
 
-    # Style the table
+    # Style the table to match Excel
     entries_table.setStyle(TableStyle([
-        # Header styling
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        # Header styling - no background color, just borders
+        ('BACKGROUND', (0, 0), (-1, 0), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        ('VALIGN', (0, 0), (-1, 0), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
 
         # Data rows styling
         ('BACKGROUND', (0, 1), (-1, -1), colors.white),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # Center item numbers
+        ('ALIGN', (0, 1), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 1), (-1, -1), 'MIDDLE'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
 
-        # Grid
+        # Grid lines - thin borders
         ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+        ('LINEABOVE', (0, 0), (-1, 0), 1.5, colors.black),  # Thicker top border on header
+        ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.black),  # Thicker bottom border on header
+
+        # Padding
         ('LEFTPADDING', (0, 0), (-1, -1), 4),
         ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 1), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
     ]))
 
     elements.append(entries_table)
-    elements.append(Spacer(1, 0.5*inch))
+    elements.append(Spacer(1, 0.4*inch))
 
-    # Signature section
-    sig_style = ParagraphStyle(
-        'Signature',
+    # Signature section - matching Excel format
+    sig_label_style = ParagraphStyle(
+        'SignatureLabel',
         parent=styles['Normal'],
         fontSize=10,
         alignment=TA_CENTER
     )
+    sig_name_style = ParagraphStyle(
+        'SignatureName',
+        parent=styles['Normal'],
+        fontSize=10,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
+    sig_position_style = ParagraphStyle(
+        'SignaturePosition',
+        parent=styles['Normal'],
+        fontSize=10,
+        alignment=TA_CENTER
+    )
+
     sig_data = [
-        [Paragraph('<b>Prepared & Submitted by:</b>', sig_style),
+        [Paragraph('Prepared & Submitted by:', sig_label_style),
          '',
-         Paragraph('<b>Noted:</b>', sig_style)],
+         Paragraph('Noted:', sig_label_style)],
         ['', '', ''],
         ['', '', ''],
-        [Paragraph(f'<b>{report.network_admin_name}</b>', sig_style),
+        [Paragraph(f'{report.network_admin_name}', sig_name_style),
          '',
-         Paragraph(f'<b>{report.noted_by_name}</b>', sig_style)],
-        [Paragraph('Designated District Network Administrator', sig_style),
+         Paragraph(f'{report.noted_by_name}', sig_name_style)],
+        [Paragraph('Computer Maintenance Technologist II', sig_position_style),
          '',
-         Paragraph(report.noted_by_position, sig_style)]
+         Paragraph(report.noted_by_position, sig_position_style)]
     ]
 
-    sig_table = Table(sig_data, colWidths=[3.5*inch, 0.5*inch, 3.5*inch])
+    sig_table = Table(sig_data, colWidths=[3.5*inch, 0.5*inch, 3.5*inch], rowHeights=[0.2*inch, 0.4*inch, 0.1*inch, 0.25*inch, 0.2*inch])
     sig_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ('TOPPADDING', (0, 0), (-1, -1), 0),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        # Add line above names
+        ('LINEABOVE', (0, 3), (0, 3), 0.5, colors.black),
+        ('LINEABOVE', (2, 3), (2, 3), 0.5, colors.black),
     ]))
     elements.append(sig_table)
 
