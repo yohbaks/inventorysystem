@@ -414,6 +414,7 @@ document.getElementById('pm-checklist-form').addEventListener('submit', function
 document.addEventListener('DOMContentLoaded', function() {
     let currentItemId = null;
     let currentItemCompletionId = null;
+    let currentDowntimeEventId = null;  // Track if we're editing an existing event
 
     // Handle "Log Downtime" button clicks
     const downtimeButtons = document.querySelectorAll('.downtime-log-btn');
@@ -432,37 +433,92 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('downtimeModalLabel').innerHTML =
                 '<i class="fas fa-exclamation-triangle"></i> Log Downtime - Item #' + itemNumber + ': ' + itemDescription;
 
-            // Reset form
+            // Reset form first
             document.getElementById('downtimeForm').reset();
             document.getElementById('occurrence_date').value = '{{ today|date:"Y-m-d" }}';
+            currentDowntimeEventId = null;  // Reset event ID
 
-            // If we have existing data in hidden fields, load it
-            if (currentItemId) {
-                const dateField = document.getElementById('downtime_date_' + currentItemId);
-                const startField = document.getElementById('downtime_start_' + currentItemId);
-                const endField = document.getElementById('downtime_end_' + currentItemId);
-                const equipmentField = document.getElementById('downtime_equipment_' + currentItemId);
-                const severityField = document.getElementById('downtime_severity_' + currentItemId);
-                const causeField = document.getElementById('downtime_cause_' + currentItemId);
-                const resolutionField = document.getElementById('downtime_resolution_' + currentItemId);
-                const servicesField = document.getElementById('downtime_services_' + currentItemId);
-                const usersField = document.getElementById('downtime_users_' + currentItemId);
-
-                if (dateField && dateField.value) document.getElementById('occurrence_date').value = dateField.value;
-                if (startField && startField.value) document.getElementById('start_time').value = startField.value;
-                if (endField && endField.value) document.getElementById('end_time').value = endField.value;
-                if (equipmentField && equipmentField.value) document.getElementById('equipment_name').value = equipmentField.value;
-                if (severityField && severityField.value) document.getElementById('severity').value = severityField.value;
-                if (causeField && causeField.value) document.getElementById('cause_description').value = causeField.value;
-                if (resolutionField && resolutionField.value) document.getElementById('resolution_notes').value = resolutionField.value;
-                if (servicesField && servicesField.value) document.getElementById('services_affected').value = servicesField.value;
-                if (usersField && usersField.value) document.getElementById('users_affected_count').value = usersField.value;
+            // If we have an item completion ID, fetch existing downtime events
+            if (currentItemCompletionId) {
+                fetchExistingDowntimeData(currentItemCompletionId);
+            } else if (currentItemId) {
+                // Otherwise, check for data in hidden fields (pre-submission state)
+                loadFromHiddenFields(currentItemId);
             }
 
             // Show modal
             $('#downtimeModal').modal('show');
         });
     });
+
+    function fetchExistingDowntimeData(itemCompletionId) {
+        // Show loading indicator
+        const submitBtn = document.getElementById('submitDowntimeBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+        // Fetch existing downtime events from the server
+        fetch(`/pm/downtime/get/${itemCompletionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.events.length > 0) {
+                    // Load the most recent event into the form
+                    const event = data.events[0];
+                    currentDowntimeEventId = event.id;
+
+                    // Populate form fields
+                    document.getElementById('occurrence_date').value = event.occurrence_date;
+                    document.getElementById('start_time').value = event.start_time;
+                    document.getElementById('end_time').value = event.end_time;
+                    document.getElementById('equipment_name').value = event.equipment_name;
+                    document.getElementById('severity').value = event.severity;
+                    document.getElementById('cause_description').value = event.cause_description;
+                    document.getElementById('resolution_notes').value = event.resolution_notes;
+                    document.getElementById('services_affected').value = event.services_affected;
+                    document.getElementById('users_affected_count').value = event.users_affected_count;
+
+                    // Update modal title to indicate editing
+                    document.getElementById('downtimeModalLabel').innerHTML =
+                        '<i class="fas fa-edit"></i> Edit Downtime Event (ID: ' + event.id + ')';
+
+                    // Update button text
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Downtime Event';
+                } else {
+                    // No existing events, show create mode
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Log Downtime Event';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching downtime data:', error);
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Log Downtime Event';
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+            });
+    }
+
+    function loadFromHiddenFields(itemId) {
+        // Load data from hidden fields (pre-submission state)
+        const dateField = document.getElementById('downtime_date_' + itemId);
+        const startField = document.getElementById('downtime_start_' + itemId);
+        const endField = document.getElementById('downtime_end_' + itemId);
+        const equipmentField = document.getElementById('downtime_equipment_' + itemId);
+        const severityField = document.getElementById('downtime_severity_' + itemId);
+        const causeField = document.getElementById('downtime_cause_' + itemId);
+        const resolutionField = document.getElementById('downtime_resolution_' + itemId);
+        const servicesField = document.getElementById('downtime_services_' + itemId);
+        const usersField = document.getElementById('downtime_users_' + itemId);
+
+        if (dateField && dateField.value) document.getElementById('occurrence_date').value = dateField.value;
+        if (startField && startField.value) document.getElementById('start_time').value = startField.value;
+        if (endField && endField.value) document.getElementById('end_time').value = endField.value;
+        if (equipmentField && equipmentField.value) document.getElementById('equipment_name').value = equipmentField.value;
+        if (severityField && severityField.value) document.getElementById('severity').value = severityField.value;
+        if (causeField && causeField.value) document.getElementById('cause_description').value = causeField.value;
+        if (resolutionField && resolutionField.value) document.getElementById('resolution_notes').value = resolutionField.value;
+        if (servicesField && servicesField.value) document.getElementById('services_affected').value = servicesField.value;
+        if (usersField && usersField.value) document.getElementById('users_affected_count').value = usersField.value;
+    }
 
     // Handle modal close buttons manually
     const closeModalButtons = document.querySelectorAll('[data-dismiss="modal"]');
@@ -483,11 +539,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // If we have an item completion ID, submit via AJAX (editing existing completion)
-        // Otherwise, populate hidden fields (initial submission)
-        if (currentItemCompletionId) {
+        // Determine submission mode: update, create via AJAX, or populate hidden fields
+        if (currentDowntimeEventId) {
+            // We're editing an existing event - update it
+            updateViaAjax(form, currentDowntimeEventId);
+        } else if (currentItemCompletionId) {
+            // We're creating a new event for an existing completion - submit via AJAX
             submitViaAjax(form, currentItemCompletionId);
         } else {
+            // Pre-submission state - populate hidden fields
             populateHiddenFields(form, currentItemId);
         }
     });
@@ -599,6 +659,51 @@ document.addEventListener('DOMContentLoaded', function() {
             // Re-enable submit button
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-save"></i> Log Downtime Event';
+        });
+    }
+
+    function updateViaAjax(form, eventId) {
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('submitDowntimeBtn');
+
+        // Disable submit button to prevent double-submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+        // Get CSRF token
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Update via AJAX
+        fetch(`/pm/downtime/update/${eventId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal
+                $('#downtimeModal').modal('hide');
+
+                // Show success message
+                alert('✓ Downtime event updated successfully!\n\nDuration: ' + data.duration);
+
+                // Reload to show updated data
+                window.location.reload();
+            } else {
+                alert('Error updating downtime: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to update downtime event. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Downtime Event';
         });
     }
 });

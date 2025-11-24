@@ -265,6 +265,8 @@ urlpatterns = [
     # ================================
     # Equipment Downtime Tracking
     path('pm/downtime/log/<int:item_completion_id>/', pm_downtime_views.log_downtime_event, name='log_downtime_event'),
+    path('pm/downtime/get/<int:item_completion_id>/', pm_downtime_views.get_downtime_events, name='get_downtime_events'),
+    path('pm/downtime/update/<int:event_id>/', pm_downtime_views.update_downtime_event, name='update_downtime_event'),
     path('pm/downtime/analytics/', pm_downtime_views.downtime_analytics_dashboard, name='downtime_analytics'),
 
     # ================================

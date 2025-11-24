@@ -82,6 +82,88 @@ def log_downtime_event(request, item_completion_id):
 
 
 @login_required
+def get_downtime_events(request, item_completion_id):
+    """Get all downtime events for a specific checklist item completion"""
+
+    item_completion = get_object_or_404(PMChecklistItemCompletion, id=item_completion_id)
+
+    # Get all downtime events for this item completion
+    downtime_events = EquipmentDowntimeEvent.objects.filter(
+        item_completion=item_completion
+    ).order_by('-created_at')
+
+    # Serialize to JSON
+    events_data = []
+    for event in downtime_events:
+        events_data.append({
+            'id': event.id,
+            'occurrence_date': event.occurrence_date.strftime('%Y-%m-%d'),
+            'start_time': event.start_time.strftime('%H:%M'),
+            'end_time': event.end_time.strftime('%H:%M') if event.end_time else '',
+            'equipment_name': event.equipment_name,
+            'severity': event.severity,
+            'cause_description': event.cause_description,
+            'resolution_notes': event.resolution_notes or '',
+            'services_affected': event.services_affected or '',
+            'users_affected_count': event.users_affected_count or '',
+            'duration': event.get_duration_display(),
+        })
+
+    return JsonResponse({
+        'success': True,
+        'events': events_data
+    })
+
+
+@login_required
+@require_POST
+def update_downtime_event(request, event_id):
+    """Update an existing downtime event"""
+
+    downtime_event = get_object_or_404(EquipmentDowntimeEvent, id=event_id)
+
+    try:
+        # Get form data
+        occurrence_date = request.POST.get('occurrence_date')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time', None)
+        equipment_name = request.POST.get('equipment_name')
+        severity = request.POST.get('severity', 'MODERATE')
+        cause_description = request.POST.get('cause_description')
+        resolution_notes = request.POST.get('resolution_notes', '')
+        services_affected = request.POST.get('services_affected', '')
+        users_affected = request.POST.get('users_affected_count', None)
+
+        # Update the event
+        downtime_event.occurrence_date = datetime.strptime(occurrence_date, '%Y-%m-%d').date()
+        downtime_event.start_time = datetime.strptime(start_time, '%H:%M').time()
+        downtime_event.end_time = datetime.strptime(end_time, '%H:%M').time() if end_time else None
+        downtime_event.equipment_name = equipment_name
+        downtime_event.severity = severity
+        downtime_event.cause_description = cause_description
+        downtime_event.resolution_notes = resolution_notes
+        downtime_event.services_affected = services_affected
+        downtime_event.users_affected_count = int(users_affected) if users_affected else None
+
+        downtime_event.save()
+
+        messages.success(request, f'Downtime event updated: {downtime_event.get_duration_display()} downtime for {equipment_name}')
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Downtime event updated successfully',
+            'duration': downtime_event.get_duration_display(),
+            'event_id': downtime_event.id
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+
+@login_required
 def downtime_analytics_dashboard(request):
     """Analytics dashboard showing downtime trends and statistics"""
 
