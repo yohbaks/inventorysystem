@@ -6944,6 +6944,29 @@ def generate_snmr_suggestions(report):
             equipment_names = list(set([e.equipment_name for e in category_events]))
             suggestion['equipment_affected'] = equipment_names[:3]
 
+            # Include detailed downtime log entries
+            downtime_logs = []
+            for event in category_events:
+                log_entry = {
+                    'id': event.id,
+                    'equipment_name': event.equipment_name,
+                    'occurrence_date': event.occurrence_date.strftime('%B %d, %Y'),
+                    'occurrence_date_short': event.occurrence_date.strftime('%b %d'),
+                    'start_time': event.start_time.strftime('%H:%M'),
+                    'end_time': event.end_time.strftime('%H:%M') if event.end_time else 'Ongoing',
+                    'severity': event.severity,
+                    'severity_label': event.get_severity_display(),
+                    'cause_description': event.cause_description,
+                    'resolution_notes': event.resolution_notes or 'N/A',
+                    'duration': event.get_duration_display(),
+                    'duration_minutes': event.duration_minutes or 0,
+                    'services_affected': event.services_affected or 'N/A',
+                    'users_affected': event.users_affected_count or 0,
+                }
+                downtime_logs.append(log_entry)
+
+            suggestion['downtime_logs'] = downtime_logs
+
             suggestions[category_name] = suggestion
         else:
             # No events found
@@ -6954,7 +6977,8 @@ def generate_snmr_suggestions(report):
                 'initial_isolation': 'N/A',
                 'date': 'N/A',
                 'resolution': 'N/A',
-                'total_events': 0
+                'total_events': 0,
+                'downtime_logs': []
             }
 
     return suggestions

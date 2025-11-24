@@ -162,6 +162,57 @@
                                                             </div>
                                                         </div>
                                                     </div>
+
+                                                    <!-- Detailed Downtime Logs -->
+                                                    {% if suggestion.downtime_logs %}
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-12">
+                                                            <h6 class="font-weight-bold mb-2">
+                                                                <i class="fas fa-clock"></i> Downtime Event Details
+                                                            </h6>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm table-bordered table-hover">
+                                                                    <thead class="thead-light">
+                                                                        <tr>
+                                                                            <th>Date</th>
+                                                                            <th>Equipment</th>
+                                                                            <th>Time</th>
+                                                                            <th>Duration</th>
+                                                                            <th>Severity</th>
+                                                                            <th>Cause</th>
+                                                                            <th>Resolution</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {% for log in suggestion.downtime_logs %}
+                                                                        <tr>
+                                                                            <td class="text-nowrap">{{ log.occurrence_date_short }}</td>
+                                                                            <td><small>{{ log.equipment_name }}</small></td>
+                                                                            <td class="text-nowrap"><small>{{ log.start_time }} - {{ log.end_time }}</small></td>
+                                                                            <td class="text-nowrap">
+                                                                                <span class="badge badge-secondary">{{ log.duration }}</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                {% if log.severity == 'CRITICAL' %}
+                                                                                    <span class="badge badge-danger">{{ log.severity }}</span>
+                                                                                {% elif log.severity == 'MAJOR' %}
+                                                                                    <span class="badge badge-warning">{{ log.severity }}</span>
+                                                                                {% elif log.severity == 'MODERATE' %}
+                                                                                    <span class="badge badge-info">{{ log.severity }}</span>
+                                                                                {% else %}
+                                                                                    <span class="badge badge-light">{{ log.severity }}</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                            <td><small>{{ log.cause_description|truncatewords:15 }}</small></td>
+                                                                            <td><small>{{ log.resolution_notes|truncatewords:10 }}</small></td>
+                                                                        </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
                                                 {% endif %}
                                                 <div class="table-responsive">
                                                     <table class="table table-sm table-bordered">
