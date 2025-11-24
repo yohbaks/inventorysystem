@@ -115,6 +115,148 @@
                             </div>
                         </div>
 
+                        <!-- Smart Suggestions Section -->
+                        {% if suggestions %}
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Smart Suggestions (Based on Daily Monitoring & Downtime Data)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="suggestionsAccordion">
+                                    {% for area_name, suggestion in suggestions.items %}
+                                    <div class="card mb-2">
+                                        <div class="card-header p-2" id="heading{{ forloop.counter }}">
+                                            <h6 class="mb-0">
+                                                <button class="btn btn-link text-left d-flex justify-content-between align-items-center w-100" type="button" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}" aria-expanded="false">
+                                                    <span>
+                                                        <i class="fas fa-network-wired"></i> {{ area_name }}
+                                                        {% if suggestion.has_data %}
+                                                            <span class="badge badge-danger ml-2">{{ suggestion.total_events }} event(s)</span>
+                                                            {% if suggestion.critical_count > 0 %}
+                                                                <span class="badge badge-danger">{{ suggestion.critical_count }} critical</span>
+                                                            {% endif %}
+                                                            {% if suggestion.moderate_count > 0 %}
+                                                                <span class="badge badge-warning">{{ suggestion.moderate_count }} moderate</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="badge badge-success ml-2">No issues</span>
+                                                        {% endif %}
+                                                    </span>
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                            </h6>
+                                        </div>
+                                        <div id="collapse{{ forloop.counter }}" class="collapse" data-parent="#suggestionsAccordion">
+                                            <div class="card-body">
+                                                {% if suggestion.has_data %}
+                                                    <div class="row mb-3">
+                                                        <div class="col-md-12">
+                                                            <div class="alert alert-info">
+                                                                <strong>Statistics:</strong><br>
+                                                                Total Events: {{ suggestion.total_events }}<br>
+                                                                Critical: {{ suggestion.critical_count }} | Moderate: {{ suggestion.moderate_count }} | Minor: {{ suggestion.minor_count }}<br>
+                                                                Total Downtime: {{ suggestion.total_downtime_hours }} hours ({{ suggestion.total_downtime_minutes }} minutes)<br>
+                                                                {% if suggestion.equipment_affected %}
+                                                                    Equipment Affected: {{ suggestion.equipment_affected|join:", " }}
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered">
+                                                        <thead class="thead-light">
+                                                            <tr>
+                                                                <th>Field</th>
+                                                                <th>Suggested Value</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td><strong>Status</strong></td>
+                                                                <td>{{ suggestion.status }}</td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-primary copy-suggestion"
+                                                                            data-area="{{ area_name }}"
+                                                                            data-field="status"
+                                                                            data-value="{{ suggestion.status }}">
+                                                                        <i class="fas fa-copy"></i> Apply
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Reason</strong></td>
+                                                                <td><small>{{ suggestion.reason }}</small></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-primary copy-suggestion"
+                                                                            data-area="{{ area_name }}"
+                                                                            data-field="reason"
+                                                                            data-value="{{ suggestion.reason }}">
+                                                                        <i class="fas fa-copy"></i> Apply
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Initial Isolation</strong></td>
+                                                                <td><small>{{ suggestion.initial_isolation }}</small></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-primary copy-suggestion"
+                                                                            data-area="{{ area_name }}"
+                                                                            data-field="initial_isolation"
+                                                                            data-value="{{ suggestion.initial_isolation }}">
+                                                                        <i class="fas fa-copy"></i> Apply
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Date</strong></td>
+                                                                <td>{{ suggestion.date }}</td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-primary copy-suggestion"
+                                                                            data-area="{{ area_name }}"
+                                                                            data-field="date"
+                                                                            data-value="{{ suggestion.date }}">
+                                                                        <i class="fas fa-copy"></i> Apply
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Resolution</strong></td>
+                                                                <td><small>{{ suggestion.resolution }}</small></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-primary copy-suggestion"
+                                                                            data-area="{{ area_name }}"
+                                                                            data-field="resolution"
+                                                                            data-value="{{ suggestion.resolution }}">
+                                                                        <i class="fas fa-copy"></i> Apply
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <button type="button" class="btn btn-success btn-block apply-all-suggestion"
+                                                        data-area="{{ area_name }}"
+                                                        data-status="{{ suggestion.status }}"
+                                                        data-reason="{{ suggestion.reason }}"
+                                                        data-initial-isolation="{{ suggestion.initial_isolation }}"
+                                                        data-date="{{ suggestion.date }}"
+                                                        data-resolution="{{ suggestion.resolution }}">
+                                                    <i class="fas fa-magic"></i> Apply All Suggestions for {{ area_name }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="alert alert-success mt-3">
+                                    <i class="fas fa-info-circle"></i> <strong>How it works:</strong> Smart suggestions are generated from downtime events and daily monitoring data recorded during this month. Click "Apply" to copy suggestions to the corresponding entry fields below.
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <!-- Entries Section -->
                         <div class="card mb-3">
                             <div class="card-header bg-success text-white">
@@ -136,23 +278,23 @@
                                         </thead>
                                         <tbody>
                                             {% for entry in entries %}
-                                            <tr>
+                                            <tr data-area="{{ entry.area_category.name }}">
                                                 <td class="text-center">{{ entry.item_number }}</td>
                                                 <td><strong>{{ entry.area_category.name }}</strong></td>
                                                 <td>
-                                                    <input type="text" name="entry_{{ entry.id }}_status" class="form-control form-control-sm" value="{{ entry.status }}">
+                                                    <input type="text" name="entry_{{ entry.id }}_status" id="entry_{{ entry.id }}_status" class="form-control form-control-sm entry-field" data-area="{{ entry.area_category.name }}" data-field="status" value="{{ entry.status }}">
                                                 </td>
                                                 <td>
-                                                    <textarea name="entry_{{ entry.id }}_reason" class="form-control form-control-sm" rows="2">{{ entry.reason }}</textarea>
+                                                    <textarea name="entry_{{ entry.id }}_reason" id="entry_{{ entry.id }}_reason" class="form-control form-control-sm entry-field" data-area="{{ entry.area_category.name }}" data-field="reason" rows="2">{{ entry.reason }}</textarea>
                                                 </td>
                                                 <td>
-                                                    <textarea name="entry_{{ entry.id }}_initial_isolation" class="form-control form-control-sm" rows="2">{{ entry.initial_isolation }}</textarea>
+                                                    <textarea name="entry_{{ entry.id }}_initial_isolation" id="entry_{{ entry.id }}_initial_isolation" class="form-control form-control-sm entry-field" data-area="{{ entry.area_category.name }}" data-field="initial_isolation" rows="2">{{ entry.initial_isolation }}</textarea>
                                                 </td>
                                                 <td>
-                                                    <input type="text" name="entry_{{ entry.id }}_date" class="form-control form-control-sm" value="{{ entry.date }}">
+                                                    <input type="text" name="entry_{{ entry.id }}_date" id="entry_{{ entry.id }}_date" class="form-control form-control-sm entry-field" data-area="{{ entry.area_category.name }}" data-field="date" value="{{ entry.date }}">
                                                 </td>
                                                 <td>
-                                                    <textarea name="entry_{{ entry.id }}_resolution" class="form-control form-control-sm" rows="2">{{ entry.resolution }}</textarea>
+                                                    <textarea name="entry_{{ entry.id }}_resolution" id="entry_{{ entry.id }}_resolution" class="form-control form-control-sm entry-field" data-area="{{ entry.area_category.name }}" data-field="resolution" rows="2">{{ entry.resolution }}</textarea>
                                                 </td>
                                             </tr>
                                             {% endfor %}
@@ -183,4 +325,102 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle individual field suggestion application
+    document.querySelectorAll('.copy-suggestion').forEach(button => {
+        button.addEventListener('click', function() {
+            const area = this.getAttribute('data-area');
+            const field = this.getAttribute('data-field');
+            const value = this.getAttribute('data-value');
+
+            // Find the corresponding entry field
+            const entryField = document.querySelector(`.entry-field[data-area="${area}"][data-field="${field}"]`);
+
+            if (entryField) {
+                entryField.value = value;
+
+                // Visual feedback
+                entryField.classList.add('border-success');
+                setTimeout(() => {
+                    entryField.classList.remove('border-success');
+                }, 1000);
+
+                // Show success message
+                showToast('Applied suggestion for ' + area + ' - ' + field, 'success');
+            }
+        });
+    });
+
+    // Handle apply all suggestions for an area
+    document.querySelectorAll('.apply-all-suggestion').forEach(button => {
+        button.addEventListener('click', function() {
+            const area = this.getAttribute('data-area');
+            const fields = {
+                'status': this.getAttribute('data-status'),
+                'reason': this.getAttribute('data-reason'),
+                'initial-isolation': this.getAttribute('data-initial-isolation'),
+                'date': this.getAttribute('data-date'),
+                'resolution': this.getAttribute('data-resolution')
+            };
+
+            let appliedCount = 0;
+
+            // Apply all fields
+            Object.keys(fields).forEach(field => {
+                const fieldName = field.replace('-', '_');
+                const entryField = document.querySelector(`.entry-field[data-area="${area}"][data-field="${fieldName}"]`);
+
+                if (entryField) {
+                    entryField.value = fields[field];
+                    appliedCount++;
+
+                    // Visual feedback
+                    entryField.classList.add('border-success');
+                    setTimeout(() => {
+                        entryField.classList.remove('border-success');
+                    }, 1500);
+                }
+            });
+
+            if (appliedCount > 0) {
+                showToast('Applied all suggestions for ' + area, 'success');
+            }
+        });
+    });
+
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        // Check if toast container exists, if not create it
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+            document.body.appendChild(toastContainer);
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} alert-dismissible fade show`;
+        toast.style.cssText = 'min-width: 250px; margin-bottom: 10px;';
+        toast.innerHTML = `
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+});
+</script>
+
 {% endblock %}

@@ -6806,6 +6806,158 @@ def _populate_snmr_from_downtime(report):
                 entry.save()
 
 
+def generate_snmr_suggestions(report):
+    """
+    Generate smart suggestions for SNMR entries based on downtime events and daily monitoring data
+    """
+    from datetime import date
+    from collections import defaultdict
+    from django.db.models import Q, Count, Avg
+
+    # Calculate month boundaries
+    month_start = date(report.year, report.month, 1)
+    if report.month == 12:
+        month_end = date(report.year + 1, 1, 1)
+    else:
+        month_end = date(report.year, report.month + 1, 1)
+
+    suggestions = {}
+
+    # Get all downtime events for this month
+    downtime_events = EquipmentDowntimeEvent.objects.filter(
+        occurrence_date__gte=month_start,
+        occurrence_date__lt=month_end
+    ).select_related('item_completion__completion__schedule__template')
+
+    # Keywords to match for different categories
+    category_keywords = {
+        'Wide Area Network': ['wan', 'wide area', 'network', 'internet', 'connectivity', 'router', 'switch'],
+        'PABX': ['pabx', 'pbx', 'phone', 'telephone', 'voip', 'extension'],
+        'Admin Server': ['server', 'admin', 'mail', 'database', 'storage'],
+        'Trunkline': ['trunkline', 'trunk', 'line', 'connection']
+    }
+
+    # Analyze downtime events for each category
+    for category_name, keywords in category_keywords.items():
+        # Filter events that match category keywords
+        category_events = []
+        for event in downtime_events:
+            equipment_lower = event.equipment_name.lower()
+            if any(keyword in equipment_lower for keyword in keywords):
+                category_events.append(event)
+
+        if category_events:
+            # Analyze the events
+            total_events = len(category_events)
+            critical_events = [e for e in category_events if e.severity in ['MAJOR', 'CRITICAL']]
+            moderate_events = [e for e in category_events if e.severity == 'MODERATE']
+            minor_events = [e for e in category_events if e.severity == 'MINOR']
+
+            # Calculate total downtime
+            total_downtime_mins = sum([e.duration_minutes or 0 for e in category_events])
+            total_downtime_hours = total_downtime_mins / 60
+
+            # Generate smart suggestion
+            suggestion = {
+                'has_data': True,
+                'total_events': total_events,
+                'critical_count': len(critical_events),
+                'moderate_count': len(moderate_events),
+                'minor_count': len(minor_events),
+                'total_downtime_minutes': total_downtime_mins,
+                'total_downtime_hours': round(total_downtime_hours, 2),
+            }
+
+            # Determine suggested status
+            if critical_events:
+                suggestion['status'] = 'Experienced downtime'
+            elif moderate_events:
+                suggestion['status'] = 'Intermittent connection'
+            elif minor_events:
+                suggestion['status'] = 'Minor issues detected'
+            else:
+                suggestion['status'] = 'Up and working'
+
+            # Generate reason summary
+            if total_events > 0:
+                reasons = []
+                for event in category_events[:3]:  # Top 3 issues
+                    if event.cause_description and event.cause_description != 'N/A':
+                        reasons.append(event.cause_description[:100])
+
+                if reasons:
+                    suggestion['reason'] = '; '.join(reasons)
+                    if total_events > 3:
+                        suggestion['reason'] += f'; and {total_events - 3} more issue(s)'
+                else:
+                    suggestion['reason'] = 'N/A'
+            else:
+                suggestion['reason'] = 'N/A'
+
+            # Generate initial isolation
+            if total_events > 0:
+                isolation_notes = []
+                for event in category_events[:2]:
+                    if event.resolution_notes and event.resolution_notes != 'N/A':
+                        isolation_notes.append(event.resolution_notes[:100])
+
+                if isolation_notes:
+                    suggestion['initial_isolation'] = '; '.join(isolation_notes)
+                else:
+                    suggestion['initial_isolation'] = 'N/A'
+            else:
+                suggestion['initial_isolation'] = 'N/A'
+
+            # Generate date summary
+            if critical_events or moderate_events:
+                # List dates of significant events
+                dates = []
+                for event in (critical_events + moderate_events)[:3]:
+                    dates.append(event.occurrence_date.strftime('%B %d'))
+                suggestion['date'] = ', '.join(dates)
+                if len(critical_events + moderate_events) > 3:
+                    suggestion['date'] += f' (+{len(critical_events + moderate_events) - 3} more)'
+            else:
+                suggestion['date'] = 'N/A'
+
+            # Generate resolution summary
+            if total_events > 0:
+                resolved_count = sum(1 for e in category_events if e.end_time is not None)
+                ongoing_count = total_events - resolved_count
+
+                if ongoing_count > 0:
+                    suggestion['resolution'] = f'{resolved_count} resolved, {ongoing_count} ongoing investigation'
+                else:
+                    suggestion['resolution'] = f'All {resolved_count} issue(s) resolved'
+
+                # Add average resolution time if available
+                resolution_times = [e.duration_minutes for e in category_events if e.duration_minutes and e.end_time]
+                if resolution_times:
+                    avg_time = sum(resolution_times) / len(resolution_times)
+                    suggestion['resolution'] += f'. Avg resolution time: {int(avg_time)} mins'
+            else:
+                suggestion['resolution'] = 'N/A'
+
+            # Collect top equipment affected
+            equipment_names = list(set([e.equipment_name for e in category_events]))
+            suggestion['equipment_affected'] = equipment_names[:3]
+
+            suggestions[category_name] = suggestion
+        else:
+            # No events found
+            suggestions[category_name] = {
+                'has_data': False,
+                'status': 'Up and working',
+                'reason': 'No issues reported',
+                'initial_isolation': 'N/A',
+                'date': 'N/A',
+                'resolution': 'N/A',
+                'total_events': 0
+            }
+
+    return suggestions
+
+
 @login_required
 def snmr_edit(request, report_id):
     """Edit an existing SNMR report"""
@@ -6840,9 +6992,13 @@ def snmr_edit(request, report_id):
         except Exception as e:
             messages.error(request, f'Error updating report: {str(e)}')
 
+    # Generate smart suggestions
+    suggestions = generate_snmr_suggestions(report)
+
     context = {
         'report': report,
-        'entries': report.entries.select_related('area_category').order_by('item_number')
+        'entries': report.entries.select_related('area_category').order_by('item_number'),
+        'suggestions': suggestions
     }
     return render(request, 'snmr/snmr_edit.html', context)
 
