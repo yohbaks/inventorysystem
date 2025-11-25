@@ -99,9 +99,12 @@ def hdr_edit(request, report_id):
         try:
             # Check if adding new entry
             if 'add_entry' in request.POST:
+                # Auto-generate reference number
+                ref_number = report.get_next_ref_number()
+
                 HDREntry.objects.create(
                     report=report,
-                    ref_number=request.POST.get('new_ref_number'),
+                    ref_number=ref_number,
                     incident_type=request.POST.get('new_incident_type', 'Service Request'),
                     main_category=request.POST.get('new_main_category'),
                     sub_category=request.POST.get('new_sub_category'),
@@ -111,7 +114,7 @@ def hdr_edit(request, report_id):
                     reported_by=request.POST.get('new_reported_by'),
                     resolution=request.POST.get('new_resolution', '')
                 )
-                messages.success(request, 'New incident added successfully.')
+                messages.success(request, f'New incident added successfully with reference number: {ref_number}')
                 return redirect('hdr_edit', report_id=report.id)
 
             # Check if deleting entry
@@ -157,6 +160,7 @@ def hdr_edit(request, report_id):
         'type_choices': HDREntry.TYPE_CHOICES,
         'category_choices': HDREntry.CATEGORY_CHOICES,
         'status_choices': HDREntry.STATUS_CHOICES,
+        'next_ref_number': report.get_next_ref_number(),
     }
     return render(request, 'hdr/hdr_edit.html', context)
 

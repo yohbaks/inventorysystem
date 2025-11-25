@@ -2034,6 +2034,32 @@ class HDRReport(models.Model):
         from datetime import date
         return date(self.year, self.month, 1).strftime('%B %Y')
 
+    def get_next_ref_number(self):
+        """Generate next reference number in format YYYY-MM-XXX"""
+        # Get all entries for this report
+        existing_entries = self.entries.all()
+
+        # If no entries exist, start with 001
+        if not existing_entries.exists():
+            return f"{self.year}-{self.month:02d}-001"
+
+        # Find the highest sequence number
+        max_sequence = 0
+        for entry in existing_entries:
+            # Extract the sequence number from ref_number (format: YYYY-MM-XXX)
+            try:
+                parts = entry.ref_number.split('-')
+                if len(parts) == 3:
+                    sequence = int(parts[2])
+                    max_sequence = max(max_sequence, sequence)
+            except (ValueError, IndexError):
+                # Skip entries with invalid format
+                continue
+
+        # Increment and format
+        next_sequence = max_sequence + 1
+        return f"{self.year}-{self.month:02d}-{next_sequence:03d}"
+
 
 class HDREntry(models.Model):
     """Individual helpdesk incident entries in the HDR report"""
