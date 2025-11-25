@@ -206,79 +206,36 @@ def hdr_export_excel(request, report_id):
     template_path = 'media/pm_reports/new_hdr.xlsx'
     wb = load_workbook(template_path, data_only=False, keep_vba=False)
 
-    # Create a brand new sheet for the exported data - no confusion
-    if 'EXPORTED_DATA' in wb.sheetnames:
-        del wb['EXPORTED_DATA']
-
-    ws = wb.create_sheet('EXPORTED_DATA', 0)  # Insert as first sheet
+    # Use the template's first sheet
+    ws = wb.worksheets[0]
     wb.active = ws  # Make it the active sheet
 
-    # Write headers
-    ws['A1'] = 'Monthly Help Desk Report'
-    ws['A2'] = 'Month:'
+    # Fill in header information in the template
     ws['C2'] = report.period_display
-
-    ws['A4'] = 'Region:'
     ws['C4'] = report.region
-    ws['G4'] = 'Network Administrator:'
     ws['I4'] = report.network_admin_name
-
-    ws['A5'] = 'Office:'
     ws['C5'] = report.office
-    ws['G5'] = 'Contact Number:'
     ws['I5'] = report.network_admin_contact
-
-    ws['A6'] = 'Address:'
     ws['C6'] = report.address
-    ws['G6'] = 'Email Address:'
     ws['I6'] = report.network_admin_email
 
-    # Write column headers in row 8
-    ws['A8'] = 'Ref No.'
-    ws['B8'] = 'Type of Incident'
-    ws['C8'] = 'Main Category'
-    ws['D8'] = 'Sub-Category'
-    ws['E8'] = 'Description'
-    ws['F8'] = 'Status'
-    ws['G8'] = 'Date Reported'
-    ws['H8'] = 'Reported by'
-    ws['I8'] = 'Resolution'
-
-    # Data starts at row 10
+    # Data starts at row 10 (assuming row 8 has headers in template)
     data_start_row = 10
 
-    # Write each entry
-    if entries.exists():
-        for idx, entry in enumerate(entries):
-            row_num = data_start_row + idx
+    # Write each entry to the template
+    for idx, entry in enumerate(entries):
+        row_num = data_start_row + idx
 
-            # Write data directly - use simple assignment
-            ws[f'A{row_num}'] = str(entry.ref_number)
-            ws[f'B{row_num}'] = str(entry.incident_type)
-            ws[f'C{row_num}'] = str(entry.main_category)
-            ws[f'D{row_num}'] = str(entry.sub_category)
-            ws[f'E{row_num}'] = str(entry.description)
-            ws[f'F{row_num}'] = str(entry.status)
-
-            # Handle date
-            if entry.date_reported:
-                ws[f'G{row_num}'] = entry.date_reported
-            else:
-                ws[f'G{row_num}'] = ''
-
-            ws[f'H{row_num}'] = str(entry.reported_by)
-            ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
-    else:
-        # No entries found - write test data to verify export works
-        ws['A10'] = 'TEST-001'
-        ws['B10'] = 'Test Type'
-        ws['C10'] = 'Test Category'
-        ws['D10'] = 'Test Sub'
-        ws['E10'] = 'Test Description - NO ENTRIES FOUND IN DATABASE'
-        ws['F10'] = 'Pending'
-        ws['G10'] = 'TEST'
-        ws['H10'] = 'Test User'
-        ws['I10'] = 'Test Resolution'
+        # Write data directly to template cells
+        ws[f'A{row_num}'] = str(entry.ref_number)
+        ws[f'B{row_num}'] = str(entry.incident_type)
+        ws[f'C{row_num}'] = str(entry.main_category)
+        ws[f'D{row_num}'] = str(entry.sub_category)
+        ws[f'E{row_num}'] = str(entry.description)
+        ws[f'F{row_num}'] = str(entry.status)
+        ws[f'G{row_num}'] = entry.date_reported if entry.date_reported else ''
+        ws[f'H{row_num}'] = str(entry.reported_by)
+        ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
 
     # Prepare response
     output = io.BytesIO()
