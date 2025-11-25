@@ -242,11 +242,12 @@ def hdr_export_excel(request, report_id):
         ws[f'H{row_num}'] = str(entry.reported_by)
         ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
 
-    # Apply formatting
-    # 1. Wrap text for cell I10
-    ws['I10'].alignment = Alignment(wrap_text=True)
+        # Enable text wrapping for all data cells in this row
+        for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
+            ws[f'{col}{row_num}'].alignment = Alignment(wrap_text=True, vertical='top')
 
-    # 2-6. Merge specific cells
+    # Apply formatting
+    # Merge specific cells
     ws.merge_cells('G14:H14')
     ws.merge_cells('G15:H15')
     ws.merge_cells('A12:B12')
