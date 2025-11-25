@@ -215,6 +215,18 @@ def hdr_export_excel(request, report_id):
     ws['H5'] = report.network_admin_contact
     ws['H6'] = report.network_admin_email
 
+    # Enable text wrapping for header cells
+    for cell_ref in ['A2', 'B4', 'B5', 'B6', 'H4', 'H5', 'H6']:
+        cell = ws[cell_ref]
+        if cell.alignment:
+            cell.alignment = Alignment(
+                horizontal=cell.alignment.horizontal,
+                vertical=cell.alignment.vertical,
+                wrap_text=True
+            )
+        else:
+            cell.alignment = Alignment(wrap_text=True)
+
     # Data starts at row 10 (template already has headers and formatting)
     data_start_row = 10
 
@@ -247,9 +259,13 @@ def hdr_export_excel(request, report_id):
                 # Default alignment with wrapping
                 cell.alignment = Alignment(
                     horizontal='center',
-                    vertical='center',
+                    vertical='top',
                     wrap_text=True
                 )
+
+        # Set row height to auto-adjust based on content
+        # Setting row height to None allows Excel to auto-adjust
+        ws.row_dimensions[row_num].height = None
 
     # Prepare response
     output = io.BytesIO()
