@@ -224,8 +224,8 @@ def hdr_export_excel(request, report_id):
     ws['H5'] = report.network_admin_contact
     ws['B6'] = report.address
     ws['H6'] = report.network_admin_email
-    # Data starts at row 10 (assuming row 8 has headers in template)
-    data_start_row = 10
+    # Data starts at row 9 (assuming row 8 has headers in template)
+    data_start_row = 9
 
     # Write each entry to the template
     for idx, entry in enumerate(entries):
