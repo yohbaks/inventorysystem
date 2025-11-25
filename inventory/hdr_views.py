@@ -210,6 +210,12 @@ def hdr_export_excel(request, report_id):
     ws = wb.worksheets[0]
     wb.active = ws  # Make it the active sheet
 
+    # Unmerge all cells to avoid "MergedCell is read-only" errors
+    # Create a list of merged ranges to unmerge
+    merged_ranges = list(ws.merged_cells.ranges)
+    for merged_range in merged_ranges:
+        ws.unmerge_cells(str(merged_range))
+
     # Fill in header information in the template
     ws['C2'] = report.period_display
     ws['C4'] = report.region
