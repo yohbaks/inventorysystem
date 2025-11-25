@@ -235,136 +235,27 @@ def hdr_export_excel(request, report_id):
     # Data starts at row 10 (row 9 has headers)
     data_start_row = 10
 
-    # CRITICAL: Clear ALL existing data from rows 10-200
-    # Don't delete rows, just clear content and reset formatting
-    for row_idx in range(data_start_row, data_start_row + 200):
-        for col_idx in range(1, 10):  # Columns A-I (1-9)
-            cell = ws.cell(row=row_idx, column=col_idx)
-            cell.value = None
-            cell.font = Font()
-            cell.border = Border()
-            cell.fill = PatternFill()
-            cell.alignment = Alignment()
-            cell.number_format = 'General'
-
-    # Unmerge any merged cells in the data area (rows 10-200, columns A-I)
-    merged_ranges_to_remove = []
-    for merged_range in list(ws.merged_cells.ranges):
-        # Check if merged range overlaps with data area
-        if merged_range.min_row >= data_start_row and merged_range.max_row <= 200:
-            if merged_range.min_col >= 1 and merged_range.max_col <= 9:
-                merged_ranges_to_remove.append(merged_range)
-
-    for merged_range in merged_ranges_to_remove:
-        try:
-            ws.unmerge_cells(str(merged_range))
-        except:
-            pass  # Ignore if already unmerged
-
-    # Define styles for data cells
-    thin_border = Border(
-        left=Side(style='thin', color='000000'),
-        right=Side(style='thin', color='000000'),
-        top=Side(style='thin', color='000000'),
-        bottom=Side(style='thin', color='000000')
-    )
-
-    default_font = Font(name='Calibri', size=11, color='000000')
-    center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-    left_alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
-
-    # Fill in data entries
+    # Simply write data - don't mess with template formatting
+    # Just overwrite the cell values directly
     for idx, entry in enumerate(entries):
         row_num = data_start_row + idx
 
-        # Ensure row is visible
-        ws.row_dimensions[row_num].hidden = False
-        ws.row_dimensions[row_num].height = 30  # Set minimum height
+        # Write data directly - use simple assignment
+        ws[f'A{row_num}'] = str(entry.ref_number)
+        ws[f'B{row_num}'] = str(entry.incident_type)
+        ws[f'C{row_num}'] = str(entry.main_category)
+        ws[f'D{row_num}'] = str(entry.sub_category)
+        ws[f'E{row_num}'] = str(entry.description)
+        ws[f'F{row_num}'] = str(entry.status)
 
-        # Column A - Ref Number
-        cell_a = ws.cell(row=row_num, column=1)
-        cell_a.value = str(entry.ref_number)
-        cell_a.font = copy(default_font)
-        cell_a.border = copy(thin_border)
-        cell_a.alignment = copy(center_alignment)
-
-        # Column B - Incident Type
-        cell_b = ws.cell(row=row_num, column=2)
-        cell_b.value = str(entry.incident_type)
-        cell_b.font = copy(default_font)
-        cell_b.border = copy(thin_border)
-        cell_b.alignment = copy(center_alignment)
-
-        # Column C - Main Category
-        cell_c = ws.cell(row=row_num, column=3)
-        cell_c.value = str(entry.main_category)
-        cell_c.font = copy(default_font)
-        cell_c.border = copy(thin_border)
-        cell_c.alignment = copy(center_alignment)
-
-        # Column D - Sub Category
-        cell_d = ws.cell(row=row_num, column=4)
-        cell_d.value = str(entry.sub_category)
-        cell_d.font = copy(default_font)
-        cell_d.border = copy(thin_border)
-        cell_d.alignment = copy(center_alignment)
-
-        # Column E - Description
-        cell_e = ws.cell(row=row_num, column=5)
-        cell_e.value = str(entry.description)
-        cell_e.font = copy(default_font)
-        cell_e.border = copy(thin_border)
-        cell_e.alignment = copy(left_alignment)
-
-        # Column F - Status
-        cell_f = ws.cell(row=row_num, column=6)
-        cell_f.value = str(entry.status)
-        cell_f.font = copy(default_font)
-        cell_f.border = copy(thin_border)
-        cell_f.alignment = copy(center_alignment)
-
-        # Column G - Date Reported
-        cell_g = ws.cell(row=row_num, column=7)
+        # Handle date
         if entry.date_reported:
-            if isinstance(entry.date_reported, str):
-                try:
-                    date_obj = datetime.strptime(entry.date_reported, '%Y-%m-%d')
-                    cell_g.value = date_obj
-                except:
-                    cell_g.value = str(entry.date_reported)
-            else:
-                cell_g.value = entry.date_reported
-            cell_g.number_format = 'MM/DD/YYYY'
+            ws[f'G{row_num}'] = entry.date_reported
         else:
-            cell_g.value = ''
-        cell_g.font = copy(default_font)
-        cell_g.border = copy(thin_border)
-        cell_g.alignment = copy(center_alignment)
+            ws[f'G{row_num}'] = ''
 
-        # Column H - Reported By
-        cell_h = ws.cell(row=row_num, column=8)
-        cell_h.value = str(entry.reported_by)
-        cell_h.font = copy(default_font)
-        cell_h.border = copy(thin_border)
-        cell_h.alignment = copy(center_alignment)
-
-        # Column I - Resolution
-        cell_i = ws.cell(row=row_num, column=9)
-        cell_i.value = str(entry.resolution) if entry.resolution else ''
-        cell_i.font = copy(default_font)
-        cell_i.border = copy(thin_border)
-        cell_i.alignment = copy(left_alignment)
-
-    # Ensure all columns are visible and have appropriate width
-    ws.column_dimensions['A'].width = 12
-    ws.column_dimensions['B'].width = 15
-    ws.column_dimensions['C'].width = 12
-    ws.column_dimensions['D'].width = 18
-    ws.column_dimensions['E'].width = 35
-    ws.column_dimensions['F'].width = 12
-    ws.column_dimensions['G'].width = 15
-    ws.column_dimensions['H'].width = 20
-    ws.column_dimensions['I'].width = 35
+        ws[f'H{row_num}'] = str(entry.reported_by)
+        ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
 
     # Prepare response
     output = io.BytesIO()
