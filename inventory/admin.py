@@ -18,7 +18,9 @@ from .models import (
     # SNMR Models
     SNMRAreaCategory, SNMRReport, SNMREntry,
     # ASIR Models
-    ASIRReport, ASIREntry
+    ASIRReport, ASIREntry,
+    # HDR Models
+    HDRReport, HDREntry
 )
 
 # Register your models here.
@@ -84,3 +86,7 @@ admin.site.register(SNMREntry)
 # ASIR - Application Systems Implementation Report
 admin.site.register(ASIRReport)
 admin.site.register(ASIREntry)
+
+# HDR - HelpDesk Report
+admin.site.register(HDRReport)
+admin.site.register(HDREntry)

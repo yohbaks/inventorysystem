@@ -280,20 +280,23 @@
             </li>
 
             <!-- ==================== REPORTS SECTION ==================== -->
-            <li class="nav-item {% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit' %}active{% endif %}">
+            <li class="nav-item {% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit hdr_list hdr_create hdr_view hdr_edit' %}active{% endif %}">
               <a data-bs-toggle="collapse" href="#menuReports"
-                 class="nav-link {% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit' %}{% else %}collapsed{% endif %}"
-                 aria-expanded="{% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit' %}true{% else %}false{% endif %}">
+                 class="nav-link {% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit hdr_list hdr_create hdr_view hdr_edit' %}{% else %}collapsed{% endif %}"
+                 aria-expanded="{% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit hdr_list hdr_create hdr_view hdr_edit' %}true{% else %}false{% endif %}">
                 <i class="fas fa-file-alt"></i>
                 <p>Reports</p><span class="caret"></span>
               </a>
-              <div class="collapse {% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit' %}show{% endif %}" id="menuReports">
+              <div class="collapse {% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit asir_list asir_create asir_view asir_edit hdr_list hdr_create hdr_view hdr_edit' %}show{% endif %}" id="menuReports">
                 <ul class="nav nav-collapse">
                   <li class="{% if request.resolver_match.url_name in 'snmr_list snmr_create snmr_view snmr_edit' %}active{% endif %}">
                     <a href="{% url 'snmr_list' %}"><span class="sub-item">🌐 SNMR</span></a>
                   </li>
                   <li class="{% if request.resolver_match.url_name in 'asir_list asir_create asir_view asir_edit' %}active{% endif %}">
                     <a href="{% url 'asir_list' %}"><span class="sub-item">💻 ASIR</span></a>
+                  </li>
+                  <li class="{% if request.resolver_match.url_name in 'hdr_list hdr_create hdr_view hdr_edit' %}active{% endif %}">
+                    <a href="{% url 'hdr_list' %}"><span class="sub-item">🎧 HDR</span></a>
                   </li>
                 </ul>
               </div>

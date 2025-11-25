@@ -1989,3 +1989,97 @@ class ASIREntry(models.Model):
 
     def __str__(self):
         return f"{self.report} - Item {self.item_number}: {self.application_name}"
+
+
+# ==================== HDR (HelpDesk Report) Models ====================
+
+class HDRReport(models.Model):
+    """Monthly HelpDesk Report"""
+
+    # Report period
+    month = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
+    year = models.IntegerField(validators=[MinValueValidator(2000)])
+
+    # Office information
+    region = models.CharField(max_length=100, default='VIII')
+    office = models.CharField(max_length=200, default='DPWH Leyte 4th Engineering District')
+    address = models.CharField(max_length=300, default='Ormoc City Leyte')
+
+    # Network administrator information
+    network_admin_name = models.CharField(max_length=200, default='BOBBY L. YU')
+    network_admin_contact = models.CharField(max_length=100, default='66800|09219290909')
+    network_admin_email = models.EmailField(default='yu.bobby@dpwh.gov.ph')
+
+    # Report metadata
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_hdr_reports')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Status
+    is_finalized = models.BooleanField(default=False)
+    finalized_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-year', '-month']
+        unique_together = ['month', 'year']
+        verbose_name = 'HDR Report'
+        verbose_name_plural = 'HDR Reports'
+
+    def __str__(self):
+        from datetime import date
+        return f"HDR - {date(self.year, self.month, 1).strftime('%B %Y')}"
+
+    @property
+    def period_display(self):
+        from datetime import date
+        return date(self.year, self.month, 1).strftime('%B %Y')
+
+
+class HDREntry(models.Model):
+    """Individual helpdesk incident entries in the HDR report"""
+
+    TYPE_CHOICES = [
+        ('Service Request', 'Service Request'),
+        ('Incident', 'Incident'),
+        ('Change Request', 'Change Request'),
+    ]
+
+    CATEGORY_CHOICES = [
+        ('Hardware', 'Hardware'),
+        ('Software', 'Software'),
+        ('Services', 'Services'),
+        ('Network', 'Network'),
+    ]
+
+    STATUS_CHOICES = [
+        ('fixed', 'Fixed'),
+        ('Done', 'Done'),
+        ('Pending', 'Pending'),
+        ('In Progress', 'In Progress'),
+        ('Cancelled', 'Cancelled'),
+    ]
+
+    report = models.ForeignKey(HDRReport, on_delete=models.CASCADE, related_name='entries')
+
+    # Entry details
+    ref_number = models.CharField(max_length=50)  # e.g., 2025-10-001
+    incident_type = models.CharField(max_length=100, choices=TYPE_CHOICES, default='Service Request')
+    main_category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+    sub_category = models.CharField(max_length=200)  # e.g., Computer - Desktop, Printer - Network Shared
+    description = models.TextField()
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    date_reported = models.DateField()
+    reported_by = models.CharField(max_length=200)
+    resolution = models.TextField(blank=True)
+
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['report', 'date_reported', 'ref_number']
+        verbose_name = 'HDR Entry'
+        verbose_name_plural = 'HDR Entries'
+
+    def __str__(self):
+        return f"{self.report} - {self.ref_number}: {self.description[:50]}"

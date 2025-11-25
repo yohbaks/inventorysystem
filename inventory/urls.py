@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard, pm_downtime_views, asir_views
+from inventory import views, pm_daily_views, pm_monthly_views, pm_weekly_views, pm_monthly_weekly_export, pm_main_dashboard, pm_downtime_views, asir_views, hdr_views
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -288,5 +288,15 @@ urlpatterns = [
     path('reports/asir/<int:report_id>/delete/', asir_views.asir_delete, name='asir_delete'),
     path('reports/asir/<int:report_id>/export/excel/', asir_views.asir_export_excel, name='asir_export_excel'),
     path('reports/asir/<int:report_id>/finalize/', asir_views.asir_finalize, name='asir_finalize'),
+
+    # ================================
+    # HDR - HelpDesk Report
+    path('reports/hdr/', hdr_views.hdr_list, name='hdr_list'),
+    path('reports/hdr/create/', hdr_views.hdr_create, name='hdr_create'),
+    path('reports/hdr/<int:report_id>/', hdr_views.hdr_view, name='hdr_view'),
+    path('reports/hdr/<int:report_id>/edit/', hdr_views.hdr_edit, name='hdr_edit'),
+    path('reports/hdr/<int:report_id>/delete/', hdr_views.hdr_delete, name='hdr_delete'),
+    path('reports/hdr/<int:report_id>/export/excel/', hdr_views.hdr_export_excel, name='hdr_export_excel'),
+    path('reports/hdr/<int:report_id>/finalize/', hdr_views.hdr_finalize, name='hdr_finalize'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

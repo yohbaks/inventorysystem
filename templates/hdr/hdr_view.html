@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}HDR Report - {{ report.period_display }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-file-alt"></i> HDR Report - {{ report.period_display }}</h3>
+                    <div>
+                        <a href="{% url 'hdr_export_excel' report.id %}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </a>
+                        {% if not report.is_finalized %}
+                        <a href="{% url 'hdr_edit' report.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#finalizeModal">
+                            <i class="fas fa-lock"></i> Finalize Report
+                        </button>
+                        {% else %}
+                        <span class="badge badge-success">FINALIZED</span>
+                        {% endif %}
+                        <a href="{% url 'hdr_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-bs-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Report Header -->
+                    <div class="text-center mb-4">
+                        <h4>Monthly Help Desk Report</h4>
+                        <h5>For the Month of {{ report.period_display }}</h5>
+                    </div>
+
+                    <!-- Office Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Region:</th>
+                                    <td>{{ report.region }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Office:</th>
+                                    <td>{{ report.office }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Address:</th>
+                                    <td>{{ report.address }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Network Administrator:</th>
+                                    <td>{{ report.network_admin_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Number:</th>
+                                    <td>{{ report.network_admin_contact }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email Address:</th>
+                                    <td>{{ report.network_admin_email }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Incidents Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 8%">Ref No.</th>
+                                    <th style="width: 10%">Type of Incident</th>
+                                    <th style="width: 10%">Main Category</th>
+                                    <th style="width: 12%">Sub-Category</th>
+                                    <th style="width: 15%">Description</th>
+                                    <th style="width: 8%">Status</th>
+                                    <th style="width: 10%">Date Reported</th>
+                                    <th style="width: 12%">Reported by</th>
+                                    <th style="width: 15%">Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries %}
+                                <tr>
+                                    <td>{{ entry.ref_number }}</td>
+                                    <td>{{ entry.incident_type }}</td>
+                                    <td>{{ entry.main_category }}</td>
+                                    <td>{{ entry.sub_category }}</td>
+                                    <td>{{ entry.description }}</td>
+                                    <td>
+                                        {% if entry.status == 'fixed' or entry.status == 'Done' %}
+                                            <span class="badge badge-success">{{ entry.status }}</span>
+                                        {% elif entry.status == 'Pending' %}
+                                            <span class="badge badge-warning">{{ entry.status }}</span>
+                                        {% elif entry.status == 'In Progress' %}
+                                            <span class="badge badge-info">{{ entry.status }}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{{ entry.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ entry.date_reported|date:"M d, Y" }}</td>
+                                    <td>{{ entry.reported_by }}</td>
+                                    <td>{{ entry.resolution }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted">
+                                        <i class="fas fa-info-circle"></i> No incidents reported for this month.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Metadata -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <strong>Report Information:</strong><br>
+                                Total Incidents: <span class="badge badge-primary">{{ entries.count }}</span><br>
+                                Created by: {{ report.created_by.get_full_name|default:report.created_by.username }}<br>
+                                Created at: {{ report.created_at|date:"F d, Y h:i A" }}<br>
+                                Last updated: {{ report.updated_at|date:"F d, Y h:i A" }}<br>
+                                {% if report.is_finalized %}
+                                    Status: <span class="badge badge-success">Finalized</span> on {{ report.finalized_at|date:"F d, Y h:i A" }}
+                                {% else %}
+                                    Status: <span class="badge badge-warning">Draft</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Finalize Modal -->
+<div class="modal fade" id="finalizeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Finalize Report</h5>
+                <button type="button" class="close" data-bs-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to finalize this report?</p>
+                <p class="text-danger"><strong>Warning:</strong> Once finalized, the report cannot be edited anymore.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'hdr_finalize' report.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-lock"></i> Finalize Report
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
