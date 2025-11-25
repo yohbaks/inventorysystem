@@ -202,13 +202,13 @@ def hdr_export_excel(request, report_id):
     report = get_object_or_404(HDRReport, id=report_id)
     entries = report.entries.order_by('date_reported', 'ref_number')
 
-    # Load template
+    # Load template with data_only=False to preserve formulas
     template_path = 'media/pm_reports/HDR 2025.xlsx'
-    wb = load_workbook(template_path)
+    wb = load_workbook(template_path, data_only=False, keep_vba=False)
 
     # Find the correct worksheet - try common sheet names
     ws = None
-    sheet_names_to_try = ['Do not delete', 'Sheet1', 'Sheet', 'HDR']
+    sheet_names_to_try = ['Do not delete', 'Sheet1', 'Sheet', 'HDR', 'Page 1']
 
     for sheet_name in sheet_names_to_try:
         if sheet_name in wb.sheetnames:
@@ -218,6 +218,10 @@ def hdr_export_excel(request, report_id):
     # If no matching sheet found, use the first sheet
     if ws is None:
         ws = wb.worksheets[0]
+
+    # Unprotect worksheet if it's protected
+    if ws.protection.sheet:
+        ws.protection.sheet = False
 
     # Fill in header information
     ws['A2'] = f'For the Month of {report.period_display}'
@@ -230,6 +234,17 @@ def hdr_export_excel(request, report_id):
 
     # Data starts at row 10 (row 9 has headers)
     data_start_row = 10
+
+    # Unmerge any merged cells in the data area (rows 10-200, columns A-I)
+    merged_ranges_to_remove = []
+    for merged_range in ws.merged_cells.ranges:
+        # Check if merged range overlaps with data area
+        if merged_range.min_row >= data_start_row and merged_range.max_row <= 200:
+            if merged_range.min_col >= 1 and merged_range.max_col <= 9:
+                merged_ranges_to_remove.append(merged_range)
+
+    for merged_range in merged_ranges_to_remove:
+        ws.unmerge_cells(str(merged_range))
 
     # Define styles for data cells
     thin_border = Border(
