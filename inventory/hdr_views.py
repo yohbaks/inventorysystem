@@ -217,14 +217,13 @@ def hdr_export_excel(request, report_id):
         ws.unmerge_cells(str(merged_range))
 
     # Fill in header information in the template
-    ws['C2'] = report.period_display
-    ws['C4'] = report.region
-    ws['I4'] = report.network_admin_name
-    ws['C5'] = report.office
-    ws['I5'] = report.network_admin_contact
-    ws['C6'] = report.address
-    ws['I6'] = report.network_admin_email
-
+    ws['B2'] = report.period_display
+    ws['B4'] = report.region
+    ws['H4'] = report.network_admin_name
+    ws['B5'] = report.office
+    ws['H5'] = report.network_admin_contact
+    ws['B6'] = report.address
+    ws['H6'] = report.network_admin_email
     # Data starts at row 10 (assuming row 8 has headers in template)
     data_start_row = 10
 
