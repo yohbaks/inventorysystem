@@ -223,16 +223,23 @@ def hdr_export_excel(request, report_id):
     if ws.protection.sheet:
         ws.protection.sheet = False
 
-    # Fill in header information
-    ws['A2'] = f'For the Month of {report.period_display}'
-    ws['B4'] = report.region
-    ws['B5'] = report.office
-    ws['B6'] = report.address
-    ws['H4'] = report.network_admin_name
-    ws['H5'] = report.network_admin_contact
-    ws['H6'] = report.network_admin_email
+    # Fill in header information matching the template layout
+    # Row 2: Month
+    ws['C2'] = report.period_display
 
-    # Data starts at row 10 (row 9 has headers)
+    # Row 4: Region (left) and Network Administrator (right)
+    ws['C4'] = report.region
+    ws['J4'] = report.network_admin_name
+
+    # Row 5: Office (left) and Contact Number (right)
+    ws['C5'] = report.office
+    ws['J5'] = report.network_admin_contact
+
+    # Row 6: Address (left) and Email Address (right)
+    ws['C6'] = report.address
+    ws['J6'] = report.network_admin_email
+
+    # Data starts at row 10 (row 8 has headers, row 9 might be empty)
     data_start_row = 10
 
     # Simply write data - don't mess with template formatting
