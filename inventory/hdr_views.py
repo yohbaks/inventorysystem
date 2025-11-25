@@ -194,7 +194,10 @@ def hdr_finalize(request, report_id):
 def hdr_export_excel(request, report_id):
     """Export HDR report to Excel using template - fills data into pre-formatted cells"""
     from openpyxl import load_workbook
-    from openpyxl.styles import Alignment
+    from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
+    from openpyxl.utils import get_column_letter
+    from copy import copy
+    from datetime import datetime
     import io
 
     report = get_object_or_404(HDRReport, id=report_id)
@@ -221,6 +224,30 @@ def hdr_export_excel(request, report_id):
 
     # Data starts at row 10 (template already has headers and formatting)
     data_start_row = 10
+    template_row = 10  # Use row 10 as template for styling
+
+    # Helper function to copy cell style
+    def copy_cell_style(source_cell, target_cell):
+        """Copy all styling from source cell to target cell"""
+        if source_cell.has_style:
+            target_cell.font = copy(source_cell.font)
+            target_cell.border = copy(source_cell.border)
+            target_cell.fill = copy(source_cell.fill)
+            target_cell.number_format = copy(source_cell.number_format)
+            target_cell.protection = copy(source_cell.protection)
+            target_cell.alignment = copy(source_cell.alignment)
+
+    # Store template row styles
+    template_styles = {}
+    for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
+        template_cell = ws[f'{col}{template_row}']
+        template_styles[col] = {
+            'font': copy(template_cell.font) if template_cell.has_style else None,
+            'border': copy(template_cell.border) if template_cell.has_style else None,
+            'fill': copy(template_cell.fill) if template_cell.has_style else None,
+            'number_format': template_cell.number_format if template_cell.has_style else None,
+            'alignment': copy(template_cell.alignment) if template_cell.has_style else None,
+        }
 
     # Fill in data entries - preserve template formatting
     for idx, entry in enumerate(entries):
@@ -233,27 +260,41 @@ def hdr_export_excel(request, report_id):
         ws[f'D{row_num}'] = entry.sub_category
         ws[f'E{row_num}'] = entry.description
         ws[f'F{row_num}'] = entry.status
-        ws[f'G{row_num}'] = entry.date_reported
-        ws[f'H{row_num}'] = entry.reported_by
-        ws[f'I{row_num}'] = entry.resolution
 
-        # Enable text wrapping for all data cells to handle long content
+        # Format date properly for Excel
+        if entry.date_reported:
+            if isinstance(entry.date_reported, str):
+                # Parse string date if needed
+                try:
+                    date_obj = datetime.strptime(entry.date_reported, '%Y-%m-%d')
+                    ws[f'G{row_num}'] = date_obj
+                except:
+                    ws[f'G{row_num}'] = entry.date_reported
+            else:
+                ws[f'G{row_num}'] = entry.date_reported
+
+        ws[f'H{row_num}'] = entry.reported_by
+        ws[f'I{row_num}'] = entry.resolution if entry.resolution else ''
+
+        # Apply template styles to all cells in this row
         for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
             cell = ws[f'{col}{row_num}']
-            if cell.alignment:
-                # Preserve existing alignment but enable wrapping
-                cell.alignment = Alignment(
-                    horizontal=cell.alignment.horizontal,
-                    vertical=cell.alignment.vertical,
-                    wrap_text=True
-                )
-            else:
-                # Default alignment with wrapping
-                cell.alignment = Alignment(
-                    horizontal='center',
-                    vertical='center',
-                    wrap_text=True
-                )
+            style = template_styles[col]
+
+            # Apply stored styles
+            if style['font']:
+                cell.font = copy(style['font'])
+            if style['border']:
+                cell.border = copy(style['border'])
+            if style['fill']:
+                cell.fill = copy(style['fill'])
+            if style['number_format']:
+                cell.number_format = style['number_format']
+            if style['alignment']:
+                # Enable text wrapping while preserving other alignment properties
+                alignment = copy(style['alignment'])
+                alignment.wrap_text = True
+                cell.alignment = alignment
 
     # Prepare response
     output = io.BytesIO()
