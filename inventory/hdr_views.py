@@ -206,44 +206,46 @@ def hdr_export_excel(request, report_id):
     template_path = 'media/pm_reports/HDR 2025.xlsx'
     wb = load_workbook(template_path, data_only=False, keep_vba=False)
 
-    # Find the correct worksheet - try common sheet names
-    ws = None
-    sheet_names_to_try = ['Do not delete', 'Sheet1', 'Sheet', 'HDR', 'Page 1']
+    # Create a brand new sheet for the exported data - no confusion
+    if 'EXPORTED_DATA' in wb.sheetnames:
+        del wb['EXPORTED_DATA']
 
-    for sheet_name in sheet_names_to_try:
-        if sheet_name in wb.sheetnames:
-            ws = wb[sheet_name]
-            break
+    ws = wb.create_sheet('EXPORTED_DATA', 0)  # Insert as first sheet
+    wb.active = ws  # Make it the active sheet
 
-    # If no matching sheet found, use the first sheet
-    if ws is None:
-        ws = wb.worksheets[0]
-
-    # Unprotect worksheet if it's protected
-    if ws.protection.sheet:
-        ws.protection.sheet = False
-
-    # Fill in header information matching the template layout
-    # Row 2: Month
+    # Write headers
+    ws['A1'] = 'Monthly Help Desk Report'
+    ws['A2'] = 'Month:'
     ws['C2'] = report.period_display
 
-    # Row 4: Region (left) and Network Administrator (right)
+    ws['A4'] = 'Region:'
     ws['C4'] = report.region
-    ws['J4'] = report.network_admin_name
+    ws['G4'] = 'Network Administrator:'
+    ws['I4'] = report.network_admin_name
 
-    # Row 5: Office (left) and Contact Number (right)
+    ws['A5'] = 'Office:'
     ws['C5'] = report.office
-    ws['J5'] = report.network_admin_contact
+    ws['G5'] = 'Contact Number:'
+    ws['I5'] = report.network_admin_contact
 
-    # Row 6: Address (left) and Email Address (right)
+    ws['A6'] = 'Address:'
     ws['C6'] = report.address
-    ws['J6'] = report.network_admin_email
+    ws['G6'] = 'Email Address:'
+    ws['I6'] = report.network_admin_email
 
-    # Data starts at row 10 (row 8 has headers, row 9 might be empty)
+    # Write column headers in row 8
+    ws['A8'] = 'Ref No.'
+    ws['B8'] = 'Type of Incident'
+    ws['C8'] = 'Main Category'
+    ws['D8'] = 'Sub-Category'
+    ws['E8'] = 'Description'
+    ws['F8'] = 'Status'
+    ws['G8'] = 'Date Reported'
+    ws['H8'] = 'Reported by'
+    ws['I8'] = 'Resolution'
+
+    # Data starts at row 10
     data_start_row = 10
-
-    # DEBUG: Write entry count
-    ws['A12'] = f'DEBUG: Found {entries.count()} entries'
 
     # Write each entry
     if entries.exists():
