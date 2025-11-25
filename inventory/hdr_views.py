@@ -235,9 +235,17 @@ def hdr_export_excel(request, report_id):
     # Data starts at row 10 (row 9 has headers)
     data_start_row = 10
 
-    # CRITICAL: Delete ALL existing rows from 10 to 500 to clear template data
-    # We'll delete in reverse order to avoid row shifting issues
-    ws.delete_rows(data_start_row, 500)
+    # CRITICAL: Clear ALL existing data from rows 10-200
+    # Don't delete rows, just clear content and reset formatting
+    for row_idx in range(data_start_row, data_start_row + 200):
+        for col_idx in range(1, 10):  # Columns A-I (1-9)
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.value = None
+            cell.font = Font()
+            cell.border = Border()
+            cell.fill = PatternFill()
+            cell.alignment = Alignment()
+            cell.number_format = 'General'
 
     # Unmerge any merged cells in the data area (rows 10-200, columns A-I)
     merged_ranges_to_remove = []
