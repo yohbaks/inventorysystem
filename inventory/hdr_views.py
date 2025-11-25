@@ -202,8 +202,8 @@ def hdr_export_excel(request, report_id):
     report = get_object_or_404(HDRReport, id=report_id)
     entries = report.entries.order_by('date_reported', 'ref_number')
 
-    # Load template with data_only=False to preserve formulas
-    template_path = 'media/pm_reports/HDR 2025.xlsx'
+    # Load the new template
+    template_path = 'media/pm_reports/new_hdr.xlsx'
     wb = load_workbook(template_path, data_only=False, keep_vba=False)
 
     # Create a brand new sheet for the exported data - no confusion
