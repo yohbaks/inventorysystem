@@ -222,44 +222,40 @@ def hdr_export_excel(request, report_id):
     ws['H5'] = report.network_admin_contact
     ws['H6'] = report.network_admin_email
 
-    # Data starts at row 10 (template already has headers and formatting)
+    # Data starts at row 10 (row 9 has headers)
     data_start_row = 10
-    template_row = 10  # Use row 10 as template for styling
+    header_row = 9  # Row 9 has the column headers
 
-    # Helper function to copy cell style
-    def copy_cell_style(source_cell, target_cell):
-        """Copy all styling from source cell to target cell"""
-        if source_cell.has_style:
-            target_cell.font = copy(source_cell.font)
-            target_cell.border = copy(source_cell.border)
-            target_cell.fill = copy(source_cell.fill)
-            target_cell.number_format = copy(source_cell.number_format)
-            target_cell.protection = copy(source_cell.protection)
-            target_cell.alignment = copy(source_cell.alignment)
+    # Clear any existing data from row 10 onwards (up to row 100 to be safe)
+    for row_idx in range(data_start_row, data_start_row + 100):
+        for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
+            ws[f'{col}{row_idx}'].value = None
 
-    # Store template row styles
-    template_styles = {}
-    for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
-        template_cell = ws[f'{col}{template_row}']
-        template_styles[col] = {
-            'font': copy(template_cell.font) if template_cell.has_style else None,
-            'border': copy(template_cell.border) if template_cell.has_style else None,
-            'fill': copy(template_cell.fill) if template_cell.has_style else None,
-            'number_format': template_cell.number_format if template_cell.has_style else None,
-            'alignment': copy(template_cell.alignment) if template_cell.has_style else None,
-        }
+    # Define default styles for data cells
+    from openpyxl.styles import Border, Side, Font, Alignment, PatternFill
 
-    # Fill in data entries - preserve template formatting
+    thin_border = Border(
+        left=Side(style='thin', color='000000'),
+        right=Side(style='thin', color='000000'),
+        top=Side(style='thin', color='000000'),
+        bottom=Side(style='thin', color='000000')
+    )
+
+    default_font = Font(name='Calibri', size=11)
+    center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    left_alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+
+    # Fill in data entries
     for idx, entry in enumerate(entries):
         row_num = data_start_row + idx
 
         # Fill in the data for this entry
-        ws[f'A{row_num}'] = entry.ref_number
-        ws[f'B{row_num}'] = entry.incident_type
-        ws[f'C{row_num}'] = entry.main_category
-        ws[f'D{row_num}'] = entry.sub_category
-        ws[f'E{row_num}'] = entry.description
-        ws[f'F{row_num}'] = entry.status
+        ws[f'A{row_num}'].value = entry.ref_number
+        ws[f'B{row_num}'].value = entry.incident_type
+        ws[f'C{row_num}'].value = entry.main_category
+        ws[f'D{row_num}'].value = entry.sub_category
+        ws[f'E{row_num}'].value = entry.description
+        ws[f'F{row_num}'].value = entry.status
 
         # Format date properly for Excel
         if entry.date_reported:
@@ -267,34 +263,31 @@ def hdr_export_excel(request, report_id):
                 # Parse string date if needed
                 try:
                     date_obj = datetime.strptime(entry.date_reported, '%Y-%m-%d')
-                    ws[f'G{row_num}'] = date_obj
+                    ws[f'G{row_num}'].value = date_obj
                 except:
-                    ws[f'G{row_num}'] = entry.date_reported
+                    ws[f'G{row_num}'].value = entry.date_reported
             else:
-                ws[f'G{row_num}'] = entry.date_reported
+                ws[f'G{row_num}'].value = entry.date_reported
 
-        ws[f'H{row_num}'] = entry.reported_by
-        ws[f'I{row_num}'] = entry.resolution if entry.resolution else ''
+        ws[f'H{row_num}'].value = entry.reported_by
+        ws[f'I{row_num}'].value = entry.resolution if entry.resolution else ''
 
-        # Apply template styles to all cells in this row
-        for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
-            cell = ws[f'{col}{row_num}']
-            style = template_styles[col]
+        # Apply consistent formatting to all cells in this row
+        for col_letter in ['A', 'B', 'C', 'D', 'F', 'G', 'H']:
+            cell = ws[f'{col_letter}{row_num}']
+            cell.font = copy(default_font)
+            cell.border = copy(thin_border)
+            cell.alignment = copy(center_alignment)
 
-            # Apply stored styles
-            if style['font']:
-                cell.font = copy(style['font'])
-            if style['border']:
-                cell.border = copy(style['border'])
-            if style['fill']:
-                cell.fill = copy(style['fill'])
-            if style['number_format']:
-                cell.number_format = style['number_format']
-            if style['alignment']:
-                # Enable text wrapping while preserving other alignment properties
-                alignment = copy(style['alignment'])
-                alignment.wrap_text = True
-                cell.alignment = alignment
+        # Description and Resolution columns use left alignment
+        for col_letter in ['E', 'I']:
+            cell = ws[f'{col_letter}{row_num}']
+            cell.font = copy(default_font)
+            cell.border = copy(thin_border)
+            cell.alignment = copy(left_alignment)
+
+        # Format date column specifically
+        ws[f'G{row_num}'].number_format = 'MM/DD/YYYY'
 
     # Prepare response
     output = io.BytesIO()
