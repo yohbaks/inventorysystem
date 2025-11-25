@@ -197,7 +197,7 @@ def hdr_export_excel(request, report_id):
     entries = report.entries.order_by('date_reported', 'ref_number')
 
     # Load template
-    template_path = 'media/pm_reports/HDR 2025.xlsx'
+    template_path = 'media/pm_reports/new_hdr.xlsx'
     wb = load_workbook(template_path)
 
     # Use the "Do not delete" sheet as template or active sheet
