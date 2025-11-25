@@ -242,27 +242,41 @@ def hdr_export_excel(request, report_id):
     # Data starts at row 10 (row 8 has headers, row 9 might be empty)
     data_start_row = 10
 
-    # Simply write data - don't mess with template formatting
-    # Just overwrite the cell values directly
-    for idx, entry in enumerate(entries):
-        row_num = data_start_row + idx
+    # DEBUG: Write entry count
+    ws['A12'] = f'DEBUG: Found {entries.count()} entries'
 
-        # Write data directly - use simple assignment
-        ws[f'A{row_num}'] = str(entry.ref_number)
-        ws[f'B{row_num}'] = str(entry.incident_type)
-        ws[f'C{row_num}'] = str(entry.main_category)
-        ws[f'D{row_num}'] = str(entry.sub_category)
-        ws[f'E{row_num}'] = str(entry.description)
-        ws[f'F{row_num}'] = str(entry.status)
+    # Write each entry
+    if entries.exists():
+        for idx, entry in enumerate(entries):
+            row_num = data_start_row + idx
 
-        # Handle date
-        if entry.date_reported:
-            ws[f'G{row_num}'] = entry.date_reported
-        else:
-            ws[f'G{row_num}'] = ''
+            # Write data directly - use simple assignment
+            ws[f'A{row_num}'] = str(entry.ref_number)
+            ws[f'B{row_num}'] = str(entry.incident_type)
+            ws[f'C{row_num}'] = str(entry.main_category)
+            ws[f'D{row_num}'] = str(entry.sub_category)
+            ws[f'E{row_num}'] = str(entry.description)
+            ws[f'F{row_num}'] = str(entry.status)
 
-        ws[f'H{row_num}'] = str(entry.reported_by)
-        ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
+            # Handle date
+            if entry.date_reported:
+                ws[f'G{row_num}'] = entry.date_reported
+            else:
+                ws[f'G{row_num}'] = ''
+
+            ws[f'H{row_num}'] = str(entry.reported_by)
+            ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
+    else:
+        # No entries found - write test data to verify export works
+        ws['A10'] = 'TEST-001'
+        ws['B10'] = 'Test Type'
+        ws['C10'] = 'Test Category'
+        ws['D10'] = 'Test Sub'
+        ws['E10'] = 'Test Description - NO ENTRIES FOUND IN DATABASE'
+        ws['F10'] = 'Pending'
+        ws['G10'] = 'TEST'
+        ws['H10'] = 'Test User'
+        ws['I10'] = 'Test Resolution'
 
     # Prepare response
     output = io.BytesIO()
