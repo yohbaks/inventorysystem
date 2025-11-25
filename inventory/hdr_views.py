@@ -235,16 +235,23 @@ def hdr_export_excel(request, report_id):
     # Data starts at row 10 (row 9 has headers)
     data_start_row = 10
 
+    # CRITICAL: Delete ALL existing rows from 10 to 500 to clear template data
+    # We'll delete in reverse order to avoid row shifting issues
+    ws.delete_rows(data_start_row, 500)
+
     # Unmerge any merged cells in the data area (rows 10-200, columns A-I)
     merged_ranges_to_remove = []
-    for merged_range in ws.merged_cells.ranges:
+    for merged_range in list(ws.merged_cells.ranges):
         # Check if merged range overlaps with data area
         if merged_range.min_row >= data_start_row and merged_range.max_row <= 200:
             if merged_range.min_col >= 1 and merged_range.max_col <= 9:
                 merged_ranges_to_remove.append(merged_range)
 
     for merged_range in merged_ranges_to_remove:
-        ws.unmerge_cells(str(merged_range))
+        try:
+            ws.unmerge_cells(str(merged_range))
+        except:
+            pass  # Ignore if already unmerged
 
     # Define styles for data cells
     thin_border = Border(
