@@ -242,6 +242,17 @@ def hdr_export_excel(request, report_id):
         ws[f'H{row_num}'] = str(entry.reported_by)
         ws[f'I{row_num}'] = str(entry.resolution) if entry.resolution else ''
 
+    # Apply formatting
+    # 1. Wrap text for cell I10
+    ws['I10'].alignment = Alignment(wrap_text=True)
+
+    # 2-6. Merge specific cells
+    ws.merge_cells('G14:H14')
+    ws.merge_cells('G15:H15')
+    ws.merge_cells('A12:B12')
+    ws.merge_cells('A14:B14')
+    ws.merge_cells('A15:B15')
+
     # Prepare response
     output = io.BytesIO()
     wb.save(output)
