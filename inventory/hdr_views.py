@@ -195,7 +195,6 @@ def hdr_export_excel(request, report_id):
     """Export HDR report to Excel using template - fills data into pre-formatted cells"""
     from openpyxl import load_workbook
     from openpyxl.styles import Alignment, Border, Side, Font, PatternFill
-    from openpyxl.utils import get_column_letter
     from copy import copy
     from datetime import datetime
     import io
@@ -207,11 +206,18 @@ def hdr_export_excel(request, report_id):
     template_path = 'media/pm_reports/HDR 2025.xlsx'
     wb = load_workbook(template_path)
 
-    # Use the "Do not delete" sheet as template or active sheet
-    if 'Do not delete' in wb.sheetnames:
-        ws = wb['Do not delete']
-    else:
-        ws = wb.active
+    # Find the correct worksheet - try common sheet names
+    ws = None
+    sheet_names_to_try = ['Do not delete', 'Sheet1', 'Sheet', 'HDR']
+
+    for sheet_name in sheet_names_to_try:
+        if sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            break
+
+    # If no matching sheet found, use the first sheet
+    if ws is None:
+        ws = wb.worksheets[0]
 
     # Fill in header information
     ws['A2'] = f'For the Month of {report.period_display}'
@@ -224,16 +230,8 @@ def hdr_export_excel(request, report_id):
 
     # Data starts at row 10 (row 9 has headers)
     data_start_row = 10
-    header_row = 9  # Row 9 has the column headers
 
-    # Clear any existing data from row 10 onwards (up to row 100 to be safe)
-    for row_idx in range(data_start_row, data_start_row + 100):
-        for col in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']:
-            ws[f'{col}{row_idx}'].value = None
-
-    # Define default styles for data cells
-    from openpyxl.styles import Border, Side, Font, Alignment, PatternFill
-
+    # Define styles for data cells
     thin_border = Border(
         left=Side(style='thin', color='000000'),
         right=Side(style='thin', color='000000'),
@@ -241,7 +239,7 @@ def hdr_export_excel(request, report_id):
         bottom=Side(style='thin', color='000000')
     )
 
-    default_font = Font(name='Calibri', size=11)
+    default_font = Font(name='Calibri', size=11, color='000000')
     center_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
     left_alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
 
@@ -249,45 +247,94 @@ def hdr_export_excel(request, report_id):
     for idx, entry in enumerate(entries):
         row_num = data_start_row + idx
 
-        # Fill in the data for this entry
-        ws[f'A{row_num}'].value = entry.ref_number
-        ws[f'B{row_num}'].value = entry.incident_type
-        ws[f'C{row_num}'].value = entry.main_category
-        ws[f'D{row_num}'].value = entry.sub_category
-        ws[f'E{row_num}'].value = entry.description
-        ws[f'F{row_num}'].value = entry.status
+        # Ensure row is visible
+        ws.row_dimensions[row_num].hidden = False
+        ws.row_dimensions[row_num].height = 30  # Set minimum height
 
-        # Format date properly for Excel
+        # Column A - Ref Number
+        cell_a = ws.cell(row=row_num, column=1)
+        cell_a.value = str(entry.ref_number)
+        cell_a.font = copy(default_font)
+        cell_a.border = copy(thin_border)
+        cell_a.alignment = copy(center_alignment)
+
+        # Column B - Incident Type
+        cell_b = ws.cell(row=row_num, column=2)
+        cell_b.value = str(entry.incident_type)
+        cell_b.font = copy(default_font)
+        cell_b.border = copy(thin_border)
+        cell_b.alignment = copy(center_alignment)
+
+        # Column C - Main Category
+        cell_c = ws.cell(row=row_num, column=3)
+        cell_c.value = str(entry.main_category)
+        cell_c.font = copy(default_font)
+        cell_c.border = copy(thin_border)
+        cell_c.alignment = copy(center_alignment)
+
+        # Column D - Sub Category
+        cell_d = ws.cell(row=row_num, column=4)
+        cell_d.value = str(entry.sub_category)
+        cell_d.font = copy(default_font)
+        cell_d.border = copy(thin_border)
+        cell_d.alignment = copy(center_alignment)
+
+        # Column E - Description
+        cell_e = ws.cell(row=row_num, column=5)
+        cell_e.value = str(entry.description)
+        cell_e.font = copy(default_font)
+        cell_e.border = copy(thin_border)
+        cell_e.alignment = copy(left_alignment)
+
+        # Column F - Status
+        cell_f = ws.cell(row=row_num, column=6)
+        cell_f.value = str(entry.status)
+        cell_f.font = copy(default_font)
+        cell_f.border = copy(thin_border)
+        cell_f.alignment = copy(center_alignment)
+
+        # Column G - Date Reported
+        cell_g = ws.cell(row=row_num, column=7)
         if entry.date_reported:
             if isinstance(entry.date_reported, str):
-                # Parse string date if needed
                 try:
                     date_obj = datetime.strptime(entry.date_reported, '%Y-%m-%d')
-                    ws[f'G{row_num}'].value = date_obj
+                    cell_g.value = date_obj
                 except:
-                    ws[f'G{row_num}'].value = entry.date_reported
+                    cell_g.value = str(entry.date_reported)
             else:
-                ws[f'G{row_num}'].value = entry.date_reported
+                cell_g.value = entry.date_reported
+            cell_g.number_format = 'MM/DD/YYYY'
+        else:
+            cell_g.value = ''
+        cell_g.font = copy(default_font)
+        cell_g.border = copy(thin_border)
+        cell_g.alignment = copy(center_alignment)
 
-        ws[f'H{row_num}'].value = entry.reported_by
-        ws[f'I{row_num}'].value = entry.resolution if entry.resolution else ''
+        # Column H - Reported By
+        cell_h = ws.cell(row=row_num, column=8)
+        cell_h.value = str(entry.reported_by)
+        cell_h.font = copy(default_font)
+        cell_h.border = copy(thin_border)
+        cell_h.alignment = copy(center_alignment)
 
-        # Apply consistent formatting to all cells in this row
-        for col_letter in ['A', 'B', 'C', 'D', 'F', 'G', 'H']:
-            cell = ws[f'{col_letter}{row_num}']
-            cell.font = copy(default_font)
-            cell.border = copy(thin_border)
-            cell.alignment = copy(center_alignment)
+        # Column I - Resolution
+        cell_i = ws.cell(row=row_num, column=9)
+        cell_i.value = str(entry.resolution) if entry.resolution else ''
+        cell_i.font = copy(default_font)
+        cell_i.border = copy(thin_border)
+        cell_i.alignment = copy(left_alignment)
 
-        # Description and Resolution columns use left alignment
-        for col_letter in ['E', 'I']:
-            cell = ws[f'{col_letter}{row_num}']
-            cell.font = copy(default_font)
-            cell.border = copy(thin_border)
-            cell.alignment = copy(left_alignment)
-
-        # Format date column specifically
-        ws[f'G{row_num}'].number_format = 'MM/DD/YYYY'
+    # Ensure all columns are visible and have appropriate width
+    ws.column_dimensions['A'].width = 12
+    ws.column_dimensions['B'].width = 15
+    ws.column_dimensions['C'].width = 12
+    ws.column_dimensions['D'].width = 18
+    ws.column_dimensions['E'].width = 35
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 15
+    ws.column_dimensions['H'].width = 20
+    ws.column_dimensions['I'].width = 35
 
     # Prepare response
     output = io.BytesIO()
