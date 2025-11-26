@@ -248,11 +248,18 @@ def hdr_export_excel(request, report_id):
 
     # Apply formatting
     # Merge specific cells
+    # Apply formatting
+    # Merge specific cells
     ws.merge_cells('G14:H14')
     ws.merge_cells('G15:H15')
+    ws.merge_cells('G16:H16')
+    ws.merge_cells('G17:H17')
+
     ws.merge_cells('A12:B12')
     ws.merge_cells('A14:B14')
     ws.merge_cells('A15:B15')
+    ws.merge_cells('A16:B16')
+    ws.merge_cells('A17:B17')
 
     # Prepare response
     output = io.BytesIO()
