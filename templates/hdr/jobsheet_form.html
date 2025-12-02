@@ -5,128 +5,363 @@
 
 {% block extra_css %}
 <style>
-    .jobsheet-container {
+    .jobsheet-wrapper {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 30px 0;
+    }
+
+    .jobsheet-card {
         max-width: 1200px;
         margin: 0 auto;
         background: white;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
     }
 
-    .jobsheet-header {
-        border: 2px solid #000;
+    .card-header-premium {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 30px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header-premium::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .dpwh-header {
+        position: relative;
+        z-index: 1;
+    }
+
+    .dpwh-logo-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
         padding: 15px;
-        margin-bottom: 20px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .dpwh-title {
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .dpwh-title h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+    }
+
+    .dpwh-title h3 {
+        margin: 5px 0;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: 1px;
+    }
+
+    .dpwh-title p {
+        margin: 3px 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .ref-number-badge {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .ref-number-badge h5 {
+        margin: 0 0 10px 0;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .ref-number-value {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-body-premium {
+        padding: 40px;
         background: #f8f9fa;
     }
 
-    .jobsheet-title {
-        text-align: center;
-        font-weight: bold;
-        font-size: 14px;
-        line-height: 1.4;
+    .section-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .section-header {
-        background: #000;
-        color: #fff;
-        padding: 8px 15px;
-        font-weight: bold;
-        font-size: 13px;
-        margin-top: 20px;
-        margin-bottom: 15px;
+    .section-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
 
-    .form-section {
-        border: 1px solid #dee2e6;
-        padding: 20px;
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #667eea;
+    }
+
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .section-icon i {
+        font-size: 24px;
+        color: white;
+    }
+
+    .section-title h5 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #2d3748;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group {
         margin-bottom: 20px;
     }
 
     .form-group label {
         font-weight: 600;
-        font-size: 13px;
-        margin-bottom: 5px;
-        color: #333;
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: #4a5568;
+        display: block;
     }
 
     .form-control {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        padding: 8px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 16px;
         font-size: 14px;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .form-control:hover {
+        border-color: #cbd5e0;
     }
 
     textarea.form-control {
         resize: vertical;
-        min-height: 80px;
+        min-height: 100px;
     }
 
     .required-mark {
-        color: red;
+        color: #f56565;
+        font-weight: bold;
     }
 
     .is-invalid {
-        border-color: #dc3545 !important;
+        border-color: #f56565 !important;
+        animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .btn-submit-premium {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 50px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        text-transform: uppercase;
+    }
+
+    .btn-submit-premium:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .btn-submit-premium:active {
+        transform: translateY(-1px);
+    }
+
+    .btn-cancel-premium {
+        background: white;
+        color: #4a5568;
+        padding: 15px 50px;
+        border: 2px solid #e2e8f0;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-cancel-premium:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        color: #2d3748;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 2px solid #e2e8f0;
+    }
+
+    .alert-premium {
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     @media print {
-        .btn {
+        .btn, .action-buttons {
             display: none;
+        }
+        .jobsheet-wrapper {
+            background: white;
+        }
+        .jobsheet-card {
+            box-shadow: none;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card-body-premium {
+            padding: 20px;
+        }
+        .section-card {
+            padding: 20px;
+        }
+        .action-buttons {
+            flex-direction: column;
+        }
+        .btn-submit-premium, .btn-cancel-premium {
+            width: 100%;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4 mb-5">
-    <div class="jobsheet-container">
-        <!-- Header -->
-        <div style="position: relative;">
-            <div class="jobsheet-header">
+<div class="jobsheet-wrapper">
+    <div class="jobsheet-card">
+        <!-- Premium Header -->
+        <div class="card-header-premium">
+            <div class="dpwh-header">
                 <div class="row align-items-center">
-                    <div class="col-md-2 text-center">
-                        <img src="{% static 'images/dpwh-logo.png' %}" alt="DPWH Logo" style="width: 80px; height: 80px;" onerror="this.style.display='none'">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="jobsheet-title">
-                            <div>Republic of the Philippines</div>
-                            <div>DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</div>
-                            <div>REGIONAL OFFICE NO. {{ report.region }}</div>
-                            <div>{{ report.office|upper }}</div>
-                            <div>{{ report.address }}</div>
+                    <div class="col-md-2">
+                        <div class="dpwh-logo-container">
+                            <img src="{% static 'images/dpwh-logo.png' %}" alt="DPWH Logo" style="width: 80px; height: 80px;" onerror="this.style.display='none'">
                         </div>
                     </div>
-                    <div class="col-md-2 text-center">
-                        <strong>JOB SHEET FORM</strong>
-                        <div style="font-size: 12px;">Ref. No.: <strong>{{ next_ref_number }}</strong></div>
+                    <div class="col-md-7">
+                        <div class="dpwh-title">
+                            <h4>Republic of the Philippines</h4>
+                            <h3>DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</h3>
+                            <p>REGIONAL OFFICE NO. {{ report.region }}</p>
+                            <p>{{ report.office|upper }}</p>
+                            <p>{{ report.address }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="ref-number-badge">
+                            <h5>JOB SHEET FORM</h5>
+                            <div class="ref-number-value">{{ next_ref_number }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Messages -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
-        {% endif %}
+        <!-- Premium Body -->
+        <div class="card-body-premium">
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-premium alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-        <!-- Form -->
-        <form method="post" id="jobsheetForm">
-            {% csrf_token %}
+            <!-- Form -->
+            <form method="post" id="jobsheetForm">
+                {% csrf_token %}
 
-            <!-- Client's Information Section -->
-            <div class="section-header">
-                CLIENT'S INFORMATION and SERVICE REQUEST
-            </div>
-
-            <div class="form-section">
+                <!-- Client's Information Section -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h5>CLIENT'S INFORMATION AND SERVICE REQUEST</h5>
+                    </div>
                 <div class="row">
                     <div class="col-md-8">
                         <div class="form-group">
@@ -157,18 +392,20 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Brief description of the Incident or Request: <span class="required-mark">*</span></label>
-                    <textarea name="description" class="form-control" required placeholder="Describe the issue or request in detail..."></textarea>
+                    <div class="form-group">
+                        <label>Brief description of the Incident or Request: <span class="required-mark">*</span></label>
+                        <textarea name="description" class="form-control" required placeholder="Describe the issue or request in detail..."></textarea>
+                    </div>
                 </div>
-            </div>
 
-            <!-- I.T. Support Technical Assessment -->
-            <div class="section-header">
-                I.T. SUPPORT TECHNICAL ASSESSMENT
-            </div>
-
-            <div class="form-section">
+                <!-- I.T. Support Technical Assessment -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <h5>I.T. SUPPORT TECHNICAL ASSESSMENT</h5>
+                    </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -214,22 +451,23 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Actions Taken and/or Recommendations:</label>
-                    <textarea name="resolution" class="form-control" placeholder="Describe actions taken or recommendations..."></textarea>
+                    <div class="form-group">
+                        <label>Actions Taken and/or Recommendations:</label>
+                        <textarea name="resolution" class="form-control" placeholder="Describe actions taken or recommendations..."></textarea>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Buttons -->
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="fas fa-save"></i> Submit Job Sheet
-                </button>
-                <a href="{% url 'hdr_edit' report.id %}" class="btn btn-secondary btn-lg ml-2">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
-            </div>
-        </form>
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="submit" class="btn-submit-premium">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit Job Sheet
+                    </button>
+                    <a href="{% url 'hdr_edit' report.id %}" class="btn-cancel-premium">
+                        <i class="fas fa-times mr-2"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
