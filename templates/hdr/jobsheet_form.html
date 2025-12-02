@@ -406,6 +406,84 @@
                         </div>
                         <h5>I.T. SUPPORT TECHNICAL ASSESSMENT</h5>
                     </div>
+
+                    <!-- Hardware Section -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-laptop mr-2"></i>Hardware</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Type:</label>
+                                    <input type="text" name="hardware_type" class="form-control" placeholder="e.g., Desktop, Laptop, Printer">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Brand and Model:</label>
+                                    <input type="text" name="hardware_brand_model" class="form-control" placeholder="e.g., HP EliteBook 840">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Serial Number:</label>
+                                    <input type="text" name="hardware_serial_number" class="form-control" placeholder="Enter serial number">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Computer Name:</label>
+                                    <input type="text" name="computer_name" class="form-control" placeholder="Enter computer name">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Application System / Software Section -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-desktop mr-2"></i>Application System / Software</h6>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label>Description:</label>
+                                    <input type="text" name="application_description" class="form-control" placeholder="e.g., Microsoft Office, AutoCAD">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Version:</label>
+                                    <input type="text" name="application_version" class="form-control" placeholder="e.g., 2021, v16.0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connectivity Section -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-network-wired mr-2"></i>Connectivity</h6>
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea name="connectivity_description" class="form-control" rows="2" placeholder="Network connectivity details..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- User Account Section -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-user-lock mr-2"></i>User Account</h6>
+                        <div class="form-group">
+                            <label>Description:</label>
+                            <textarea name="user_account_description" class="form-control" rows="2" placeholder="User account details..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Assessment Section -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-clipboard-check mr-2"></i>Assessment</h6>
+                        <div class="form-group">
+                            <textarea name="assessment" class="form-control" rows="3" placeholder="Technical assessment and findings..."></textarea>
+                        </div>
+                    </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -451,9 +529,116 @@
                     </div>
                 </div>
 
+                    <!-- Actions Taken Section -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-check-circle mr-2"></i>Actions Taken and/or Recommendations</h6>
+                        <div class="form-group">
+                            <textarea name="resolution" class="form-control" rows="3" placeholder="Describe actions taken or recommendations..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Mode of Filing and Personnel Section -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Mode of Filing:</label>
+                                <select name="mode_of_filing" class="form-control">
+                                    <option value="">-- Select Mode --</option>
+                                    <option value="Walk-in">Walk-in</option>
+                                    <option value="Telephone Call">Telephone Call</option>
+                                    <option value="Email">Email</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Fulfilled by:</label>
+                                <input type="text" name="fulfilled_by" class="form-control" placeholder="Name of person who fulfilled">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Reviewed by:</label>
+                                <input type="text" name="reviewed_by" class="form-control" placeholder="Name of reviewer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Evaluation Section -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <div class="section-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h5>CLIENT'S EVALUATION</h5>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>1. Was your concern/problem properly addressed?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="concern_addressed" id="concern_yes" value="Yes">
+                                        <label class="form-check-label" for="concern_yes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="concern_addressed" id="concern_no" value="No">
+                                        <label class="form-check-label" for="concern_no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>2. How satisfied are you with the I.T. support service received?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="satisfaction_service" id="service_very" value="Very Satisfied">
+                                        <label class="form-check-label" for="service_very">Very Satisfied</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="satisfaction_service" id="service_satisfied" value="Satisfied">
+                                        <label class="form-check-label" for="service_satisfied">Satisfied</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="satisfaction_service" id="service_not" value="Not Satisfied">
+                                        <label class="form-check-label" for="service_not">Not Satisfied</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>3. How satisfied are you with the effectiveness of the solution?</label>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_very" value="Very Satisfied">
+                                        <label class="form-check-label" for="solution_very">Very Satisfied</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_satisfied" value="Satisfied">
+                                        <label class="form-check-label" for="solution_satisfied">Satisfied</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_not" value="Not Satisfied">
+                                        <label class="form-check-label" for="solution_not">Not Satisfied</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label>Actions Taken and/or Recommendations:</label>
-                        <textarea name="resolution" class="form-control" placeholder="Describe actions taken or recommendations..."></textarea>
+                        <label>Comments and/or Suggestions:</label>
+                        <textarea name="client_comments" class="form-control" rows="3" placeholder="Additional comments or suggestions..."></textarea>
                     </div>
                 </div>
 

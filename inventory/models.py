@@ -2093,7 +2093,46 @@ class HDREntry(models.Model):
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
     date_reported = models.DateField()
     reported_by = models.CharField(max_length=200)
+    section_division = models.CharField(max_length=200, blank=True)
+    contact_no = models.CharField(max_length=100, blank=True)
     resolution = models.TextField(blank=True)
+
+    # Hardware details
+    hardware_type = models.CharField(max_length=200, blank=True)
+    hardware_brand_model = models.CharField(max_length=200, blank=True)
+    hardware_serial_number = models.CharField(max_length=200, blank=True)
+    computer_name = models.CharField(max_length=200, blank=True)
+
+    # Application System / Software
+    application_description = models.TextField(blank=True)
+    application_version = models.CharField(max_length=100, blank=True)
+
+    # Connectivity
+    connectivity_description = models.TextField(blank=True)
+
+    # User Account
+    user_account_description = models.TextField(blank=True)
+
+    # Assessment
+    assessment = models.TextField(blank=True)
+
+    # Mode of Filing
+    MODE_OF_FILING_CHOICES = [
+        ('Walk-in', 'Walk-in'),
+        ('Telephone Call', 'Telephone Call'),
+        ('Email', 'Email'),
+    ]
+    mode_of_filing = models.CharField(max_length=50, choices=MODE_OF_FILING_CHOICES, blank=True)
+
+    # Personnel
+    fulfilled_by = models.CharField(max_length=200, blank=True)
+    reviewed_by = models.CharField(max_length=200, blank=True)
+
+    # Client Evaluation
+    concern_addressed = models.CharField(max_length=10, blank=True)  # Yes/No
+    satisfaction_service = models.CharField(max_length=50, blank=True)  # Very Satisfied/Satisfied/Not Satisfied
+    satisfaction_solution = models.CharField(max_length=50, blank=True)  # Very Satisfied/Satisfied/Not Satisfied
+    client_comments = models.TextField(blank=True)
 
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)

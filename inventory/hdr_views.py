@@ -190,7 +190,32 @@ def hdr_jobsheet_form(request, report_id):
                 status=request.POST.get('status', 'fixed'),
                 date_reported=request.POST.get('date_reported'),
                 reported_by=request.POST.get('reported_by'),
-                resolution=request.POST.get('resolution', '')
+                section_division=request.POST.get('section_division', ''),
+                contact_no=request.POST.get('contact_no', ''),
+                resolution=request.POST.get('resolution', ''),
+                # Hardware details
+                hardware_type=request.POST.get('hardware_type', ''),
+                hardware_brand_model=request.POST.get('hardware_brand_model', ''),
+                hardware_serial_number=request.POST.get('hardware_serial_number', ''),
+                computer_name=request.POST.get('computer_name', ''),
+                # Application System / Software
+                application_description=request.POST.get('application_description', ''),
+                application_version=request.POST.get('application_version', ''),
+                # Connectivity
+                connectivity_description=request.POST.get('connectivity_description', ''),
+                # User Account
+                user_account_description=request.POST.get('user_account_description', ''),
+                # Assessment
+                assessment=request.POST.get('assessment', ''),
+                # Mode of Filing and Personnel
+                mode_of_filing=request.POST.get('mode_of_filing', ''),
+                fulfilled_by=request.POST.get('fulfilled_by', ''),
+                reviewed_by=request.POST.get('reviewed_by', ''),
+                # Client Evaluation
+                concern_addressed=request.POST.get('concern_addressed', ''),
+                satisfaction_service=request.POST.get('satisfaction_service', ''),
+                satisfaction_solution=request.POST.get('satisfaction_solution', ''),
+                client_comments=request.POST.get('client_comments', '')
             )
             messages.success(request, f'Job sheet submitted successfully! Reference Number: {ref_number}')
             return redirect('hdr_edit', report_id=report.id)
@@ -207,6 +232,18 @@ def hdr_jobsheet_form(request, report_id):
         'today': date.today().isoformat(),
     }
     return render(request, 'hdr/jobsheet_form.html', context)
+
+
+@login_required
+def hdr_entry_detail(request, entry_id):
+    """View detailed information for a single HDR entry"""
+    entry = get_object_or_404(HDREntry, id=entry_id)
+
+    context = {
+        'entry': entry,
+        'report': entry.report,
+    }
+    return render(request, 'hdr/entry_detail.html', context)
 
 
 @login_required
