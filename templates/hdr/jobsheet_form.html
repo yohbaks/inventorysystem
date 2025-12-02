@@ -27,13 +27,6 @@
         line-height: 1.4;
     }
 
-    .ref-number {
-        position: absolute;
-        right: 30px;
-        top: 30px;
-        font-weight: bold;
-    }
-
     .section-header {
         background: #000;
         color: #fff;
@@ -50,79 +43,35 @@
         margin-bottom: 20px;
     }
 
-    .form-row-custom {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .form-field {
-        flex: 1;
-    }
-
-    .form-field label {
+    .form-group label {
         font-weight: 600;
         font-size: 13px;
         margin-bottom: 5px;
-        display: block;
         color: #333;
     }
 
-    .form-field input,
-    .form-field select,
-    .form-field textarea {
-        width: 100%;
+    .form-control {
         border: 1px solid #ced4da;
         border-radius: 4px;
         padding: 8px 12px;
         font-size: 14px;
     }
 
-    .form-field textarea {
+    textarea.form-control {
         resize: vertical;
         min-height: 80px;
     }
 
     .required-mark {
         color: red;
-        margin-left: 2px;
     }
 
-    .btn-submit {
-        background: #28a745;
-        color: white;
-        padding: 12px 40px;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        margin-right: 10px;
-    }
-
-    .btn-submit:hover {
-        background: #218838;
-    }
-
-    .btn-cancel {
-        background: #6c757d;
-        color: white;
-        padding: 12px 40px;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .btn-cancel:hover {
-        background: #5a6268;
-        color: white;
+    .is-invalid {
+        border-color: #dc3545 !important;
     }
 
     @media print {
-        .btn-submit, .btn-cancel {
+        .btn {
             display: none;
         }
     }
@@ -156,6 +105,18 @@
             </div>
         </div>
 
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <!-- Form -->
         <form method="post" id="jobsheetForm">
             {% csrf_token %}
@@ -166,31 +127,39 @@
             </div>
 
             <div class="form-section">
-                <div class="form-row-custom">
-                    <div class="form-field" style="flex: 2;">
-                        <label>Full Name: <span class="required-mark">*</span></label>
-                        <input type="text" name="reported_by" required placeholder="Enter full name of person reporting">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label>Full Name: <span class="required-mark">*</span></label>
+                            <input type="text" name="reported_by" class="form-control" required placeholder="Enter full name of person reporting">
+                        </div>
                     </div>
-                    <div class="form-field">
-                        <label>Date of Filing: <span class="required-mark">*</span></label>
-                        <input type="date" name="date_reported" required value="{{ today }}">
-                    </div>
-                </div>
-
-                <div class="form-row-custom">
-                    <div class="form-field">
-                        <label>Section/Division:</label>
-                        <input type="text" name="section_division" placeholder="Enter section or division">
-                    </div>
-                    <div class="form-field">
-                        <label>Contact No.:</label>
-                        <input type="text" name="contact_no" placeholder="Enter contact number">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Date of Filing: <span class="required-mark">*</span></label>
+                            <input type="date" name="date_reported" class="form-control" required value="{{ today }}">
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-field">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Section/Division:</label>
+                            <input type="text" name="section_division" class="form-control" placeholder="Enter section or division">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Contact No.:</label>
+                            <input type="text" name="contact_no" class="form-control" placeholder="Enter contact number">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Brief description of the Incident or Request: <span class="required-mark">*</span></label>
-                    <textarea name="description" required placeholder="Describe the issue or request in detail..."></textarea>
+                    <textarea name="description" class="form-control" required placeholder="Describe the issue or request in detail..."></textarea>
                 </div>
             </div>
 
@@ -200,55 +169,63 @@
             </div>
 
             <div class="form-section">
-                <div class="form-row-custom">
-                    <div class="form-field">
-                        <label>Type of Incident: <span class="required-mark">*</span></label>
-                        <select name="incident_type" required>
-                            <option value="">-- Select Type --</option>
-                            {% for value, label in type_choices %}
-                                <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Type of Incident: <span class="required-mark">*</span></label>
+                            <select name="incident_type" class="form-control" required>
+                                <option value="">-- Select Type --</option>
+                                {% for value, label in type_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-field">
-                        <label>Main Category: <span class="required-mark">*</span></label>
-                        <select name="main_category" required id="mainCategory">
-                            <option value="">-- Select Category --</option>
-                            {% for value, label in category_choices %}
-                                <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row-custom">
-                    <div class="form-field">
-                        <label>Sub-Category: <span class="required-mark">*</span></label>
-                        <input type="text" name="sub_category" required placeholder="e.g., Computer - Desktop, Printer - Network">
-                    </div>
-                    <div class="form-field">
-                        <label>Status: <span class="required-mark">*</span></label>
-                        <select name="status" required>
-                            <option value="">-- Select Status --</option>
-                            {% for value, label in status_choices %}
-                                <option value="{{ value }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Main Category: <span class="required-mark">*</span></label>
+                            <select name="main_category" class="form-control" required id="mainCategory">
+                                <option value="">-- Select Category --</option>
+                                {% for value, label in category_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-field">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Sub-Category: <span class="required-mark">*</span></label>
+                            <input type="text" name="sub_category" class="form-control" required placeholder="e.g., Computer - Desktop, Printer - Network">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Status: <span class="required-mark">*</span></label>
+                            <select name="status" class="form-control" required>
+                                <option value="">-- Select Status --</option>
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Actions Taken and/or Recommendations:</label>
-                    <textarea name="resolution" placeholder="Describe actions taken or recommendations..."></textarea>
+                    <textarea name="resolution" class="form-control" placeholder="Describe actions taken or recommendations..."></textarea>
                 </div>
             </div>
 
             <!-- Buttons -->
             <div class="text-center mt-4">
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn btn-success btn-lg">
                     <i class="fas fa-save"></i> Submit Job Sheet
                 </button>
-                <a href="{% url 'hdr_edit' report.id %}" class="btn-cancel">
+                <a href="{% url 'hdr_edit' report.id %}" class="btn btn-secondary btn-lg ml-2">
                     <i class="fas fa-times"></i> Cancel
                 </a>
             </div>
@@ -257,32 +234,51 @@
 </div>
 
 <script>
-// Auto-populate today's date
 document.addEventListener('DOMContentLoaded', function() {
+    // Auto-populate today's date
     const dateInput = document.querySelector('input[name="date_reported"]');
-    if (!dateInput.value) {
+    if (dateInput && !dateInput.value) {
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
     }
-});
 
-// Form validation
-document.getElementById('jobsheetForm').addEventListener('submit', function(e) {
-    const requiredFields = this.querySelectorAll('[required]');
-    let isValid = true;
+    // Form validation
+    const form = document.getElementById('jobsheetForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+            let firstInvalidField = null;
 
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            isValid = false;
-            field.style.borderColor = 'red';
-        } else {
-            field.style.borderColor = '#ced4da';
-        }
-    });
+            requiredFields.forEach(field => {
+                const value = field.value ? field.value.trim() : '';
+                if (!value) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
 
-    if (!isValid) {
-        e.preventDefault();
-        alert('Please fill in all required fields marked with *');
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields marked with *');
+                if (firstInvalidField) {
+                    firstInvalidField.focus();
+                }
+            }
+        });
+
+        // Remove invalid class on input
+        const allInputs = form.querySelectorAll('input, select, textarea');
+        allInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+        });
     }
 });
 </script>
