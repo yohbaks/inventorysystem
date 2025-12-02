@@ -3,655 +3,326 @@
 
 {% block title %}Job Sheet Form - {{ report.period_display }}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .jobsheet-wrapper {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 30px 0;
-    }
-
-    .jobsheet-card {
-        max-width: 1200px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        overflow: hidden;
-    }
-
-    .card-header-premium {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        padding: 30px;
-        color: white;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .card-header-premium::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: pulse 15s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-
-    .dpwh-header {
-        position: relative;
-        z-index: 1;
-    }
-
-    .dpwh-logo-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 15px;
-        padding: 15px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .dpwh-title {
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .dpwh-title h4 {
-        margin: 0;
-        font-weight: 700;
-        font-size: 16px;
-        letter-spacing: 0.5px;
-    }
-
-    .dpwh-title h3 {
-        margin: 5px 0;
-        font-weight: 800;
-        font-size: 20px;
-        letter-spacing: 1px;
-    }
-
-    .dpwh-title p {
-        margin: 3px 0;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .ref-number-badge {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .ref-number-badge h5 {
-        margin: 0 0 10px 0;
-        font-weight: 700;
-        font-size: 16px;
-    }
-
-    .ref-number-value {
-        font-size: 24px;
-        font-weight: 900;
-        letter-spacing: 2px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .card-body-premium {
-        padding: 40px;
-        background: #f8f9fa;
-    }
-
-    .section-card {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .section-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    }
-
-    .section-title {
-        display: flex;
-        align-items: center;
-        margin-bottom: 25px;
-        padding-bottom: 15px;
-        border-bottom: 3px solid #667eea;
-    }
-
-    .section-icon {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 15px;
-        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-    }
-
-    .section-icon i {
-        font-size: 24px;
-        color: white;
-    }
-
-    .section-title h5 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: #2d3748;
-        letter-spacing: 0.5px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 8px;
-        color: #4a5568;
-        display: block;
-    }
-
-    .form-control {
-        border: 2px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px 16px;
-        font-size: 14px;
-        transition: all 0.3s ease;
-        background: #ffffff;
-    }
-
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        outline: none;
-    }
-
-    .form-control:hover {
-        border-color: #cbd5e0;
-    }
-
-    textarea.form-control {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .required-mark {
-        color: #f56565;
-        font-weight: bold;
-    }
-
-    .is-invalid {
-        border-color: #f56565 !important;
-        animation: shake 0.3s ease;
-    }
-
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-    }
-
-    .btn-submit-premium {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 50px;
-        border: none;
-        border-radius: 50px;
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        text-transform: uppercase;
-    }
-
-    .btn-submit-premium:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    }
-
-    .btn-submit-premium:active {
-        transform: translateY(-1px);
-    }
-
-    .btn-cancel-premium {
-        background: white;
-        color: #4a5568;
-        padding: 15px 50px;
-        border: 2px solid #e2e8f0;
-        border-radius: 50px;
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 1px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-transform: uppercase;
-        text-decoration: none;
-        display: inline-block;
-    }
-
-    .btn-cancel-premium:hover {
-        background: #f7fafc;
-        border-color: #cbd5e0;
-        color: #2d3748;
-        text-decoration: none;
-        transform: translateY(-2px);
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 20px;
-        justify-content: center;
-        margin-top: 40px;
-        padding-top: 30px;
-        border-top: 2px solid #e2e8f0;
-    }
-
-    .alert-premium {
-        border-radius: 12px;
-        padding: 15px 20px;
-        margin-bottom: 20px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    @media print {
-        .btn, .action-buttons {
-            display: none;
-        }
-        .jobsheet-wrapper {
-            background: white;
-        }
-        .jobsheet-card {
-            box-shadow: none;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .card-body-premium {
-            padding: 20px;
-        }
-        .section-card {
-            padding: 20px;
-        }
-        .action-buttons {
-            flex-direction: column;
-        }
-        .btn-submit-premium, .btn-cancel-premium {
-            width: 100%;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="jobsheet-wrapper">
-    <div class="jobsheet-card">
-        <!-- Premium Header -->
-        <div class="card-header-premium">
-            <div class="dpwh-header">
-                <div class="row align-items-center">
-                    <div class="col-md-2">
-                        <div class="dpwh-logo-container">
-                            <img src="{% static 'images/dpwh-logo.png' %}" alt="DPWH Logo" style="width: 80px; height: 80px;" onerror="this.style.display='none'">
+<div class="container">
+    <div class="page-inner">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 class="mb-0"><i class="fas fa-file-alt"></i> Job Sheet Form</h3>
+                                <small class="text-muted">Reference Number: <strong>{{ next_ref_number }}</strong> | {{ report.period_display }}</small>
+                            </div>
+                            <a href="{% url 'hdr_edit' report.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Report
+                            </a>
                         </div>
                     </div>
-                    <div class="col-md-7">
-                        <div class="dpwh-title">
-                            <h4>Republic of the Philippines</h4>
-                            <h3>DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</h3>
-                            <p>REGIONAL OFFICE NO. {{ report.region }}</p>
-                            <p>{{ report.office|upper }}</p>
-                            <p>{{ report.address }}</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="ref-number-badge">
-                            <h5>JOB SHEET FORM</h5>
-                            <div class="ref-number-value">{{ next_ref_number }}</div>
-                        </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="close" data-bs-dismiss="alert">
+                                        <span>&times;</span>
+                                    </button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post" id="jobsheetForm">
+                            {% csrf_token %}
+
+                            <!-- Client's Information Section -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-user-circle mr-2"></i>Client's Information and Service Request</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label>Full Name <span class="text-danger">*</span></label>
+                                                <input type="text" name="reported_by" class="form-control" required placeholder="Enter full name of person reporting">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Date of Filing <span class="text-danger">*</span></label>
+                                                <input type="date" name="date_reported" class="form-control" required value="{{ today }}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Section/Division</label>
+                                                <input type="text" name="section_division" class="form-control" placeholder="Enter section or division">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Contact No.</label>
+                                                <input type="text" name="contact_no" class="form-control" placeholder="Enter contact number">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Brief description of the Incident or Request <span class="text-danger">*</span></label>
+                                        <textarea name="description" class="form-control" rows="3" required placeholder="Describe the issue or request in detail..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- I.T. Support Technical Assessment -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-tools mr-2"></i>I.T. Support Technical Assessment</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Incident Classification -->
+                                    <h6 class="font-weight-bold mb-3">Incident Classification</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Type of Incident <span class="text-danger">*</span></label>
+                                                <select name="incident_type" class="form-control" required>
+                                                    <option value="">-- Select Type --</option>
+                                                    {% for value, label in type_choices %}
+                                                        <option value="{{ value }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Main Category <span class="text-danger">*</span></label>
+                                                <select name="main_category" class="form-control" required>
+                                                    <option value="">-- Select Category --</option>
+                                                    {% for value, label in category_choices %}
+                                                        <option value="{{ value }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Sub-Category <span class="text-danger">*</span></label>
+                                                <input type="text" name="sub_category" class="form-control" required placeholder="e.g., Computer - Desktop, Printer">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Status <span class="text-danger">*</span></label>
+                                                <select name="status" class="form-control" required>
+                                                    <option value="">-- Select Status --</option>
+                                                    {% for value, label in status_choices %}
+                                                        <option value="{{ value }}">{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Hardware -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-laptop mr-2"></i>Hardware</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Type</label>
+                                                <input type="text" name="hardware_type" class="form-control" placeholder="e.g., Desktop, Laptop, Printer">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Brand and Model</label>
+                                                <input type="text" name="hardware_brand_model" class="form-control" placeholder="e.g., HP EliteBook 840">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Serial Number</label>
+                                                <input type="text" name="hardware_serial_number" class="form-control" placeholder="Enter serial number">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Computer Name</label>
+                                                <input type="text" name="computer_name" class="form-control" placeholder="Enter computer name">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Application System / Software -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-desktop mr-2"></i>Application System / Software</h6>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <input type="text" name="application_description" class="form-control" placeholder="e.g., Microsoft Office, AutoCAD">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Version</label>
+                                                <input type="text" name="application_version" class="form-control" placeholder="e.g., 2021, v16.0">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Connectivity -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-network-wired mr-2"></i>Connectivity</h6>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea name="connectivity_description" class="form-control" rows="2" placeholder="Network connectivity details..."></textarea>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- User Account -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-user-lock mr-2"></i>User Account</h6>
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea name="user_account_description" class="form-control" rows="2" placeholder="User account details..."></textarea>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Assessment -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-clipboard-check mr-2"></i>Assessment</h6>
+                                    <div class="form-group">
+                                        <textarea name="assessment" class="form-control" rows="3" placeholder="Technical assessment and findings..."></textarea>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Actions Taken -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-check-circle mr-2"></i>Actions Taken and/or Recommendations</h6>
+                                    <div class="form-group">
+                                        <textarea name="resolution" class="form-control" rows="3" placeholder="Describe actions taken or recommendations..."></textarea>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Mode of Filing and Personnel -->
+                                    <h6 class="font-weight-bold mb-3"><i class="fas fa-users mr-2"></i>Personnel Information</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Mode of Filing</label>
+                                                <select name="mode_of_filing" class="form-control">
+                                                    <option value="">-- Select Mode --</option>
+                                                    <option value="Walk-in">Walk-in</option>
+                                                    <option value="Telephone Call">Telephone Call</option>
+                                                    <option value="Email">Email</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Fulfilled by</label>
+                                                <input type="text" name="fulfilled_by" class="form-control" placeholder="Name of person who fulfilled">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Reviewed by</label>
+                                                <input type="text" name="reviewed_by" class="form-control" placeholder="Name of reviewer">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Client Evaluation Section -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="fas fa-star mr-2"></i>Client's Evaluation</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">1. Was your concern/problem properly addressed?</label>
+                                        <div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="concern_addressed" id="concern_yes" value="Yes">
+                                                <label class="form-check-label" for="concern_yes">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="concern_addressed" id="concern_no" value="No">
+                                                <label class="form-check-label" for="concern_no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">2. How satisfied are you with the I.T. support service received?</label>
+                                        <div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="satisfaction_service" id="service_very" value="Very Satisfied">
+                                                <label class="form-check-label" for="service_very">Very Satisfied</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="satisfaction_service" id="service_satisfied" value="Satisfied">
+                                                <label class="form-check-label" for="service_satisfied">Satisfied</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="satisfaction_service" id="service_not" value="Not Satisfied">
+                                                <label class="form-check-label" for="service_not">Not Satisfied</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">3. How satisfied are you with the effectiveness of the solution?</label>
+                                        <div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_very" value="Very Satisfied">
+                                                <label class="form-check-label" for="solution_very">Very Satisfied</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_satisfied" value="Satisfied">
+                                                <label class="form-check-label" for="solution_satisfied">Satisfied</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_not" value="Not Satisfied">
+                                                <label class="form-check-label" for="solution_not">Not Satisfied</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Comments and/or Suggestions</label>
+                                        <textarea name="client_comments" class="form-control" rows="3" placeholder="Additional comments or suggestions..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                    <i class="fas fa-paper-plane"></i> Submit Job Sheet
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Premium Body -->
-        <div class="card-body-premium">
-            <!-- Messages -->
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-premium alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        {{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <!-- Form -->
-            <form method="post" id="jobsheetForm">
-                {% csrf_token %}
-
-                <!-- Client's Information Section -->
-                <div class="section-card">
-                    <div class="section-title">
-                        <div class="section-icon">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <h5>CLIENT'S INFORMATION AND SERVICE REQUEST</h5>
-                    </div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label>Full Name: <span class="required-mark">*</span></label>
-                            <input type="text" name="reported_by" class="form-control" required placeholder="Enter full name of person reporting">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Date of Filing: <span class="required-mark">*</span></label>
-                            <input type="date" name="date_reported" class="form-control" required value="{{ today }}">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Section/Division:</label>
-                            <input type="text" name="section_division" class="form-control" placeholder="Enter section or division">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Contact No.:</label>
-                            <input type="text" name="contact_no" class="form-control" placeholder="Enter contact number">
-                        </div>
-                    </div>
-                </div>
-
-                    <div class="form-group">
-                        <label>Brief description of the Incident or Request: <span class="required-mark">*</span></label>
-                        <textarea name="description" class="form-control" required placeholder="Describe the issue or request in detail..."></textarea>
-                    </div>
-                </div>
-
-                <!-- I.T. Support Technical Assessment -->
-                <div class="section-card">
-                    <div class="section-title">
-                        <div class="section-icon">
-                            <i class="fas fa-tools"></i>
-                        </div>
-                        <h5>I.T. SUPPORT TECHNICAL ASSESSMENT</h5>
-                    </div>
-
-                    <!-- Hardware Section -->
-                    <div class="mb-4">
-                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-laptop mr-2"></i>Hardware</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Type:</label>
-                                    <input type="text" name="hardware_type" class="form-control" placeholder="e.g., Desktop, Laptop, Printer">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Brand and Model:</label>
-                                    <input type="text" name="hardware_brand_model" class="form-control" placeholder="e.g., HP EliteBook 840">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Serial Number:</label>
-                                    <input type="text" name="hardware_serial_number" class="form-control" placeholder="Enter serial number">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Computer Name:</label>
-                                    <input type="text" name="computer_name" class="form-control" placeholder="Enter computer name">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Application System / Software Section -->
-                    <div class="mb-4">
-                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-desktop mr-2"></i>Application System / Software</h6>
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <label>Description:</label>
-                                    <input type="text" name="application_description" class="form-control" placeholder="e.g., Microsoft Office, AutoCAD">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Version:</label>
-                                    <input type="text" name="application_version" class="form-control" placeholder="e.g., 2021, v16.0">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Connectivity Section -->
-                    <div class="mb-4">
-                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-network-wired mr-2"></i>Connectivity</h6>
-                        <div class="form-group">
-                            <label>Description:</label>
-                            <textarea name="connectivity_description" class="form-control" rows="2" placeholder="Network connectivity details..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- User Account Section -->
-                    <div class="mb-4">
-                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-user-lock mr-2"></i>User Account</h6>
-                        <div class="form-group">
-                            <label>Description:</label>
-                            <textarea name="user_account_description" class="form-control" rows="2" placeholder="User account details..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Assessment Section -->
-                    <div class="mb-4">
-                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-clipboard-check mr-2"></i>Assessment</h6>
-                        <div class="form-group">
-                            <textarea name="assessment" class="form-control" rows="3" placeholder="Technical assessment and findings..."></textarea>
-                        </div>
-                    </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Type of Incident: <span class="required-mark">*</span></label>
-                            <select name="incident_type" class="form-control" required>
-                                <option value="">-- Select Type --</option>
-                                {% for value, label in type_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Main Category: <span class="required-mark">*</span></label>
-                            <select name="main_category" class="form-control" required id="mainCategory">
-                                <option value="">-- Select Category --</option>
-                                {% for value, label in category_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Sub-Category: <span class="required-mark">*</span></label>
-                            <input type="text" name="sub_category" class="form-control" required placeholder="e.g., Computer - Desktop, Printer - Network">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Status: <span class="required-mark">*</span></label>
-                            <select name="status" class="form-control" required>
-                                <option value="">-- Select Status --</option>
-                                {% for value, label in status_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                    <!-- Actions Taken Section -->
-                    <div class="mb-4">
-                        <h6 class="font-weight-bold text-secondary mb-3"><i class="fas fa-check-circle mr-2"></i>Actions Taken and/or Recommendations</h6>
-                        <div class="form-group">
-                            <textarea name="resolution" class="form-control" rows="3" placeholder="Describe actions taken or recommendations..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Mode of Filing and Personnel Section -->
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Mode of Filing:</label>
-                                <select name="mode_of_filing" class="form-control">
-                                    <option value="">-- Select Mode --</option>
-                                    <option value="Walk-in">Walk-in</option>
-                                    <option value="Telephone Call">Telephone Call</option>
-                                    <option value="Email">Email</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Fulfilled by:</label>
-                                <input type="text" name="fulfilled_by" class="form-control" placeholder="Name of person who fulfilled">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Reviewed by:</label>
-                                <input type="text" name="reviewed_by" class="form-control" placeholder="Name of reviewer">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Client Evaluation Section -->
-                <div class="section-card">
-                    <div class="section-title">
-                        <div class="section-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <h5>CLIENT'S EVALUATION</h5>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>1. Was your concern/problem properly addressed?</label>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="concern_addressed" id="concern_yes" value="Yes">
-                                        <label class="form-check-label" for="concern_yes">Yes</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="concern_addressed" id="concern_no" value="No">
-                                        <label class="form-check-label" for="concern_no">No</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>2. How satisfied are you with the I.T. support service received?</label>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="satisfaction_service" id="service_very" value="Very Satisfied">
-                                        <label class="form-check-label" for="service_very">Very Satisfied</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="satisfaction_service" id="service_satisfied" value="Satisfied">
-                                        <label class="form-check-label" for="service_satisfied">Satisfied</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="satisfaction_service" id="service_not" value="Not Satisfied">
-                                        <label class="form-check-label" for="service_not">Not Satisfied</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label>3. How satisfied are you with the effectiveness of the solution?</label>
-                                <div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_very" value="Very Satisfied">
-                                        <label class="form-check-label" for="solution_very">Very Satisfied</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_satisfied" value="Satisfied">
-                                        <label class="form-check-label" for="solution_satisfied">Satisfied</label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="satisfaction_solution" id="solution_not" value="Not Satisfied">
-                                        <label class="form-check-label" for="solution_not">Not Satisfied</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Comments and/or Suggestions:</label>
-                        <textarea name="client_comments" class="form-control" rows="3" placeholder="Additional comments or suggestions..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button type="submit" class="btn-submit-premium">
-                        <i class="fas fa-paper-plane mr-2"></i> Submit Job Sheet
-                    </button>
-                    <a href="{% url 'hdr_edit' report.id %}" class="btn-cancel-premium">
-                        <i class="fas fa-times mr-2"></i> Cancel
-                    </a>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -706,3 +377,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+
