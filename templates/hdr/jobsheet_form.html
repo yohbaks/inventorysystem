@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Job Sheet Form - {{ report.period_display }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .jobsheet-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .jobsheet-header {
+        border: 2px solid #000;
+        padding: 15px;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+    }
+
+    .jobsheet-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .ref-number {
+        position: absolute;
+        right: 30px;
+        top: 30px;
+        font-weight: bold;
+    }
+
+    .section-header {
+        background: #000;
+        color: #fff;
+        padding: 8px 15px;
+        font-weight: bold;
+        font-size: 13px;
+        margin-top: 20px;
+        margin-bottom: 15px;
+    }
+
+    .form-section {
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-row-custom {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .form-field {
+        flex: 1;
+    }
+
+    .form-field label {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 5px;
+        display: block;
+        color: #333;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .form-field textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .required-mark {
+        color: red;
+        margin-left: 2px;
+    }
+
+    .btn-submit {
+        background: #28a745;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    .btn-submit:hover {
+        background: #218838;
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        padding: 12px 40px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-cancel:hover {
+        background: #5a6268;
+        color: white;
+    }
+
+    @media print {
+        .btn-submit, .btn-cancel {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+    <div class="jobsheet-container">
+        <!-- Header -->
+        <div style="position: relative;">
+            <div class="jobsheet-header">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <img src="{% static 'images/dpwh-logo.png' %}" alt="DPWH Logo" style="width: 80px; height: 80px;" onerror="this.style.display='none'">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="jobsheet-title">
+                            <div>Republic of the Philippines</div>
+                            <div>DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</div>
+                            <div>REGIONAL OFFICE NO. {{ report.region }}</div>
+                            <div>{{ report.office|upper }}</div>
+                            <div>{{ report.address }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <strong>JOB SHEET FORM</strong>
+                        <div style="font-size: 12px;">Ref. No.: <strong>{{ next_ref_number }}</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="post" id="jobsheetForm">
+            {% csrf_token %}
+
+            <!-- Client's Information Section -->
+            <div class="section-header">
+                CLIENT'S INFORMATION and SERVICE REQUEST
+            </div>
+
+            <div class="form-section">
+                <div class="form-row-custom">
+                    <div class="form-field" style="flex: 2;">
+                        <label>Full Name: <span class="required-mark">*</span></label>
+                        <input type="text" name="reported_by" required placeholder="Enter full name of person reporting">
+                    </div>
+                    <div class="form-field">
+                        <label>Date of Filing: <span class="required-mark">*</span></label>
+                        <input type="date" name="date_reported" required value="{{ today }}">
+                    </div>
+                </div>
+
+                <div class="form-row-custom">
+                    <div class="form-field">
+                        <label>Section/Division:</label>
+                        <input type="text" name="section_division" placeholder="Enter section or division">
+                    </div>
+                    <div class="form-field">
+                        <label>Contact No.:</label>
+                        <input type="text" name="contact_no" placeholder="Enter contact number">
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label>Brief description of the Incident or Request: <span class="required-mark">*</span></label>
+                    <textarea name="description" required placeholder="Describe the issue or request in detail..."></textarea>
+                </div>
+            </div>
+
+            <!-- I.T. Support Technical Assessment -->
+            <div class="section-header">
+                I.T. SUPPORT TECHNICAL ASSESSMENT
+            </div>
+
+            <div class="form-section">
+                <div class="form-row-custom">
+                    <div class="form-field">
+                        <label>Type of Incident: <span class="required-mark">*</span></label>
+                        <select name="incident_type" required>
+                            <option value="">-- Select Type --</option>
+                            {% for value, label in type_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>Main Category: <span class="required-mark">*</span></label>
+                        <select name="main_category" required id="mainCategory">
+                            <option value="">-- Select Category --</option>
+                            {% for value, label in category_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row-custom">
+                    <div class="form-field">
+                        <label>Sub-Category: <span class="required-mark">*</span></label>
+                        <input type="text" name="sub_category" required placeholder="e.g., Computer - Desktop, Printer - Network">
+                    </div>
+                    <div class="form-field">
+                        <label>Status: <span class="required-mark">*</span></label>
+                        <select name="status" required>
+                            <option value="">-- Select Status --</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label>Actions Taken and/or Recommendations:</label>
+                    <textarea name="resolution" placeholder="Describe actions taken or recommendations..."></textarea>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Submit Job Sheet
+                </button>
+                <a href="{% url 'hdr_edit' report.id %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Auto-populate today's date
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.querySelector('input[name="date_reported"]');
+    if (!dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+});
+
+// Form validation
+document.getElementById('jobsheetForm').addEventListener('submit', function(e) {
+    const requiredFields = this.querySelectorAll('[required]');
+    let isValid = true;
+
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.style.borderColor = 'red';
+        } else {
+            field.style.borderColor = '#ced4da';
+        }
+    });
+
+    if (!isValid) {
+        e.preventDefault();
+        alert('Please fill in all required fields marked with *');
+    }
+});
+</script>
+{% endblock %}

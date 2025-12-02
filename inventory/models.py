@@ -2066,23 +2066,20 @@ class HDREntry(models.Model):
 
     TYPE_CHOICES = [
         ('Service Request', 'Service Request'),
-        ('Incident', 'Incident'),
-        ('Change Request', 'Change Request'),
+        ('Failure', 'Failure'),
     ]
 
     CATEGORY_CHOICES = [
+        ('Business Apps', 'Business Apps'),
         ('Hardware', 'Hardware'),
         ('Software', 'Software'),
         ('Services', 'Services'),
-        ('Network', 'Network'),
     ]
 
     STATUS_CHOICES = [
         ('fixed', 'Fixed'),
-        ('Done', 'Done'),
-        ('Pending', 'Pending'),
-        ('In Progress', 'In Progress'),
-        ('Cancelled', 'Cancelled'),
+        ('For Repair', 'For Repair'),
+        ('For disposal', 'For disposal'),
     ]
 
     report = models.ForeignKey(HDRReport, on_delete=models.CASCADE, related_name='entries')

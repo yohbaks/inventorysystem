@@ -166,6 +166,50 @@ def hdr_edit(request, report_id):
 
 
 @login_required
+def hdr_jobsheet_form(request, report_id):
+    """Job sheet form for adding new incidents"""
+    report = get_object_or_404(HDRReport, id=report_id)
+
+    # Prevent editing finalized reports
+    if report.is_finalized:
+        messages.warning(request, 'This report has been finalized and cannot be edited.')
+        return redirect('hdr_view', report_id=report.id)
+
+    if request.method == 'POST':
+        try:
+            # Auto-generate reference number
+            ref_number = report.get_next_ref_number()
+
+            HDREntry.objects.create(
+                report=report,
+                ref_number=ref_number,
+                incident_type=request.POST.get('incident_type'),
+                main_category=request.POST.get('main_category'),
+                sub_category=request.POST.get('sub_category'),
+                description=request.POST.get('description'),
+                status=request.POST.get('status', 'fixed'),
+                date_reported=request.POST.get('date_reported'),
+                reported_by=request.POST.get('reported_by'),
+                resolution=request.POST.get('resolution', '')
+            )
+            messages.success(request, f'Job sheet submitted successfully! Reference Number: {ref_number}')
+            return redirect('hdr_edit', report_id=report.id)
+
+        except Exception as e:
+            messages.error(request, f'Error submitting job sheet: {str(e)}')
+
+    context = {
+        'report': report,
+        'type_choices': HDREntry.TYPE_CHOICES,
+        'category_choices': HDREntry.CATEGORY_CHOICES,
+        'status_choices': HDREntry.STATUS_CHOICES,
+        'next_ref_number': report.get_next_ref_number(),
+        'today': date.today().isoformat(),
+    }
+    return render(request, 'hdr/jobsheet_form.html', context)
+
+
+@login_required
 def hdr_delete(request, report_id):
     """Delete HDR report"""
     if request.method == 'POST':
