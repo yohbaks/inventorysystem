@@ -333,6 +333,11 @@ def hdr_entry_export(request, entry_id):
     wb = load_workbook(template_path, data_only=False, keep_vba=False)
     ws = wb.active
 
+    # Unmerge all cells to avoid "MergedCell is read-only" errors
+    merged_ranges = list(ws.merged_cells.ranges)
+    for merged_range in merged_ranges:
+        ws.unmerge_cells(str(merged_range))
+
     # Fill in the job sheet data based on the actual template structure
     # Looking at the exported form, mapping cells more precisely
 
