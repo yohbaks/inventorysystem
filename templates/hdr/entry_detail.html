@@ -5,441 +5,467 @@
 
 {% block extra_css %}
 <style>
-    .detail-card {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        margin-bottom: 20px;
-        overflow: hidden;
-    }
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-info: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
 
-    .detail-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 20px 30px;
-    }
+.status-fixed { background: #c6f6d5; color: #22543d; padding: 6px 16px; border-radius: 20px; font-weight: 600; display: inline-block; }
+.status-for-repair { background: #fed7d7; color: #742a2a; padding: 6px 16px; border-radius: 20px; font-weight: 600; display: inline-block; }
+.status-for-disposal { background: #feebc8; color: #7c2d12; padding: 6px 16px; border-radius: 20px; font-weight: 600; display: inline-block; }
 
-    .detail-body {
-        padding: 30px;
-    }
+.modern-tabs {
+  background: white;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 2rem;
+}
 
-    .section-divider {
-        border-bottom: 2px solid #e2e8f0;
-        padding-bottom: 15px;
-        margin-bottom: 25px;
-    }
+.modern-tabs .nav-link {
+  border-radius: 0.75rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  color: #64748b;
+  transition: all 0.3s;
+}
 
-    .section-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-    }
+.modern-tabs .nav-link:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+}
 
-    .section-title i {
-        margin-right: 10px;
-        color: #667eea;
-    }
+.modern-tabs .nav-link.active {
+  background: var(--gradient-primary);
+  color: white;
+}
 
-    .detail-row {
-        margin-bottom: 20px;
-    }
+.modern-card {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
 
-    .detail-label {
-        font-weight: 600;
-        color: #4a5568;
-        font-size: 14px;
-        margin-bottom: 5px;
-    }
+.card-header-modern {
+  padding: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-    .detail-value {
-        color: #2d3748;
-        font-size: 15px;
-        padding: 10px 15px;
-        background: #f7fafc;
-        border-radius: 8px;
-        border-left: 3px solid #667eea;
-    }
+.card-title-modern {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
 
-    .detail-value.empty {
-        color: #a0aec0;
-        font-style: italic;
-    }
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
 
-    .ref-badge {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 10px 20px;
-        border-radius: 50px;
-        display: inline-block;
-        font-weight: 700;
-        font-size: 18px;
-    }
+.detail-item {
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border-left: 4px solid #667eea;
+}
 
-    .status-badge {
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 14px;
-        display: inline-block;
-    }
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
 
-    .status-fixed { background: #c6f6d5; color: #22543d; }
-    .status-repair { background: #fed7d7; color: #742a2a; }
-    .status-disposal { background: #feebc8; color: #7c2d12; }
+.detail-value {
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 500;
+}
 
-    .evaluation-section {
-        background: #f7fafc;
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 20px;
-    }
+.detail-value.empty {
+  color: #94a3b8;
+  font-style: italic;
+}
 
-    .evaluation-item {
-        margin-bottom: 15px;
-        padding: 15px;
-        background: white;
-        border-radius: 8px;
-        border-left: 4px solid #667eea;
-    }
-
-    .evaluation-question {
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 8px;
-    }
-
-    .evaluation-answer {
-        color: #4a5568;
-        font-size: 15px;
-    }
-
-    @media print {
-        .btn, .no-print {
-            display: none;
-        }
-    }
+.evaluation-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  display: inline-block;
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="detail-card">
-        <!-- Header -->
-        <div class="detail-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h3><i class="fas fa-file-alt mr-2"></i>Job Sheet Detail</h3>
-                    <div class="ref-badge">{{ entry.ref_number }}</div>
-                </div>
-                <div class="no-print">
-                    <a href="{% url 'hdr_edit' report.id %}" class="btn btn-light btn-lg">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Report
-                    </a>
-                    <button onclick="window.print()" class="btn btn-light btn-lg">
-                        <i class="fas fa-print mr-2"></i>Print
-                    </button>
-                </div>
+<div class="modern-container">
+  <div class="container-fluid">
+
+    <!-- Hero Header -->
+    <div class="premium-page-header theme-info">
+      <div class="hero-content">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+          <div class="flex-grow-1">
+            <div class="hero-badge">
+              <i class="fas fa-file-alt"></i>
+              <span>Job Sheet</span>
             </div>
+            <h1 class="hero-title text-white">{{ entry.ref_number }}</h1>
+
+            <div class="info-cards">
+              <div class="info-card">
+                <div class="info-label">Reported By</div>
+                <div class="info-value text-white">{{ entry.reported_by }}</div>
+                <div class="text-white"><small style="opacity: 0.9;">{{ entry.section_division|default:"No section specified" }}</small></div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Date Filed</div>
+                <div class="info-value text-white">{{ entry.date_reported|date:"F d, Y" }}</div>
+                <div class="text-white"><small style="opacity: 0.9;">{{ entry.get_incident_type_display }}</small></div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Status</div>
+                <div class="info-value">
+                  <span class="status-{{ entry.status|lower|cut:' '|replace:'for':''|cut:' ' }}">{{ entry.get_status_display }}</span>
+                </div>
+                <div class="text-white"><small style="opacity: 0.9;">{{ entry.get_main_category_display }}</small></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-buttons mt-3 mt-md-0">
+            <a href="{% url 'hdr_entry_export' entry.id %}" class="modern-btn btn-primary">
+              <i class="fa fa-file-excel"></i>
+              Export
+            </a>
+            <button class="modern-btn btn-secondary" onclick="window.print()">
+              <i class="fas fa-print"></i>
+              Print
+            </button>
+            <a href="{% url 'hdr_edit' report.id %}" class="modern-btn btn-secondary">
+              <i class="fas fa-arrow-left"></i>
+              Back
+            </a>
+          </div>
         </div>
-
-        <!-- Body -->
-        <div class="detail-body">
-            <!-- Client Information Section -->
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-user-circle"></i>
-                    CLIENT'S INFORMATION
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Full Name:</div>
-                            <div class="detail-value">{{ entry.reported_by }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="detail-row">
-                            <div class="detail-label">Date of Filing:</div>
-                            <div class="detail-value">{{ entry.date_reported|date:"F d, Y" }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="detail-row">
-                            <div class="detail-label">Status:</div>
-                            <div class="detail-value">
-                                <span class="status-badge status-{{ entry.status|lower }}">{{ entry.get_status_display }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Section/Division:</div>
-                            <div class="detail-value {% if not entry.section_division %}empty{% endif %}">
-                                {{ entry.section_division|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Contact No.:</div>
-                            <div class="detail-value {% if not entry.contact_no %}empty{% endif %}">
-                                {{ entry.contact_no|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">Brief Description of the Incident or Request:</div>
-                    <div class="detail-value">{{ entry.description }}</div>
-                </div>
-            </div>
-
-            <!-- Incident Classification Section -->
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-tags"></i>
-                    INCIDENT CLASSIFICATION
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Type of Incident:</div>
-                            <div class="detail-value">{{ entry.get_incident_type_display }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Main Category:</div>
-                            <div class="detail-value">{{ entry.get_main_category_display }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Sub-Category:</div>
-                            <div class="detail-value">{{ entry.sub_category }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hardware Details Section -->
-            {% if entry.hardware_type or entry.hardware_brand_model or entry.hardware_serial_number or entry.computer_name %}
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-laptop"></i>
-                    HARDWARE DETAILS
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Type:</div>
-                            <div class="detail-value {% if not entry.hardware_type %}empty{% endif %}">
-                                {{ entry.hardware_type|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Brand and Model:</div>
-                            <div class="detail-value {% if not entry.hardware_brand_model %}empty{% endif %}">
-                                {{ entry.hardware_brand_model|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Serial Number:</div>
-                            <div class="detail-value {% if not entry.hardware_serial_number %}empty{% endif %}">
-                                {{ entry.hardware_serial_number|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="detail-row">
-                            <div class="detail-label">Computer Name:</div>
-                            <div class="detail-value {% if not entry.computer_name %}empty{% endif %}">
-                                {{ entry.computer_name|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Application System / Software Section -->
-            {% if entry.application_description or entry.application_version %}
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-desktop"></i>
-                    APPLICATION SYSTEM / SOFTWARE
-                </div>
-
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="detail-row">
-                            <div class="detail-label">Description:</div>
-                            <div class="detail-value {% if not entry.application_description %}empty{% endif %}">
-                                {{ entry.application_description|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Version:</div>
-                            <div class="detail-value {% if not entry.application_version %}empty{% endif %}">
-                                {{ entry.application_version|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Connectivity Section -->
-            {% if entry.connectivity_description %}
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-network-wired"></i>
-                    CONNECTIVITY
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">Description:</div>
-                    <div class="detail-value">{{ entry.connectivity_description }}</div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- User Account Section -->
-            {% if entry.user_account_description %}
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-user-lock"></i>
-                    USER ACCOUNT
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-label">Description:</div>
-                    <div class="detail-value">{{ entry.user_account_description }}</div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Assessment Section -->
-            {% if entry.assessment %}
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-clipboard-check"></i>
-                    ASSESSMENT
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-value">{{ entry.assessment }}</div>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Actions Taken Section -->
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-check-circle"></i>
-                    ACTIONS TAKEN AND/OR RECOMMENDATIONS
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-value {% if not entry.resolution %}empty{% endif %}">
-                        {{ entry.resolution|default:"No actions recorded" }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Personnel and Filing Section -->
-            <div class="section-divider">
-                <div class="section-title">
-                    <i class="fas fa-users"></i>
-                    PERSONNEL AND FILING INFORMATION
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Mode of Filing:</div>
-                            <div class="detail-value {% if not entry.mode_of_filing %}empty{% endif %}">
-                                {{ entry.mode_of_filing|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Fulfilled by:</div>
-                            <div class="detail-value {% if not entry.fulfilled_by %}empty{% endif %}">
-                                {{ entry.fulfilled_by|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="detail-row">
-                            <div class="detail-label">Reviewed by:</div>
-                            <div class="detail-value {% if not entry.reviewed_by %}empty{% endif %}">
-                                {{ entry.reviewed_by|default:"Not specified" }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Client Evaluation Section -->
-            {% if entry.concern_addressed or entry.satisfaction_service or entry.satisfaction_solution or entry.client_comments %}
-            <div>
-                <div class="section-title">
-                    <i class="fas fa-star"></i>
-                    CLIENT'S EVALUATION
-                </div>
-
-                <div class="evaluation-section">
-                    {% if entry.concern_addressed %}
-                    <div class="evaluation-item">
-                        <div class="evaluation-question">1. Was your concern/problem properly addressed?</div>
-                        <div class="evaluation-answer"><strong>{{ entry.concern_addressed }}</strong></div>
-                    </div>
-                    {% endif %}
-
-                    {% if entry.satisfaction_service %}
-                    <div class="evaluation-item">
-                        <div class="evaluation-question">2. How satisfied are you with the I.T. support service received?</div>
-                        <div class="evaluation-answer"><strong>{{ entry.satisfaction_service }}</strong></div>
-                    </div>
-                    {% endif %}
-
-                    {% if entry.satisfaction_solution %}
-                    <div class="evaluation-item">
-                        <div class="evaluation-question">3. How satisfied are you with the effectiveness of the solution?</div>
-                        <div class="evaluation-answer"><strong>{{ entry.satisfaction_solution }}</strong></div>
-                    </div>
-                    {% endif %}
-
-                    {% if entry.client_comments %}
-                    <div class="evaluation-item">
-                        <div class="evaluation-question">Comments and/or Suggestions:</div>
-                        <div class="evaluation-answer">{{ entry.client_comments }}</div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-        </div>
+      </div>
     </div>
+
+    <!-- Modern Tab Navigation -->
+    <ul class="nav nav-pills nav-secondary nav-pills-no-bd modern-tabs" id="pills-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active modern-btn" id="pills-basic-tab" data-bs-toggle="pill" data-bs-target="#pills-basic" type="button" role="tab">
+          <i class="fas fa-info-circle"></i> Basic Info
+        </button>
+      </li>
+      {% if entry.hardware_type or entry.application_description or entry.connectivity_description or entry.user_account_description %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link modern-btn" id="pills-technical-tab" data-bs-toggle="pill" data-bs-target="#pills-technical" type="button" role="tab">
+          <i class="fas fa-tools"></i> Technical Details
+        </button>
+      </li>
+      {% endif %}
+      {% if entry.assessment or entry.resolution %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link modern-btn" id="pills-assessment-tab" data-bs-toggle="pill" data-bs-target="#pills-assessment" type="button" role="tab">
+          <i class="fas fa-clipboard-check"></i> Assessment
+        </button>
+      </li>
+      {% endif %}
+      {% if entry.concern_addressed or entry.satisfaction_service or entry.satisfaction_solution or entry.client_comments %}
+      <li class="nav-item" role="presentation">
+        <button class="nav-link modern-btn" id="pills-evaluation-tab" data-bs-toggle="pill" data-bs-target="#pills-evaluation" type="button" role="tab">
+          <i class="fas fa-star"></i> Client Evaluation
+        </button>
+      </li>
+      {% endif %}
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="pills-tabContent">
+
+      <!-- Basic Info Tab -->
+      <div class="tab-pane fade show active" id="pills-basic" role="tabpanel">
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-user-circle mr-2"></i>Client Information</h2>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Full Name</div>
+              <div class="detail-value">{{ entry.reported_by }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Date of Filing</div>
+              <div class="detail-value">{{ entry.date_reported|date:"F d, Y" }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Section/Division</div>
+              <div class="detail-value {% if not entry.section_division %}empty{% endif %}">
+                {{ entry.section_division|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Contact Number</div>
+              <div class="detail-value {% if not entry.contact_no %}empty{% endif %}">
+                {{ entry.contact_no|default:"Not specified" }}
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 0 1.5rem 1.5rem;">
+            <div class="detail-item">
+              <div class="detail-label">Brief Description</div>
+              <div class="detail-value">{{ entry.description }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-tags mr-2"></i>Incident Classification</h2>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Type of Incident</div>
+              <div class="detail-value">{{ entry.get_incident_type_display }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Main Category</div>
+              <div class="detail-value">{{ entry.get_main_category_display }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Sub-Category</div>
+              <div class="detail-value">{{ entry.sub_category }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Status</div>
+              <div class="detail-value">
+                <span class="status-{{ entry.status|lower|cut:' ' }}">{{ entry.get_status_display }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-users mr-2"></i>Personnel Information</h2>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Mode of Filing</div>
+              <div class="detail-value {% if not entry.mode_of_filing %}empty{% endif %}">
+                {{ entry.mode_of_filing|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Fulfilled By</div>
+              <div class="detail-value {% if not entry.fulfilled_by %}empty{% endif %}">
+                {{ entry.fulfilled_by|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Reviewed By</div>
+              <div class="detail-value {% if not entry.reviewed_by %}empty{% endif %}">
+                {{ entry.reviewed_by|default:"Not specified" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Details Tab -->
+      {% if entry.hardware_type or entry.application_description or entry.connectivity_description or entry.user_account_description %}
+      <div class="tab-pane fade" id="pills-technical" role="tabpanel">
+        {% if entry.hardware_type or entry.hardware_brand_model or entry.hardware_serial_number or entry.computer_name %}
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-laptop mr-2"></i>Hardware Details</h2>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Type</div>
+              <div class="detail-value {% if not entry.hardware_type %}empty{% endif %}">
+                {{ entry.hardware_type|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Brand and Model</div>
+              <div class="detail-value {% if not entry.hardware_brand_model %}empty{% endif %}">
+                {{ entry.hardware_brand_model|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Serial Number</div>
+              <div class="detail-value {% if not entry.hardware_serial_number %}empty{% endif %}">
+                {{ entry.hardware_serial_number|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Computer Name</div>
+              <div class="detail-value {% if not entry.computer_name %}empty{% endif %}">
+                {{ entry.computer_name|default:"Not specified" }}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if entry.application_description or entry.application_version %}
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-desktop mr-2"></i>Application System / Software</h2>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Description</div>
+              <div class="detail-value {% if not entry.application_description %}empty{% endif %}">
+                {{ entry.application_description|default:"Not specified" }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Version</div>
+              <div class="detail-value {% if not entry.application_version %}empty{% endif %}">
+                {{ entry.application_version|default:"Not specified" }}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if entry.connectivity_description %}
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-network-wired mr-2"></i>Connectivity</h2>
+          </div>
+
+          <div style="padding: 1.5rem;">
+            <div class="detail-item">
+              <div class="detail-label">Description</div>
+              <div class="detail-value">{{ entry.connectivity_description }}</div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if entry.user_account_description %}
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-user-lock mr-2"></i>User Account</h2>
+          </div>
+
+          <div style="padding: 1.5rem;">
+            <div class="detail-item">
+              <div class="detail-label">Description</div>
+              <div class="detail-value">{{ entry.user_account_description }}</div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Assessment Tab -->
+      {% if entry.assessment or entry.resolution %}
+      <div class="tab-pane fade" id="pills-assessment" role="tabpanel">
+        {% if entry.assessment %}
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-clipboard-check mr-2"></i>Technical Assessment</h2>
+          </div>
+
+          <div style="padding: 1.5rem;">
+            <div class="detail-item">
+              <div class="detail-value">{{ entry.assessment }}</div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-check-circle mr-2"></i>Actions Taken and/or Recommendations</h2>
+          </div>
+
+          <div style="padding: 1.5rem;">
+            <div class="detail-item">
+              <div class="detail-value {% if not entry.resolution %}empty{% endif %}">
+                {{ entry.resolution|default:"No actions recorded" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Client Evaluation Tab -->
+      {% if entry.concern_addressed or entry.satisfaction_service or entry.satisfaction_solution or entry.client_comments %}
+      <div class="tab-pane fade" id="pills-evaluation" role="tabpanel">
+        <div class="modern-card">
+          <div class="card-header-modern">
+            <h2 class="card-title-modern"><i class="fas fa-star mr-2"></i>Client's Evaluation</h2>
+          </div>
+
+          <div style="padding: 1.5rem;">
+            {% if entry.concern_addressed %}
+            <div class="detail-item mb-3">
+              <div class="detail-label">1. Was your concern/problem properly addressed?</div>
+              <div class="detail-value">
+                <span class="evaluation-badge">{{ entry.concern_addressed }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if entry.satisfaction_service %}
+            <div class="detail-item mb-3">
+              <div class="detail-label">2. How satisfied are you with the I.T. support service received?</div>
+              <div class="detail-value">
+                <span class="evaluation-badge">{{ entry.satisfaction_service }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if entry.satisfaction_solution %}
+            <div class="detail-item mb-3">
+              <div class="detail-label">3. How satisfied are you with the effectiveness of the solution?</div>
+              <div class="detail-value">
+                <span class="evaluation-badge">{{ entry.satisfaction_solution }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if entry.client_comments %}
+            <div class="detail-item">
+              <div class="detail-label">Comments and/or Suggestions</div>
+              <div class="detail-value">{{ entry.client_comments }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
 </div>
 {% endblock %}
