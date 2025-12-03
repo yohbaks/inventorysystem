@@ -140,7 +140,7 @@
               <div class="info-card">
                 <div class="info-label">Status</div>
                 <div class="info-value">
-                  <span class="status-{{ entry.status|lower|cut:' '|replace:'for':''|cut:' ' }}">{{ entry.get_status_display }}</span>
+                  <span class="status-{{ entry.status|slugify }}">{{ entry.get_status_display }}</span>
                 </div>
                 <div class="text-white"><small style="opacity: 0.9;">{{ entry.get_main_category_display }}</small></div>
               </div>
