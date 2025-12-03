@@ -272,6 +272,53 @@ def hdr_finalize(request, report_id):
 
 
 @login_required
+def hdr_entry_export_diagnostic(request, entry_id):
+    """Diagnostic export to show cell structure - helps identify correct cell positions"""
+    from openpyxl import load_workbook
+    from openpyxl.styles import Font, PatternFill
+    import io
+
+    entry = get_object_or_404(HDREntry, id=entry_id)
+
+    # Load the Standard Job Sheet template
+    template_path = 'templates/excel temps/Standard Job Sheet.xlsx'
+    wb = load_workbook(template_path, data_only=False, keep_vba=False)
+    ws = wb.active
+
+    # Highlight cells with their addresses to help map data
+    yellow_fill = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+
+    # Add cell addresses as values to identify positions
+    diagnostic_cells = {
+        'B6': 'B6-RefNo?', 'G6': 'G6-RefNo?', 'H6': 'H6-RefNo?',
+        'B8': 'B8-Date?', 'G8': 'G8-Date?', 'H8': 'H8-Date?',
+        'B11': 'B11-Name?', 'B12': 'B12-Section?', 'G12': 'G12-Contact?',
+        'B14': 'B14-Description?',
+        'B17': 'B17-Type?', 'C17': 'C17-Category?',
+        'B18': 'B18-SubCat?', 'C18': 'C18-Status?',
+        'B21': 'B21-HWType?', 'C21': 'C21-HWBrand?',
+        'B22': 'B22-Serial?', 'E22': 'E22-CompName?',
+    }
+
+    for cell, label in diagnostic_cells.items():
+        ws[cell].value = label
+        ws[cell].fill = yellow_fill
+        ws[cell].font = Font(bold=True, color='FF0000')
+
+    # Prepare response
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="JobSheet_Diagnostic.xlsx"'
+    return response
+
+
+@login_required
 def hdr_entry_export(request, entry_id):
     """Export individual job sheet to Excel using Standard Job Sheet template"""
     from openpyxl import load_workbook
@@ -287,54 +334,58 @@ def hdr_entry_export(request, entry_id):
     ws = wb.active
 
     # Fill in the job sheet data based on the actual template structure
-    # Header - Reference Number and Date
-    ws['G6'] = str(entry.ref_number)  # Ref No
-    ws['G8'] = entry.date_reported.strftime('%B %d, %Y') if entry.date_reported else ''  # Date of Filing
+    # Looking at the exported form, mapping cells more precisely
 
-    # Client's Information Section
-    ws['B11'] = str(entry.reported_by)  # Full Name
+    # Header Section (top right)
+    ws['G6'] = str(entry.ref_number)  # Ref No field (top right)
+
+    # CLIENT'S INFORMATION Section
+    ws['B11'] = str(entry.reported_by)  # Full Name (first field under client info header)
     ws['B12'] = str(entry.section_division)  # Section/Division
-    ws['G12'] = str(entry.contact_no)  # Contact No.
-    ws['B14'] = str(entry.description)  # Brief description of the problem
+    ws['G11'] = entry.date_reported.strftime('%B %d, %Y') if entry.date_reported else ''  # Date of Filing (right side)
+    ws['G12'] = str(entry.contact_no)  # Contact No. (right side, same row as section)
+    ws['B14'] = str(entry.description)  # Brief description (multi-line field)
 
-    # Incident Classification (below CLIENT'S INFORMATION)
-    ws['B17'] = str(entry.incident_type)  # Type of Incident
-    ws['C17'] = str(entry.main_category)  # Main Category
-    ws['B18'] = str(entry.sub_category)  # Sub-Category
-    ws['C18'] = str(entry.status)  # Status
+    # I.T. SUPPORT TECHNICAL ASSESSMENT Section
+    # Incident Classification subsection
+    ws['B18'] = str(entry.incident_type)  # Type of Incident
+    ws['D18'] = str(entry.main_category)  # Main Category
+    ws['B19'] = str(entry.sub_category)  # Sub-Category
+    ws['D19'] = str(entry.status)  # Status
 
-    # Hardware Section
-    ws['B21'] = str(entry.hardware_type)  # Type
-    ws['C21'] = str(entry.hardware_brand_model)  # Brand and Model
-    ws['B22'] = str(entry.hardware_serial_number)  # Serial Number
-    ws['E22'] = str(entry.computer_name)  # Computer Name
+    # Hardware subsection
+    ws['B22'] = str(entry.hardware_type)  # Type
+    ws['D22'] = str(entry.hardware_brand_model)  # Brand and Model
+    ws['B23'] = str(entry.hardware_serial_number)  # Serial Number
+    ws['E23'] = str(entry.computer_name)  # Computer Name
 
-    # Application System / Software
-    ws['B25'] = str(entry.application_description)  # Description
-    ws['G25'] = str(entry.application_version)  # Version
+    # Application System / Software subsection
+    ws['B26'] = str(entry.application_description)  # Description
+    ws['G26'] = str(entry.application_version)  # Version
 
-    # Connectivity
-    ws['B28'] = str(entry.connectivity_description)
+    # Connectivity subsection
+    ws['B29'] = str(entry.connectivity_description)
 
-    # User Account
-    ws['B31'] = str(entry.user_account_description)
+    # User Account subsection
+    ws['B32'] = str(entry.user_account_description)
 
-    # Assessment
-    ws['B34'] = str(entry.assessment)
+    # Assessment subsection
+    ws['B35'] = str(entry.assessment)
 
     # Actions Taken and/or Recommendations
-    ws['B37'] = str(entry.resolution)
+    ws['B38'] = str(entry.resolution)
 
-    # Mode of Filing and Personnel
-    ws['B40'] = str(entry.mode_of_filing)  # Mode of Filing (checkboxes)
-    ws['E40'] = str(entry.fulfilled_by)  # Fulfilled by
-    ws['E41'] = str(entry.reviewed_by)  # Reviewed by
+    # Mode of Filing and Personnel Section
+    # Mode checkboxes around row 42, personnel names to the right
+    ws['E43'] = str(entry.fulfilled_by)  # Fulfilled by
+    ws['E44'] = str(entry.reviewed_by)  # Reviewed by
 
-    # Client's Evaluation Section
-    ws['B45'] = str(entry.concern_addressed)  # Question 1: Was concern addressed?
-    ws['B46'] = str(entry.satisfaction_service)  # Question 2: Satisfaction with service
-    ws['B47'] = str(entry.satisfaction_solution)  # Question 3: Satisfaction with solution
-    ws['B49'] = str(entry.client_comments)  # Comments/Suggestions
+    # CLIENT'S EVALUATION Section (bottom)
+    # Questions with Yes/No and satisfaction options
+    ws['B48'] = str(entry.concern_addressed)  # Question 1
+    ws['B49'] = str(entry.satisfaction_service)  # Question 2
+    ws['B50'] = str(entry.satisfaction_solution)  # Question 3
+    ws['B52'] = str(entry.client_comments)  # Comments/Suggestions
 
     # Prepare response
     output = io.BytesIO()
