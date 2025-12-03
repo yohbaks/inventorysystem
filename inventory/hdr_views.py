@@ -286,55 +286,55 @@ def hdr_entry_export(request, entry_id):
     wb = load_workbook(template_path, data_only=False, keep_vba=False)
     ws = wb.active
 
-    # Fill in the job sheet data
-    # Reference Number and Date
-    ws['B5'] = str(entry.ref_number)  # Ref No
-    ws['H5'] = entry.date_reported.strftime('%B %d, %Y') if entry.date_reported else ''  # Date of Filing
+    # Fill in the job sheet data based on the actual template structure
+    # Header - Reference Number and Date
+    ws['G6'] = str(entry.ref_number)  # Ref No
+    ws['G8'] = entry.date_reported.strftime('%B %d, %Y') if entry.date_reported else ''  # Date of Filing
 
-    # Client's Information
-    ws['B8'] = str(entry.reported_by)  # Full Name
-    ws['B9'] = str(entry.section_division)  # Section/Division
-    ws['H9'] = str(entry.contact_no)  # Contact No.
-    ws['B11'] = str(entry.description)  # Brief description
+    # Client's Information Section
+    ws['B11'] = str(entry.reported_by)  # Full Name
+    ws['B12'] = str(entry.section_division)  # Section/Division
+    ws['G12'] = str(entry.contact_no)  # Contact No.
+    ws['B14'] = str(entry.description)  # Brief description of the problem
 
-    # I.T. Support Technical Assessment - Incident Classification
-    ws['B15'] = str(entry.incident_type)  # Type of Incident
-    ws['D15'] = str(entry.main_category)  # Main Category
-    ws['B16'] = str(entry.sub_category)  # Sub-Category
-    ws['D16'] = str(entry.status)  # Status
+    # Incident Classification (below CLIENT'S INFORMATION)
+    ws['B17'] = str(entry.incident_type)  # Type of Incident
+    ws['C17'] = str(entry.main_category)  # Main Category
+    ws['B18'] = str(entry.sub_category)  # Sub-Category
+    ws['C18'] = str(entry.status)  # Status
 
-    # Hardware
-    ws['B19'] = str(entry.hardware_type)  # Type
-    ws['D19'] = str(entry.hardware_brand_model)  # Brand and Model
-    ws['B20'] = str(entry.hardware_serial_number)  # Serial Number
-    ws['D20'] = str(entry.computer_name)  # Computer Name
+    # Hardware Section
+    ws['B21'] = str(entry.hardware_type)  # Type
+    ws['C21'] = str(entry.hardware_brand_model)  # Brand and Model
+    ws['B22'] = str(entry.hardware_serial_number)  # Serial Number
+    ws['E22'] = str(entry.computer_name)  # Computer Name
 
     # Application System / Software
-    ws['B23'] = str(entry.application_description)  # Description
-    ws['G23'] = str(entry.application_version)  # Version
+    ws['B25'] = str(entry.application_description)  # Description
+    ws['G25'] = str(entry.application_version)  # Version
 
     # Connectivity
-    ws['B26'] = str(entry.connectivity_description)
+    ws['B28'] = str(entry.connectivity_description)
 
     # User Account
-    ws['B29'] = str(entry.user_account_description)
+    ws['B31'] = str(entry.user_account_description)
 
     # Assessment
-    ws['B32'] = str(entry.assessment)
+    ws['B34'] = str(entry.assessment)
 
     # Actions Taken and/or Recommendations
-    ws['B35'] = str(entry.resolution)
+    ws['B37'] = str(entry.resolution)
 
     # Mode of Filing and Personnel
-    ws['B38'] = str(entry.mode_of_filing)  # Mode of Filing
-    ws['D38'] = str(entry.fulfilled_by)  # Fulfilled by
-    ws['F38'] = str(entry.reviewed_by)  # Reviewed by
+    ws['B40'] = str(entry.mode_of_filing)  # Mode of Filing (checkboxes)
+    ws['E40'] = str(entry.fulfilled_by)  # Fulfilled by
+    ws['E41'] = str(entry.reviewed_by)  # Reviewed by
 
-    # Client's Evaluation
-    ws['C42'] = str(entry.concern_addressed)  # Question 1
-    ws['C43'] = str(entry.satisfaction_service)  # Question 2
-    ws['C44'] = str(entry.satisfaction_solution)  # Question 3
-    ws['B46'] = str(entry.client_comments)  # Comments/Suggestions
+    # Client's Evaluation Section
+    ws['B45'] = str(entry.concern_addressed)  # Question 1: Was concern addressed?
+    ws['B46'] = str(entry.satisfaction_service)  # Question 2: Satisfaction with service
+    ws['B47'] = str(entry.satisfaction_solution)  # Question 3: Satisfaction with solution
+    ws['B49'] = str(entry.client_comments)  # Comments/Suggestions
 
     # Prepare response
     output = io.BytesIO()
