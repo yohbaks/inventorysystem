@@ -297,6 +297,7 @@ urlpatterns = [
     path('reports/hdr/<int:report_id>/edit/', hdr_views.hdr_edit, name='hdr_edit'),
     path('reports/hdr/<int:report_id>/jobsheet/', hdr_views.hdr_jobsheet_form, name='hdr_jobsheet_form'),
     path('reports/hdr/entry/<int:entry_id>/', hdr_views.hdr_entry_detail, name='hdr_entry_detail'),
+    path('reports/hdr/entry/<int:entry_id>/export/', hdr_views.hdr_entry_export, name='hdr_entry_export'),
     path('reports/hdr/<int:report_id>/delete/', hdr_views.hdr_delete, name='hdr_delete'),
     path('reports/hdr/<int:report_id>/export/excel/', hdr_views.hdr_export_excel, name='hdr_export_excel'),
     path('reports/hdr/<int:report_id>/finalize/', hdr_views.hdr_finalize, name='hdr_finalize'),

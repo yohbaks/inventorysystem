@@ -272,6 +272,87 @@ def hdr_finalize(request, report_id):
 
 
 @login_required
+def hdr_entry_export(request, entry_id):
+    """Export individual job sheet to Excel using Standard Job Sheet template"""
+    from openpyxl import load_workbook
+    from openpyxl.styles import Alignment
+    import io
+
+    entry = get_object_or_404(HDREntry, id=entry_id)
+    report = entry.report
+
+    # Load the Standard Job Sheet template
+    template_path = 'templates/excel temps/Standard Job Sheet.xlsx'
+    wb = load_workbook(template_path, data_only=False, keep_vba=False)
+    ws = wb.active
+
+    # Fill in the job sheet data
+    # Reference Number and Date
+    ws['B5'] = str(entry.ref_number)  # Ref No
+    ws['H5'] = entry.date_reported.strftime('%B %d, %Y') if entry.date_reported else ''  # Date of Filing
+
+    # Client's Information
+    ws['B8'] = str(entry.reported_by)  # Full Name
+    ws['B9'] = str(entry.section_division)  # Section/Division
+    ws['H9'] = str(entry.contact_no)  # Contact No.
+    ws['B11'] = str(entry.description)  # Brief description
+
+    # I.T. Support Technical Assessment - Incident Classification
+    ws['B15'] = str(entry.incident_type)  # Type of Incident
+    ws['D15'] = str(entry.main_category)  # Main Category
+    ws['B16'] = str(entry.sub_category)  # Sub-Category
+    ws['D16'] = str(entry.status)  # Status
+
+    # Hardware
+    ws['B19'] = str(entry.hardware_type)  # Type
+    ws['D19'] = str(entry.hardware_brand_model)  # Brand and Model
+    ws['B20'] = str(entry.hardware_serial_number)  # Serial Number
+    ws['D20'] = str(entry.computer_name)  # Computer Name
+
+    # Application System / Software
+    ws['B23'] = str(entry.application_description)  # Description
+    ws['G23'] = str(entry.application_version)  # Version
+
+    # Connectivity
+    ws['B26'] = str(entry.connectivity_description)
+
+    # User Account
+    ws['B29'] = str(entry.user_account_description)
+
+    # Assessment
+    ws['B32'] = str(entry.assessment)
+
+    # Actions Taken and/or Recommendations
+    ws['B35'] = str(entry.resolution)
+
+    # Mode of Filing and Personnel
+    ws['B38'] = str(entry.mode_of_filing)  # Mode of Filing
+    ws['D38'] = str(entry.fulfilled_by)  # Fulfilled by
+    ws['F38'] = str(entry.reviewed_by)  # Reviewed by
+
+    # Client's Evaluation
+    ws['C42'] = str(entry.concern_addressed)  # Question 1
+    ws['C43'] = str(entry.satisfaction_service)  # Question 2
+    ws['C44'] = str(entry.satisfaction_solution)  # Question 3
+    ws['B46'] = str(entry.client_comments)  # Comments/Suggestions
+
+    # Prepare response
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    # Create response
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f'JobSheet_{entry.ref_number}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+
+@login_required
 def hdr_export_excel(request, report_id):
     """Export HDR report to Excel using template - fills data into pre-formatted cells"""
     from openpyxl import load_workbook
