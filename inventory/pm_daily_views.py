@@ -153,8 +153,9 @@ def complete_daily_pm(request, schedule_id):
                     completion.completed_by = request.user
                     completion.printed_name = request.POST.get('printed_name', '')
                     completion.save()
-                    # Delete old item completions to replace with new ones
-                    completion.item_completions.all().delete()
+                    # Only delete item completions that have NO downtime events attached
+                    # (preserve those with downtime so the FK references remain intact)
+                    completion.item_completions.filter(downtime_events__isnull=True).delete()
                 else:
                     completion = PMChecklistCompletion.objects.create(
                         schedule=schedule,
@@ -173,6 +174,11 @@ def complete_daily_pm(request, schedule_id):
                     4: 'friday'
                 }
                 day_field = day_fields.get(weekday)
+
+                # Build a set of item IDs already preserved (have downtime events)
+                preserved_item_ids = set(
+                    completion.item_completions.values_list('item_id', flat=True)
+                )
 
                 # Create item completions
                 for item in items:
@@ -224,7 +230,15 @@ def complete_daily_pm(request, schedule_id):
                     if day_field and is_completed:
                         item_completion_data[day_field] = True
 
-                    item_completion = PMChecklistItemCompletion.objects.create(**item_completion_data)
+                    # If this item was preserved (has downtime events), update it in-place
+                    if item.id in preserved_item_ids:
+                        item_completion = completion.item_completions.get(item=item)
+                        for field, value in item_completion_data.items():
+                            if field not in ('completion', 'item'):
+                                setattr(item_completion, field, value)
+                        item_completion.save()
+                    else:
+                        item_completion = PMChecklistItemCompletion.objects.create(**item_completion_data)
 
                     # Handle inline downtime logging for items 1 and 2
                     if item.item_number in [1, 2]:

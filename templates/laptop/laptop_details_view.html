@@ -854,27 +854,49 @@
 
           {% if current_pm_schedule %}
           <div>
-            {% for assignment in current_pm_schedule %}
-            <div class="pm-item">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <div class="d-flex align-items-center gap-2">
-                  {% if assignment.is_completed %}
-                  <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                  {% else %}
-                  <i class="fas fa-clock" style="color: #f59e0b;"></i>
-                  {% endif %}
-                  <strong>{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }} {{ assignment.pm_section_schedule.quarter_schedule.year }}</strong>
-                </div>
-                <span class="pm-status {% if assignment.is_completed %}status-completed{% else %}status-pending{% endif %}">
-                  {% if assignment.is_completed %}Completed{% else %}Pending{% endif %}
+            {% regroup current_pm_schedule by pm_section_schedule.quarter_schedule.year as assignments_by_year %}
+            {% for year_group in assignments_by_year %}
+              {% with is_latest=forloop.last %}
+
+              <!-- Year toggle header -->
+              <div class="d-flex align-items-center justify-content-between mt-3 mb-1"
+                   style="cursor:pointer; user-select:none;"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#pmYear-{{ year_group.grouper }}"
+                   aria-expanded="{{ is_latest|yesno:'true,false' }}">
+                <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb; padding-bottom: 2px; flex: 1;">
+                  {{ year_group.grouper }}
                 </span>
+                <i class="fas fa-chevron-{% if is_latest %}up{% else %}down{% endif %} ms-2"
+                   style="font-size:0.7rem; color:#9ca3af;"></i>
               </div>
-              <div style="color: #6b7280; font-size: 0.875rem;">{{ assignment.pm_section_schedule.section.name }}</div>
-              <div style="color: #9ca3af; font-size: 0.75rem; margin-top: 0.5rem;">
-                <i class="far fa-calendar"></i>
-                {{ assignment.pm_section_schedule.start_date }} - {{ assignment.pm_section_schedule.end_date }}
+
+              <div class="collapse {% if is_latest %}show{% endif %}" id="pmYear-{{ year_group.grouper }}">
+                {% for assignment in year_group.list %}
+                <div class="pm-item mb-2">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <div class="d-flex align-items-center gap-2">
+                      {% if assignment.is_completed %}
+                      <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                      <strong style="color:#059669; font-size:0.9rem;">{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}</strong>
+                      {% else %}
+                      <i class="fas fa-clock" style="color: #f59e0b;"></i>
+                      <strong style="color:#92400e; font-size:0.9rem;">{{ assignment.pm_section_schedule.quarter_schedule.get_quarter_display }}</strong>
+                      {% endif %}
+                    </div>
+                    <span class="pm-status {% if assignment.is_completed %}status-completed{% else %}status-pending{% endif %}">
+                      {% if assignment.is_completed %}Completed{% else %}Pending{% endif %}
+                    </span>
+                  </div>
+                  <div style="color: #9ca3af; font-size: 0.75rem; margin-top: 0.25rem;">
+                    <i class="far fa-calendar me-1"></i>
+                    {{ assignment.pm_section_schedule.start_date|date:"M d" }} – {{ assignment.pm_section_schedule.end_date|date:"M d, Y" }}
+                  </div>
+                </div>
+                {% endfor %}
               </div>
-            </div>
+
+              {% endwith %}
             {% endfor %}
           </div>
 
@@ -892,9 +914,18 @@
         <!-- Quick Actions -->
         <div class="quick-actions mt-4">
           <h4 style="font-weight: 700; margin-bottom: 1rem; color: #1f2937;">Quick Actions</h4>
-          
-          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}" 
-   class="action-item conduct-pm-link" 
+
+          <a href="{% url 'log_downtime_standalone' %}?system={{ laptop_details.laptop_computer_name|default:laptop_package.id }}" class="action-item">
+            <div class="d-flex align-items-center gap-3">
+              <div style="padding: 0.75rem; background: #fee2e2; color: #dc2626; border-radius: 0.75rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <span style="font-weight: 600;">Log Downtime</span>
+            </div>
+          </a>
+
+          <a href="{% url 'maintenance_history_laptop' laptop_package.id %}"
+   class="action-item conduct-pm-link"
    data-disposed="{{ laptop_package.is_disposed|yesno:'true,false' }}">
   <div class="d-flex align-items-center gap-3">
     <div style="padding: 0.75rem; background: #dbeafe; color: #2563eb; border-radius: 0.75rem;">

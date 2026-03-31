@@ -1627,11 +1627,19 @@ class EquipmentDowntimeEvent(models.Model):
         ('CRITICAL', 'Critical - Complete service loss'),
     ]
 
-    # Link to checklist item completion
+    # Link to checklist item completion (nullable for standalone downtime logs)
     item_completion = models.ForeignKey(
         PMChecklistItemCompletion,
         on_delete=models.CASCADE,
-        related_name='downtime_events'
+        related_name='downtime_events',
+        null=True,
+        blank=True,
+    )
+
+    # For standalone logs: free-text system/workstation identifier
+    system_reference = models.CharField(
+        max_length=255, blank=True,
+        help_text="e.g. PC-007, Laptop-Admin-01, Server Room UPS"
     )
 
     # Downtime details

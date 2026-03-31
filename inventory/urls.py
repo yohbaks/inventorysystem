@@ -124,6 +124,8 @@ urlpatterns = [
     path('maintenance/overview/', views.pm_overview_view, name='pm_overview'),
     path('maintenance/assign_pm_schedule/', views.assign_pm_schedule, name='assign_pm_schedule'),
     path('maintenance/schedules/', views.section_schedule_list_view, name='section_schedule_list'), # section schedule list view of pm
+    path('maintenance/schedules/<int:schedule_id>/edit/', views.edit_pm_section_schedule, name='edit_pm_section_schedule'),
+    path('maintenance/schedules/<int:schedule_id>/delete/', views.delete_pm_section_schedule, name='delete_pm_section_schedule'),
     path('office-sections/', views.office_section_list, name='office_section_list'), #office section list view
 
     #disposal
@@ -265,6 +267,7 @@ urlpatterns = [
     # ================================
     # Equipment Downtime Tracking
     path('pm/downtime/log/<int:item_completion_id>/', pm_downtime_views.log_downtime_event, name='log_downtime_event'),
+    path('pm/downtime/log/', pm_downtime_views.log_downtime_standalone, name='log_downtime_standalone'),
     path('pm/downtime/get/<int:item_completion_id>/', pm_downtime_views.get_downtime_events, name='get_downtime_events'),
     path('pm/downtime/update/<int:event_id>/', pm_downtime_views.update_downtime_event, name='update_downtime_event'),
     path('pm/downtime/analytics/', pm_downtime_views.downtime_analytics_dashboard, name='downtime_analytics'),

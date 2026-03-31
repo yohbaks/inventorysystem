@@ -23,16 +23,22 @@ def monthly_pm_dashboard(request):
     # Get Annex B template
     template = get_object_or_404(PMChecklistTemplate, annex_code='B', is_active=True)
 
-    # Get current date
+    # Allow browsing a specific month via ?month=YYYY-MM, default to current month
     today = timezone.now().date()
-    current_year = today.year
-    current_month = today.month
+    month_param = request.GET.get('month')
+    try:
+        if month_param:
+            viewed_date = datetime.strptime(month_param, '%Y-%m').date()
+        else:
+            viewed_date = today.replace(day=1)
+    except ValueError:
+        viewed_date = today.replace(day=1)
 
-    # Get or create schedule for current month (1st day of month)
+    current_year = viewed_date.year
+    current_month = viewed_date.month
+
+    # Get or create schedule for the viewed month
     first_day = datetime(current_year, current_month, 1).date()
-    last_day = datetime(current_year, current_month, monthrange(current_year, current_month)[1]).date()
-
-    # Due date is end of 1st week (7th day of month)
     due_date = datetime(current_year, current_month, min(7, monthrange(current_year, current_month)[1])).date()
 
     schedule, created = PMChecklistSchedule.objects.get_or_create(
@@ -52,7 +58,27 @@ def monthly_pm_dashboard(request):
         completion = None
         is_completed = False
 
-    # Get smart suggestions from daily data (Item #1)
+    # Prev / next month navigation
+    if current_month == 1:
+        prev_month = datetime(current_year - 1, 12, 1).date()
+    else:
+        prev_month = datetime(current_year, current_month - 1, 1).date()
+
+    if current_month == 12:
+        next_month = datetime(current_year + 1, 1, 1).date()
+    else:
+        next_month = datetime(current_year, current_month + 1, 1).date()
+
+    is_current_month = (first_day == today.replace(day=1))
+    # Don't allow navigating into the future beyond current month
+    next_month_is_future = next_month > today.replace(day=1)
+
+    # Build list of all months that have an existing schedule (for quick jump)
+    past_schedules = PMChecklistSchedule.objects.filter(
+        template=template
+    ).order_by('-scheduled_date').select_related('completion')
+
+    # Get smart suggestions from daily data
     smart_suggestions = get_monthly_smart_suggestions(current_year, current_month)
 
     context = {
@@ -60,11 +86,16 @@ def monthly_pm_dashboard(request):
         'schedule': schedule,
         'completion': completion,
         'is_completed': is_completed,
-        'current_month': today.strftime('%B %Y'),
+        'current_month': first_day.strftime('%B %Y'),
         'first_day': first_day,
         'due_date': due_date,
         'is_overdue': schedule.is_overdue(),
         'smart_suggestions': smart_suggestions,
+        'prev_month': prev_month.strftime('%Y-%m'),
+        'next_month': next_month.strftime('%Y-%m'),
+        'next_month_is_future': next_month_is_future,
+        'is_current_month': is_current_month,
+        'past_schedules': past_schedules,
     }
 
     return render(request, 'pm/monthly_dashboard.html', context)

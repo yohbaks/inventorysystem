@@ -663,12 +663,25 @@ def desktop_details_view(request, package_id):
     ups_brands      = Brand.objects.filter(is_ups=True)
 
     #Preventive Maintenance
+    # Auto-create missing PMScheduleAssignment records for the desktop's section
+    # (covers cases where new year schedules were added after the desktop was registered)
+    if user_details and user_details.user_Enduser and user_details.user_Enduser.employee_office_section:
+        section = user_details.user_Enduser.employee_office_section
+        for section_schedule in PMSectionSchedule.objects.filter(section=section):
+            PMScheduleAssignment.objects.get_or_create(
+                equipment_package=equipment_package,
+                pm_section_schedule=section_schedule,
+            )
+
     # Preventive Maintenance Schedule Assignments
     pm_assignments = PMScheduleAssignment.objects.filter(
         equipment_package=equipment_package
     ).select_related(
         'pm_section_schedule__section',
         'pm_section_schedule__quarter_schedule'
+    ).order_by(
+        'pm_section_schedule__quarter_schedule__year',
+        'pm_section_schedule__quarter_schedule__quarter'
     )
 
     # Preventive Maintenance History (Completed records)
@@ -4114,8 +4127,74 @@ def section_schedule_list_view(request):
     schedules = PMSectionSchedule.objects.select_related('quarter_schedule', 'section').order_by('-start_date')
     quarters = QuarterSchedule.objects.all().order_by('-year')
     sections = OfficeSection.objects.all().order_by('name')
+    existing_years = sorted(
+        QuarterSchedule.objects.values_list('year', flat=True).distinct(),
+        reverse=True
+    )
 
     if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # Bulk generate schedules for a target year by mirroring an existing source year
+        if action == 'generate_year':
+            source_year = request.POST.get('source_year')
+            target_year = request.POST.get('generate_year')
+            try:
+                source_year = int(source_year)
+                target_year = int(target_year)
+            except (TypeError, ValueError):
+                messages.error(request, "Invalid year selection.")
+                return redirect('section_schedule_list')
+
+            # Fetch all section schedules from the source year
+            source_schedules = PMSectionSchedule.objects.filter(
+                quarter_schedule__year=source_year
+            ).select_related('quarter_schedule', 'section')
+
+            if not source_schedules.exists():
+                messages.warning(request, f"No schedules found for {source_year} to copy from.")
+                return redirect('section_schedule_list')
+
+            created_quarters = 0
+            created_schedules = 0
+            skipped_schedules = 0
+
+            for src in source_schedules:
+                # Get or create the matching quarter for the target year
+                target_quarter, q_created = QuarterSchedule.objects.get_or_create(
+                    year=target_year,
+                    quarter=src.quarter_schedule.quarter,
+                )
+                if q_created:
+                    created_quarters += 1
+
+                # Mirror the same day/month, just change year
+                new_start = src.start_date.replace(year=target_year)
+                new_end = src.end_date.replace(year=target_year)
+
+                obj, s_created = PMSectionSchedule.objects.get_or_create(
+                    quarter_schedule=target_quarter,
+                    section=src.section,
+                    defaults={
+                        'start_date': new_start,
+                        'end_date': new_end,
+                        'notes': src.notes or '',
+                    },
+                )
+                if s_created:
+                    created_schedules += 1
+                else:
+                    # Overwrite existing with correct dates from source year
+                    obj.start_date = new_start
+                    obj.end_date = new_end
+                    obj.notes = src.notes or obj.notes
+                    obj.save()
+                    skipped_schedules += 1
+
+            msg = f"Copied {source_year} → {target_year}: {created_schedules} new + {skipped_schedules} updated. All dates now match {source_year} exactly (same day/month, year changed to {target_year})."
+            messages.success(request, msg)
+            return redirect('section_schedule_list')
+
         quarter_id = request.POST.get('quarter_schedule_id')
         section_id = request.POST.get('section_id')
         start_date = request.POST.get('start_date')
@@ -4144,9 +4223,33 @@ def section_schedule_list_view(request):
         'schedules': schedules,
         'quarters': quarters,
         'sections': sections,
+        'existing_years': existing_years,
     })
 
-# # View to handle office section list and addition    
+def edit_pm_section_schedule(request, schedule_id):
+    schedule = get_object_or_404(PMSectionSchedule, pk=schedule_id)
+    if request.method == 'POST':
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        notes = request.POST.get('notes', '')
+        schedule.start_date = start_date
+        schedule.end_date = end_date
+        schedule.notes = notes
+        schedule.save()
+        messages.success(request, f"Schedule updated for {schedule.section.name} — {schedule.quarter_schedule}.")
+    return redirect('section_schedule_list')
+
+
+def delete_pm_section_schedule(request, schedule_id):
+    schedule = get_object_or_404(PMSectionSchedule, pk=schedule_id)
+    if request.method == 'POST':
+        label = f"{schedule.section.name} — {schedule.quarter_schedule}"
+        schedule.delete()
+        messages.success(request, f"Schedule deleted: {label}.")
+    return redirect('section_schedule_list')
+
+
+# # View to handle office section list and addition
 def office_section_list(request):
     if request.method == 'POST':
         section_name = request.POST.get('section_name')
@@ -5222,10 +5325,23 @@ def laptop_details_view(request, package_id):
     enduser_history = get_end_user_history(laptop_package)
     assetowner_history = get_asset_owner_history(laptop_package)
 
+    # Auto-create missing PMScheduleAssignment records for the laptop's section
+    # (covers cases where new year schedules were added after the laptop was registered)
+    if user_details and user_details.user_Enduser and user_details.user_Enduser.employee_office_section:
+        laptop_section = user_details.user_Enduser.employee_office_section
+        for section_schedule in PMSectionSchedule.objects.filter(section=laptop_section):
+            PMScheduleAssignment.objects.get_or_create(
+                laptop_package=laptop_package,
+                pm_section_schedule=section_schedule,
+            )
+
     # PM assignments for this laptop
     pm_assignments = PMScheduleAssignment.objects.filter(laptop_package=laptop_package).select_related(
         'pm_section_schedule__quarter_schedule',
         'pm_section_schedule__section'
+    ).order_by(
+        'pm_section_schedule__quarter_schedule__year',
+        'pm_section_schedule__quarter_schedule__quarter'
     )
 
     # ✅ Preventive Maintenance history

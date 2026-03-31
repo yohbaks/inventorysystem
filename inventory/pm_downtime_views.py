@@ -164,6 +164,55 @@ def update_downtime_event(request, event_id):
 
 
 @login_required
+def log_downtime_standalone(request):
+    """Standalone downtime log — not tied to any checklist item."""
+
+    if request.method == 'POST':
+        try:
+            occurrence_date = request.POST.get('occurrence_date')
+            start_time = request.POST.get('start_time')
+            end_time = request.POST.get('end_time') or None
+            equipment_name = request.POST.get('equipment_name')
+            system_reference = request.POST.get('system_reference', '')
+            severity = request.POST.get('severity', 'MODERATE')
+            cause_description = request.POST.get('cause_description')
+            resolution_notes = request.POST.get('resolution_notes', '')
+            services_affected = request.POST.get('services_affected', '')
+            users_affected = request.POST.get('users_affected_count') or None
+
+            event = EquipmentDowntimeEvent.objects.create(
+                item_completion=None,
+                system_reference=system_reference,
+                occurrence_date=datetime.strptime(occurrence_date, '%Y-%m-%d').date(),
+                start_time=datetime.strptime(start_time, '%H:%M').time(),
+                end_time=datetime.strptime(end_time, '%H:%M').time() if end_time else None,
+                equipment_name=equipment_name,
+                severity=severity,
+                cause_description=cause_description,
+                resolution_notes=resolution_notes,
+                services_affected=services_affected,
+                users_affected_count=int(users_affected) if users_affected else None,
+                reported_by=request.user,
+            )
+
+            messages.success(request, f'Downtime logged: {event.get_duration_display()} — {equipment_name}')
+            return redirect('downtime_analytics')
+
+        except Exception as e:
+            messages.error(request, f'Error logging downtime: {str(e)}')
+
+    # Pre-fill system_reference if passed via GET (e.g. from a workstation page)
+    system_reference = request.GET.get('system', '')
+    today = timezone.now().date().strftime('%Y-%m-%d')
+
+    return render(request, 'pm/log_downtime_standalone.html', {
+        'system_reference': system_reference,
+        'today': today,
+        'severity_choices': EquipmentDowntimeEvent.SEVERITY_CHOICES,
+    })
+
+
+@login_required
 def downtime_analytics_dashboard(request):
     """Analytics dashboard showing downtime trends and statistics"""
 

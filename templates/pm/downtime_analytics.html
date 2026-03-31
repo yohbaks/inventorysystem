@@ -280,6 +280,7 @@
                                         <tr>
                                             <th>Date/Time</th>
                                             <th>Equipment</th>
+                                            <th>System Ref</th>
                                             <th>Severity</th>
                                             <th>Duration</th>
                                             <th>Cause</th>
@@ -290,12 +291,21 @@
                                         {% for event in recent_events %}
                                         <tr>
                                             <td>
-                                                {{ event.occurrence_date|date:"M d" }}<br>
-                                                <small>{{ event.start_time|time:"H:i" }}</small>
+                                                {{ event.occurrence_date|date:"M d, Y" }}<br>
+                                                <small class="text-muted">{{ event.start_time|time:"H:i" }}{% if event.end_time %} – {{ event.end_time|time:"H:i" }}{% endif %}</small>
                                             </td>
                                             <td><strong>{{ event.equipment_name }}</strong></td>
                                             <td>
-                                                <span class="badge badge-{% if event.severity == 'CRITICAL' %}danger{% elif event.severity == 'MAJOR' %}warning{% elif event.severity == 'MODERATE' %}info{% else %}secondary{% endif %}">
+                                                {% if event.system_reference %}
+                                                  <span class="badge bg-secondary">{{ event.system_reference }}</span>
+                                                {% elif event.item_completion %}
+                                                  <small class="text-muted">PM Checklist</small>
+                                                {% else %}
+                                                  <small class="text-muted">—</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if event.severity == 'CRITICAL' %}bg-dark{% elif event.severity == 'MAJOR' %}bg-danger{% elif event.severity == 'MODERATE' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                                     {{ event.severity }}
                                                 </span>
                                             </td>
@@ -311,9 +321,9 @@
                             <div class="text-center my-5">
                                 <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
                                 <p class="text-muted">No downtime events recorded in the selected period.</p>
-                                <p class="text-info">
-                                    <i class="fas fa-info-circle"></i> <strong>Tip:</strong> Log downtime events from the Daily PM Checklist (Items 1-2) using the "Log Downtime Event" button.
-                                </p>
+                                <a href="{% url 'log_downtime_standalone' %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> Log a Downtime Event
+                                </a>
                             </div>
                             {% endif %}
                         </div>
@@ -323,9 +333,12 @@
 
             <!-- Action Buttons -->
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-12 d-flex gap-2 flex-wrap">
                     <a href="{% url 'pm_main_dashboard' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to PM Dashboard
+                    </a>
+                    <a href="{% url 'log_downtime_standalone' %}" class="btn btn-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Log Downtime
                     </a>
                     <a href="{% url 'pm_daily_dashboard' %}" class="btn btn-primary">
                         <i class="fas fa-clipboard-check"></i> Go to Daily Checklists

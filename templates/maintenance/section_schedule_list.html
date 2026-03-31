@@ -29,6 +29,10 @@
             <i class="fas fa-print"></i>
             Print
           </a>
+          <button class="premium-btn premium-btn-generate" data-bs-toggle="modal" data-bs-target="#generateYearModal">
+            <i class="fas fa-copy"></i>
+            Copy to Year
+          </button>
           <button class="premium-btn premium-btn-add" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
             <i class="fas fa-plus"></i>
             Add Schedule
@@ -50,6 +54,144 @@
             Click column headers to <strong>sort</strong>. View <strong>status badges</strong> to see upcoming, active, or completed schedules.
           </p>
         </div>
+      </div>
+    </div>
+
+    <!-- Generate Year Schedules Modal -->
+    <div class="modal fade" id="generateYearModal" tabindex="-1" aria-labelledby="generateYearModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" action="{% url 'section_schedule_list' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="generate_year">
+          <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+              <h5 class="modal-title" id="generateYearModalLabel">
+                <i class="fas fa-copy me-2"></i>Copy Schedules to New Year
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="alert mb-3" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fcd34d; color: #92400e; border-radius: 10px;">
+                <i class="fas fa-info-circle me-2"></i>
+                Copies all section schedules from the <strong>source year</strong> into the <strong>target year</strong>, keeping the <strong>exact same dates</strong> (day &amp; month) — only the year changes. Existing schedules will not be overwritten.
+              </div>
+              <div class="row g-3">
+                <div class="col-6">
+                  <label class="form-label fw-bold">
+                    <i class="fas fa-calendar-alt me-2 text-secondary"></i>Copy From (Source)
+                  </label>
+                  <select class="form-select" name="source_year" required>
+                    {% for yr in existing_years %}
+                      <option value="{{ yr }}" {% if yr == 2025 %}selected{% endif %}>{{ yr }}</option>
+                    {% empty %}
+                      <option value="2025" selected>2025</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label fw-bold">
+                    <i class="fas fa-calendar-check me-2 text-warning"></i>Copy To (Target)
+                  </label>
+                  <select class="form-select" name="generate_year" required>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-3 p-3 rounded" style="background: #f9fafb; border: 1px solid #e5e7eb; font-size: 0.875rem; color: #374151;">
+                <i class="fas fa-lightbulb me-2 text-warning"></i>
+                <strong>Same exact dates, only the year changes.</strong><br>
+                e.g. Admin Section Q1: <span class="text-danger">Mar 1–15, 2025</span> → <span class="text-success">Mar 1–15, 2026</span>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times me-1"></i>Cancel
+              </button>
+              <button type="submit" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-copy me-1"></i>Copy Schedules
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Schedule Modal -->
+    <div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" id="editScheduleForm" action="">
+          {% csrf_token %}
+          <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;">
+              <h5 class="modal-title" id="editScheduleModalLabel">
+                <i class="fas fa-edit me-2"></i>Edit Schedule
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-muted mb-3" id="editScheduleLabel" style="font-size: 0.875rem;"></p>
+              <div class="mb-3">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-calendar-day me-2 text-primary"></i>Start Date
+                </label>
+                <input type="date" class="form-control" name="start_date" id="editStartDate" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-calendar-check me-2 text-primary"></i>End Date
+                </label>
+                <input type="date" class="form-control" name="end_date" id="editEndDate" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-bold">
+                  <i class="fas fa-sticky-note me-2 text-primary"></i>Notes (Optional)
+                </label>
+                <textarea class="form-control" name="notes" id="editNotes" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times me-1"></i>Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i>Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Schedule Modal -->
+    <div class="modal fade" id="deleteScheduleModal" tabindex="-1" aria-labelledby="deleteScheduleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" id="deleteScheduleForm" action="">
+          {% csrf_token %}
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title" id="deleteScheduleModalLabel">
+                <i class="fas fa-trash me-2"></i>Delete Schedule
+              </h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+              <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+              <p class="mb-1">Are you sure you want to delete:</p>
+              <p class="fw-bold text-dark" id="deleteScheduleLabel"></p>
+              <p class="text-muted" style="font-size: 0.875rem;">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="fas fa-times me-1"></i>Cancel
+              </button>
+              <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash me-1"></i>Delete
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -140,8 +282,9 @@
                     <th>Duration</th>
                     <th>Status</th>
                     <th>Notes</th>
+                    <th>Actions</th>
                   </tr>
-                  
+
                   <!-- Filter Row -->
                   <tr class="filters">
                     <th>
@@ -156,8 +299,8 @@
                     <th>
                       <select class="form-select form-select-sm column-search" data-column="1">
                         <option value="">All Years</option>
-                        {% for schedule in schedules %}
-                          <option value="{{ schedule.quarter_schedule.year }}">{{ schedule.quarter_schedule.year }}</option>
+                        {% for yr in existing_years %}
+                          <option value="{{ yr }}">{{ yr }}</option>
                         {% endfor %}
                       </select>
                     </th>
@@ -170,15 +313,15 @@
                       </select>
                     </th>
                     <th>
-                      <input type="date" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Filter Start" 
+                      <input type="date"
+                             class="form-control form-control-sm column-search"
+                             placeholder="Filter Start"
                              data-column="3" />
                     </th>
                     <th>
-                      <input type="date" 
-                             class="form-control form-control-sm column-search" 
-                             placeholder="Filter End" 
+                      <input type="date"
+                             class="form-control form-control-sm column-search"
+                             placeholder="Filter End"
                              data-column="4" />
                     </th>
                     <th></th>
@@ -190,6 +333,7 @@
                         <option value="Completed">Completed</option>
                       </select>
                     </th>
+                    <th></th>
                     <th></th>
                   </tr>
                 </thead>
@@ -252,6 +396,28 @@
                       {% else %}
                         <span class="text-muted">—</span>
                       {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-primary edit-schedule-btn"
+                          data-id="{{ schedule.id }}"
+                          data-section="{{ schedule.section.name }}"
+                          data-quarter="{{ schedule.quarter_schedule.get_quarter_display }} {{ schedule.quarter_schedule.year }}"
+                          data-start="{{ schedule.start_date|date:'Y-m-d' }}"
+                          data-end="{{ schedule.end_date|date:'Y-m-d' }}"
+                          data-notes="{{ schedule.notes|default:'' }}"
+                          data-bs-toggle="modal" data-bs-target="#editScheduleModal"
+                          title="Edit">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger delete-schedule-btn"
+                          data-id="{{ schedule.id }}"
+                          data-label="{{ schedule.section.name }} — {{ schedule.quarter_schedule }}"
+                          data-bs-toggle="modal" data-bs-target="#deleteScheduleModal"
+                          title="Delete">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                   {% empty %}
@@ -397,6 +563,19 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
+
+/* Generate Year button styling */
+.premium-btn-generate {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.premium-btn-generate:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
 </style>
 
 {% endblock %}
@@ -471,7 +650,7 @@ $(document).ready(function() {
     },
     columnDefs: [
       { orderable: true, targets: [0, 1, 2, 3, 4, 5, 6] },
-      { orderable: false, targets: [7] } // Notes column not sortable
+      { orderable: false, targets: [7, 8] } // Notes and Actions not sortable
     ],
     dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
     buttons: [
@@ -550,6 +729,30 @@ $(document).ready(function() {
   });
   
   console.log('Schedule filter handlers attached');
+
+  // Edit schedule modal — populate fields from data attributes
+  $(document).on('click', '.edit-schedule-btn', function() {
+    var id = $(this).data('id');
+    var section = $(this).data('section');
+    var quarter = $(this).data('quarter');
+    var start = $(this).data('start');
+    var end = $(this).data('end');
+    var notes = $(this).data('notes');
+
+    $('#editScheduleForm').attr('action', '/maintenance/schedules/' + id + '/edit/');
+    $('#editScheduleLabel').text(quarter + ' — ' + section);
+    $('#editStartDate').val(start);
+    $('#editEndDate').val(end);
+    $('#editNotes').val(notes);
+  });
+
+  // Delete schedule modal — populate label and form action
+  $(document).on('click', '.delete-schedule-btn', function() {
+    var id = $(this).data('id');
+    var label = $(this).data('label');
+    $('#deleteScheduleForm').attr('action', '/maintenance/schedules/' + id + '/delete/');
+    $('#deleteScheduleLabel').text(label);
+  });
 });
 
 // Add fade-in animation keyframes

@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Log Downtime Event{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-inner">
+    <div class="row justify-content-center">
+    <div class="col-xl-8 col-lg-10 col-md-12">
+
+  <!-- Header -->
+  <div class="premium-page-header theme-desktop mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="d-flex align-items-center">
+        <div class="premium-page-icon" style="background: rgba(255,255,255,0.2); border-radius: 14px; width: 52px; height: 52px; display:flex; align-items:center; justify-content:center;">
+          <i class="fas fa-exclamation-triangle fa-lg text-white"></i>
+        </div>
+        <div class="ms-3">
+          <h4 class="premium-page-title mb-0">Log Downtime Event</h4>
+          <p class="text-white mb-0" style="font-size: 0.875rem; opacity: 0.9;">Record any equipment or system downtime for monitoring and analysis.</p>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-2 mt-md-0">
+        <a href="{% url 'downtime_analytics' %}" class="premium-btn premium-btn-export">
+          <i class="fas fa-chart-bar"></i> View Analytics
+        </a>
+        <a href="{% url 'pm_main_dashboard' %}" class="premium-btn premium-btn-print">
+          <i class="fas fa-arrow-left"></i> PM Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-3" role="alert">
+        <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}times-circle{% else %}info-circle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Form -->
+  <div class="card shadow-sm rounded-4 border-0">
+    <div class="card-body p-4">
+      <form method="POST" action="{% url 'log_downtime_standalone' %}">
+        {% csrf_token %}
+
+        <!-- System / Equipment -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-desktop me-1 text-danger"></i> Equipment / System Name <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" name="equipment_name" required
+                   placeholder="e.g. Main Server, UPS Unit A, AC Unit 2">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-tag me-1 text-secondary"></i> System Reference
+            </label>
+            <input type="text" class="form-control" name="system_reference"
+                   value="{{ system_reference }}"
+                   placeholder="e.g. PC-007, Laptop-Admin-01, Server Room">
+            <div class="form-text">Optional — workstation tag, room, or asset code</div>
+          </div>
+        </div>
+
+        <!-- Date & Time -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-calendar me-1 text-danger"></i> Date <span class="text-danger">*</span>
+            </label>
+            <input type="date" class="form-control" name="occurrence_date" value="{{ today }}" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-clock me-1 text-danger"></i> Start Time <span class="text-danger">*</span>
+            </label>
+            <input type="time" class="form-control" name="start_time" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-clock me-1 text-success"></i> End Time
+            </label>
+            <input type="time" class="form-control" name="end_time" id="endTimeInput">
+            <div class="form-text">Leave blank if still ongoing</div>
+          </div>
+        </div>
+
+        <!-- Duration preview -->
+        <div class="mb-3" id="durationPreview" style="display:none;">
+          <div class="alert alert-info py-2 mb-0 rounded-3" style="font-size:0.875rem;">
+            <i class="fas fa-stopwatch me-1"></i> Duration: <strong id="durationText"></strong>
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-exclamation-circle me-1 text-warning"></i> Severity <span class="text-danger">*</span>
+          </label>
+          <div class="row g-2">
+            {% for val, label in severity_choices %}
+            <div class="col-6 col-md-3">
+              <input type="radio" class="btn-check" name="severity" id="sev_{{ val }}" value="{{ val }}"
+                     {% if val == 'MODERATE' %}checked{% endif %}>
+              <label class="btn btn-outline-secondary w-100 text-start" for="sev_{{ val }}"
+                     style="font-size:0.8rem; padding: 0.5rem 0.75rem;">
+                {% if val == 'MINOR' %}<i class="fas fa-circle text-info me-1"></i>
+                {% elif val == 'MODERATE' %}<i class="fas fa-circle text-warning me-1"></i>
+                {% elif val == 'MAJOR' %}<i class="fas fa-circle text-danger me-1"></i>
+                {% elif val == 'CRITICAL' %}<i class="fas fa-circle text-dark me-1"></i>{% endif %}
+                {{ label }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Cause -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-search me-1 text-danger"></i> Cause / Description <span class="text-danger">*</span>
+          </label>
+          <textarea class="form-control" name="cause_description" rows="3" required
+                    placeholder="What caused the downtime?"></textarea>
+        </div>
+
+        <!-- Resolution -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-check-circle me-1 text-success"></i> Resolution / Action Taken
+          </label>
+          <textarea class="form-control" name="resolution_notes" rows="2"
+                    placeholder="How was it resolved? Leave blank if still ongoing."></textarea>
+        </div>
+
+        <!-- Services & Users -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-network-wired me-1 text-secondary"></i> Services / Systems Affected
+            </label>
+            <input type="text" class="form-control" name="services_affected"
+                   placeholder="e.g. Email, File Server, Internet, HR System">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">
+              <i class="fas fa-users me-1 text-secondary"></i> Users Affected
+            </label>
+            <input type="number" class="form-control" name="users_affected_count" min="0"
+                   placeholder="0">
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <a href="{% url 'downtime_analytics' %}" class="btn btn-outline-secondary px-4">
+            Cancel
+          </a>
+          <button type="submit" class="btn btn-danger px-5 fw-semibold">
+            <i class="fas fa-save me-2"></i> Log Downtime
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+    </div><!-- col -->
+    </div><!-- row -->
+  </div><!-- page-inner -->
+</div><!-- container -->
+
+<script>
+// Auto-calculate duration when end time is filled
+const startInput = document.querySelector('[name="start_time"]');
+const endInput = document.getElementById('endTimeInput');
+const preview = document.getElementById('durationPreview');
+const durationText = document.getElementById('durationText');
+
+function calcDuration() {
+  if (!startInput.value || !endInput.value) { preview.style.display = 'none'; return; }
+  const [sh, sm] = startInput.value.split(':').map(Number);
+  const [eh, em] = endInput.value.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins <= 0) { preview.style.display = 'none'; return; }
+  const h = Math.floor(mins / 60), m = mins % 60;
+  durationText.textContent = h > 0 ? `${h}h ${m}m` : `${m}m`;
+  preview.style.display = 'block';
+}
+
+startInput.addEventListener('change', calcDuration);
+endInput.addEventListener('change', calcDuration);
+</script>
+{% endblock %}

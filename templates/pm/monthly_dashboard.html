@@ -10,20 +10,53 @@
             <!-- Header -->
             <div class="card mb-4">
                 <div class="card-header bg-dark text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-calendar-alt"></i> {{ template.title }} - {{ current_month }}
-                    </h3>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <h3 class="mb-0">
+                            <i class="fas fa-calendar-alt"></i> {{ template.title }}
+                        </h3>
+                        {% if not is_current_month %}
+                        <a href="{% url 'monthly_pm_dashboard' %}" class="btn btn-sm btn-outline-light">
+                            <i class="fas fa-calendar-check me-1"></i> Go to Current Month
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-body">
                     <p class="mb-0">{{ template.schedule_note }}</p>
                 </div>
             </div>
 
-            <!-- Current Month Status -->
+            <!-- Month Navigation -->
+            <div class="card mb-4">
+                <div class="card-body py-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <a href="?month={{ prev_month }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-chevron-left me-1"></i> Previous
+                        </a>
+                        <div class="text-center">
+                            <span class="fw-bold fs-5">{{ current_month }}</span>
+                            {% if is_current_month %}
+                                <span class="badge bg-primary ms-2">Current</span>
+                            {% endif %}
+                        </div>
+                        {% if next_month_is_future %}
+                            <button class="btn btn-outline-secondary btn-sm" disabled>
+                                Next <i class="fas fa-chevron-right ms-1"></i>
+                            </button>
+                        {% else %}
+                            <a href="?month={{ next_month }}" class="btn btn-outline-secondary btn-sm">
+                                Next <i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Viewed Month Status -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-tasks"></i> Current Month Status
+                        <i class="fas fa-tasks"></i> {{ current_month }} Status
                     </h5>
                 <div>
                     {% if is_completed %}
@@ -104,6 +137,69 @@
                 <p class="mb-0">{{ template.description }}</p>
             </div>
         </div>
+
+        <!-- All Months History -->
+        {% if past_schedules %}
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>All Monthly Records</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Month</th>
+                                <th>Status</th>
+                                <th>Completed By</th>
+                                <th>Completed On</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in past_schedules %}
+                            <tr {% if s.scheduled_date == first_day %}class="table-primary fw-bold"{% endif %}>
+                                <td>
+                                    {{ s.scheduled_date|date:"F Y" }}
+                                    {% if s.scheduled_date == first_day %}<span class="badge bg-primary ms-1">Viewing</span>{% endif %}
+                                </td>
+                                <td>
+                                    {% if s.status == 'COMPLETED' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif s.status == 'OVERDUE' %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if s.completion %}
+                                        {{ s.completion.completed_by.get_full_name|default:s.completion.completed_by.username }}
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>
+                                    {% if s.completion %}
+                                        {{ s.completion.completion_date|date:"M d, Y" }}
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="?month={{ s.scheduled_date|date:'Y-m' }}" class="btn btn-sm btn-outline-primary me-1" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if s.completion %}
+                                    <a href="{% url 'export_monthly_pm_pdf' s.completion.id %}" class="btn btn-sm btn-outline-success" title="Export PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Back Button -->
         <div class="text-center mt-4">
