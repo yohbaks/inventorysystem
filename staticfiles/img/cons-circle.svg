@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CONS circular logo">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF7A00"/>
+      <stop offset="100%" stop-color="#FFA34D"/>
+    </linearGradient>
+    <filter id="shadow3" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Circle background -->
+  <circle cx="128" cy="128" r="112" fill="url(#g3)" filter="url(#shadow3)"/>
+
+  <!-- Stylized C -->
+  <path d="M178 92
+           a50 50 0 1 0 0 72" 
+        fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round"/>
+
+  <!-- Small inner circle to hint connection -->
+  <circle cx="184" cy="128" r="8" fill="#FFFFFF"/>
+</svg>

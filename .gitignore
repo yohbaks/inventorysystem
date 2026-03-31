@@ -2,3 +2,11 @@ venv/
 *.pyc
 __pycache__/
 requirements_linux.txt
+.env
+.env.local
+*.sqlite3
+db - Copy.sqlite3
+.DS_Store
+.idea/
+.vscode/
+*.log

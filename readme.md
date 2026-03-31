@@ -1,3 +1,3 @@
 # Inventory system using django python
 
-DPWH IT EQUIPMENT INVENTORY SYSTEM
+IT EQUIPMENT INVENTORY SYSTEM
